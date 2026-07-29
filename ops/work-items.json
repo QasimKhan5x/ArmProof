@@ -1,0 +1,303 @@
+{
+  "schema_version": "1.0.0",
+  "updated_at": "2026-07-29",
+  "allowed_statuses": [
+    "pending",
+    "in_progress",
+    "verifying",
+    "completed",
+    "blocked",
+    "failed"
+  ],
+  "items": [
+    {
+      "id": "INIT-001",
+      "phase": 0,
+      "priority": 1,
+      "title": "Initialize durable project context",
+      "status": "completed",
+      "dependencies": [],
+      "context": [
+        "AGENTS.md",
+        "docs/PROJECT_MAP.md",
+        "docs/AGENT_PLAYBOOK.md"
+      ],
+      "deliverables": [
+        "Stable documentation hierarchy",
+        "Machine-readable work state",
+        "Experiment schema and registry"
+      ],
+      "verification": [
+        "All JSON files parse",
+        "All relative Markdown links resolve",
+        "Requirement, claim, phase, risk, and budget documents agree"
+      ],
+      "evidence": [
+        "scripts/validate_context.py: Context validation passed on 2026-07-29"
+      ]
+    },
+    {
+      "id": "SRC-001",
+      "phase": 0,
+      "priority": 2,
+      "title": "Pin and map llama.cpp KleidiAI dispatch source",
+      "status": "pending",
+      "dependencies": ["INIT-001"],
+      "context": [
+        "docs/FEASIBILITY_PLAN.md",
+        "docs/ARCHITECTURE.md",
+        "docs/SOURCES.md"
+      ],
+      "deliverables": [
+        "Pinned revisions",
+        "Dispatch path map",
+        "Observed-versus-derived field inventory",
+        "Minimal patch design"
+      ],
+      "verification": [
+        "Every proposed trace field maps to pinned source or is labeled derived",
+        "KleidiAI-off negative path is defined"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "SCH-001",
+      "phase": 0,
+      "priority": 3,
+      "title": "Define trace, environment, recipe, and evidence schemas",
+      "status": "pending",
+      "dependencies": ["SRC-001"],
+      "context": [
+        "docs/REQUIREMENTS.md",
+        "docs/ARCHITECTURE.md",
+        "docs/TRACEABILITY.md"
+      ],
+      "deliverables": [
+        "Versioned schemas",
+        "Eligible, fallback, unknown, and failure fixtures"
+      ],
+      "verification": [
+        "Fixtures validate",
+        "Invalid fixtures fail",
+        "Unknown is distinct from fallback"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "BOOT-001",
+      "phase": 0,
+      "priority": 4,
+      "title": "Create reproducible local and Arm64 bootstrap",
+      "status": "pending",
+      "dependencies": ["SRC-001"],
+      "context": [
+        "docs/ROADMAP.md",
+        "docs/SECURITY_AND_LICENSES.md"
+      ],
+      "deliverables": [
+        "Pinned setup",
+        "Verified build/test/smoke commands",
+        "Free GitHub Actions Arm64 compile check"
+      ],
+      "verification": [
+        "Clean environment bootstrap succeeds",
+        "AGENTS.md and STATUS.md commands updated"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "DATA-001",
+      "phase": 0,
+      "priority": 5,
+      "title": "Select and license the 3B model and evaluation data",
+      "status": "pending",
+      "dependencies": ["INIT-001"],
+      "context": [
+        "docs/FEASIBILITY_PLAN.md",
+        "docs/BENCHMARK_PROTOCOL.md",
+        "docs/SECURITY_AND_LICENSES.md"
+      ],
+      "deliverables": [
+        "Canonical model/data sources",
+        "Licenses and redistribution decision",
+        "Checksummed download manifest",
+        "Calibration/held-out split"
+      ],
+      "verification": [
+        "Ungated clean download works",
+        "No calibration leakage into held-out acceptance"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "AWS-001",
+      "phase": 0,
+      "priority": 6,
+      "title": "Implement dry-run AWS lifecycle and cost guard",
+      "status": "pending",
+      "dependencies": ["INIT-001"],
+      "context": [
+        "docs/AWS_BUDGET.md",
+        "docs/SECURITY_AND_LICENSES.md"
+      ],
+      "deliverables": [
+        "Plan, launch, TTL, upload, terminate, and cleanup scripts",
+        "Dry-run cost estimate",
+        "Least-privilege resource inventory"
+      ],
+      "verification": [
+        "Dry run creates no resource",
+        "Cleanup handles partial failure",
+        "No command runs without explicit approval token"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "TRACE-001",
+      "phase": 1,
+      "priority": 7,
+      "title": "Implement bounded runtime tracing",
+      "status": "pending",
+      "dependencies": ["SCH-001", "BOOT-001"],
+      "context": [
+        "docs/REQUIREMENTS.md",
+        "docs/ARCHITECTURE.md",
+        "docs/FEASIBILITY_PLAN.md"
+      ],
+      "deliverables": [
+        "Opt-in runtime patch",
+        "Normalizer",
+        "Rule prototype",
+        "On/off comparison"
+      ],
+      "verification": [
+        "FR-01 through FR-04 tests pass",
+        "False acceleration negative test passes",
+        "Overhead is measured"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "BASE-001",
+      "phase": 2,
+      "priority": 8,
+      "title": "Run controlled baseline matrix",
+      "status": "pending",
+      "dependencies": ["TRACE-001", "DATA-001", "AWS-001"],
+      "context": [
+        "docs/BENCHMARK_PROTOCOL.md",
+        "docs/AWS_BUDGET.md",
+        "docs/TRACEABILITY.md"
+      ],
+      "deliverables": [
+        "F16/BF16, Q8_0, Q4_K_M, Q4_0, target-BPW, and KleidiAI-off evidence"
+      ],
+      "verification": [
+        "Required baselines share fixed environment/workload",
+        "Raw repeated samples and quality outputs exist",
+        "Spend ledger and cleanup pass"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "OPT-001",
+      "phase": 2,
+      "priority": 9,
+      "title": "Generate and evaluate bounded Arm-aware candidates",
+      "status": "pending",
+      "dependencies": ["BASE-001"],
+      "context": [
+        "docs/FEASIBILITY_PLAN.md",
+        "docs/BENCHMARK_PROTOCOL.md",
+        "docs/RISKS.md"
+      ],
+      "deliverables": [
+        "At most three first-round recipes",
+        "Candidate GGUFs and checksums",
+        "Quality/performance comparison",
+        "GO/PIVOT/STOP decision"
+      ],
+      "verification": [
+        "FP-01 through FP-09 evaluated",
+        "Target-BPW baseline included",
+        "Unfavorable candidates retained"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "MVP-001",
+      "phase": 3,
+      "priority": 10,
+      "title": "Build the installable MVP",
+      "status": "pending",
+      "dependencies": ["OPT-001"],
+      "context": [
+        "docs/ARCHITECTURE.md",
+        "docs/ROADMAP.md",
+        "docs/REQUIREMENTS.md"
+      ],
+      "deliverables": [
+        "Record, explain, optimize, compare CLI",
+        "Stable errors and schemas",
+        "Generated report",
+        "Worked example"
+      ],
+      "verification": [
+        "Fresh-user quickstart",
+        "Contract/integration tests",
+        "Failed candidate UX test"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "FULL-001",
+      "phase": 4,
+      "priority": 11,
+      "title": "Complete reusable product and interactive report",
+      "status": "pending",
+      "dependencies": ["MVP-001"],
+      "context": [
+        "docs/JUDGING_STRATEGY.md",
+        "docs/DEMO_AND_SUBMISSION.md",
+        "docs/TRACEABILITY.md"
+      ],
+      "deliverables": [
+        "Interactive X-ray",
+        "CI regression check",
+        "Clean-room reproduction",
+        "Tutorial and contribution patch"
+      ],
+      "verification": [
+        "Browser/accessibility tests",
+        "Clean Graviton4 replay",
+        "Claims matrix complete"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "SHIP-001",
+      "phase": 5,
+      "priority": 12,
+      "title": "Harden and submit",
+      "status": "pending",
+      "dependencies": ["FULL-001"],
+      "context": [
+        "docs/DEMO_AND_SUBMISSION.md",
+        "docs/JUDGING_STRATEGY.md",
+        "docs/SECURITY_AND_LICENSES.md"
+      ],
+      "deliverables": [
+        "Demo video",
+        "Devpost submission",
+        "Public evidence and judge quickstart",
+        "Final adversarial review"
+      ],
+      "verification": [
+        "Every submission claim has evidence ID",
+        "Repository secret/license scan passes",
+        "Offline demo works"
+      ],
+      "evidence": []
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kleidiscope.dev/schemas/experiment.schema.json",
+  "title": "KleidiScope Experiment Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "experiment_id",
+    "status",
+    "hypothesis",
+    "primary_metric",
+    "quality_budget",
+    "required_baselines",
+    "environment_ref",
+    "maximum_runtime_minutes",
+    "maximum_cost_usd",
+    "evidence_path"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "experiment_id": { "type": "string", "pattern": "^EXP-[0-9]{4}-[0-9]{3}$" },
+    "status": {
+      "enum": ["preregistered", "running", "passed", "failed", "inconclusive", "aborted"]
+    },
+    "hypothesis": { "type": "string", "minLength": 20 },
+    "predicted_direction": { "type": "string" },
+    "primary_metric": { "type": "string", "minLength": 1 },
+    "quality_budget": { "type": "object" },
+    "required_baselines": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string" }
+    },
+    "environment_ref": { "type": "string", "minLength": 1 },
+    "model_ref": { "type": "string" },
+    "dataset_refs": { "type": "array", "items": { "type": "string" } },
+    "workload_ref": { "type": "string" },
+    "runtime_ref": { "type": "string" },
+    "candidate_policy_ref": { "type": "string" },
+    "maximum_candidates": { "type": "integer", "minimum": 0, "maximum": 20 },
+    "maximum_runtime_minutes": { "type": "integer", "minimum": 1 },
+    "maximum_cost_usd": { "type": "number", "minimum": 0, "maximum": 15 },
+    "acceptance": { "type": "object" },
+    "started_at": { "type": "string", "format": "date-time" },
+    "finished_at": { "type": "string", "format": "date-time" },
+    "decision": { "type": "string" },
+    "evidence_path": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string" }
+  }
+}
+
