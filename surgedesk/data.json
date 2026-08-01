@@ -23,7 +23,7 @@
     "slo_ms": 10000
   },
   "product": {
-    "demo_mode": "recorded_evidence_replay",
+    "demo_mode": "accepted_evidence_load",
     "description": "Human-confirmed support triage on an Arm-optimized cloud AI service.",
     "name": "SurgeDesk"
   },
@@ -44,6 +44,12 @@
   "provenance": {
     "dataset": "BANKING77",
     "dataset_license": "CC-BY-4.0",
+    "evidence": {
+      "checksum_verified": true,
+      "checksummed_files": 141,
+      "comparison": "matched_control",
+      "only_changed_control": "mlas.disable_kleidiai"
+    },
     "experiment_id": "EXP-2026-004",
     "machine": "AWS Graviton4 c8g.4xlarge",
     "model": "Phi-4 Mini",

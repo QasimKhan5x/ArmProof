@@ -27,7 +27,7 @@
   <nav class="view-tabs" aria-label="SurgeDesk views">
     <div role="tablist" aria-label="Demo workflow">
       <button id="tab-workspace" role="tab" aria-selected="true" aria-controls="view-workspace" data-view="workspace">1. Triage</button>
-      <button id="tab-surge" role="tab" aria-selected="false" aria-controls="view-surge" data-view="surge">2. Surge replay</button>
+      <button id="tab-surge" role="tab" aria-selected="false" aria-controls="view-surge" data-view="surge">2. Arm result</button>
       <button id="tab-proof" role="tab" aria-selected="false" aria-controls="view-proof" data-view="proof">3. Release proof</button>
     </div>
     <p id="demo-source">Loading accepted evidence…</p>
@@ -116,7 +116,7 @@
 
           <div id="review-complete" class="workflow-handoff" role="status" hidden>
             <div><strong id="review-complete-title">Ticket routed</strong><span>Decision recorded in the audit trail.</span></div>
-            <button class="secondary-button" type="button" data-go-surge>Continue to surge replay</button>
+            <button class="secondary-button" type="button" data-go-surge>Continue to Arm result</button>
           </div>
 
           <section class="recent-section" aria-labelledby="recent-title">
@@ -146,10 +146,23 @@
           <div>
             <p class="eyebrow">Fixed-SLO experiment</p>
             <h1>What happens when support demand surges?</h1>
-            <p>Replay the same eight requests at the same load, then inspect the separately confirmed capacity boundary.</p>
+            <p>Load the accepted checksum-bound experiment, then inspect equal-load outcomes and confirmed capacity.</p>
           </div>
-          <button id="run-replay" class="primary-button replay-button" type="button">Run recorded surge</button>
         </header>
+
+        <section id="evidence-loader" class="evidence-loader" aria-labelledby="evidence-loader-title">
+          <div class="evidence-seal" aria-hidden="true">✓</div>
+          <div class="evidence-identity">
+            <p class="eyebrow">Accepted evidence bundle</p>
+            <h2 id="evidence-loader-title"><span id="evidence-experiment-id">—</span> is ready</h2>
+            <p id="evidence-load-note" aria-live="polite">The browser will derive this view from checked-in raw request events. It will not simulate a live benchmark.</p>
+          </div>
+          <dl class="evidence-facts">
+            <div><dt>Integrity</dt><dd id="evidence-checksum-status">Verifying…</dd></div>
+            <div><dt>Comparison</dt><dd id="evidence-comparison">Matched control</dd></div>
+          </dl>
+          <button id="load-experiment" class="primary-button replay-button" type="button">Load verified experiment</button>
+        </section>
 
         <div class="experiment-strip" aria-label="Experiment controls">
           <div><span>Machine</span><strong id="experiment-machine">c8g.4xlarge</strong></div>
@@ -158,6 +171,7 @@
           <div><span>Only changed control</span><strong>KleidiAI off → on</strong></div>
         </div>
 
+        <div id="experiment-results" class="experiment-results" hidden>
         <section class="capacity-reveal" aria-labelledby="capacity-title">
           <header class="section-heading">
             <div>
@@ -195,7 +209,7 @@
               <div><dt>Observed p95</dt><dd id="baseline-p95">—</dd></div>
               <div><dt>SLO breaches</dt><dd id="baseline-breaches">0</dd></div>
             </dl>
-            <p id="baseline-event" class="event-line">Run not started.</p>
+            <p id="baseline-event" class="event-line">Accepted run not loaded.</p>
           </article>
 
           <article class="run-panel optimized-run" aria-labelledby="optimized-title">
@@ -214,7 +228,7 @@
               <div><dt>Observed p95</dt><dd id="optimized-p95">—</dd></div>
               <div><dt>SLO breaches</dt><dd id="optimized-breaches">0</dd></div>
             </dl>
-            <p id="optimized-event" class="event-line">Run not started.</p>
+            <p id="optimized-event" class="event-line">Accepted run not loaded.</p>
           </article>
         </div>
 
@@ -237,6 +251,7 @@
             </table>
           </div>
         </section>
+        </div>
       </div>
     </section>
 

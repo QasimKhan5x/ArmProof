@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from armproof.demo.queue_guard import QueueGuard
+from armproof.evidence import verify_checksum_ledger
 
 
 DEMO_CASE_IDS = (
@@ -124,7 +125,17 @@ def _queue_guard(root: Path) -> tuple[QueueGuard, list[dict[str, str]]]:
 
 
 def build_surgedesk_payload(root: Path) -> dict[str, Any]:
-    evidence = root / "ops/evidence/EXP-2026-004/accepted/evidence/capacity/experiment"
+    accepted_evidence = root / "ops/evidence/EXP-2026-004/accepted/evidence"
+    checksum_result = verify_checksum_ledger(
+        accepted_evidence / "SHA256SUMS",
+        accepted_evidence,
+    )
+    if not checksum_result.passed:
+        raise ValueError(
+            "accepted evidence failed checksum verification: "
+            f"missing={checksum_result.missing}, mismatched={checksum_result.mismatched}"
+        )
+    evidence = accepted_evidence / "capacity/experiment"
     summary = _load_json(evidence / "summary.json")
     quality_enabled = _load_json(evidence / "quality/kleidiai-enabled.json")
     quality_disabled = _load_json(evidence / "quality/kleidiai-disabled.json")
@@ -216,7 +227,7 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
         "product": {
             "name": "SurgeDesk",
             "description": "Human-confirmed support triage on an Arm-optimized cloud AI service.",
-            "demo_mode": "recorded_evidence_replay",
+            "demo_mode": "accepted_evidence_load",
         },
         "routing_cases": routing_cases,
         "capacity": {"slo_ms": 10_000, "mixes": mixes},
@@ -274,6 +285,12 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
         },
         "provenance": {
             "experiment_id": "EXP-2026-004",
+            "evidence": {
+                "checksum_verified": checksum_result.passed,
+                "checksummed_files": checksum_result.checked,
+                "comparison": "matched_control",
+                "only_changed_control": "mlas.disable_kleidiai",
+            },
             "dataset": "BANKING77",
             "dataset_license": "CC-BY-4.0",
             "model": "Phi-4 Mini",

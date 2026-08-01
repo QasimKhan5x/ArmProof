@@ -11,7 +11,7 @@ python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
 Open `http://127.0.0.1:8765/surgedesk/#triage`. Choose **Guard intervention**
-or **Human correction**, then continue through Surge replay and Release proof.
+or **Human correction**, then continue through Arm result and Release proof.
 The views are directly addressable as `#triage`, `#surge`, and `#proof`. See
 [`SURGEDESK_DEMO.md`](SURGEDESK_DEMO.md) for provenance and narration.
 

@@ -71,8 +71,8 @@ reproduced.
 - **FR-13 Reproduction:** provide one documented clean-run command.
 - **FR-14 Application workflow:** route recorded BANKING77 requests through an
   explicit human confirmation or correction step.
-- **FR-15 Surge replay:** animate raw accepted baseline and optimized request
-  samples and converge on their measured p95, breaches and capacity boundary.
+- **FR-15 Arm result:** load raw accepted baseline and optimized request
+  samples and derive their measured p95, breaches and capacity boundary.
 - **FR-16 Evidence-derived demo:** generate all product-demo metrics and cases
   from accepted files; checked output drift must fail CI.
 - **FR-17 Operational quality:** evaluate the five-destination product task on a

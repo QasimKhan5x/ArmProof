@@ -17,8 +17,9 @@ The canonical submission package is [`../submission/README.md`](../submission/RE
 - Upload-ready images: [`../submission/assets/`](../submission/assets/)
 - Final owner checklist: [`../submission/SUBMISSION_CHECKLIST.md`](../submission/SUBMISSION_CHECKLIST.md)
 
-The recording script preloads the accepted surge result before capture. It
-does not spend video time waiting for the replay animation.
+The recording script visibly loads the accepted surge experiment during
+capture. The app explicitly says it derives the view from checksum-bound raw
+events rather than running the Graviton benchmark live.
 
 ## Submission Claim Rules
 

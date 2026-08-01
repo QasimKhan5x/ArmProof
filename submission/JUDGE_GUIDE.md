@@ -9,8 +9,10 @@ the product demo are checked into the public repository.
 1. Open https://qasimkhan5x.github.io/VerifyLane/surgedesk/#triage.
 2. Choose **Guard intervention**, load the suggestion and inspect the direct
    LLM queue versus the guarded queue.
-3. Open **Surge replay**. The page presents accepted same-load customer
-   outcomes and the separately confirmed 3x capacity boundary.
+3. Open **Arm result**, inspect the accepted experiment identity and checksum
+   status, then click **Load verified experiment**. The page derives same-load
+   customer outcomes and the confirmed 3x capacity boundary from accepted
+   events.
 4. Open **Release proof**. Inspect the claim ledger, optimization path, exact
    deployment and reusable GitHub Action.
 
@@ -83,4 +85,3 @@ the frozen capacity protocol; and the passing deployment is captured in
 ArmProof verifies declared claims for a pinned deployment. It is not an Arm
 certification authority and does not claim that one result generalizes to all
 models or Arm machines.
-

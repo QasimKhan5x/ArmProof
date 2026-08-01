@@ -59,6 +59,13 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertFalse(proof["kleidiai_disabled_callchains"])
         self.assertEqual(proof["instance"], "c8g.4xlarge")
 
+    def test_demo_identifies_a_verified_matched_control_bundle(self) -> None:
+        evidence = self.payload["provenance"]["evidence"]
+        self.assertTrue(evidence["checksum_verified"])
+        self.assertEqual(evidence["checksummed_files"], 141)
+        self.assertEqual(evidence["comparison"], "matched_control")
+        self.assertEqual(evidence["only_changed_control"], "mlas.disable_kleidiai")
+
 
 if __name__ == "__main__":
     unittest.main()

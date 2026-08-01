@@ -13,7 +13,6 @@ const elements = Object.fromEntries(
 
 let data;
 let workspace;
-let replayTimer = null;
 let inferenceMode = "recorded";
 
 const VIEW_TO_HASH = {
@@ -389,7 +388,7 @@ function renderRun(name, snapshot) {
     `${name}-event`,
     latest
       ? `#${String(latest.sequence).padStart(2, "0")} ${formatMs(latest.latency_ms)} · ${latest.source_text}`
-      : "Run not started.",
+      : "Accepted run not loaded.",
   );
 }
 
@@ -402,25 +401,15 @@ function renderReplay(progress) {
 }
 
 
-function startReplay() {
-  if (replayTimer) window.clearInterval(replayTimer);
-  elements["replay-conclusion"].hidden = true;
-  elements["run-replay"].disabled = true;
-  elements["run-replay"].textContent = "Replaying evidence…";
-  const started = performance.now();
-  const duration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 200 : 6000;
-  renderReplay(0);
-  replayTimer = window.setInterval(() => {
-    const progress = Math.min(1, (performance.now() - started) / duration);
-    renderReplay(progress);
-    if (progress >= 1) {
-      window.clearInterval(replayTimer);
-      replayTimer = null;
-      elements["run-replay"].disabled = false;
-      elements["run-replay"].textContent = "Replay again";
-      elements["tab-surge"].classList.add("completed");
-    }
-  }, 120);
+function loadVerifiedExperiment() {
+  renderReplay(1);
+  elements["experiment-results"].hidden = false;
+  elements["load-experiment"].disabled = true;
+  elements["load-experiment"].textContent = "Verified experiment loaded";
+  elements["evidence-load-note"].textContent =
+    `Loaded ${data.provenance.evidence.checksummed_files} verified files; summary recomputed from accepted raw events.`;
+  elements["evidence-loader"].classList.add("loaded");
+  elements["tab-surge"].classList.add("completed");
 }
 
 
@@ -450,7 +439,7 @@ function bindInteractions() {
   elements["intake-form"].addEventListener("submit", routeSelectedMessage);
   elements["confirm-route"].addEventListener("click", () => review("confirm"));
   elements["correct-route"].addEventListener("click", () => review("correct"));
-  elements["run-replay"].addEventListener("click", startReplay);
+  elements["load-experiment"].addEventListener("click", loadVerifiedExperiment);
   document.querySelectorAll('input[name="inference-mode"]').forEach((radio) => {
     radio.addEventListener("change", () => setInferenceMode(radio.value));
   });
@@ -477,7 +466,18 @@ async function main() {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     data = await response.json();
     workspace = createWorkspace(data);
-    setText("demo-source", `${data.provenance.experiment_id} · ${data.provenance.machine} · recorded replay`);
+    setText("demo-source", `${data.provenance.experiment_id} · ${data.provenance.machine} · accepted evidence`);
+    setText("evidence-experiment-id", data.provenance.experiment_id);
+    setText(
+      "evidence-checksum-status",
+      `${data.provenance.evidence.checksummed_files} files · ${data.provenance.evidence.checksum_verified ? "SHA-256 verified" : "verification failed"}`,
+    );
+    setText(
+      "evidence-comparison",
+      data.provenance.evidence.comparison === "matched_control"
+        ? "Matched INT4 control · only KleidiAI changes"
+        : "Comparison unavailable",
+    );
     setText("experiment-machine", data.proof.instance);
     setText("absolute-accuracy", `${data.quality.optimized_accuracy_percent.toFixed(2)}%`);
     populateCases();

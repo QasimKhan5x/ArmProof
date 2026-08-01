@@ -34,7 +34,7 @@ test("operator confirms and corrects recorded support routes", async ({ page }) 
   await expect(page.locator("#reviewed-tickets tr")).toHaveCount(1);
   await expect(page.locator("#reviewed-tickets")).toContainText("Confirmed");
   await expect(page.locator("#review-complete")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Continue to surge replay" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Continue to Arm result" })).toBeFocused();
 
   await page.locator("#sample-select").selectOption("banking77-quality-0007");
   await page.getByRole("button", { name: "Load model suggestion" }).click();
@@ -76,7 +76,7 @@ test("guided scenarios and URL-addressable keyboard tabs support a clean demo", 
   await page.getByRole("tab", { name: "1. Triage" }).focus();
   await page.keyboard.press("ArrowRight");
   await expect(page).toHaveURL(/#surge$/);
-  await expect(page.getByRole("tab", { name: "2. Surge replay" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: "2. Arm result" })).toHaveAttribute("aria-selected", "true");
 
   await page.goto(`${appUrl}#proof`);
   await expect(page.getByRole("heading", { name: "Approved for the measured Graviton deployment" })).toBeVisible();
@@ -124,16 +124,22 @@ test("configured gateway enables a live Graviton route", async ({ page }) => {
 });
 
 
-test("recorded surge reveals the fixed-SLO Arm result", async ({ page }) => {
+test("verified evidence load reveals the fixed-SLO Arm result", async ({ page }) => {
   const messages = captureBrowserErrors(page);
-  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto(appUrl);
-  await page.getByRole("tab", { name: "2. Surge replay" }).click();
+  await page.getByRole("tab", { name: "2. Arm result" }).click();
 
+  await expect(page.locator("#evidence-experiment-id")).toHaveText("EXP-2026-004");
+  await expect(page.locator("#evidence-checksum-status")).toHaveText("141 files · SHA-256 verified");
+  await expect(page.locator("#evidence-comparison")).toContainText("Matched INT4 control");
+  await expect(page.locator("#experiment-results")).toBeHidden();
+
+  await page.getByRole("button", { name: "Load verified experiment" }).click();
+  await expect(page.getByRole("button", { name: "Verified experiment loaded" })).toBeDisabled();
+  await expect(page.locator("#experiment-results")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Same instance. 3× the capacity." })).toBeVisible();
-  await page.getByRole("button", { name: "Run recorded surge" }).click();
-  await expect(page.locator("#baseline-status")).toHaveText("failed", { timeout: 3000 });
+  await expect(page.locator("#baseline-status")).toHaveText("failed");
   await expect(page.locator("#optimized-status")).toHaveText("passed");
   await expect(page.locator("#baseline-completed")).toHaveText("8 / 8");
   await expect(page.locator("#optimized-completed")).toHaveText("8 / 8");
@@ -172,7 +178,7 @@ test("mobile workflow has no page overflow", async ({ page }) => {
   await page.goto(appUrl);
   await expect(page.getByRole("heading", { name: "Route an incoming request" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
-  await page.getByRole("tab", { name: "2. Surge replay" }).click();
+  await page.getByRole("tab", { name: "2. Arm result" }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.getByRole("tab", { name: "3. Release proof" }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
