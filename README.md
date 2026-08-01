@@ -43,9 +43,14 @@ python3.12 scripts/serve_surgedesk.py --port 8765
 
 Open `http://127.0.0.1:8765/surgedesk/`. The three-step judge path is:
 
-1. Route and human-confirm real BANKING77 requests using recorded model output.
+1. Use **Guard intervention** and **Human correction** to inspect both sides of
+   the human-confirmed BANKING77 routing boundary.
 2. Replay the same raw demand in both treatments, then reveal confirmed capacity.
 3. Inspect the Arm execution, quality, reproduction and deployment proof.
+
+Each view has a stable URL: `#triage`, `#surge`, and `#proof`. The tabs support
+Left/Right Arrow navigation, and every evidence table becomes a labeled card
+list on narrow screens.
 
 Recorded mode never simulates live inference or claims autonomous routing.
 Fine-grained 77-class accuracy is 46.49%, so human confirmation remains a

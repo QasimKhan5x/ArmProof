@@ -20,7 +20,7 @@
     </div>
     <div class="environment-status">
       <span class="status-dot" aria-hidden="true"></span>
-      Recorded Graviton evidence
+      <span id="environment-label">Recorded Graviton evidence</span>
     </div>
   </header>
 
@@ -63,7 +63,7 @@
           <section class="quality-scoreband" aria-label="Held-out routing quality">
             <div><span>Operational queue accuracy</span><strong id="guard-accuracy">—</strong><small>Held-out, 770 requests</small></div>
             <div><span>Improvement over LLM mapping</span><strong id="guard-gain">—</strong><small id="guard-split">—</small></div>
-            <div><span>Fine-grained intent accuracy</span><strong id="intent-accuracy">—</strong><small>Human confirms every route</small></div>
+            <div><span>Schema-valid responses</span><strong id="schema-valid">—</strong><small>Human confirmation required</small></div>
           </section>
 
           <form id="intake-form" class="intake-form">
@@ -73,6 +73,14 @@
               <label id="live-mode-label"><input id="live-mode" type="radio" name="inference-mode" value="live" disabled> Live Graviton endpoint</label>
               <span id="live-mode-hint">Start the demo gateway with an endpoint to enable live mode.</span>
             </fieldset>
+            <div id="scenario-picker" class="scenario-picker">
+              <div class="scenario-heading"><span>Evidence scenario</span><small>Choose the decision path to inspect</small></div>
+              <div class="scenario-options" aria-label="Recorded evidence scenarios">
+                <button type="button" data-case-id="banking77-quality-0110" aria-pressed="true"><strong>Straight-through</strong><small>Model and guard agree</small></button>
+                <button type="button" data-case-id="banking77-quality-0007" aria-pressed="false"><strong>Guard intervention</strong><small>Guard rescues the LLM route</small></button>
+                <button type="button" data-case-id="banking77-quality-0044" aria-pressed="false"><strong>Human correction</strong><small>Operator catches a guard error</small></button>
+              </div>
+            </div>
             <label for="sample-select">Recorded customer request</label>
             <select id="sample-select" name="sample"></select>
             <label for="customer-message">Message</label>
@@ -85,7 +93,7 @@
 
           <div id="intake-error" class="inline-alert error-alert" role="alert" hidden></div>
 
-          <section id="review-panel" class="review-panel" aria-labelledby="review-title" hidden>
+          <section id="review-panel" class="review-panel" aria-labelledby="review-title" aria-live="polite" hidden>
             <div class="review-summary">
               <div>
                 <p class="eyebrow">Two-stage suggestion</p>
@@ -106,6 +114,11 @@
             </div>
           </section>
 
+          <div id="review-complete" class="workflow-handoff" role="status" hidden>
+            <div><strong id="review-complete-title">Ticket routed</strong><span>Decision recorded in the audit trail.</span></div>
+            <button class="secondary-button" type="button" data-go-surge>Continue to surge replay</button>
+          </div>
+
           <section class="recent-section" aria-labelledby="recent-title">
             <div class="section-heading compact-heading">
               <div>
@@ -115,7 +128,7 @@
               <span id="review-count" class="source-chip">0 reviewed</span>
             </div>
             <div class="table-wrap">
-              <table>
+              <table data-mobile-cards>
                 <thead><tr><th>Request</th><th>Final queue</th><th>Review</th><th>Runbook</th></tr></thead>
                 <tbody id="reviewed-tickets">
                   <tr class="empty-row"><td colspan="4">No tickets reviewed in this demo session.</td></tr>
@@ -218,7 +231,7 @@
             <span id="confirmation-count" class="source-chip">—</span>
           </div>
           <div class="table-wrap">
-            <table>
+            <table data-mobile-cards>
               <thead><tr><th>Traffic mix</th><th>Baseline</th><th>Optimized</th><th>Capacity gain</th></tr></thead>
               <tbody id="mix-table"></tbody>
             </table>
@@ -245,7 +258,7 @@
             <a class="text-link" href="../report/index.html">Open full evidence report</a>
           </div>
           <div class="table-wrap">
-            <table class="claims-table">
+            <table class="claims-table" data-mobile-cards>
               <thead><tr><th>Required claim</th><th>Observed</th><th>Threshold</th><th>Decision</th></tr></thead>
               <tbody>
                 <tr><td>Cloud capacity</td><td id="proof-capacity">—</td><td>≥ 1.5×</td><td><span class="pass-label">Pass</span></td></tr>

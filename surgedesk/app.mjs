@@ -16,6 +16,15 @@ let workspace;
 let replayTimer = null;
 let inferenceMode = "recorded";
 
+const VIEW_TO_HASH = {
+  workspace: "triage",
+  surge: "surge",
+  proof: "proof",
+};
+const HASH_TO_VIEW = Object.fromEntries(
+  Object.entries(VIEW_TO_HASH).map(([view, hash]) => [hash, view]),
+);
+
 
 function setText(id, value) {
   elements[id].textContent = String(value);
@@ -33,7 +42,8 @@ function formatMs(value) {
 }
 
 
-function activateView(view) {
+function activateView(view, { focus = true, updateHash = true } = {}) {
+  if (!(view in VIEW_TO_HASH)) return;
   document.querySelectorAll("[role=tab]").forEach((tab) => {
     const selected = tab.dataset.view === view;
     tab.setAttribute("aria-selected", String(selected));
@@ -42,7 +52,18 @@ function activateView(view) {
   document.querySelectorAll(".view").forEach((panel) => {
     panel.hidden = panel.id !== `view-${view}`;
   });
-  document.querySelector(`[data-view="${view}"]`)?.focus({ preventScroll: true });
+  if (updateHash) history.replaceState(null, "", `#${VIEW_TO_HASH[view]}`);
+  if (focus) document.querySelector(`[data-view="${view}"]`)?.focus({ preventScroll: true });
+}
+
+
+function labelResponsiveTable(table) {
+  const labels = [...table.querySelectorAll("thead th")].map((header) => header.textContent.trim());
+  table.querySelectorAll("tbody tr").forEach((row) => {
+    [...row.cells].forEach((cell, index) => {
+      if (labels[index]) cell.dataset.label = labels[index];
+    });
+  });
 }
 
 
@@ -105,6 +126,8 @@ function renderReviewedTickets() {
     cell.textContent = "No tickets reviewed in this demo session.";
     row.append(cell);
     elements["reviewed-tickets"].append(row);
+    labelResponsiveTable(elements["reviewed-tickets"].closest("table"));
+    elements["review-complete"].hidden = true;
     return;
   }
   workspace.resolved.forEach((ticket) => {
@@ -122,6 +145,15 @@ function renderReviewedTickets() {
     row.append(request, queue, status, runbook);
     elements["reviewed-tickets"].append(row);
   });
+  labelResponsiveTable(elements["reviewed-tickets"].closest("table"));
+  elements["review-complete"].hidden = Boolean(workspace.active);
+  const latest = workspace.resolved[0];
+  setText(
+    "review-complete-title",
+    latest.review_status === "corrected"
+      ? `Corrected to ${latest.final_queue}`
+      : `Routed to ${latest.final_queue}`,
+  );
 }
 
 
@@ -137,7 +169,16 @@ function loadSelectedSample() {
     (item) => item.request_id === elements["sample-select"].value,
   );
   if (selected) elements["customer-message"].value = selected.source_text;
+  document.querySelectorAll("[data-case-id]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.caseId === selected?.request_id));
+  });
   elements["intake-error"].hidden = true;
+}
+
+
+function selectScenario(requestId) {
+  elements["sample-select"].value = requestId;
+  loadSelectedSample();
 }
 
 
@@ -184,6 +225,8 @@ function setInferenceMode(mode) {
   inferenceMode = mode;
   const live = mode === "live";
   elements["sample-select"].disabled = live;
+  elements["scenario-picker"].hidden = live;
+  setText("environment-label", live ? "Live Graviton endpoint" : "Recorded Graviton evidence");
   elements["workspace-mode"].textContent = live ? "Live Graviton inference" : "BANKING77 recorded output";
   elements["intake-note"].textContent = live
     ? "This message is sent through the configured Graviton inference endpoint and local queue guard."
@@ -222,6 +265,8 @@ async function configureLiveMode() {
 function review(decision) {
   workspace = resolveTicket(workspace, decision);
   renderWorkspace();
+  elements["tab-workspace"].classList.add("completed");
+  elements["review-complete"].querySelector("button").focus();
 }
 
 
@@ -252,6 +297,7 @@ function renderMixTable() {
     });
     elements["mix-table"].append(row);
   });
+  labelResponsiveTable(elements["mix-table"].closest("table"));
 }
 
 
@@ -271,7 +317,7 @@ function renderEvidenceSummary() {
     "guard-split",
     `${data.quality.guard_training_cases} train / ${data.quality.guard_evaluation_cases} held out`,
   );
-  setText("intent-accuracy", `${data.quality.optimized_accuracy_percent.toFixed(2)}%`);
+  setText("schema-valid", `${data.quality.schema_valid_percent.toFixed(0)}%`);
   setText(
     "confirmation-count",
     `${mixed.confirmations_per_treatment} confirmations per treatment`,
@@ -372,6 +418,7 @@ function startReplay() {
       replayTimer = null;
       elements["run-replay"].disabled = false;
       elements["run-replay"].textContent = "Replay again";
+      elements["tab-surge"].classList.add("completed");
     }
   }, 120);
 }
@@ -382,6 +429,7 @@ function bindInteractions() {
     tab.addEventListener("click", () => activateView(tab.dataset.view));
     tab.addEventListener("keydown", (event) => {
       if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+      event.preventDefault();
       const tabs = [...document.querySelectorAll("[role=tab]")];
       const current = tabs.indexOf(tab);
       const offset = event.key === "ArrowRight" ? 1 : -1;
@@ -391,6 +439,12 @@ function bindInteractions() {
   });
   document.querySelectorAll("[data-go-proof]").forEach((button) => {
     button.addEventListener("click", () => activateView("proof"));
+  });
+  document.querySelectorAll("[data-go-surge]").forEach((button) => {
+    button.addEventListener("click", () => activateView("surge"));
+  });
+  document.querySelectorAll("[data-case-id]").forEach((button) => {
+    button.addEventListener("click", () => selectScenario(button.dataset.caseId));
   });
   elements["sample-select"].addEventListener("change", loadSelectedSample);
   elements["intake-form"].addEventListener("submit", routeSelectedMessage);
@@ -410,6 +464,10 @@ function bindInteractions() {
       }
     });
   });
+  window.addEventListener("hashchange", () => {
+    const view = HASH_TO_VIEW[location.hash.slice(1)];
+    if (view) activateView(view, { focus: false, updateHash: false });
+  });
 }
 
 
@@ -428,6 +486,9 @@ async function main() {
     renderEvidenceSummary();
     renderReplay(0);
     bindInteractions();
+    document.querySelectorAll("table[data-mobile-cards]").forEach(labelResponsiveTable);
+    const initialView = HASH_TO_VIEW[location.hash.slice(1)] ?? "workspace";
+    activateView(initialView, { focus: false });
     await configureLiveMode();
   } catch (error) {
     console.error(error);

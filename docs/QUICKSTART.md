@@ -10,8 +10,9 @@ python3.12 scripts/build_surgedesk_demo.py --verify
 python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
-Open `http://127.0.0.1:8765/surgedesk/`. Use the numbered tabs in order:
-Triage, Surge replay, Release proof. See
+Open `http://127.0.0.1:8765/surgedesk/#triage`. Choose **Guard intervention**
+or **Human correction**, then continue through Surge replay and Release proof.
+The views are directly addressable as `#triage`, `#surge`, and `#proof`. See
 [`SURGEDESK_DEMO.md`](SURGEDESK_DEMO.md) for provenance and narration.
 
 ## Evaluate The Reference

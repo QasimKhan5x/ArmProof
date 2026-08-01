@@ -24,6 +24,7 @@ test("operator confirms and corrects recorded support routes", async ({ page }) 
   await expect(page.locator("#demo-source")).toContainText("EXP-2026-004");
   await expect(page.locator("#guard-accuracy")).toHaveText("86.75%");
   await expect(page.locator("#guard-gain")).toHaveText("+12.34 pp");
+  await expect(page.locator("#schema-valid")).toHaveText("100%");
   await expect(page.locator("#customer-message")).toHaveValue(/gym bag/);
 
   await page.getByRole("button", { name: "Load model suggestion" }).click();
@@ -32,6 +33,8 @@ test("operator confirms and corrects recorded support routes", async ({ page }) 
   await page.getByRole("button", { name: "Confirm route" }).click();
   await expect(page.locator("#reviewed-tickets tr")).toHaveCount(1);
   await expect(page.locator("#reviewed-tickets")).toContainText("Confirmed");
+  await expect(page.locator("#review-complete")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continue to surge replay" })).toBeFocused();
 
   await page.locator("#sample-select").selectOption("banking77-quality-0007");
   await page.getByRole("button", { name: "Load model suggestion" }).click();
@@ -54,6 +57,26 @@ test("operator confirms and corrects recorded support routes", async ({ page }) 
   expect(messages).toEqual([]);
   await mkdir("build/screenshots", { recursive: true });
   await page.screenshot({ path: "build/screenshots/surgedesk-triage.png", fullPage: true });
+});
+
+
+test("guided scenarios and URL-addressable keyboard tabs support a clean demo", async ({ page }) => {
+  await page.goto(appUrl);
+
+  await page.getByRole("button", { name: "Guard intervention" }).click();
+  await expect(page.locator("#sample-select")).toHaveValue("banking77-quality-0007");
+  await expect(page.locator("#customer-message")).toHaveValue("i have not received my card");
+  await page.getByRole("button", { name: "Load model suggestion" }).click();
+  await expect(page.locator("#review-warning")).toContainText("changed the LLM route");
+
+  await page.getByRole("tab", { name: "1. Triage" }).focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(page).toHaveURL(/#surge$/);
+  await expect(page.getByRole("tab", { name: "2. Surge replay" })).toHaveAttribute("aria-selected", "true");
+
+  await page.goto(`${appUrl}#proof`);
+  await expect(page.getByRole("heading", { name: "Approved for the measured Graviton deployment" })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "3. Release proof" })).toHaveAttribute("aria-selected", "true");
 });
 
 
@@ -149,6 +172,8 @@ test("mobile workflow has no page overflow", async ({ page }) => {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await page.getByRole("tab", { name: "3. Release proof" }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  await expect(page.locator(".claims-table thead")).toBeHidden();
+  await expect(page.locator(".claims-table tbody tr").first()).toHaveCSS("display", "grid");
   expect(messages).toEqual([]);
   await page.screenshot({ path: "build/screenshots/surgedesk-mobile.png", fullPage: true });
 });

@@ -16,6 +16,14 @@ python3.12 scripts/serve_surgedesk.py --port 8765
 
 Open `http://127.0.0.1:8765/surgedesk/`.
 
+The triage screen exposes three deterministic evidence paths:
+
+- **Straight-through:** the model and queue guard agree.
+- **Guard intervention:** the guard repairs an incorrect direct LLM route.
+- **Human correction:** the operator catches a guard error.
+
+Direct links are available at `#triage`, `#surge`, and `#proof`.
+
 ## Workflow
 
 1. **Triage:** inspect the held-out `86.75%` queue result, load a recorded
@@ -75,5 +83,6 @@ npm run test:logic
 npm run test:ui
 ```
 
-The browser suite covers confirmation, correction, edited-text rejection, raw
-replay convergence, proof visibility, console errors and 320-pixel overflow.
+The browser suite covers guided scenarios, confirmation, correction,
+edited-text rejection, URL and keyboard navigation, raw replay convergence,
+proof visibility, console errors and responsive tables down to 320 pixels.
