@@ -1,0 +1,66 @@
+{
+  "gates": {
+    "disk_reduction": true,
+    "format_validity": true,
+    "int4_speedup": true,
+    "kernel_negative": true,
+    "kernel_positive": true,
+    "kleidiai_3_of_4": true,
+    "kleidiai_no_regression": true,
+    "quality_loss": true,
+    "repetitions": true,
+    "rss_reduction": false
+  },
+  "passed": false,
+  "summary": {
+    "disabled_kernel_observed": false,
+    "disk_reduction_percent": 35.91724252463868,
+    "int4_format_valid_percent": 100.0,
+    "int4_vs_bf16_best_speedup": 47.61608499743072,
+    "kleidiai_kernel_observed": true,
+    "kleidiai_shape_gains": [
+      1.7618352858363835,
+      2.1769914504132815,
+      2.4518557039983566,
+      2.607826878169171
+    ],
+    "minimum_repetitions": 3,
+    "quality": {
+      "bf16_correct": 19,
+      "int4_correct": 20,
+      "total": 24
+    },
+    "quality_loss_count": 0,
+    "rss_reduction_percent": -165.62835340407776,
+    "shapes": [
+      {
+        "batch": 1,
+        "decode_gain": 1.2978131098575487,
+        "e2e_gain": 1.7618352858363835,
+        "int4_vs_bf16": 47.61608499743072,
+        "prompt_length": 128
+      },
+      {
+        "batch": 1,
+        "decode_gain": 1.2531812538051976,
+        "e2e_gain": 2.1769914504132815,
+        "int4_vs_bf16": 24.659274638065394,
+        "prompt_length": 512
+      },
+      {
+        "batch": 4,
+        "decode_gain": 1.8834162023776786,
+        "e2e_gain": 2.4518557039983566,
+        "int4_vs_bf16": 5.3945764778513094,
+        "prompt_length": 128
+      },
+      {
+        "batch": 4,
+        "decode_gain": 1.7460029026680612,
+        "e2e_gain": 2.607826878169171,
+        "int4_vs_bf16": 3.1634768394049737,
+        "prompt_length": 512
+      }
+    ]
+  }
+}

@@ -1,49 +1,56 @@
 # Current Status
 
-Last updated: 2026-07-29
+Last updated: 2026-07-31
 
-## Phase
+## Product
 
-Project initialization and feasibility design.
+ArmProof is a fail-closed CI gate for Arm AI optimization changes. It evaluates
+a versioned quality, capacity and Arm-execution contract, emits stable reason
+codes, renders an offline evidence report and records the exact passing
+deployment.
 
-## Verified State
+## Accepted Result
 
-- Product concept and claim boundary documented.
-- Current upstream `llama-quantize` capabilities researched, including
-  `--tensor-type` and `--target-bpw`.
-- Graviton4 cost envelope researched.
-- No application code, runtime patch, model artifact, or benchmark result yet.
-- No paid AWS resource has been provisioned.
+The decisive reference gate passed on AWS Graviton4 `c8g.4xlarge`:
 
-## Immediate Next Action
+- KleidiAI fixed-SLO capacity: 3.0x short, 2.5x long and 3.0x mixed traffic.
+- Quality delta: -0.390 percentage points accuracy and -0.673 points macro F1,
+  both inside the preregistered one-point tolerance.
+- Schema validity: 100% across the 770-item BANKING77 evaluation.
+- Arm attribution: `kai_*` callchains appear only in the enabled profile.
+- Whole deployment: 35.92% less disk, 55.34% lower peak PSS and 59.66% lower
+  time-weighted PSS than the BF16 reference.
+- Clean reproduction: all three capacity ratios matched exactly on a fresh
+  `c8g.4xlarge`, with the same quality gate and enabled-only `kai_*` evidence.
 
-Run Phase 0 source reconnaissance from `ops/work-items.json` against a pinned
-`llama.cpp` commit. Confirm that the required dispatch evidence is observable
-with a minimal, low-overhead patch before provisioning AWS.
+The corrected capacity result is `EXP-2026-004`. The aborted and inconclusive
+attempts remain preserved and visible.
 
-## Current Commands
+## Product State
 
-There are no verified build commands yet. Documentation validation consists of:
+Completed: guarded AWS lifecycle, reference service, fixed-SLO harness, policy
+engine, pass/fail/unknown fixtures, single-config CLI, reusable GitHub Action,
+responsive offline report, integrity verifier and pinned deployment artifact.
+
+Remaining release work is repository publication and hackathon video/submission
+packaging. The secondary measurement-overhead claim remains unpublished until
+it has a matched baseline.
+
+## Verified Commands
 
 ```bash
-git status --short
-python3 -m json.tool ops/work-items.json
-python3 -m json.tool schemas/experiment.schema.json
+make check
+armproof ci examples/armproof-reference/armproof.json
+armproof evidence-verify \
+  --checksums ops/evidence/EXP-2026-004/accepted/evidence/SHA256SUMS \
+  --root ops/evidence/EXP-2026-004/accepted/evidence
+npm run test:ui
 ```
 
-Add automated link and traceability validation during Phase 0.
+## Constraints
 
-## Open Decisions
-
-- Final public name and whether the existing GitHub repository will be renamed.
-- Exact 3B source model, subject to license and ungated download availability.
-- Pinned `llama.cpp` and KleidiAI revisions.
-- Whether Performix is available without licensing or account friction.
-- Whether `c8g.2xlarge` is sufficient for every conversion and evaluation step;
-  `c8g.4xlarge` is the approved fallback within the same budget ceiling.
-
-## Known Blockers
-
-- AWS CLI session requires reauthentication before any approved provisioning.
-- Real feasibility claims require Graviton4 evidence.
-
+- Accepted performance claims are scoped to the pinned Phi-4 Mini workload,
+  runtime and `c8g.4xlarge`; they are not universal model claims.
+- Project source is MIT licensed; BANKING77 is attributed under CC-BY-4.0.
+- Estimated cumulative AWS evidence cost is USD 3.8689 and inventory is empty.
+- ArmProof means "verified against the declared contract," not Arm certified.

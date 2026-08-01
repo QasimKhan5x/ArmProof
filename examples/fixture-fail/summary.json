@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "passed": false,
+  "mixes": {
+    "short": {"ratio": {"baseline_median": 0.5, "treatment_median": 0.6, "ratio": 1.2}},
+    "long": {"ratio": {"baseline_median": 0.25, "treatment_median": 0.3, "ratio": 1.2}},
+    "mixed": {"ratio": {"baseline_median": 0.5, "treatment_median": 0.6, "ratio": 1.2}}
+  },
+  "quality_comparison": {
+    "accuracy_delta_pp": 0.0,
+    "macro_f1_delta_pp": 0.0,
+    "schema_valid_rate": 1.0
+  }
+}

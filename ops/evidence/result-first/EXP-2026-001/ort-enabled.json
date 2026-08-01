@@ -1,0 +1,432 @@
+{
+  "label": "enabled",
+  "model_bytes": 4930563449,
+  "model_rss_bytes": 2883600384,
+  "performance": [
+    {
+      "batch": 1,
+      "generation_length": 64,
+      "median": {
+        "decode_seconds": 0.8985642040000812,
+        "decode_tokens_per_second": 70.11185146208463,
+        "end_to_end_seconds": 1.2431207580000319,
+        "output_tokens_per_second": 51.483333045588445,
+        "prefill_seconds": 0.34447017000002234,
+        "ttft_seconds": 0.34455655399995067
+      },
+      "prompt_length": 128,
+      "repetitions": 5,
+      "rows": [
+        {
+          "decode_seconds": 0.902162980000071,
+          "decode_tokens_per_second": 69.83217156615653,
+          "end_to_end_seconds": 1.2469625319999977,
+          "output_tokens_per_second": 51.32471775022035,
+          "prefill_seconds": 0.344704911000008,
+          "ttft_seconds": 0.34479955199992673
+        },
+        {
+          "decode_seconds": 0.9032270730000391,
+          "decode_tokens_per_second": 69.74990219319663,
+          "end_to_end_seconds": 1.2479210579999744,
+          "output_tokens_per_second": 51.28529532354547,
+          "prefill_seconds": 0.3446082819999674,
+          "ttft_seconds": 0.3446939849999353
+        },
+        {
+          "decode_seconds": 0.8985642040000812,
+          "decode_tokens_per_second": 70.11185146208463,
+          "end_to_end_seconds": 1.2431207580000319,
+          "output_tokens_per_second": 51.483333045588445,
+          "prefill_seconds": 0.34447017000002234,
+          "ttft_seconds": 0.34455655399995067
+        },
+        {
+          "decode_seconds": 0.8961677930000178,
+          "decode_tokens_per_second": 70.29933511569384,
+          "end_to_end_seconds": 1.240565896000021,
+          "output_tokens_per_second": 51.58935950629979,
+          "prefill_seconds": 0.34431086400002187,
+          "ttft_seconds": 0.3443981030000032
+        },
+        {
+          "decode_seconds": 0.8980551829999968,
+          "decode_tokens_per_second": 70.15159111887252,
+          "end_to_end_seconds": 1.2421723179999162,
+          "output_tokens_per_second": 51.522642287705786,
+          "prefill_seconds": 0.3440313429999833,
+          "ttft_seconds": 0.34411713499991947
+        }
+      ]
+    },
+    {
+      "batch": 1,
+      "generation_length": 64,
+      "median": {
+        "decode_seconds": 1.0628758210000342,
+        "decode_tokens_per_second": 59.273151910375404,
+        "end_to_end_seconds": 2.511571361000051,
+        "output_tokens_per_second": 25.482055176213127,
+        "prefill_seconds": 1.4486079950000885,
+        "ttft_seconds": 1.448695540000017
+      },
+      "prompt_length": 512,
+      "repetitions": 5,
+      "rows": [
+        {
+          "decode_seconds": 1.055088160000082,
+          "decode_tokens_per_second": 59.71065015078465,
+          "end_to_end_seconds": 2.5035287100000687,
+          "output_tokens_per_second": 25.56391694026079,
+          "prefill_seconds": 1.4483522950000634,
+          "ttft_seconds": 1.4484405499999866
+        },
+        {
+          "decode_seconds": 1.0628758210000342,
+          "decode_tokens_per_second": 59.273151910375404,
+          "end_to_end_seconds": 2.511571361000051,
+          "output_tokens_per_second": 25.482055176213127,
+          "prefill_seconds": 1.4486079950000885,
+          "ttft_seconds": 1.448695540000017
+        },
+        {
+          "decode_seconds": 1.0660242459999836,
+          "decode_tokens_per_second": 59.09809297151856,
+          "end_to_end_seconds": 2.514107036999917,
+          "output_tokens_per_second": 25.456354506040114,
+          "prefill_seconds": 1.4479914749999807,
+          "ttft_seconds": 1.4480827909999334
+        },
+        {
+          "decode_seconds": 1.065025844000047,
+          "decode_tokens_per_second": 59.15349411933821,
+          "end_to_end_seconds": 2.514710593000018,
+          "output_tokens_per_second": 25.450244723250165,
+          "prefill_seconds": 1.4495954650000158,
+          "ttft_seconds": 1.449684748999971
+        },
+        {
+          "decode_seconds": 1.058389641999952,
+          "decode_tokens_per_second": 59.52439205749792,
+          "end_to_end_seconds": 2.507510097000022,
+          "output_tokens_per_second": 25.523326935580204,
+          "prefill_seconds": 1.4490301840000939,
+          "ttft_seconds": 1.4491204550000703
+        }
+      ]
+    },
+    {
+      "batch": 4,
+      "generation_length": 64,
+      "median": {
+        "decode_seconds": 1.3022142449999592,
+        "decode_tokens_per_second": 193.5165438157282,
+        "end_to_end_seconds": 2.646797525000011,
+        "output_tokens_per_second": 96.72065867599711,
+        "prefill_seconds": 1.3445654060000152,
+        "ttft_seconds": 1.3448895609999454
+      },
+      "prompt_length": 128,
+      "repetitions": 5,
+      "rows": [
+        {
+          "decode_seconds": 1.2955392380000603,
+          "decode_tokens_per_second": 194.513599131907,
+          "end_to_end_seconds": 2.6394383530000596,
+          "output_tokens_per_second": 96.9903311850505,
+          "prefill_seconds": 1.3435845700000755,
+          "ttft_seconds": 1.3438991149999993
+        },
+        {
+          "decode_seconds": 1.3022142449999592,
+          "decode_tokens_per_second": 193.5165438157282,
+          "end_to_end_seconds": 2.646797525000011,
+          "output_tokens_per_second": 96.72065867599711,
+          "prefill_seconds": 1.344262120000053,
+          "ttft_seconds": 1.3445832800000517
+        },
+        {
+          "decode_seconds": 1.3014463050000131,
+          "decode_tokens_per_second": 193.6307314653273,
+          "end_to_end_seconds": 2.6463358659999585,
+          "output_tokens_per_second": 96.7375318035326,
+          "prefill_seconds": 1.3445654060000152,
+          "ttft_seconds": 1.3448895609999454
+        },
+        {
+          "decode_seconds": 1.3065899339999305,
+          "decode_tokens_per_second": 192.86846886118244,
+          "end_to_end_seconds": 2.655566160000035,
+          "output_tokens_per_second": 96.40128868037566,
+          "prefill_seconds": 1.3486596660000032,
+          "ttft_seconds": 1.3489762260001044
+        },
+        {
+          "decode_seconds": 1.3032218379998994,
+          "decode_tokens_per_second": 193.36692545511153,
+          "end_to_end_seconds": 2.648976196999911,
+          "output_tokens_per_second": 96.64110998427692,
+          "prefill_seconds": 1.3454357680000157,
+          "ttft_seconds": 1.3457543590000114
+        }
+      ]
+    },
+    {
+      "batch": 4,
+      "generation_length": 64,
+      "median": {
+        "decode_seconds": 1.6003890370000136,
+        "decode_tokens_per_second": 157.4617134796068,
+        "end_to_end_seconds": 7.406735347999984,
+        "output_tokens_per_second": 34.56313584488027,
+        "prefill_seconds": 5.807243535999987,
+        "ttft_seconds": 5.807598479999797
+      },
+      "prompt_length": 512,
+      "repetitions": 5,
+      "rows": [
+        {
+          "decode_seconds": 1.6003890370000136,
+          "decode_tokens_per_second": 157.4617134796068,
+          "end_to_end_seconds": 7.406263630000012,
+          "output_tokens_per_second": 34.56533723199367,
+          "prefill_seconds": 5.805549907000113,
+          "ttft_seconds": 5.805874592999999
+        },
+        {
+          "decode_seconds": 1.5927544749999925,
+          "decode_tokens_per_second": 158.21647589469256,
+          "end_to_end_seconds": 7.396845802999906,
+          "output_tokens_per_second": 34.609346580697306,
+          "prefill_seconds": 5.803765938999959,
+          "ttft_seconds": 5.804091327999913
+        },
+        {
+          "decode_seconds": 1.6086386070001026,
+          "decode_tokens_per_second": 156.65420368714544,
+          "end_to_end_seconds": 7.424487873000089,
+          "output_tokens_per_second": 34.48049271263143,
+          "prefill_seconds": 5.815462661000083,
+          "ttft_seconds": 5.8158492659999865
+        },
+        {
+          "decode_seconds": 1.599136868000187,
+          "decode_tokens_per_second": 157.58501041573794,
+          "end_to_end_seconds": 7.406735347999984,
+          "output_tokens_per_second": 34.56313584488027,
+          "prefill_seconds": 5.807243535999987,
+          "ttft_seconds": 5.807598479999797
+        },
+        {
+          "decode_seconds": 1.6074998189999405,
+          "decode_tokens_per_second": 156.76518094837144,
+          "end_to_end_seconds": 7.421635067999887,
+          "output_tokens_per_second": 34.493746681752626,
+          "prefill_seconds": 5.81381007899995,
+          "ttft_seconds": 5.814135248999946
+        }
+      ]
+    }
+  ],
+  "quality": {
+    "correct": 20,
+    "rows": [
+      {
+        "answer": "C",
+        "correct": false,
+        "id": "arith-01",
+        "output": "B) 96",
+        "parsed": "B",
+        "question": "What is 17 multiplied by 6? A) 92 B) 96 C) 102 D) 112"
+      },
+      {
+        "answer": "C",
+        "correct": true,
+        "id": "arith-02",
+        "output": "The correct answer is C. When ",
+        "parsed": "C",
+        "question": "What is 144 divided by 12? A) 10 B) 11 C) 12 D) 14"
+      },
+      {
+        "answer": "C",
+        "correct": false,
+        "id": "arith-03",
+        "output": "B) 25",
+        "parsed": "B",
+        "question": "What is 15 percent of 200? A) 20 B) 25 C) 30 D) 35"
+      },
+      {
+        "answer": "C",
+        "correct": true,
+        "id": "arith-04",
+        "output": "C",
+        "parsed": "C",
+        "question": "Which number is prime? A) 21 B) 27 C) 29 D) 33"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "logic-01",
+        "output": "B",
+        "parsed": "B",
+        "question": "All tulips are flowers. No flowers are metal. Can a tulip be metal? A) Yes B) No C) Sometimes D) Unknown"
+      },
+      {
+        "answer": "C",
+        "correct": false,
+        "id": "logic-02",
+        "output": "D",
+        "parsed": "D",
+        "question": "Ana is older than Bo. Bo is older than Cy. Who is youngest? A) Ana B) Bo C) Cy D) Unknown"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "logic-03",
+        "output": "B",
+        "parsed": "B",
+        "question": "If today is Tuesday, what day is three days later? A) Thursday B) Friday C) Saturday D) Sunday"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "logic-04",
+        "output": "B",
+        "parsed": "B",
+        "question": "A switch is either on or off. It is not on. What state is it? A) On B) Off C) Both D) Unknown"
+      },
+      {
+        "answer": "C",
+        "correct": true,
+        "id": "code-01",
+        "output": "C",
+        "parsed": "C",
+        "question": "In Python, which creates an empty dictionary? A) [] B) () C) {} D) set()"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "code-02",
+        "output": "B",
+        "parsed": "B",
+        "question": "What does len([4,5,6]) return? A) 2 B) 3 C) 4 D) 15"
+      },
+      {
+        "answer": "D",
+        "correct": true,
+        "id": "code-03",
+        "output": "D",
+        "parsed": "D",
+        "question": "Which HTTP status means Not Found? A) 200 B) 301 C) 401 D) 404"
+      },
+      {
+        "answer": "A",
+        "correct": true,
+        "id": "code-04",
+        "output": "A) WHERE",
+        "parsed": "A",
+        "question": "Which SQL clause filters rows? A) WHERE B) ORDER BY C) SELECT D) JOIN"
+      },
+      {
+        "answer": "A",
+        "correct": true,
+        "id": "science-01",
+        "output": "A",
+        "parsed": "A",
+        "question": "Water freezes at what Celsius temperature? A) 0 B) 10 C) 32 D) 100"
+      },
+      {
+        "answer": "C",
+        "correct": true,
+        "id": "science-02",
+        "output": "C",
+        "parsed": "C",
+        "question": "Which planet is closest to the Sun? A) Earth B) Mars C) Mercury D) Venus"
+      },
+      {
+        "answer": "A",
+        "correct": true,
+        "id": "science-03",
+        "output": "A",
+        "parsed": "A",
+        "question": "Plants primarily absorb which gas? A) Carbon dioxide B) Helium C) Hydrogen D) Nitrogen"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "science-04",
+        "output": "B",
+        "parsed": "B",
+        "question": "What force attracts objects toward Earth? A) Friction B) Gravity C) Magnetism D) Tension"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "language-01",
+        "output": "B",
+        "parsed": "B",
+        "question": "Choose the synonym of rapid. A) slow B) quick C) quiet D) heavy"
+      },
+      {
+        "answer": "C",
+        "correct": false,
+        "id": "language-02",
+        "output": "A",
+        "parsed": "A",
+        "question": "Choose the correctly spelled word. A) accomodate B) acommodate C) accommodate D) accomadate"
+      },
+      {
+        "answer": "D",
+        "correct": true,
+        "id": "language-03",
+        "output": "D) write",
+        "parsed": "D",
+        "question": "Which word is a verb? A) blue B) quickly C) table D) write"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "language-04",
+        "output": "B",
+        "parsed": "B",
+        "question": "What is the plural of analysis? A) analysises B) analyses C) analysi D) analysis"
+      },
+      {
+        "answer": "C",
+        "correct": true,
+        "id": "data-01",
+        "output": "C",
+        "parsed": "C",
+        "question": "A table has values 3, 7, and 5. What is the maximum? A) 3 B) 5 C) 7 D) 15"
+      },
+      {
+        "answer": "A",
+        "correct": true,
+        "id": "data-02",
+        "output": "A",
+        "parsed": "A",
+        "question": "JSON object keys are normally enclosed in what? A) Quotes B) Parentheses C) Brackets D) Slashes"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "data-03",
+        "output": "B",
+        "parsed": "B",
+        "question": "For values 2, 4, 6, what is the mean? A) 3 B) 4 C) 5 D) 6"
+      },
+      {
+        "answer": "A",
+        "correct": true,
+        "id": "data-04",
+        "output": "A",
+        "parsed": "A",
+        "question": "Which chart best shows parts of a whole? A) Pie chart B) Scatter plot C) Histogram D) Timeline"
+      }
+    ],
+    "total": 24,
+    "valid": 24
+  },
+  "rss_before_bytes": 36454400,
+  "rss_loaded_bytes": 2920054784
+}

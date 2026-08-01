@@ -1,0 +1,254 @@
+{
+  "long": {
+    "kleidiai-disabled": [
+      {
+        "passed": true,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 4788.093682,
+          "p95_ms": 4788.093682,
+          "p99_ms": 4788.093682,
+          "total": 1
+        },
+        "target_rps": 0.025
+      },
+      {
+        "passed": true,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 4740.150623,
+          "p95_ms": 4740.150623,
+          "p99_ms": 4740.150623,
+          "total": 1
+        },
+        "target_rps": 0.04
+      },
+      {
+        "passed": true,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 4690.310772,
+          "p95_ms": 4690.310772,
+          "p99_ms": 4690.310772,
+          "total": 1
+        },
+        "target_rps": 0.05
+      },
+      {
+        "passed": false,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 4761.227597,
+          "p95_ms": 4761.227597,
+          "p99_ms": 4761.227597,
+          "total": 1
+        },
+        "target_rps": 0.075
+      }
+    ],
+    "kleidiai-enabled": [
+      {
+        "passed": true,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 2143.445201,
+          "p95_ms": 2143.445201,
+          "p99_ms": 2143.445201,
+          "total": 1
+        },
+        "target_rps": 0.025
+      },
+      {
+        "passed": true,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 2156.219282,
+          "p95_ms": 2156.219282,
+          "p99_ms": 2156.219282,
+          "total": 1
+        },
+        "target_rps": 0.04
+      },
+      {
+        "passed": true,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 2111.450075,
+          "p95_ms": 2111.450075,
+          "p99_ms": 2111.450075,
+          "total": 1
+        },
+        "target_rps": 0.05
+      },
+      {
+        "passed": false,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 2121.067355,
+          "p95_ms": 2121.067355,
+          "p99_ms": 2121.067355,
+          "total": 1
+        },
+        "target_rps": 0.075
+      }
+    ]
+  },
+  "mixed": {
+    "kleidiai-disabled": [
+      {
+        "passed": true,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 3768.080442,
+          "p95_ms": 3768.080442,
+          "p99_ms": 3768.080442,
+          "total": 1
+        },
+        "target_rps": 0.04
+      },
+      {
+        "passed": true,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 3742.190359,
+          "p95_ms": 3742.190359,
+          "p99_ms": 3742.190359,
+          "total": 1
+        },
+        "target_rps": 0.05
+      },
+      {
+        "passed": false,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 3733.796685,
+          "p95_ms": 3733.796685,
+          "p99_ms": 3733.796685,
+          "total": 1
+        },
+        "target_rps": 0.075
+      }
+    ],
+    "kleidiai-enabled": [
+      {
+        "passed": true,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 1442.684085,
+          "p95_ms": 1442.684085,
+          "p99_ms": 1442.684085,
+          "total": 1
+        },
+        "target_rps": 0.04
+      },
+      {
+        "passed": true,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 1404.727751,
+          "p95_ms": 1404.727751,
+          "p99_ms": 1404.727751,
+          "total": 1
+        },
+        "target_rps": 0.05
+      },
+      {
+        "passed": false,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 1417.39962,
+          "p95_ms": 1417.39962,
+          "p99_ms": 1417.39962,
+          "total": 1
+        },
+        "target_rps": 0.075
+      }
+    ]
+  },
+  "short": {
+    "kleidiai-disabled": [
+      {
+        "passed": true,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 3735.356896,
+          "p95_ms": 3735.356896,
+          "p99_ms": 3735.356896,
+          "total": 1
+        },
+        "target_rps": 0.05
+      },
+      {
+        "passed": false,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 3795.613453,
+          "p95_ms": 3795.613453,
+          "p99_ms": 3795.613453,
+          "total": 1
+        },
+        "target_rps": 0.075
+      }
+    ],
+    "kleidiai-enabled": [
+      {
+        "passed": true,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 1420.013711,
+          "p95_ms": 1420.013711,
+          "p99_ms": 1420.013711,
+          "total": 1
+        },
+        "target_rps": 0.05
+      },
+      {
+        "passed": false,
+        "summary": {
+          "accepted": 1,
+          "accepted_rps": 0.06666666666666667,
+          "error_rate": 0.0,
+          "p50_ms": 1401.634315,
+          "p95_ms": 1401.634315,
+          "p99_ms": 1401.634315,
+          "total": 1
+        },
+        "target_rps": 0.075
+      }
+    ]
+  }
+}

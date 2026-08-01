@@ -1,268 +1,136 @@
-# Evolving Architecture
+# ArmProof Architecture
 
-The architecture grows only after each feasibility gate. Interfaces are
-versioned JSON contracts so the runtime integration, policy engine, and report
-can evolve independently.
+## System Boundary
 
-## System Context
-
-```text
-Developer
-   |
-   v
-KleidiScope CLI/orchestrator
-   |-- target probe
-   |-- patched/pinned llama.cpp recorder
-   |-- source-rule analyzer
-   |-- recipe policy
-   |-- upstream quantizer adapter
-   |-- evaluation runners
-   `-- evidence/report generator
-            |
-            v
-      immutable evidence bundle
-```
-
-## Stage 0: Experimental Harness
-
-Purpose: prove observability and optimization potential with scripts and stable
-schemas before designing a full application.
-
-Components:
-
-- `target-probe`: captures environment and CPU features.
-- `trace-hook`: minimal instrumentation in the pinned execution path.
-- `trace-normalizer`: converts events to the versioned trace schema.
-- `rule-inventory`: source-revision-specific dispatch/fallback rules.
-- `recipe-notebook-or-script`: bounded candidate generation.
-- `experiment-runner`: invokes quantizer, quality, and benchmark commands.
-- `evidence-writer`: writes immutable run bundles.
-
-Stage 0 may be inelegant internally, but its outputs cannot be ad hoc.
-
-## Stage 1: MVP Architecture
+ArmProof orchestrates existing inference runtimes and profiling tools. It does
+not implement model kernels, inference scheduling or model conversion.
 
 ```text
-kleidiscope record
-  -> environment probe
-  -> workload adapter
-  -> runtime process
-  -> trace events
-  -> normalized run.json
-
-kleidiscope explain
-  -> source rule provider
-  -> coverage aggregator
-  -> ranked fallback report
-
-kleidiscope optimize
-  -> constraints
-  -> candidate policy
-  -> recipe.json + rendered quantizer command
-
-kleidiscope compare
-  -> candidate builder
-  -> quality runner
-  -> performance runner
-  -> decision gate
-  -> comparison.json
+armproof.json
+     |
+     v
+contract validator
+     |
+     v
+experiment orchestrator
+     |-- treatment adapters
+     |-- workload/load generator
+     |-- quality evaluator
+     |-- resource sampler
+     `-- Arm attribution collector
+     |
+     v
+normalized evidence store
+     |
+     v
+fail-closed claim ledger
+     |-- CLI decision
+     |-- GitHub Check
+     |-- static report
+     `-- deployment manifest
 ```
 
-The MVP supports one pinned runtime family, one 3B model architecture, one Arm
-target family, and one quality adapter. Unsupported combinations fail clearly.
+## Modules
 
-## Stage 2: Full Hackathon Product
+### Contracts
 
-### CLI And Orchestrator
+Parses versioned YAML/JSON inputs, rejects unknown required semantics, and
+normalizes them into immutable domain records.
 
-Responsibilities:
+### Treatment Adapters
 
-- validate prerequisites and architecture;
-- assign run IDs;
-- enforce phase transitions and budgets;
-- invoke subprocesses without shell interpolation;
-- stream progress and preserve diagnostics;
-- resume safe idempotent steps;
-- generate reproduction commands.
+One adapter owns process command construction, environment, readiness and
+shutdown for one treatment. Reference adapters are:
 
-### Runtime Integration
+- `pytorch_bf16`;
+- `ort_int4_kleidiai_disabled`;
+- `ort_int4_kleidiai_enabled`.
 
-Responsibilities:
+Enabled and disabled INT4 adapters must share every field except the explicit
+KleidiAI control.
 
-- emit bounded structured events;
-- identify operation, tensors, types, shapes, backend, dispatch result, and
-  kernel identifier/family where observable;
-- emit stable reason codes rather than English-only messages;
-- remain disabled by default;
-- expose sampling/aggregation if event volume is high.
+### Workload Runner
 
-This integration should be a small patch or upstream-compatible hook. The
-orchestrator must pin the exact source revision it understands.
+Replays frozen requests against a common HTTP interface. It records request
+identity, scheduling time, response, status and latency. Traffic policies are
+closed-loop smoke, fixed-rate SLO and saturation discovery.
 
-### Source Rule Provider
+### Collectors
 
-Responsibilities:
+- Process collector: lifecycle, exit status and logs.
+- Memory collector: timestamped RSS/PSS from `smaps_rollup`.
+- Performance collector: request latency, accepted throughput and errors.
+- Arm collector: bounded `perf`/Performix capture and normalized `kai_*`
+  execution status.
+- Environment collector: CPU, ISA, OS, runtime and artifact identity.
 
-- map normalized runtime facts to eligibility/fallback rules;
-- include source revision and location;
-- distinguish observed, derived, and unknown facts;
-- reject incompatible runtime versions;
-- allow fixtures independent of live inference.
+Profiler collection is separate from normal load measurement so profiling
+overhead does not contaminate the primary performance result.
 
-Rules are data or narrow adapters, not prose scraped at runtime.
+### Quality Evaluator
 
-### Coverage Aggregator
-
-Produces:
-
-- event-count coverage;
-- tensor-byte-weighted coverage;
-- observed-duration-weighted coverage;
-- prompt versus decode breakdown;
-- ranked fallback groups;
-- unknown/unattributed proportions.
-
-Never present sampled profiler time as exact per-operation time unless the
-correlation mechanism is tested.
-
-### Recipe Policy Engine
-
-Inputs:
-
-- tensor inventory and current formats;
-- runtime-weighted opportunities;
-- CPU/kernel compatibility matrix;
-- quality sensitivity/imatrix data;
-- target size/BPW and quality budget;
-- candidate-count and wall-time budgets.
-
-Outputs:
-
-- ordered override rules;
-- rationale per override;
-- predicted size/BPW;
-- expected dispatch effect;
-- uncertainty and exclusions;
-- rendered upstream command.
-
-The first policy should be deterministic heuristics. A learned optimizer is out
-of scope until evidence proves heuristics inadequate.
-
-### Quantizer Adapter
-
-Responsibilities:
-
-- verify source model precision;
-- reject accidental requantization by default;
-- invoke pinned `llama-quantize` arguments;
-- capture complete execution evidence;
-- inspect output tensor distribution;
-- hash inputs, recipe, tool, and output.
-
-### Evaluation Layer
-
-Adapters:
-
-- model size and GGUF inspection;
-- process RSS and peak RSS;
-- `llama-bench` prompt/decode measurements;
-- `llama-server` fixed-load measurements;
-- perplexity/KLD and optional task-quality measurement;
-- optional Performix capture as corroborating evidence.
-
-Evaluation consumes candidates; it does not know how they were generated.
+Receives recorded outputs and a workload-specific metric plugin. It counts
+malformed, missing and timed-out outputs as declared by the contract. The core
+system does not encode support-routing semantics.
 
 ### Evidence Store
 
-An evidence bundle is a directory, not a database dependency:
+An append-only run directory contains raw samples, normalized records, hashes,
+commands and logs. Normalized records reference raw evidence rather than copy
+unverifiable prose.
+
+### Claim Ledger
+
+Pure policy code evaluates claims. A claim has a causal scope, comparison,
+metric, threshold, evidence IDs and status: `pass`, `fail`, `unknown` or
+`not_applicable`. Required `unknown` claims fail the contract.
+
+### Presenters
+
+CLI, GitHub and web report consume the same verified decision artifact. They
+cannot independently reinterpret metrics.
+
+## Repository Structure
 
 ```text
-ops/evidence/<run-id>/
-  manifest.json
-  environment.json
-  commands.jsonl
-  trace.jsonl.zst
-  coverage.json
-  recipes/
-  measurements/
-  logs/
-  checksums.txt
-  decision.json
-  report-data.json
+src/armproof/
+  cli.py
+  contracts/
+  domain/
+  adapters/
+  workload/
+  collectors/
+  quality/
+  evidence/
+  policy/
+  report/
+tests/
+  fixtures/
+  contract/
+  integration/
+report/
+action.yml
+examples/phi4-graviton/
+schemas/
+ops/evidence/
 ```
-
-Large model files remain external but are referenced by checksum and license.
-
-### Report Application
-
-Views:
-
-1. verdict and headline Pareto comparison;
-2. model execution X-ray;
-3. ranked fallbacks and source-grounded explanations;
-4. candidate recipe diff;
-5. quality, size, memory, PP/TG, TTFT, p50/p95, and uncertainty;
-6. environment and Arm/KleidiAI proof;
-7. reproduction and raw evidence downloads.
-
-The report must render completely from fixture data for browser testing.
-
-### CI Interface
-
-The CI command compares a candidate evidence bundle with a committed baseline
-policy and emits:
-
-- machine-readable result;
-- human summary;
-- stable exit code;
-- inconclusive status for noisy or missing evidence.
-
-## Public Contracts
-
-Version these independently:
-
-- trace event schema;
-- environment manifest;
-- source rule schema;
-- recipe schema;
-- measurement schema;
-- comparison/decision schema;
-- evidence bundle manifest.
-
-Breaking changes require migration notes and an ADR.
 
 ## Error Model
 
-Use typed categories:
+Errors use stable reason codes grouped as contract, execution, evidence,
+attribution, quality and policy failures. Exceptions are not converted into
+passing or partial decisions.
 
-- `unsupported_architecture`
-- `runtime_revision_mismatch`
-- `kernel_mapping_unknown`
-- `source_model_not_high_precision`
-- `quality_budget_failed`
-- `performance_inconclusive`
-- `candidate_build_failed`
-- `cloud_budget_exceeded`
-- `partial_evidence`
+## Trust Boundaries
 
-An error must preserve the command, diagnostics, partial artifacts, and next
-corrective action.
+- Contract and workload content are untrusted input.
+- Raw evidence is immutable after collection but not trusted until verified.
+- Normalized evidence is derived and must retain provenance.
+- The claim decision is trusted only after schema, hash and dependency checks.
+- Report text is presentation, never authority.
 
-## Technology Direction
+## Deployment Output
 
-- Python 3.12 for CLI, orchestration, schemas, and evaluation adapters.
-- Typer or Click for CLI only after a minimal comparison; avoid framework
-  dependence in domain logic.
-- Pydantic or JSON Schema for boundary validation.
-- `llama.cpp` C/C++ minimal patch for runtime events.
-- Existing `llama-quantize`, `llama-bench`, `llama-perplexity`, and
-  `llama-server` tools.
-- Static React/TypeScript report only if plain generated HTML cannot meet the
-  interaction requirement; choose after the feasibility result.
-- Pytest and property-based tests for policy and contracts.
-- GitHub Actions Arm64 standard runner for free integration coverage.
-- AWS C8g for final performance evidence.
-
-Dependencies must be pinned after source reconnaissance. This document does
-not authorize inventing an API before verifying upstream.
-
+The generated manifest pins the exact passing treatment identity, model,
+runtime, environment variables, arguments and resource settings. It is not a
+general deployment platform.

@@ -1,25 +1,22 @@
 # Glossary
 
-- **Accelerated coverage:** A declared weighting of execution facts that were
-  handled by an eligible KleidiAI path. Always name the weighting method.
-- **BF16/F16 reference:** High-precision source used for quality comparison and
-  primary quantization. Not necessarily the fastest deployment baseline.
-- **Candidate:** A generated GGUF model plus recipe and evidence identity.
-- **Dispatch:** Runtime selection of backend/kernel implementation for an
-  operation under tensor, shape, type, and CPU constraints.
-- **Evidence bundle:** Immutable directory containing environment, commands,
-  traces, measurements, checksums, and decision for one run.
-- **Fallback:** An operation that does not use the intended eligible KleidiAI
-  path. A fallback may still be correct and fast; the reason matters.
-- **GGML:** Tensor and execution infrastructure used by `llama.cpp`.
-- **GGUF:** Model file format used by `llama.cpp`.
-- **KleidiAI:** Arm microkernel library integrated into AI/ML frameworks.
-- **Kernel eligibility:** Whether a kernel may handle a specific operation on
-  the detected CPU, given type, shape, layout, and runtime rules.
-- **Observed fact:** Emitted directly by runtime or measured command.
-- **Derived fact:** Computed from observed facts and a versioned source rule.
-- **Target-BPW:** Upstream llama.cpp optimization that chooses tensor types to
-  meet a bits-per-weight target with estimated quality considerations.
-- **Trace overhead:** Performance difference caused by enabling instrumentation.
-- **Unknown:** Evidence is insufficient. It is not equivalent to fallback.
+- **Accepted throughput:** Successful requests per second whose latency and
+  output satisfy the declared contract.
+- **Arm attribution:** Evidence that the required Arm acceleration path
+  executed and affected a matched comparison.
+- **Claim ledger:** Machine-readable claims, comparisons, thresholds, evidence
+  dependencies and decisions.
+- **Contract:** User-declared treatments, workload, metrics and requirements.
+- **Evidence bundle:** Raw and normalized run artifacts plus identities and
+  hashes.
+- **Fail closed:** Required missing, mismatched or unknown evidence prevents
+  approval.
+- **Fixed-SLO capacity:** Maximum sustainable accepted throughput while the
+  declared latency objective remains satisfied.
+- **PSS:** Proportional Set Size; shared pages are divided among processes.
+- **Reference workload:** Public task data used to demonstrate ArmProof. It is
+  not the product itself.
+- **Treatment:** One pinned service configuration evaluated by a run.
+- **Whole deployment transformation:** BF16 PyTorch versus INT4 ONNX Runtime
+  GenAI; it includes multiple changes and is not a KleidiAI-only comparison.
 

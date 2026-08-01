@@ -1,0 +1,1 @@
+"""Treatment adapter tests."""

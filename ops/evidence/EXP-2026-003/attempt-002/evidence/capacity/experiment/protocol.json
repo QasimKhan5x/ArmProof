@@ -1,0 +1,78 @@
+{
+  "experiment_id": "EXP-2026-003",
+  "protocol": {
+    "confirmation_seconds": 30.0,
+    "confirmations": 5,
+    "discovery_seconds": 15.0,
+    "experiment_id": "EXP-2026-003",
+    "max_error_rate": 0.01,
+    "max_workers": 32,
+    "minimum_delivery_ratio": 0.95,
+    "mixes": [
+      {
+        "candidates_rps": [
+          0.05,
+          0.075,
+          0.1,
+          0.125,
+          0.15,
+          0.2,
+          0.25,
+          0.3,
+          0.4,
+          0.5
+        ],
+        "mix_id": "short",
+        "p95_slo_ms": 15000.0,
+        "workload": "/opt/armproof/work/data/banking77/generated/traffic-short.jsonl"
+      },
+      {
+        "candidates_rps": [
+          0.025,
+          0.04,
+          0.05,
+          0.075,
+          0.1,
+          0.125,
+          0.15,
+          0.2,
+          0.25,
+          0.3
+        ],
+        "mix_id": "long",
+        "p95_slo_ms": 30000.0,
+        "workload": "/opt/armproof/work/data/banking77/generated/traffic-long.jsonl"
+      },
+      {
+        "candidates_rps": [
+          0.04,
+          0.05,
+          0.075,
+          0.1,
+          0.125,
+          0.15,
+          0.2,
+          0.25,
+          0.3,
+          0.4
+        ],
+        "mix_id": "mixed",
+        "p95_slo_ms": 25000.0,
+        "workload": "/opt/armproof/work/data/banking77/generated/traffic-mixed.jsonl"
+      }
+    ],
+    "quality_dataset": "/opt/armproof/work/data/banking77/generated/quality.jsonl",
+    "request_timeout_seconds": 90.0,
+    "warmup_requests": 3
+  },
+  "treatments": [
+    {
+      "endpoint": "http://127.0.0.1:8000/infer",
+      "treatment_id": "kleidiai-disabled"
+    },
+    {
+      "endpoint": "http://127.0.0.1:8001/infer",
+      "treatment_id": "kleidiai-enabled"
+    }
+  ]
+}

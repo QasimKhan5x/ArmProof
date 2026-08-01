@@ -1,0 +1,13 @@
+{
+  "cleanup_complete": true,
+  "cleanup_errors": [],
+  "error": null,
+  "experiment_id": "EXP-RESULT-FIRST-MEM-002",
+  "instance_id": "redacted-public-copy",
+  "instance_type": "c8g.4xlarge",
+  "maximum_compute_cost_usd": 0.5317,
+  "maximum_runtime_minutes": 50,
+  "recorded_at": "2026-07-31T15:25:24.304868+00:00",
+  "region": "us-east-1",
+  "terminated": true
+}

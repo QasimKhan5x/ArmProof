@@ -1,0 +1,6172 @@
+{
+  "accuracy": 0.2857142857142857,
+  "correct": 220,
+  "macro_f1": 0.3135459631038915,
+  "missing": 0,
+  "rows": [
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_arrival",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0000",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_arrival",
+      "predicted_intent": "card_delivery_estimate",
+      "request_id": "banking77-quality-0001",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_arrival",
+      "predicted_intent": "card_delivery_estimate",
+      "request_id": "banking77-quality-0002",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_arrival",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0003",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_arrival",
+      "predicted_intent": "card_arrival",
+      "request_id": "banking77-quality-0004",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_arrival",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0005",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_arrival",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0006",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_arrival",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0007",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_arrival",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0008",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_arrival",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0009",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_linking",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0010",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_linking",
+      "predicted_intent": "activate_my_card",
+      "request_id": "banking77-quality-0011",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_linking",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0012",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_linking",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0013",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_linking",
+      "predicted_intent": "card_linking",
+      "request_id": "banking77-quality-0014",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_linking",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0015",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_linking",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0016",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_linking",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0017",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "card_linking",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0018",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_linking",
+      "predicted_intent": "card_linking",
+      "request_id": "banking77-quality-0019",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_rate",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0020",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_rate",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0021",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_rate",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0022",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_rate",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0023",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_rate",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0024",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_rate",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0025",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "exchange_rate",
+      "predicted_intent": "exchange_rate",
+      "request_id": "banking77-quality-0026",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "exchange_rate",
+      "predicted_intent": "exchange_rate",
+      "request_id": "banking77-quality-0027",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "exchange_rate",
+      "predicted_intent": "exchange_rate",
+      "request_id": "banking77-quality-0028",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "exchange_rate",
+      "predicted_intent": "exchange_rate",
+      "request_id": "banking77-quality-0029",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_payment_wrong_exchange_rate",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0030",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_payment_wrong_exchange_rate",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0031",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_payment_wrong_exchange_rate",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0032",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_payment_wrong_exchange_rate",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0033",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_payment_wrong_exchange_rate",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0034",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_payment_wrong_exchange_rate",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0035",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_payment_wrong_exchange_rate",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0036",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_payment_wrong_exchange_rate",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0037",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_payment_wrong_exchange_rate",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0038",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_payment_wrong_exchange_rate",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0039",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "extra_charge_on_statement",
+      "predicted_intent": "extra_charge_on_statement",
+      "request_id": "banking77-quality-0040",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "extra_charge_on_statement",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0041",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "extra_charge_on_statement",
+      "predicted_intent": "extra_charge_on_statement",
+      "request_id": "banking77-quality-0042",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "extra_charge_on_statement",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0043",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "extra_charge_on_statement",
+      "predicted_intent": "extra_charge_on_statement",
+      "request_id": "banking77-quality-0044",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "extra_charge_on_statement",
+      "predicted_intent": "Refund_not_showing_up",
+      "request_id": "banking77-quality-0045",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "extra_charge_on_statement",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0046",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "extra_charge_on_statement",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0047",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "extra_charge_on_statement",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0048",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "extra_charge_on_statement",
+      "predicted_intent": "extra_charge_on_statement",
+      "request_id": "banking77-quality-0049",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_cash_withdrawal",
+      "predicted_intent": "pending_cash_withdrawal",
+      "request_id": "banking77-quality-0050",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_cash_withdrawal",
+      "predicted_intent": "pending_cash_withdrawal",
+      "request_id": "banking77-quality-0051",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_cash_withdrawal",
+      "predicted_intent": "pending_cash_withdrawal",
+      "request_id": "banking77-quality-0052",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0053",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0054",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0055",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0056",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0057",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0058",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0059",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "fiat_currency_support",
+      "predicted_intent": "fiat_currency_support",
+      "request_id": "banking77-quality-0060",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "fiat_currency_support",
+      "predicted_intent": "fiat_currency_support",
+      "request_id": "banking77-quality-0061",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "fiat_currency_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0062",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "fiat_currency_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0063",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "fiat_currency_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0064",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "fiat_currency_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0065",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "fiat_currency_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0066",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "fiat_currency_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0067",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "fiat_currency_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0068",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "fiat_currency_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0069",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_delivery_estimate",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0070",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_delivery_estimate",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0071",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_delivery_estimate",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0072",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_delivery_estimate",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0073",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_delivery_estimate",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0074",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_delivery_estimate",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0075",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_delivery_estimate",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0076",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_delivery_estimate",
+      "predicted_intent": "card_delivery_estimate",
+      "request_id": "banking77-quality-0077",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_delivery_estimate",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0078",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_delivery_estimate",
+      "predicted_intent": "card_delivery_estimate",
+      "request_id": "banking77-quality-0079",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "automatic_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0080",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "automatic_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0081",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "automatic_top_up",
+      "predicted_intent": "automatic_top_up",
+      "request_id": "banking77-quality-0082",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "automatic_top_up",
+      "predicted_intent": "automatic_top_up",
+      "request_id": "banking77-quality-0083",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "automatic_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0084",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "automatic_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0085",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "automatic_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0086",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "automatic_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0087",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "automatic_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0088",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "automatic_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0089",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_not_working",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0090",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_not_working",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0091",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_not_working",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0092",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_not_working",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0093",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_not_working",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0094",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_not_working",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0095",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_not_working",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0096",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_not_working",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0097",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_not_working",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0098",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_not_working",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0099",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_via_app",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0100",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_via_app",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0101",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_via_app",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0102",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_via_app",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0103",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_via_app",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0104",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_via_app",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0105",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_via_app",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0106",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_via_app",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0107",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_via_app",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0108",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_via_app",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0109",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0110",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0111",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0112",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0113",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0114",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0115",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0116",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0117",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0118",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0119",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "age_limit",
+      "predicted_intent": "age_limit",
+      "request_id": "banking77-quality-0120",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "age_limit",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0121",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "age_limit",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0122",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "age_limit",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0123",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "age_limit",
+      "predicted_intent": "age_limit",
+      "request_id": "banking77-quality-0124",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "age_limit",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0125",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "age_limit",
+      "predicted_intent": "age_limit",
+      "request_id": "banking77-quality-0126",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "age_limit",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0127",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "age_limit",
+      "predicted_intent": "age_limit",
+      "request_id": "banking77-quality-0128",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "age_limit",
+      "predicted_intent": "age_limit",
+      "request_id": "banking77-quality-0129",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pin_blocked",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0130",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pin_blocked",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0131",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pin_blocked",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0132",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pin_blocked",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0133",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pin_blocked",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0134",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pin_blocked",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0135",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pin_blocked",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0136",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pin_blocked",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0137",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pin_blocked",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0138",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pin_blocked",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0139",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "contactless_not_working",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0140",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "contactless_not_working",
+      "predicted_intent": "contactless_not_working",
+      "request_id": "banking77-quality-0141",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "contactless_not_working",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0142",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "contactless_not_working",
+      "predicted_intent": "contactless_not_working",
+      "request_id": "banking77-quality-0143",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "contactless_not_working",
+      "predicted_intent": "contactless_not_working",
+      "request_id": "banking77-quality-0144",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "contactless_not_working",
+      "predicted_intent": "contactless_not_working",
+      "request_id": "banking77-quality-0145",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "contactless_not_working",
+      "predicted_intent": "contactless_not_working",
+      "request_id": "banking77-quality-0146",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "contactless_not_working",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0147",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "contactless_not_working",
+      "predicted_intent": "contactless_not_working",
+      "request_id": "banking77-quality-0148",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "contactless_not_working",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0149",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "top_up_by_bank_transfer_charge",
+      "predicted_intent": "transfer_fee_charged",
+      "request_id": "banking77-quality-0150",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "top_up_by_bank_transfer_charge",
+      "predicted_intent": "transfer_fee_charged",
+      "request_id": "banking77-quality-0151",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_bank_transfer_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0152",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_bank_transfer_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0153",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_bank_transfer_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0154",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "top_up_by_bank_transfer_charge",
+      "predicted_intent": "fiat_currency_support",
+      "request_id": "banking77-quality-0155",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "top_up_by_bank_transfer_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0156",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_bank_transfer_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0157",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_bank_transfer_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0158",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_bank_transfer_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0159",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "pending_top_up",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0160",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0161",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0162",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_top_up",
+      "predicted_intent": "pending_top_up",
+      "request_id": "banking77-quality-0163",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0164",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_top_up",
+      "predicted_intent": "pending_top_up",
+      "request_id": "banking77-quality-0165",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0166",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0167",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0168",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_top_up",
+      "predicted_intent": "pending_top_up",
+      "request_id": "banking77-quality-0169",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "cancel_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0170",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cancel_transfer",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0171",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "cancel_transfer",
+      "predicted_intent": "cancel_transfer",
+      "request_id": "banking77-quality-0172",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cancel_transfer",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0173",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "cancel_transfer",
+      "predicted_intent": "cancel_transfer",
+      "request_id": "banking77-quality-0174",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cancel_transfer",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0175",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "cancel_transfer",
+      "predicted_intent": "cancel_transfer",
+      "request_id": "banking77-quality-0176",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "cancel_transfer",
+      "predicted_intent": "cancel_transfer",
+      "request_id": "banking77-quality-0177",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "cancel_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0178",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "cancel_transfer",
+      "predicted_intent": "cancel_transfer",
+      "request_id": "banking77-quality-0179",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "top_up_limits",
+      "predicted_intent": "top_up_limits",
+      "request_id": "banking77-quality-0180",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_limits",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0181",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "top_up_limits",
+      "predicted_intent": "top_up_limits",
+      "request_id": "banking77-quality-0182",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_limits",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0183",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_limits",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0184",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_limits",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0185",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "top_up_limits",
+      "predicted_intent": "top_up_limits",
+      "request_id": "banking77-quality-0186",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "top_up_limits",
+      "predicted_intent": "top_up_limits",
+      "request_id": "banking77-quality-0187",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "top_up_limits",
+      "predicted_intent": "top_up_limits",
+      "request_id": "banking77-quality-0188",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_limits",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0189",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "wrong_amount_of_cash_received",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0190",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "wrong_amount_of_cash_received",
+      "predicted_intent": "cash_withdrawal_not_recognised",
+      "request_id": "banking77-quality-0191",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "wrong_amount_of_cash_received",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0192",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "wrong_amount_of_cash_received",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0193",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "wrong_amount_of_cash_received",
+      "predicted_intent": "wrong_amount_of_cash_received",
+      "request_id": "banking77-quality-0194",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "wrong_amount_of_cash_received",
+      "predicted_intent": "wrong_amount_of_cash_received",
+      "request_id": "banking77-quality-0195",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "wrong_amount_of_cash_received",
+      "predicted_intent": "cash_withdrawal_not_recognised",
+      "request_id": "banking77-quality-0196",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "wrong_amount_of_cash_received",
+      "predicted_intent": "wrong_amount_of_cash_received",
+      "request_id": "banking77-quality-0197",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "wrong_amount_of_cash_received",
+      "predicted_intent": "wrong_amount_of_cash_received",
+      "request_id": "banking77-quality-0198",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "wrong_amount_of_cash_received",
+      "predicted_intent": "wrong_amount_of_cash_received",
+      "request_id": "banking77-quality-0199",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_payment_fee_charged",
+      "predicted_intent": "extra_charge_on_statement",
+      "request_id": "banking77-quality-0200",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_payment_fee_charged",
+      "predicted_intent": "card_payment_fee_charged",
+      "request_id": "banking77-quality-0201",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_payment_fee_charged",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0202",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_payment_fee_charged",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0203",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_payment_fee_charged",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0204",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_payment_fee_charged",
+      "predicted_intent": "card_payment_fee_charged",
+      "request_id": "banking77-quality-0205",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_payment_fee_charged",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0206",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_payment_fee_charged",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0207",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_payment_fee_charged",
+      "predicted_intent": "extra_charge_on_statement",
+      "request_id": "banking77-quality-0208",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_payment_fee_charged",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0209",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "transfer_not_received_by_recipient",
+      "predicted_intent": "pending_transfer",
+      "request_id": "banking77-quality-0210",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "transfer_not_received_by_recipient",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0211",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "transfer_not_received_by_recipient",
+      "predicted_intent": "pending_cash_withdrawal",
+      "request_id": "banking77-quality-0212",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "transfer_not_received_by_recipient",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0213",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "transfer_not_received_by_recipient",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0214",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_not_received_by_recipient",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0215",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_not_received_by_recipient",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0216",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_not_received_by_recipient",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0217",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "transfer_not_received_by_recipient",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0218",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "transfer_not_received_by_recipient",
+      "predicted_intent": "transfer_timing",
+      "request_id": "banking77-quality-0219",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "supported_cards_and_currencies",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0220",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "supported_cards_and_currencies",
+      "predicted_intent": "top_up_limits",
+      "request_id": "banking77-quality-0221",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "supported_cards_and_currencies",
+      "predicted_intent": "supported_cards_and_currencies",
+      "request_id": "banking77-quality-0222",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "supported_cards_and_currencies",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0223",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "supported_cards_and_currencies",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0224",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "supported_cards_and_currencies",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0225",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "supported_cards_and_currencies",
+      "predicted_intent": "supported_cards_and_currencies",
+      "request_id": "banking77-quality-0226",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "supported_cards_and_currencies",
+      "predicted_intent": "compromised_card",
+      "request_id": "banking77-quality-0227",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "supported_cards_and_currencies",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0228",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "supported_cards_and_currencies",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0229",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "getting_virtual_card",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0230",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "getting_virtual_card",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0231",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "getting_virtual_card",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0232",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "getting_virtual_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0233",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "getting_virtual_card",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0234",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "getting_virtual_card",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0235",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "getting_virtual_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0236",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "getting_virtual_card",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0237",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "getting_virtual_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0238",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "getting_virtual_card",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0239",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_acceptance",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0240",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_acceptance",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0241",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_acceptance",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0242",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_acceptance",
+      "predicted_intent": "card_acceptance",
+      "request_id": "banking77-quality-0243",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_acceptance",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0244",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_acceptance",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0245",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_acceptance",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0246",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_acceptance",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0247",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_acceptance",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0248",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_acceptance",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0249",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "top_up_reverted",
+      "predicted_intent": "request_refund",
+      "request_id": "banking77-quality-0250",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_reverted",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0251",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_reverted",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0252",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_reverted",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0253",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "top_up_reverted",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0254",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "top_up_reverted",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0255",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "top_up_reverted",
+      "predicted_intent": "top_up_by_card_charge",
+      "request_id": "banking77-quality-0256",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_reverted",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0257",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "top_up_reverted",
+      "predicted_intent": "pending_top_up",
+      "request_id": "banking77-quality-0258",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_reverted",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0259",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "balance_not_updated_after_cheque_or_cash_deposit",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0260",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "balance_not_updated_after_cheque_or_cash_deposit",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0261",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "balance_not_updated_after_cheque_or_cash_deposit",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0262",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "balance_not_updated_after_cheque_or_cash_deposit",
+      "predicted_intent": "pending_cash_withdrawal",
+      "request_id": "banking77-quality-0263",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "balance_not_updated_after_cheque_or_cash_deposit",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0264",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "balance_not_updated_after_cheque_or_cash_deposit",
+      "predicted_intent": "pending_cash_withdrawal",
+      "request_id": "banking77-quality-0265",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "balance_not_updated_after_cheque_or_cash_deposit",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0266",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "balance_not_updated_after_cheque_or_cash_deposit",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0267",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "balance_not_updated_after_cheque_or_cash_deposit",
+      "predicted_intent": "pending_cash_withdrawal",
+      "request_id": "banking77-quality-0268",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "balance_not_updated_after_cheque_or_cash_deposit",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0269",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_payment_not_recognised",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0270",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_payment_not_recognised",
+      "predicted_intent": "card_payment_fee_charged",
+      "request_id": "banking77-quality-0271",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_payment_not_recognised",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0272",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_payment_not_recognised",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0273",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_payment_not_recognised",
+      "predicted_intent": "compromised_card",
+      "request_id": "banking77-quality-0274",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_payment_not_recognised",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0275",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_payment_not_recognised",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0276",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_payment_not_recognised",
+      "predicted_intent": "compromised_card",
+      "request_id": "banking77-quality-0277",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_payment_not_recognised",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0278",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_payment_not_recognised",
+      "predicted_intent": "card_payment_not_recognised",
+      "request_id": "banking77-quality-0279",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "edit_personal_details",
+      "predicted_intent": "edit_personal_details",
+      "request_id": "banking77-quality-0280",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "edit_personal_details",
+      "predicted_intent": "edit_personal_details",
+      "request_id": "banking77-quality-0281",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "edit_personal_details",
+      "predicted_intent": "edit_personal_details",
+      "request_id": "banking77-quality-0282",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "edit_personal_details",
+      "predicted_intent": "edit_personal_details",
+      "request_id": "banking77-quality-0283",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "edit_personal_details",
+      "predicted_intent": "edit_personal_details",
+      "request_id": "banking77-quality-0284",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "edit_personal_details",
+      "predicted_intent": "edit_personal_details",
+      "request_id": "banking77-quality-0285",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "edit_personal_details",
+      "predicted_intent": "edit_personal_details",
+      "request_id": "banking77-quality-0286",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "edit_personal_details",
+      "predicted_intent": "edit_personal_details",
+      "request_id": "banking77-quality-0287",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "edit_personal_details",
+      "predicted_intent": "edit_personal_details",
+      "request_id": "banking77-quality-0288",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "edit_personal_details",
+      "predicted_intent": "edit_personal_details",
+      "request_id": "banking77-quality-0289",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "why_verify_identity",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0290",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "why_verify_identity",
+      "predicted_intent": "unable_to_verify_identity",
+      "request_id": "banking77-quality-0291",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "why_verify_identity",
+      "predicted_intent": "why_verify_identity",
+      "request_id": "banking77-quality-0292",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "why_verify_identity",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0293",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "why_verify_identity",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0294",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "why_verify_identity",
+      "predicted_intent": "why_verify_identity",
+      "request_id": "banking77-quality-0295",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "why_verify_identity",
+      "predicted_intent": "why_verify_identity",
+      "request_id": "banking77-quality-0296",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "why_verify_identity",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0297",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "why_verify_identity",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0298",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "why_verify_identity",
+      "predicted_intent": "why_verify_identity",
+      "request_id": "banking77-quality-0299",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "unable_to_verify_identity",
+      "predicted_intent": "unable_to_verify_identity",
+      "request_id": "banking77-quality-0300",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "unable_to_verify_identity",
+      "predicted_intent": "why_verify_identity",
+      "request_id": "banking77-quality-0301",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "unable_to_verify_identity",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0302",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "unable_to_verify_identity",
+      "predicted_intent": "unable_to_verify_identity",
+      "request_id": "banking77-quality-0303",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "unable_to_verify_identity",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0304",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "unable_to_verify_identity",
+      "predicted_intent": "unable_to_verify_identity",
+      "request_id": "banking77-quality-0305",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "unable_to_verify_identity",
+      "predicted_intent": "verify_source_of_funds",
+      "request_id": "banking77-quality-0306",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "unable_to_verify_identity",
+      "predicted_intent": "unable_to_verify_identity",
+      "request_id": "banking77-quality-0307",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "unable_to_verify_identity",
+      "predicted_intent": "card_payment_not_recognised",
+      "request_id": "banking77-quality-0308",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "unable_to_verify_identity",
+      "predicted_intent": "why_verify_identity",
+      "request_id": "banking77-quality-0309",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "get_physical_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0310",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "get_physical_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0311",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "get_physical_card",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0312",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "get_physical_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0313",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "get_physical_card",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0314",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "get_physical_card",
+      "predicted_intent": "change_pin",
+      "request_id": "banking77-quality-0315",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "get_physical_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0316",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "get_physical_card",
+      "predicted_intent": "verify_source_of_funds",
+      "request_id": "banking77-quality-0317",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "get_physical_card",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0318",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "get_physical_card",
+      "predicted_intent": "change_pin",
+      "request_id": "banking77-quality-0319",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "visa_or_mastercard",
+      "predicted_intent": "supported_cards_and_currencies",
+      "request_id": "banking77-quality-0320",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "visa_or_mastercard",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0321",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "visa_or_mastercard",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0322",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "visa_or_mastercard",
+      "predicted_intent": "supported_cards_and_currencies",
+      "request_id": "banking77-quality-0323",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "visa_or_mastercard",
+      "predicted_intent": "supported_cards_and_currencies",
+      "request_id": "banking77-quality-0324",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "visa_or_mastercard",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0325",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "visa_or_mastercard",
+      "predicted_intent": "supported_cards_and_currencies",
+      "request_id": "banking77-quality-0326",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "visa_or_mastercard",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0327",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "visa_or_mastercard",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0328",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "visa_or_mastercard",
+      "predicted_intent": "supported_cards_and_currencies",
+      "request_id": "banking77-quality-0329",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "topping_up_by_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0330",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "topping_up_by_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0331",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "topping_up_by_card",
+      "predicted_intent": "topping_up_by_card",
+      "request_id": "banking77-quality-0332",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "topping_up_by_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0333",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "topping_up_by_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0334",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "topping_up_by_card",
+      "predicted_intent": "extra_charge_on_statement",
+      "request_id": "banking77-quality-0335",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "topping_up_by_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0336",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "topping_up_by_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0337",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "topping_up_by_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0338",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "topping_up_by_card",
+      "predicted_intent": "top_up_limits",
+      "request_id": "banking77-quality-0339",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "disposable_card_limits",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0340",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "disposable_card_limits",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0341",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "disposable_card_limits",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0342",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "disposable_card_limits",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0343",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "disposable_card_limits",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0344",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "disposable_card_limits",
+      "predicted_intent": "disposable_card_limits",
+      "request_id": "banking77-quality-0345",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "disposable_card_limits",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0346",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "disposable_card_limits",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0347",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "disposable_card_limits",
+      "predicted_intent": "disposable_card_limits",
+      "request_id": "banking77-quality-0348",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "disposable_card_limits",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0349",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "compromised_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0350",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "compromised_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0351",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "compromised_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0352",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "compromised_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0353",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "compromised_card",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0354",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "compromised_card",
+      "predicted_intent": "compromised_card",
+      "request_id": "banking77-quality-0355",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "compromised_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0356",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "compromised_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0357",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "compromised_card",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0358",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "compromised_card",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0359",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "atm_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0360",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "atm_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0361",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "atm_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0362",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "atm_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0363",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "atm_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0364",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "atm_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0365",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "atm_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0366",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "atm_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0367",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "atm_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0368",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "atm_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0369",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "direct_debit_payment_not_recognised",
+      "predicted_intent": "declined_transfer",
+      "request_id": "banking77-quality-0370",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "direct_debit_payment_not_recognised",
+      "predicted_intent": "declined_transfer",
+      "request_id": "banking77-quality-0371",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "direct_debit_payment_not_recognised",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0372",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "direct_debit_payment_not_recognised",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0373",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "direct_debit_payment_not_recognised",
+      "predicted_intent": "extra_charge_on_statement",
+      "request_id": "banking77-quality-0374",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "direct_debit_payment_not_recognised",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0375",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "direct_debit_payment_not_recognised",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0376",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "direct_debit_payment_not_recognised",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0377",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "direct_debit_payment_not_recognised",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0378",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "direct_debit_payment_not_recognised",
+      "predicted_intent": "compromised_card",
+      "request_id": "banking77-quality-0379",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "passcode_forgotten",
+      "predicted_intent": "passcode_forgotten",
+      "request_id": "banking77-quality-0380",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "passcode_forgotten",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0381",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "passcode_forgotten",
+      "predicted_intent": "passcode_forgotten",
+      "request_id": "banking77-quality-0382",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "passcode_forgotten",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0383",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "passcode_forgotten",
+      "predicted_intent": "passcode_forgotten",
+      "request_id": "banking77-quality-0384",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "passcode_forgotten",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0385",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "passcode_forgotten",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0386",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "passcode_forgotten",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0387",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "passcode_forgotten",
+      "predicted_intent": "change_pin",
+      "request_id": "banking77-quality-0388",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "passcode_forgotten",
+      "predicted_intent": "passcode_forgotten",
+      "request_id": "banking77-quality-0389",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "declined_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0390",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "declined_cash_withdrawal",
+      "predicted_intent": "pending_cash_withdrawal",
+      "request_id": "banking77-quality-0391",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "declined_cash_withdrawal",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0392",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "declined_cash_withdrawal",
+      "predicted_intent": "atm_support",
+      "request_id": "banking77-quality-0393",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "declined_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0394",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "declined_cash_withdrawal",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0395",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "declined_cash_withdrawal",
+      "predicted_intent": "declined_cash_withdrawal",
+      "request_id": "banking77-quality-0396",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "declined_cash_withdrawal",
+      "predicted_intent": "cash_withdrawal_not_recognised",
+      "request_id": "banking77-quality-0397",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "declined_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0398",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "declined_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0399",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_card_payment",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0400",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_card_payment",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0401",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_card_payment",
+      "predicted_intent": "pending_card_payment",
+      "request_id": "banking77-quality-0402",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "pending_card_payment",
+      "predicted_intent": "card_payment_not_recognised",
+      "request_id": "banking77-quality-0403",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_card_payment",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0404",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_card_payment",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0405",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_card_payment",
+      "predicted_intent": "pending_card_payment",
+      "request_id": "banking77-quality-0406",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "pending_card_payment",
+      "predicted_intent": "pending_cash_withdrawal",
+      "request_id": "banking77-quality-0407",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "pending_card_payment",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0408",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_card_payment",
+      "predicted_intent": "pending_card_payment",
+      "request_id": "banking77-quality-0409",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_phone",
+      "predicted_intent": "lost_or_stolen_phone",
+      "request_id": "banking77-quality-0410",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_phone",
+      "predicted_intent": "lost_or_stolen_phone",
+      "request_id": "banking77-quality-0411",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_phone",
+      "predicted_intent": "lost_or_stolen_phone",
+      "request_id": "banking77-quality-0412",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_phone",
+      "predicted_intent": "lost_or_stolen_phone",
+      "request_id": "banking77-quality-0413",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "lost_or_stolen_phone",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0414",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_phone",
+      "predicted_intent": "lost_or_stolen_phone",
+      "request_id": "banking77-quality-0415",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_phone",
+      "predicted_intent": "lost_or_stolen_phone",
+      "request_id": "banking77-quality-0416",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_phone",
+      "predicted_intent": "lost_or_stolen_phone",
+      "request_id": "banking77-quality-0417",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "lost_or_stolen_phone",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0418",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "lost_or_stolen_phone",
+      "predicted_intent": "lost_or_stolen_phone",
+      "request_id": "banking77-quality-0419",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "request_refund",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0420",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "request_refund",
+      "predicted_intent": "request_refund",
+      "request_id": "banking77-quality-0421",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "request_refund",
+      "predicted_intent": "request_refund",
+      "request_id": "banking77-quality-0422",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "request_refund",
+      "predicted_intent": "request_refund",
+      "request_id": "banking77-quality-0423",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "request_refund",
+      "predicted_intent": "request_refund",
+      "request_id": "banking77-quality-0424",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "request_refund",
+      "predicted_intent": "request_refund",
+      "request_id": "banking77-quality-0425",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "request_refund",
+      "predicted_intent": "request_refund",
+      "request_id": "banking77-quality-0426",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "request_refund",
+      "predicted_intent": "request_refund",
+      "request_id": "banking77-quality-0427",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "request_refund",
+      "predicted_intent": "request_refund",
+      "request_id": "banking77-quality-0428",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "request_refund",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0429",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "declined_transfer",
+      "predicted_intent": "declined_transfer",
+      "request_id": "banking77-quality-0430",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "declined_transfer",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0431",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "declined_transfer",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0432",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "declined_transfer",
+      "predicted_intent": "declined_transfer",
+      "request_id": "banking77-quality-0433",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "declined_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0434",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "declined_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0435",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "declined_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0436",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "declined_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0437",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "declined_transfer",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0438",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "declined_transfer",
+      "predicted_intent": "declined_transfer",
+      "request_id": "banking77-quality-0439",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "Refund_not_showing_up",
+      "predicted_intent": "Refund_not_showing_up",
+      "request_id": "banking77-quality-0440",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "Refund_not_showing_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0441",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "Refund_not_showing_up",
+      "predicted_intent": "request_refund",
+      "request_id": "banking77-quality-0442",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "Refund_not_showing_up",
+      "predicted_intent": "request_refund",
+      "request_id": "banking77-quality-0443",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "Refund_not_showing_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0444",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "Refund_not_showing_up",
+      "predicted_intent": "request_refund",
+      "request_id": "banking77-quality-0445",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "Refund_not_showing_up",
+      "predicted_intent": "request_refund",
+      "request_id": "banking77-quality-0446",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "Refund_not_showing_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0447",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "Refund_not_showing_up",
+      "predicted_intent": "Refund_not_showing_up",
+      "request_id": "banking77-quality-0448",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "Refund_not_showing_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0449",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "declined_card_payment",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0450",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "declined_card_payment",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0451",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "declined_card_payment",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0452",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "declined_card_payment",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0453",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "declined_card_payment",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0454",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "declined_card_payment",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0455",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "declined_card_payment",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0456",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "declined_card_payment",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0457",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "declined_card_payment",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0458",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "declined_card_payment",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0459",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0460",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0461",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0462",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_transfer",
+      "predicted_intent": "pending_transfer",
+      "request_id": "banking77-quality-0463",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_transfer",
+      "predicted_intent": "pending_transfer",
+      "request_id": "banking77-quality-0464",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_transfer",
+      "predicted_intent": "pending_transfer",
+      "request_id": "banking77-quality-0465",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_transfer",
+      "predicted_intent": "pending_transfer",
+      "request_id": "banking77-quality-0466",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0467",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "pending_transfer",
+      "predicted_intent": "pending_transfer",
+      "request_id": "banking77-quality-0468",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "pending_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0469",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "terminate_account",
+      "predicted_intent": "terminate_account",
+      "request_id": "banking77-quality-0470",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "terminate_account",
+      "predicted_intent": "terminate_account",
+      "request_id": "banking77-quality-0471",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "terminate_account",
+      "predicted_intent": "terminate_account",
+      "request_id": "banking77-quality-0472",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "terminate_account",
+      "predicted_intent": "terminate_account",
+      "request_id": "banking77-quality-0473",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "terminate_account",
+      "predicted_intent": "terminate_account",
+      "request_id": "banking77-quality-0474",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "terminate_account",
+      "predicted_intent": "terminate_account",
+      "request_id": "banking77-quality-0475",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "terminate_account",
+      "predicted_intent": "terminate_account",
+      "request_id": "banking77-quality-0476",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "terminate_account",
+      "predicted_intent": "terminate_account",
+      "request_id": "banking77-quality-0477",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "terminate_account",
+      "predicted_intent": "terminate_account",
+      "request_id": "banking77-quality-0478",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "terminate_account",
+      "predicted_intent": "terminate_account",
+      "request_id": "banking77-quality-0479",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_swallowed",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0480",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_swallowed",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0481",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_swallowed",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0482",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_swallowed",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0483",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_swallowed",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0484",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_swallowed",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0485",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_swallowed",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0486",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_swallowed",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0487",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "card_swallowed",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0488",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_swallowed",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0489",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "transaction_charged_twice",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0490",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "transaction_charged_twice",
+      "predicted_intent": "pending_transfer",
+      "request_id": "banking77-quality-0491",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transaction_charged_twice",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0492",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "transaction_charged_twice",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0493",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "transaction_charged_twice",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0494",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transaction_charged_twice",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0495",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transaction_charged_twice",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0496",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "transaction_charged_twice",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0497",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "transaction_charged_twice",
+      "predicted_intent": "declined_card_payment",
+      "request_id": "banking77-quality-0498",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "transaction_charged_twice",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0499",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "verify_source_of_funds",
+      "predicted_intent": "verify_source_of_funds",
+      "request_id": "banking77-quality-0500",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "verify_source_of_funds",
+      "predicted_intent": "verify_source_of_funds",
+      "request_id": "banking77-quality-0501",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_source_of_funds",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0502",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "verify_source_of_funds",
+      "predicted_intent": "verify_source_of_funds",
+      "request_id": "banking77-quality-0503",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_source_of_funds",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0504",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "verify_source_of_funds",
+      "predicted_intent": "verify_source_of_funds",
+      "request_id": "banking77-quality-0505",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "verify_source_of_funds",
+      "predicted_intent": "verify_source_of_funds",
+      "request_id": "banking77-quality-0506",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "verify_source_of_funds",
+      "predicted_intent": "verify_source_of_funds",
+      "request_id": "banking77-quality-0507",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_source_of_funds",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0508",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "verify_source_of_funds",
+      "predicted_intent": "verify_source_of_funds",
+      "request_id": "banking77-quality-0509",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "transfer_timing",
+      "predicted_intent": "pending_transfer",
+      "request_id": "banking77-quality-0510",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_timing",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0511",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "transfer_timing",
+      "predicted_intent": "transfer_timing",
+      "request_id": "banking77-quality-0512",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_timing",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0513",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_timing",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0514",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_timing",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0515",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_timing",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0516",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_timing",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0517",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_timing",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0518",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "transfer_timing",
+      "predicted_intent": "exchange_rate",
+      "request_id": "banking77-quality-0519",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "reverted_card_payment?",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0520",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "reverted_card_payment?",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0521",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "reverted_card_payment?",
+      "predicted_intent": "card_payment_not_recognised",
+      "request_id": "banking77-quality-0522",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "reverted_card_payment?",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0523",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "reverted_card_payment?",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0524",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "reverted_card_payment?",
+      "predicted_intent": "card_payment_not_recognised",
+      "request_id": "banking77-quality-0525",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "reverted_card_payment?",
+      "predicted_intent": "card_payment_not_recognised",
+      "request_id": "banking77-quality-0526",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "reverted_card_payment?",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0527",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "reverted_card_payment?",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0528",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "reverted_card_payment?",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0529",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "change_pin",
+      "predicted_intent": "change_pin",
+      "request_id": "banking77-quality-0530",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "change_pin",
+      "predicted_intent": "change_pin",
+      "request_id": "banking77-quality-0531",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "change_pin",
+      "predicted_intent": "pin_blocked",
+      "request_id": "banking77-quality-0532",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "change_pin",
+      "predicted_intent": "verify_source_of_funds",
+      "request_id": "banking77-quality-0533",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "change_pin",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0534",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "change_pin",
+      "predicted_intent": "change_pin",
+      "request_id": "banking77-quality-0535",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "change_pin",
+      "predicted_intent": "change_pin",
+      "request_id": "banking77-quality-0536",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "change_pin",
+      "predicted_intent": "change_pin",
+      "request_id": "banking77-quality-0537",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "change_pin",
+      "predicted_intent": "change_pin",
+      "request_id": "banking77-quality-0538",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "change_pin",
+      "predicted_intent": "change_pin",
+      "request_id": "banking77-quality-0539",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "beneficiary_not_allowed",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0540",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "beneficiary_not_allowed",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0541",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "beneficiary_not_allowed",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0542",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "beneficiary_not_allowed",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0543",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "beneficiary_not_allowed",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0544",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "beneficiary_not_allowed",
+      "predicted_intent": "fiat_currency_support",
+      "request_id": "banking77-quality-0545",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "beneficiary_not_allowed",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0546",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "beneficiary_not_allowed",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0547",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "beneficiary_not_allowed",
+      "predicted_intent": "fiat_currency_support",
+      "request_id": "banking77-quality-0548",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "beneficiary_not_allowed",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0549",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "transfer_fee_charged",
+      "predicted_intent": "transfer_fee_charged",
+      "request_id": "banking77-quality-0550",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "transfer_fee_charged",
+      "predicted_intent": "transfer_fee_charged",
+      "request_id": "banking77-quality-0551",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_fee_charged",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0552",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_fee_charged",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0553",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "transfer_fee_charged",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0554",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "transfer_fee_charged",
+      "predicted_intent": "transfer_fee_charged",
+      "request_id": "banking77-quality-0555",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_fee_charged",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0556",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "transfer_fee_charged",
+      "predicted_intent": "transfer_fee_charged",
+      "request_id": "banking77-quality-0557",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_fee_charged",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0558",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_fee_charged",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0559",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "receiving_money",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0560",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "receiving_money",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0561",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "receiving_money",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0562",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "receiving_money",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0563",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "receiving_money",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0564",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "receiving_money",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0565",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "receiving_money",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0566",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "receiving_money",
+      "predicted_intent": "fiat_currency_support",
+      "request_id": "banking77-quality-0567",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "receiving_money",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0568",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "receiving_money",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0569",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "failed_transfer",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0570",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "failed_transfer",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0571",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "failed_transfer",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0572",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "failed_transfer",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0573",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "failed_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0574",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "failed_transfer",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0575",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "failed_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0576",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "failed_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0577",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "failed_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0578",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "failed_transfer",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0579",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "transfer_into_account",
+      "predicted_intent": "transfer_into_account",
+      "request_id": "banking77-quality-0580",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "transfer_into_account",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0581",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_into_account",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0582",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_into_account",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0583",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_into_account",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0584",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "transfer_into_account",
+      "predicted_intent": "transfer_into_account",
+      "request_id": "banking77-quality-0585",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "transfer_into_account",
+      "predicted_intent": "transfer_into_account",
+      "request_id": "banking77-quality-0586",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "transfer_into_account",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0587",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_into_account",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0588",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "transfer_into_account",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0589",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0590",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "verify_top_up",
+      "predicted_intent": "verify_top_up",
+      "request_id": "banking77-quality-0591",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0592",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0593",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0594",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0595",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "verify_top_up",
+      "predicted_intent": "why_verify_identity",
+      "request_id": "banking77-quality-0596",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "verify_top_up",
+      "predicted_intent": "verify_top_up",
+      "request_id": "banking77-quality-0597",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "verify_top_up",
+      "predicted_intent": "why_verify_identity",
+      "request_id": "banking77-quality-0598",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_top_up",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0599",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "getting_spare_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0600",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "getting_spare_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0601",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "getting_spare_card",
+      "predicted_intent": "getting_spare_card",
+      "request_id": "banking77-quality-0602",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "getting_spare_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0603",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "getting_spare_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0604",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "getting_spare_card",
+      "predicted_intent": "getting_spare_card",
+      "request_id": "banking77-quality-0605",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "getting_spare_card",
+      "predicted_intent": "getting_spare_card",
+      "request_id": "banking77-quality-0606",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "getting_spare_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0607",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "getting_spare_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0608",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "getting_spare_card",
+      "predicted_intent": "getting_spare_card",
+      "request_id": "banking77-quality-0609",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "top_up_by_cash_or_cheque",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0610",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "top_up_by_cash_or_cheque",
+      "predicted_intent": "top_up_by_cash_or_cheque",
+      "request_id": "banking77-quality-0611",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_cash_or_cheque",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0612",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_cash_or_cheque",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0613",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_cash_or_cheque",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0614",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_cash_or_cheque",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0615",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "top_up_by_cash_or_cheque",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0616",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "top_up_by_cash_or_cheque",
+      "predicted_intent": "top_up_limits",
+      "request_id": "banking77-quality-0617",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_cash_or_cheque",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0618",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_cash_or_cheque",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0619",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "order_physical_card",
+      "predicted_intent": "get_physical_card",
+      "request_id": "banking77-quality-0620",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "order_physical_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0621",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "order_physical_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0622",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "order_physical_card",
+      "predicted_intent": "card_delivery_estimate",
+      "request_id": "banking77-quality-0623",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "order_physical_card",
+      "predicted_intent": "card_delivery_estimate",
+      "request_id": "banking77-quality-0624",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "order_physical_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0625",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "order_physical_card",
+      "predicted_intent": "get_physical_card",
+      "request_id": "banking77-quality-0626",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "order_physical_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0627",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "order_physical_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0628",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "order_physical_card",
+      "predicted_intent": "fiat_currency_support",
+      "request_id": "banking77-quality-0629",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "virtual_card_not_working",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0630",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "virtual_card_not_working",
+      "predicted_intent": "disposable_card_limits",
+      "request_id": "banking77-quality-0631",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "virtual_card_not_working",
+      "predicted_intent": "getting_spare_card",
+      "request_id": "banking77-quality-0632",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "virtual_card_not_working",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0633",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "virtual_card_not_working",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0634",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "virtual_card_not_working",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0635",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "virtual_card_not_working",
+      "predicted_intent": "disposable_card_limits",
+      "request_id": "banking77-quality-0636",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "virtual_card_not_working",
+      "predicted_intent": "virtual_card_not_working",
+      "request_id": "banking77-quality-0637",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "virtual_card_not_working",
+      "predicted_intent": "virtual_card_not_working",
+      "request_id": "banking77-quality-0638",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "virtual_card_not_working",
+      "predicted_intent": "virtual_card_not_working",
+      "request_id": "banking77-quality-0639",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "wrong_exchange_rate_for_cash_withdrawal",
+      "predicted_intent": "wrong_amount_of_cash_received",
+      "request_id": "banking77-quality-0640",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "wrong_exchange_rate_for_cash_withdrawal",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0641",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "wrong_exchange_rate_for_cash_withdrawal",
+      "predicted_intent": "extra_charge_on_statement",
+      "request_id": "banking77-quality-0642",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "wrong_exchange_rate_for_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0643",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "wrong_exchange_rate_for_cash_withdrawal",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0644",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "wrong_exchange_rate_for_cash_withdrawal",
+      "predicted_intent": "cash_withdrawal_not_recognised",
+      "request_id": "banking77-quality-0645",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "wrong_exchange_rate_for_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0646",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "wrong_exchange_rate_for_cash_withdrawal",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0647",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "wrong_exchange_rate_for_cash_withdrawal",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0648",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "wrong_exchange_rate_for_cash_withdrawal",
+      "predicted_intent": "card_payment_wrong_exchange_rate",
+      "request_id": "banking77-quality-0649",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "get_disposable_virtual_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0650",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "get_disposable_virtual_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0651",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "get_disposable_virtual_card",
+      "predicted_intent": "getting_spare_card",
+      "request_id": "banking77-quality-0652",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "get_disposable_virtual_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0653",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "get_disposable_virtual_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0654",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "get_disposable_virtual_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0655",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "get_disposable_virtual_card",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0656",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "get_disposable_virtual_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0657",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "get_disposable_virtual_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0658",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "get_disposable_virtual_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0659",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "top_up_failed",
+      "predicted_intent": "top_up_failed",
+      "request_id": "banking77-quality-0660",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "top_up_failed",
+      "predicted_intent": "top_up_failed",
+      "request_id": "banking77-quality-0661",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_failed",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0662",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "top_up_failed",
+      "predicted_intent": "top_up_failed",
+      "request_id": "banking77-quality-0663",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_failed",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0664",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_failed",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0665",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "top_up_failed",
+      "predicted_intent": "top_up_by_card_charge",
+      "request_id": "banking77-quality-0666",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "top_up_failed",
+      "predicted_intent": "top_up_by_card_charge",
+      "request_id": "banking77-quality-0667",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_failed",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0668",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_failed",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0669",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "balance_not_updated_after_bank_transfer",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0670",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "balance_not_updated_after_bank_transfer",
+      "predicted_intent": "balance_not_updated_after_bank_transfer",
+      "request_id": "banking77-quality-0671",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "balance_not_updated_after_bank_transfer",
+      "predicted_intent": "transfer_timing",
+      "request_id": "banking77-quality-0672",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "balance_not_updated_after_bank_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0673",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "balance_not_updated_after_bank_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0674",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "balance_not_updated_after_bank_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0675",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "balance_not_updated_after_bank_transfer",
+      "predicted_intent": "transfer_timing",
+      "request_id": "banking77-quality-0676",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "balance_not_updated_after_bank_transfer",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0677",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "balance_not_updated_after_bank_transfer",
+      "predicted_intent": "transfer_not_received_by_recipient",
+      "request_id": "banking77-quality-0678",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "balance_not_updated_after_bank_transfer",
+      "predicted_intent": "balance_not_updated_after_cheque_or_cash_deposit",
+      "request_id": "banking77-quality-0679",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cash_withdrawal_not_recognised",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0680",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cash_withdrawal_not_recognised",
+      "predicted_intent": "card_not_working",
+      "request_id": "banking77-quality-0681",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cash_withdrawal_not_recognised",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0682",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cash_withdrawal_not_recognised",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0683",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "cash_withdrawal_not_recognised",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0684",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "cash_withdrawal_not_recognised",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0685",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cash_withdrawal_not_recognised",
+      "predicted_intent": "compromised_card",
+      "request_id": "banking77-quality-0686",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cash_withdrawal_not_recognised",
+      "predicted_intent": "card_payment_not_recognised",
+      "request_id": "banking77-quality-0687",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "cash_withdrawal_not_recognised",
+      "predicted_intent": "cash_withdrawal_not_recognised",
+      "request_id": "banking77-quality-0688",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cash_withdrawal_not_recognised",
+      "predicted_intent": "lost_or_stolen_card",
+      "request_id": "banking77-quality-0689",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "exchange_charge",
+      "predicted_intent": "exchange_rate",
+      "request_id": "banking77-quality-0690",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "exchange_charge",
+      "predicted_intent": "exchange_rate",
+      "request_id": "banking77-quality-0691",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0692",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0693",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0694",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0695",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0696",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0697",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "exchange_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0698",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "exchange_charge",
+      "predicted_intent": "exchange_rate",
+      "request_id": "banking77-quality-0699",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_card_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0700",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_card_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0701",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "top_up_by_card_charge",
+      "predicted_intent": "card_payment_fee_charged",
+      "request_id": "banking77-quality-0702",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_card_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0703",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_card_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0704",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_card_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0705",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_card_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0706",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_card_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0707",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_card_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0708",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "top_up_by_card_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0709",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "activate_my_card",
+      "predicted_intent": "activate_my_card",
+      "request_id": "banking77-quality-0710",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "activate_my_card",
+      "predicted_intent": "activate_my_card",
+      "request_id": "banking77-quality-0711",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "activate_my_card",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0712",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "activate_my_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0713",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "activate_my_card",
+      "predicted_intent": "get_physical_card",
+      "request_id": "banking77-quality-0714",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "activate_my_card",
+      "predicted_intent": "getting_spare_card",
+      "request_id": "banking77-quality-0715",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "activate_my_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0716",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "activate_my_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0717",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "activate_my_card",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0718",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "activate_my_card",
+      "predicted_intent": "getting_virtual_card",
+      "request_id": "banking77-quality-0719",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cash_withdrawal_charge",
+      "predicted_intent": "exchange_rate",
+      "request_id": "banking77-quality-0720",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "cash_withdrawal_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0721",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "cash_withdrawal_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0722",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cash_withdrawal_charge",
+      "predicted_intent": "extra_charge_on_statement",
+      "request_id": "banking77-quality-0723",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "cash_withdrawal_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0724",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cash_withdrawal_charge",
+      "predicted_intent": "exchange_rate",
+      "request_id": "banking77-quality-0725",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "cash_withdrawal_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0726",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "cash_withdrawal_charge",
+      "predicted_intent": "exchange_rate",
+      "request_id": "banking77-quality-0727",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "cash_withdrawal_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0728",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "cash_withdrawal_charge",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0729",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_about_to_expire",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0730",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_about_to_expire",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0731",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_about_to_expire",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0732",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_about_to_expire",
+      "predicted_intent": "card_about_to_expire",
+      "request_id": "banking77-quality-0733",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_about_to_expire",
+      "predicted_intent": "card_about_to_expire",
+      "request_id": "banking77-quality-0734",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_about_to_expire",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0735",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_about_to_expire",
+      "predicted_intent": "card_about_to_expire",
+      "request_id": "banking77-quality-0736",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "card_about_to_expire",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0737",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_about_to_expire",
+      "predicted_intent": "card_about_to_expire",
+      "request_id": "banking77-quality-0738",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "card_about_to_expire",
+      "predicted_intent": "card_about_to_expire",
+      "request_id": "banking77-quality-0739",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "apple_pay_or_google_pay",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0740",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "apple_pay_or_google_pay",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0741",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "apple_pay_or_google_pay",
+      "predicted_intent": "top_up_by_card_charge",
+      "request_id": "banking77-quality-0742",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "apple_pay_or_google_pay",
+      "predicted_intent": "apple_pay_or_google_pay",
+      "request_id": "banking77-quality-0743",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "apple_pay_or_google_pay",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0744",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "apple_pay_or_google_pay",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0745",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "unknown_intent",
+      "expected_intent": "apple_pay_or_google_pay",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0746",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "apple_pay_or_google_pay",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0747",
+      "schema_valid": false
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "apple_pay_or_google_pay",
+      "predicted_intent": "apple_pay_or_google_pay",
+      "request_id": "banking77-quality-0748",
+      "schema_valid": true
+    },
+    {
+      "correct": true,
+      "error": null,
+      "expected_intent": "apple_pay_or_google_pay",
+      "predicted_intent": "apple_pay_or_google_pay",
+      "request_id": "banking77-quality-0749",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_my_identity",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0750",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "verify_my_identity",
+      "predicted_intent": "why_verify_identity",
+      "request_id": "banking77-quality-0751",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "verify_my_identity",
+      "predicted_intent": "why_verify_identity",
+      "request_id": "banking77-quality-0752",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "verify_my_identity",
+      "predicted_intent": "why_verify_identity",
+      "request_id": "banking77-quality-0753",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_my_identity",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0754",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_my_identity",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0755",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_my_identity",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0756",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_my_identity",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0757",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "verify_my_identity",
+      "predicted_intent": "why_verify_identity",
+      "request_id": "banking77-quality-0758",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "verify_my_identity",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0759",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "country_support",
+      "predicted_intent": "fiat_currency_support",
+      "request_id": "banking77-quality-0760",
+      "schema_valid": true
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "country_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0761",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "country_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0762",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "country_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0763",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "country_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0764",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "country_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0765",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "country_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0766",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "country_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0767",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": "malformed_json",
+      "expected_intent": "country_support",
+      "predicted_intent": null,
+      "request_id": "banking77-quality-0768",
+      "schema_valid": false
+    },
+    {
+      "correct": false,
+      "error": null,
+      "expected_intent": "country_support",
+      "predicted_intent": "fiat_currency_support",
+      "request_id": "banking77-quality-0769",
+      "schema_valid": true
+    }
+  ],
+  "schema_valid": 415,
+  "schema_valid_rate": 0.538961038961039,
+  "schema_version": "1.0.0",
+  "total": 770
+}

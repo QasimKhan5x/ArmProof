@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0.0",
+  "contract": "contract.json",
+  "comparisons": ["comparison.json"],
+  "summary": "../../ops/evidence/EXP-2026-004/accepted/evidence/capacity/experiment/summary.json",
+  "deployment_summary": "deployment-summary.json",
+  "output": "../../build/armproof-report"
+}

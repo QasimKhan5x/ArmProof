@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://armproof.dev/schemas/comparison.schema.json",
+  "title": "ArmProof Normalized Comparison",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "comparison_id", "causal_scope", "baseline", "treatment", "metrics", "evidence_kinds", "arm_attribution"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "comparison_id": {"type": "string", "minLength": 1},
+    "causal_scope": {"enum": ["artifact", "arm_acceleration", "whole_deployment", "cloud_capacity", "overhead", "reproduction"]},
+    "baseline": {"$ref": "#/$defs/identity"},
+    "treatment": {"$ref": "#/$defs/identity"},
+    "metrics": {"type": "object", "additionalProperties": {"type": "number"}},
+    "evidence_kinds": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "arm_attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline_observed", "treatment_observed"],
+      "properties": {
+        "baseline_observed": {"type": ["boolean", "null"]},
+        "treatment_observed": {"type": ["boolean", "null"]}
+      }
+    }
+  },
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["treatment_id", "artifact_sha256", "runtime_sha256", "workload_sha256", "environment_sha256", "controls"],
+      "properties": {
+        "treatment_id": {"type": "string", "minLength": 1},
+        "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "runtime_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "workload_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "environment_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "controls": {"type": "object"}
+      }
+    }
+  }
+}

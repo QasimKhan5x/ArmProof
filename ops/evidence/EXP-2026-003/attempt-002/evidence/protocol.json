@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-003",
+  "discovery_seconds": 15.0,
+  "confirmation_seconds": 30.0,
+  "confirmations": 5,
+  "max_error_rate": 0.01,
+  "minimum_delivery_ratio": 0.95,
+  "max_workers": 32,
+  "request_timeout_seconds": 90.0,
+  "warmup_requests": 3,
+  "quality_batch_size": 4,
+  "mixes": [
+    {
+      "mix_id": "short",
+      "workload": "data/banking77/generated/traffic-short.jsonl",
+      "p95_slo_ms": 15000.0,
+      "candidates_rps": [0.05, 0.075, 0.1, 0.125, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5]
+    },
+    {
+      "mix_id": "long",
+      "workload": "data/banking77/generated/traffic-long.jsonl",
+      "p95_slo_ms": 30000.0,
+      "candidates_rps": [0.025, 0.04, 0.05, 0.075, 0.1, 0.125, 0.15, 0.2, 0.25, 0.3]
+    },
+    {
+      "mix_id": "mixed",
+      "workload": "data/banking77/generated/traffic-mixed.jsonl",
+      "p95_slo_ms": 25000.0,
+      "candidates_rps": [0.04, 0.05, 0.075, 0.1, 0.125, 0.15, 0.2, 0.25, 0.3, 0.4]
+    }
+  ]
+}

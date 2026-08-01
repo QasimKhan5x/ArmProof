@@ -1,49 +1,49 @@
 # Project Map
 
-Use this page to load the smallest useful context set.
+Use this file to route context. Do not load every document.
 
-| Question or task | Read |
-|---|---|
-| What are we building and why? | `CONCEPT.md` |
-| What must the system do? | `REQUIREMENTS.md` |
-| What makes this competitive? | `JUDGING_STRATEGY.md` |
-| Is the central mechanism feasible? | `FEASIBILITY_PLAN.md`, `BENCHMARK_PROTOCOL.md` |
-| How should components fit together? | `ARCHITECTURE.md` |
-| What should be built next? | `ROADMAP.md`, `../ops/work-items.json`, `../STATUS.md` |
-| How are claims accepted? | `TRACEABILITY.md`, `BENCHMARK_PROTOCOL.md` |
-| How is AWS spending controlled? | `AWS_BUDGET.md` |
-| What can invalidate the project? | `RISKS.md` |
-| How should a fresh agent resume? | `AGENT_PLAYBOOK.md`, `../AGENTS.md` |
-| What is shown to judges? | `DEMO_AND_SUBMISSION.md` |
-| Why was a decision made? | `DECISIONS.md` |
-| Which external facts support this? | `SOURCES.md` |
+## Start Of Every Task
 
-## Durable Versus Mutable State
+Read `STATUS.md`, the selected entry in `ops/work-items.json`, and only the
+context paths listed by that entry.
 
-Stable intent belongs in `docs/`. Mutable execution state belongs in:
+## Product Intent
 
-- `STATUS.md`: compact human handoff and next action.
-- `ops/work-items.json`: machine-readable phase and verification status.
-- `ops/experiments/registry.jsonl`: append-only experiment index.
-- `ops/evidence/<run-id>/`: immutable raw evidence bundles.
+- `docs/PRODUCT_SPEC.md`: approved normative scope and success criteria.
+- `docs/CONCEPT.md`: short human explanation.
+- `docs/REQUIREMENTS.md`: stable requirements and stress questions.
 
-Do not store benchmark truth only in conversation history, screenshots, or a
-dashboard. Reports are projections of the evidence bundle.
+## Technical Design
 
-## Planned Code Layout
+- `docs/ARCHITECTURE.md`: component and trust boundaries.
+- `docs/BENCHMARK_PROTOCOL.md`: rules for accepted measurements.
+- `docs/CAPACITY_VALIDATION.md`: remaining Cloud AI experiment.
+- `docs/ESTABLISHED_EVIDENCE.md`: accepted findings and limitations.
 
-The following layout is architectural intent and should be created
-incrementally:
+## Execution
 
-```text
-src/kleidiscope/       CLI, orchestration, policies, reports
-patches/llama.cpp/     minimal pinned tracing patch or integration
-schemas/               trace, recipe, comparison, experiment schemas
-workloads/             pinned prompt and server workloads
-evaluation/            quality and performance adapters
-tests/                 unit, contract, integration, golden-fixture tests
-scripts/               bootstrap, reproduce, AWS lifecycle, cleanup
-ops/                    work state, experiments, evidence
-docs/                   stable decisions and user-facing engineering docs
-```
+- `docs/DEVELOPMENT.md`: verified local and Arm64 commands.
+- `tasks/plan.md`: dependency graph and phase gates.
+- `tasks/todo.md`: implementable checklist.
+- `ops/work-items.json`: machine-readable status.
+- `context/packs/`: focused task packets.
+- `STATUS.md`: compact handoff and immediate next action.
 
+## Governance
+
+- `docs/TRACEABILITY.md`: claim-to-requirement/evidence state.
+- `docs/DECISIONS.md`: accepted and superseded decisions.
+- `docs/RISKS.md`: risks and stop conditions.
+- `docs/AWS_BUDGET.md`: cloud approval and cleanup.
+- `docs/SECURITY_AND_LICENSES.md`: trust and redistribution rules.
+
+## Submission
+
+- `docs/JUDGING_STRATEGY.md`: rubric alignment.
+- `docs/DEMO_AND_SUBMISSION.md`: judge narrative and claim rules.
+- `docs/SOURCES.md`: external technical references.
+
+## Generated Or Non-Authoritative
+
+Reports, README prose, conversation history and generated summaries help with
+routing but cannot override the approved spec, raw evidence or source/tests.

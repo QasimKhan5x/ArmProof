@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "phi4-graviton-kleidiai-release",
+  "treatments": [
+    {
+      "id": "kleidiai-disabled",
+      "command": ["python", "-m", "armproof.reference.phi4", "--backend", "ort-int4", "--threads", "16"],
+      "artifact_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
+      "runtime_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
+      "environment": {"mlas.disable_kleidiai": "1", "OMP_NUM_THREADS": "16"}
+    },
+    {
+      "id": "kleidiai-enabled",
+      "command": ["python", "-m", "armproof.reference.phi4", "--backend", "ort-int4", "--threads", "16"],
+      "artifact_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
+      "runtime_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
+      "environment": {"mlas.disable_kleidiai": "0", "OMP_NUM_THREADS": "16"}
+    }
+  ],
+  "claims": [
+    {
+      "id": "quality-accuracy",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-004-kleidiai",
+      "metric": "accuracy_delta_pp",
+      "operator": "gte",
+      "threshold": -1.0,
+      "required_evidence": ["quality_rows", "artifact_hashes", "arm_callchains"],
+      "required": true,
+      "depends_on": []
+    },
+    {
+      "id": "quality-macro-f1",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-004-kleidiai",
+      "metric": "macro_f1_delta_pp",
+      "operator": "gte",
+      "threshold": -1.0,
+      "required_evidence": ["quality_rows", "artifact_hashes", "arm_callchains"],
+      "required": true,
+      "depends_on": []
+    },
+    {
+      "id": "quality-schema",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-004-kleidiai",
+      "metric": "schema_valid_rate",
+      "operator": "gte",
+      "threshold": 0.99,
+      "required_evidence": ["quality_rows", "artifact_hashes", "arm_callchains"],
+      "required": true,
+      "depends_on": []
+    },
+    {
+      "id": "cloud-capacity",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-004-kleidiai",
+      "metric": "minimum_capacity_ratio",
+      "operator": "gte",
+      "threshold": 1.5,
+      "required_evidence": ["request_samples", "boundary_confirmations", "artifact_hashes", "arm_callchains"],
+      "required": true,
+      "depends_on": ["quality-accuracy", "quality-macro-f1", "quality-schema"]
+    },
+    {
+      "id": "arm-execution",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-004-kleidiai",
+      "metric": "enabled_kai_callchains_observed",
+      "operator": "eq",
+      "threshold": 1.0,
+      "required_evidence": ["arm_callchains", "artifact_hashes"],
+      "required": true,
+      "depends_on": []
+    }
+  ]
+}

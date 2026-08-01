@@ -1,256 +1,111 @@
-# Requirements And Verification Questions
+# ArmProof Requirements And Stress Questions
 
-Requirement IDs are stable. Work items, tests, evidence, reports, and judging
-claims must reference them.
+Requirement IDs are stable. Tests, work items, evidence and submission claims
+must reference them.
 
-## Product Invariants
+## Invariants
 
-### INV-01: Arm Evidence, Not Branding
+### INV-01: Arm Causality
 
-Every optimization claim must identify the Arm CPU, supported ISA features,
-selected KleidiAI path, and relevant fallback behavior.
+An Arm-specific claim requires a matched treatment/control and observed Arm
+execution evidence.
 
-**Stress questions**
+- Is the model, runtime, workload, thread configuration and machine identical?
+- Is only the KleidiAI control different?
+- Does enabled evidence contain executed `kai_*` callchains while disabled
+  evidence does not?
 
-- Would the exact same output be produced on x86? If yes, where is the
-  Arm-specific contribution?
-- Can a reviewer trace a headline speedup to an actual runtime/build/model
-  difference rather than a label in the UI?
-- Is KleidiAI execution observed or merely inferred from being compiled in?
+### INV-02: Honest Causal Scope
 
-### INV-02: End-To-End Artifact
+Whole-stack migration, quantization/runtime transformation and KleidiAI
+acceleration must not be conflated.
 
-The system must produce an evaluated candidate model, not only a trace,
-recommendation, or dashboard.
+- Which exact comparison supports each number?
+- Would the report still be truthful if the KleidiAI speedup were zero?
 
-**Stress questions**
+### INV-03: Quality Is A Contract
 
-- Where is the candidate GGUF checksum and exact recipe?
-- Can a fresh machine reproduce the candidate and comparison?
-- If candidate generation fails, does the system report failure clearly?
+Performance cannot pass when the declared task-quality tolerance fails.
 
-### INV-03: Quality Is A Hard Constraint
+- Was the metric and tolerance frozen before the accepted run?
+- Are malformed and missing outputs counted as failures?
+- Does "pass" mean only this workload rather than universal safety?
 
-No speed or size win is accepted when the declared quality-loss budget fails.
+### INV-04: Fail Closed
 
-**Stress questions**
+Missing, mismatched, stale or unavailable required evidence prevents approval.
 
-- Was the quality metric selected before seeing results?
-- Is the candidate compared to the correct F16/BF16 reference?
-- Can changing the evaluation slice reverse the conclusion?
+- What happens when an artifact hash changes?
+- Can a report display a claim whose raw samples were removed?
+- Is unknown distinct from pass, fail and not-applicable?
 
-### INV-04: Existing Upstream Capabilities Are Baselines
+### INV-05: Reproducible Deployment
 
-Per-tensor quantization, importance matrices, and target-BPW optimization are
-upstream capabilities, not KleidiScope inventions.
+The accepted configuration must be the configuration that can be deployed and
+reproduced.
 
-**Stress questions**
-
-- Did the experiment include a size-matched `--target-bpw` candidate?
-- Is improvement caused by Arm-aware policy or simply by upstream mixed
-  precision?
-- Does the project add useful dispatch explanation even when it cannot beat
-  target-BPW performance?
-
-### INV-05: Reports Derive From Raw Evidence
-
-All visualizations and summaries must be reproducible projections of versioned
-machine-readable evidence.
-
-**Stress questions**
-
-- Can every chart point be located in a raw file?
-- Does changing a raw value and regenerating the report update the chart?
-- Are missing samples shown rather than silently omitted?
+- Does the generated manifest pin the measured artifacts and flags?
+- Can a clean machine reproduce the decision without manual repair?
 
 ## Functional Requirements
 
-### FR-01 Environment Fingerprint
-
-Record CPU identity/features, core count, memory, OS/kernel, compiler, build
-flags, git revisions, dependency versions, thread/affinity settings, and active
-power/performance controls where observable.
-
-Verification: schema validation plus a fixture and one real Arm capture.
-
-### FR-02 Structured Dispatch Trace
-
-Capture a versioned event stream connecting workload phase, GGML operation,
-tensor identity/type/shape, selected backend, selected kernel or kernel family,
-eligibility decision, and fallback code.
-
-Verification: golden synthetic fixture, real trace, source-line mapping, and
-negative test with KleidiAI disabled.
-
-### FR-03 Source-Grounded Explanation
-
-Explain dispatch and fallback through rules extracted from the pinned upstream
-source. Each explanation must carry a rule ID, source revision, and confidence.
-
-Verification: rule tests covering eligible, ineligible, unknown, and version
-mismatch cases.
-
-### FR-04 Coverage Metrics
-
-Report at least event-count, tensor-byte-weighted, and runtime-weighted
-acceleration coverage. Keep observed duration separate from attributed kernel
-time when attribution confidence differs.
-
-Verification: hand-calculated fixture and reconciliation totals.
-
-### FR-05 Ranked Opportunities
-
-Rank fallbacks by measured significance and explain the expected tradeoff of
-candidate tensor-format changes.
-
-Verification: deterministic ranking fixture and explicit tie behavior.
-
-### FR-06 Bounded Recipe Generation
-
-Generate no more than a configured candidate count from an allowlisted set of
-supported tensor types. Respect quality-sensitive tensor policies, size budget,
-ISA/kernel eligibility, and unsupported-shape constraints.
-
-Verification: property tests for budget, allowlist, determinism, and no-change
-cases.
-
-### FR-07 Upstream Quantizer Adapter
-
-Render auditable `llama-quantize` commands using pinned, verified flags and
-capture stdout, stderr, exit status, recipe, input/output hashes, and tool
-revision.
-
-Verification: command snapshot tests and a real candidate build from F16/BF16.
-
-### FR-08 Evaluation Pipeline
-
-Evaluate disk size, tensor distribution, RSS/peak RSS, quality, prompt
-processing, generation, TTFT, latency, and throughput where applicable.
-
-Verification: schema checks, repeatability checks, and intentionally failing
-quality candidate.
-
-### FR-09 Baseline Comparison
-
-Compare at minimum:
-
-1. F16/BF16 reference;
-2. standard `Q4_K_M`;
-3. a KleidiAI-friendly uniform or standard format such as `Q4_0`;
-4. matched upstream `--target-bpw` optimization;
-5. KleidiAI enabled versus disabled where technically valid; and
-6. the KleidiScope candidate.
-
-Verification: comparison refuses acceptance when a required baseline is absent.
-
-### FR-10 Decision Gate
-
-Accept, reject, or mark inconclusive using predeclared thresholds. Preserve all
-candidates, including failures.
-
-Verification: table-driven tests for pass, fail, missing, and noisy outcomes.
-
-### FR-11 Evidence Bundle
-
-Export manifest, trace, recipes, commands, logs, raw measurements, summaries,
-checksums, licenses, and report inputs under a unique run ID.
-
-Verification: bundle schema, checksum verification, and clean-room replay.
-
-### FR-12 Interactive Report
-
-Provide a clear operator-to-kernel X-ray, ranked fallbacks, candidate
-comparisons, uncertainty, environment, and reproduction commands without
-hiding failed runs.
-
-Verification: browser tests at desktop/mobile sizes, accessibility checks,
-fixture-driven screenshots, and raw-data links.
-
-### FR-13 CI Regression Check
-
-Allow a developer to fail CI when declared acceleration coverage or performance
-regresses beyond a threshold, while distinguishing infrastructure noise from a
-confirmed regression.
-
-Verification: fixture-based passing/failing workflows and documented exit codes.
+- **FR-01 Contract validation:** reject invalid or ambiguous contracts before
+  execution.
+- **FR-02 Identity capture:** hash artifacts, workloads, commands, runtime and
+  relevant environment facts.
+- **FR-03 Treatment execution:** run declared treatments with bounded lifecycle
+  and readiness behavior.
+- **FR-04 Workload replay:** support frozen short, long and mixed traffic.
+- **FR-05 Resource measurement:** collect latency, throughput, RSS and PSS with
+  raw timestamped samples.
+- **FR-06 Quality evaluation:** apply a pluggable task metric and count malformed
+  output.
+- **FR-07 Arm attribution:** capture and normalize positive/negative `kai_*`
+  execution evidence.
+- **FR-08 Claim ledger:** bind each claim to its comparison, evidence and
+  decision rule.
+- **FR-09 Verification:** independently validate a completed evidence bundle.
+- **FR-10 Reporting:** render an offline interactive report from verified data.
+- **FR-11 CI decision:** emit stable exit codes and a GitHub Check summary.
+- **FR-12 Deployment output:** emit the exact accepted service configuration.
+- **FR-13 Reproduction:** provide one documented clean-run command.
 
 ## Non-Functional Requirements
 
-### NFR-01 Reproducibility
+- **NFR-01 Determinism:** fixed inputs and identities produce the same policy
+  decision.
+- **NFR-02 Overhead:** non-profiler measurement overhead remains below 5%.
+- **NFR-03 Security:** no shell interpolation of workload data; no secrets in
+  evidence or reports.
+- **NFR-04 Portability:** reports work offline; core policy tests run without
+  Arm hardware.
+- **NFR-05 Explainability:** every failure has a stable reason code and human
+  explanation.
+- **NFR-06 Accessibility:** the report is keyboard-usable, readable and
+  responsive.
+- **NFR-07 Bounded cost:** cloud runs enforce approval, TTL, tags and spend cap.
 
-All evidence-bearing inputs and tools are pinned or checksummed. Randomness is
-seeded. Commands are preserved verbatim.
+## Product Properties
 
-### NFR-02 Statistical Rigor
+- **P-01 Existing evidence imports without reinterpretation.**
+- **P-02 Unfavorable samples remain present.**
+- **P-03 Swapping one artifact invalidates dependent claims.**
+- **P-04 Disabling KleidiAI invalidates the Arm execution claim.**
+- **P-05 Report, CLI and GitHub Check produce the same decision.**
+- **P-06 The reference recipe is replaceable through documented adapter
+  boundaries, not hardcoded presentation logic.**
+- **P-07 A failed contract remains useful and understandable.**
 
-Performance tests include warmup, repeated samples, ordering controls,
-dispersion, and an inconclusive region. One-shot best numbers are forbidden.
+## Final Agent Stress Test
 
-### NFR-03 Low Perturbation
+Before marking the product complete, answer with evidence:
 
-Tracing is opt-in, bounded, and measured. Disabled tracing must not impose a
-material production penalty; enabled overhead must be reported.
-
-### NFR-04 Determinism
-
-Given the same normalized trace, policy, and source inventory, recipe output is
-stable and order-independent.
-
-### NFR-05 Failure Transparency
-
-Unknown mappings, missing counters, timeouts, unsupported tensors, and partial
-runs are explicit typed states, not empty strings or guessed values.
-
-### NFR-06 Usability
-
-A developer can reach a first report from documented prerequisites and a small
-number of commands. Errors provide corrective action and preserve diagnostics.
-
-### NFR-07 Portability
-
-The orchestration and report layers run locally and on Linux Arm64. The
-KleidiAI-specific analyzer fails clearly on unsupported architectures.
-
-### NFR-08 Security
-
-No model prompts, secrets, SSH keys, cloud credentials, or private evidence are
-committed. Shell commands use structured argument lists where possible.
-
-### NFR-09 Cost Safety
-
-Cloud work requires explicit approval, TTL, tags, automatic termination,
-budget alerts, and cleanup verification.
-
-### NFR-10 Maintainability
-
-Public schemas are versioned; upstream-specific logic is isolated; tests use
-small fixtures; consequential decisions have ADR entries.
-
-## Feasibility Acceptance Properties
-
-- FP-01: Required dispatch evidence can be captured with a bounded patch.
-- FP-02: Trace overhead is measurable and acceptable for profiling.
-- FP-03: At least one fallback explanation is validated against source.
-- FP-04: The generator creates a valid per-tensor candidate from F16/BF16.
-- FP-05: Quality evaluation detects degradation.
-- FP-06: Performance results are stable enough to distinguish a 10% change.
-- FP-07: A candidate meets the primary gate or the project records a no-go.
-- FP-08: The result is compared with matched target-BPW optimization.
-- FP-09: Total AWS spend remains inside the approved ceiling.
-
-## Final Agent Self-Interrogation
-
-Before declaring the project complete, answer with evidence paths:
-
-1. What exact operation changed, on what CPU, and which kernel handled it?
-2. What would a generic x86 quantizer produce differently?
-3. Which required baseline is hardest to beat, and was it included?
-4. Did any rejected candidate outperform the winner on another metric?
-5. How much does tracing perturb the result?
-6. Can the full headline result be regenerated from a clean instance?
-7. Which claim remains an inference rather than direct observation?
-8. What happens on an unsupported model, tensor, ISA, or source revision?
-9. Can another developer reuse the patch, schema, CLI, and CI check without
-   adopting the demo model?
-10. Which judging claim would collapse if one artifact were removed?
+1. What exact comparison proves the Arm-specific speedup?
+2. Which gains come from the whole migration rather than KleidiAI?
+3. Can a compiled-but-unused KleidiAI path pass?
+4. What happens when raw samples, hashes or profiler evidence are missing?
+5. Is the deployment manifest identical to the measured passing treatment?
+6. Can a fresh developer run it from one YAML file and one command?
+7. Does the report remain honest when a metric is unfavorable or unavailable?
+8. What disappears on x86, and is that boundary visible?
 

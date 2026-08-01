@@ -1,0 +1,44 @@
+{
+  "schema_version": "2.0.0",
+  "experiment_id": "EXP-2026-004",
+  "status": "preregistered",
+  "hypothesis": "After correcting nominal-versus-offered load accounting, KleidiAI increases sustainable Phi-4 Mini INT4 serving capacity by at least 1.5x at the same 10-second p95 SLO in at least two frozen traffic mixes on Graviton4.",
+  "causal_scope": "cloud_capacity",
+  "treatments": [
+    {
+      "id": "kleidiai-disabled",
+      "artifact_ref": "microsoft/Phi-4-mini-instruct-onnx@fc04c8f93df696602fd9f300a30d1bf2e3081347:cpu-int4-rtn-block-32-acc-level-4",
+      "runtime_ref": "onnxruntime@4c4d4923b4630a2d0b3807cbbbc3b1813b1380a5+onnxruntime-genai@d2c81fdc8ef80836ceba1bae384be80262e24bb4",
+      "command_ref": "ops/aws/cap-001/guest.sh:kleidiai-disabled",
+      "environment_overrides": {"mlas.disable_kleidiai": "1", "intra_op_num_threads": 16}
+    },
+    {
+      "id": "kleidiai-enabled",
+      "artifact_ref": "microsoft/Phi-4-mini-instruct-onnx@fc04c8f93df696602fd9f300a30d1bf2e3081347:cpu-int4-rtn-block-32-acc-level-4",
+      "runtime_ref": "onnxruntime@4c4d4923b4630a2d0b3807cbbbc3b1813b1380a5+onnxruntime-genai@d2c81fdc8ef80836ceba1bae384be80262e24bb4",
+      "command_ref": "ops/aws/cap-001/guest.sh:kleidiai-enabled",
+      "environment_overrides": {"mlas.disable_kleidiai": "0", "intra_op_num_threads": 16}
+    }
+  ],
+  "workload_ref": "data/banking77/generated/manifest.json",
+  "quality_ref": "EXP-2026-003 attempt-002 immutable 770-row samples, rescored by scripts/reanalyze_quality.py",
+  "primary_metric": "sustainable_accepted_rps_ratio_at_fixed_10_second_p95_slo",
+  "secondary_metrics": ["p50_ms", "p95_ms", "p99_ms", "error_rate", "schema_valid_rate", "accuracy_delta_pp", "macro_f1_delta_pp", "arm_path_attribution"],
+  "acceptance": {
+    "minimum_ratio": 1.5,
+    "minimum_passing_mixes": 2,
+    "minimum_lower_95": 1.15,
+    "maximum_accuracy_loss_pp": 1.0,
+    "maximum_macro_f1_loss_pp": 1.0,
+    "minimum_schema_valid_rate": 0.99
+  },
+  "environment_ref": "examples/phi4-graviton/runtime-lock.json",
+  "repetitions": 5,
+  "randomization": "Discovery order is disabled then enabled; confirmation treatment order alternates AB/BA by repetition.",
+  "warmup_policy": "Three successful requests per already-ready treatment before capacity measurement.",
+  "profiler_ref": "Separate perf record callchain run; excluded from primary load metrics.",
+  "maximum_runtime_minutes": 120,
+  "maximum_cost_usd": 1.3,
+  "evidence_path": "ops/evidence/EXP-2026-004",
+  "notes": "Corrective rerun after EXP-2026-003 was rendered inconclusive by nominal-versus-offered load quantization. Candidate rates correspond to exact integer request counts per 30-second window. The universal 10-second p95 SLO and all thresholds are frozen before launch."
+}

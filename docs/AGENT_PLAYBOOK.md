@@ -1,138 +1,48 @@
-# Long-Horizon Agent Playbook
+# Agent Playbook
 
-This repository is designed for agents working across many context windows.
-Conversation history is convenient but non-authoritative.
+## Context Loading
 
-## Context Layers
+Do not read every document. Start with `STATUS.md`, one work item and its
+context paths. Keep loaded context below roughly 2,000 focused lines.
 
-1. `AGENTS.md`: short persistent rules and routing map.
-2. `STATUS.md`: current verified state and next action.
-3. `ops/work-items.json`: machine-readable dependency and verification state.
-4. Relevant spec/architecture sections selected by the work item.
-5. Nearby source/tests and current command output.
-6. Conversation history only for unresolved nuance.
+## Task Cycle
 
-Avoid loading the entire project corpus for a narrow task.
+1. Confirm dependencies and authority.
+2. Load the named files, related tests and one nearby pattern.
+3. State the bounded implementation and verification plan.
+4. Implement one vertical slice.
+5. Run focused tests and context validation.
+6. Store evidence and update work state.
+7. Record any decision that changes public behavior.
 
-## Standard Session Loop
+## Conflicts
 
-### Orient
+- Product spec versus old prose: product spec wins; clean the old prose.
+- Planning versus raw evidence: raw evidence wins; narrow the claim.
+- Documentation versus pinned source: verify source before implementation.
+- Report versus claim ledger: claim ledger wins; reports do not decide.
+- Work item versus repository state: repository state wins; repair status.
 
-- Confirm repository path and branch.
-- Read status, work item, recent commits, and working-tree changes.
-- Identify user-authored changes and preserve them.
-- Run the documented health check.
+## Cloud Work
 
-### Select
+Before provisioning, load `docs/AWS_BUDGET.md`, the experiment contract and the
+cloud work item. Confirm explicit approval, non-root credentials, tags, TTL,
+cost cap and cleanup. Never improvise a second experiment in a paid session.
 
-- Choose one highest-priority unblocked work item.
-- Confirm its dependencies are actually evidenced, not merely marked complete.
-- Load only its context files and related source/tests.
+## Evidence Work
 
-### Predict
+Observed facts, normalized facts and decisions are different layers. Preserve
+the raw source for every normalized value. Do not hand-edit an accepted claim
+result; rerun the validator from corrected evidence.
 
-Before a non-trivial change, record:
+## UI Work
 
-- what observable behavior should change;
-- what should remain unchanged;
-- verification command and expected evidence;
-- risks and rollback boundary.
+Develop against versioned fixture evidence after schemas freeze. The report
+must show unavailable and failed states, not only the successful reference.
+Use browser tests before calling the UI complete.
 
-For experiments, create a preregistration record before seeing results.
+## Handoffs
 
-### Implement Incrementally
-
-- Add or update a failing test/fixture first when behavior is testable.
-- Make the smallest coherent change.
-- Re-run focused verification.
-- Expand verification according to blast radius.
-- Do not combine unrelated refactoring.
-
-### Prove
-
-- Execute the work item's verification.
-- Inspect outputs, not only exit status.
-- Store evidence paths.
-- Try at least one negative or failure case.
-- For consequential claims, use a fresh-context reviewer to attempt refutation.
-
-### Persist
-
-- Update the work item status and evidence references.
-- Append experiment records; never rewrite an unfavorable run.
-- Update `STATUS.md` with exact current state and one next action.
-- Add an ADR if architecture, scope, claims, or constraints changed.
-- Leave commands and the working tree understandable to the next agent.
-
-## Work Item State Machine
-
-```text
-pending -> in_progress -> verifying -> completed
-                  |           |
-                  v           v
-                blocked     failed
-```
-
-- `completed` requires the specified evidence.
-- `blocked` names an external dependency and attempted alternatives.
-- `failed` means the attempted implementation/experiment did not satisfy its
-  gate; failure evidence remains useful.
-- Reopening a completed item requires a reason and invalidated evidence link.
-
-## Experiment Loop
-
-```text
-hypothesis -> preregistration -> execution -> raw evidence
-     -> analysis -> accept/reject/inconclusive -> next hypothesis
-```
-
-Do not let analysis mutate the original hypothesis or thresholds. Follow-up
-exploration receives a new experiment ID.
-
-## Compaction Handoff
-
-Before anticipated compaction, ensure `STATUS.md` contains:
-
-- what is complete and how it was verified;
-- what is currently running or partially edited;
-- exact failing command/output summary;
-- decisions made and alternatives rejected;
-- paid resources still active;
-- the single next action.
-
-Never store secrets or huge logs in `STATUS.md`; link to local evidence.
-
-## Parallel Agent Rules
-
-- Decompose by disjoint write ownership.
-- Freeze shared schemas before parallel implementation.
-- Give each worker explicit inputs, output paths, tests, and non-goals.
-- One integrator owns shared state and cloud experiments.
-- Review returned patches before marking work complete.
-- Do not have multiple agents provision AWS independently.
-- Use independent agents for adversarial verification after evidence exists,
-  not for duplicating speculative implementation.
-
-## Anti-Drift Checks
-
-At phase boundaries ask:
-
-- Are we still solving dispatch visibility plus Arm-aware optimization?
-- Did a new feature enter without a requirement and ADR?
-- Does the headline depend on an unverified inference?
-- Are existing upstream capabilities represented as baselines?
-- Can a judge reproduce the claim without private context?
-- Is the next phase justified by the prior gate?
-
-## Definition Of Done
-
-Code generation is not completion. A work item is done only when:
-
-- acceptance behavior exists;
-- negative/failure behavior exists;
-- tests and required real evidence pass;
-- docs and schemas agree;
-- cost/security/license constraints are satisfied;
-- status and traceability are updated;
-- no required process remains running.
+At a handoff, `STATUS.md` must answer: what is established, what changed, what
+failed, what is currently allowed, and what exact task comes next.
 

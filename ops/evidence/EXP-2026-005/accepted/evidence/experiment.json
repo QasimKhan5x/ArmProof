@@ -1,0 +1,43 @@
+{
+  "schema_version": "2.0.0",
+  "experiment_id": "EXP-2026-005",
+  "status": "preregistered",
+  "hypothesis": "A fresh c8g.4xlarge reproduces every EXP-2026-004 fixed-SLO capacity ratio within 10% while retaining the original quality and Arm-attribution gates.",
+  "causal_scope": "reproduction",
+  "treatments": [
+    {
+      "id": "kleidiai-disabled",
+      "artifact_ref": "microsoft/Phi-4-mini-instruct-onnx@fc04c8f93df696602fd9f300a30d1bf2e3081347:cpu-int4-rtn-block-32-acc-level-4",
+      "runtime_ref": "onnxruntime@4c4d4923b4630a2d0b3807cbbbc3b1813b1380a5+onnxruntime-genai@d2c81fdc8ef80836ceba1bae384be80262e24bb4",
+      "command_ref": "ops/aws/cap-001/guest.sh:kleidiai-disabled",
+      "environment_overrides": {"mlas.disable_kleidiai": "1", "intra_op_num_threads": 16}
+    },
+    {
+      "id": "kleidiai-enabled",
+      "artifact_ref": "microsoft/Phi-4-mini-instruct-onnx@fc04c8f93df696602fd9f300a30d1bf2e3081347:cpu-int4-rtn-block-32-acc-level-4",
+      "runtime_ref": "onnxruntime@4c4d4923b4630a2d0b3807cbbbc3b1813b1380a5+onnxruntime-genai@d2c81fdc8ef80836ceba1bae384be80262e24bb4",
+      "command_ref": "ops/aws/cap-001/guest.sh:kleidiai-enabled",
+      "environment_overrides": {"mlas.disable_kleidiai": "0", "intra_op_num_threads": 16}
+    }
+  ],
+  "workload_ref": "data/banking77/generated/manifest.json",
+  "quality_ref": "EXP-2026-003 attempt-002 immutable 770-row samples",
+  "primary_metric": "per_mix_capacity_ratio_relative_difference_from_EXP-2026-004",
+  "secondary_metrics": ["quality_non_inferiority", "schema_valid_rate", "arm_path_attribution", "artifact_identity"],
+  "acceptance": {
+    "maximum_relative_difference": 0.10,
+    "required_reproduced_mixes": 3,
+    "minimum_capacity_ratio": 1.5,
+    "maximum_quality_loss_pp": 1.0,
+    "minimum_schema_valid_rate": 0.99
+  },
+  "environment_ref": "examples/phi4-graviton/runtime-lock.json",
+  "repetitions": 5,
+  "randomization": "Identical to EXP-2026-004; confirmation treatment order alternates AB/BA.",
+  "warmup_policy": "Three successful requests per ready treatment.",
+  "profiler_ref": "Separate perf record callchain run excluded from load metrics.",
+  "maximum_runtime_minutes": 120,
+  "maximum_cost_usd": 1.3,
+  "evidence_path": "ops/evidence/EXP-2026-005",
+  "notes": "One clean-instance reproduction. EXP-2026-004 remains immutable and authoritative regardless of outcome."
+}

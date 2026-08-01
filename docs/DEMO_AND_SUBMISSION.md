@@ -1,103 +1,61 @@
-# Demo And Submission Plan
+# Demo And Submission
 
-The demo is a realistic developer workflow, not an invented application layer.
+## Message
 
-## Scenario
+> ArmProof catches Arm optimization pull requests that run on Graviton but are
+> not actually accelerated by the required Arm path.
 
-An inference engineer has deployed a 3B instruct model on Graviton4 with
-`llama.cpp` and KleidiAI. The model runs, but the developer cannot explain
-whether the important operations are accelerated or whether the standard GGUF
-is the right artifact for this Arm machine.
+## Ninety-Second Judge Path
 
-## Three-Minute Demo
+### 0-15 seconds: The Decision
 
-### 0:00-0:20 - Problem And Input
+Open a real repository PR migrating the Phi-4 service from PyTorch BF16 to INT4
+ONNX Runtime GenAI with KleidiAI. Show the declared optimization contract.
 
-Show the real GGUF, pinned workload, Graviton4 identity, and one baseline
-performance result. State the problem plainly: enabling a backend does not
-explain coverage or produce the best deployable model.
+### 15-40 seconds: Catch The False Claim
 
-### 0:20-0:55 - Execution X-Ray
+Show the run with KleidiAI disabled. The GitHub Check is red because `kai_*`
+execution is absent and the Arm performance contract fails.
 
-Run or replay `kleidiscope record` and open the report:
+### 40-65 seconds: Prove The Optimization
 
-- model execution paths are weighted by measured significance;
-- accelerated paths identify KleidiAI kernel/family and ISA requirement;
-- fallbacks show stable reason codes and source-grounded explanations;
-- unknown attribution remains visible.
+Enable KleidiAI. Show the green check, fixed-SLO capacity result, preserved
+quality, clean-instance reproduction and separate whole-stack versus
+Arm-specific comparisons.
 
-Select one expensive fallback and show the tensor, type, shape, source rule,
-and why a candidate format is eligible.
+### 65-90 seconds: Reuse It
 
-### 0:55-1:25 - Explainable Optimization
+Open the report provenance, show the one-command reproduction and launch or
+display the exact passing deployment manifest.
 
-Run or replay `kleidiscope optimize`:
+## Three-Minute Video
 
-- declare quality and size/performance constraints;
-- show no more than three candidate recipes;
-- show the rationale for each tensor override;
-- distinguish KleidiScope policy from upstream `llama-quantize` execution.
+Add enough time to explain:
 
-### 1:25-2:15 - Controlled Comparison
+- why BF16-to-INT4 and KleidiAI on/off answer different questions;
+- how the claim ledger fails closed;
+- how PSS and capacity are measured;
+- which artifacts another developer can reuse; and
+- the limits of the evidence.
 
-Show the comparison table/frontier for:
+## Report Views
 
-- F16/BF16 quality reference;
-- Q4_K_M;
-- relevant standard/uniform quant;
-- size-matched target-BPW;
-- KleidiScope candidate.
+1. Decision and failed requirements.
+2. Transformation and causal comparison map.
+3. Fixed-SLO cloud capacity and queue behavior.
+4. Quality and malformed-output inspection.
+5. Arm environment, `kai_*` evidence and raw provenance.
 
-Headline only measured outcomes: quality, bytes/RSS, PP/TG, TTFT/p95, and
-coverage with uncertainty.
+## Submission Claim Rules
 
-### 2:15-2:40 - Reusable Artifact
+- Every number names its comparison and environment.
+- "Verified by ArmProof" is allowed; "Arm certified" is not.
+- Direct speed and PSS results remain distinct from the accepted server
+  capacity comparison.
+- Failed and inconclusive experiments remain visible.
+- The report is a product artifact, not evidence by itself.
 
-Download or open:
+## Offline Backup
 
-- recipe and exact quantizer command;
-- candidate checksum/model reference;
-- trace schema and fallback rules;
-- evidence manifest and reproduction command;
-- CI regression check.
-
-### 2:40-3:00 - Contribution
-
-Conclude with the scoped measured result and community value: an Arm developer
-can inspect, optimize, reproduce, and guard a model without repeating source
-archaeology.
-
-## UX Requirements
-
-- First screen answers: what won, by how much, on what hardware, under what
-  quality constraint.
-- The X-ray is a functional inspection view, not decoration.
-- Tooltips explain unfamiliar kernel/ISA terms.
-- Failed and inconclusive candidates remain accessible.
-- Every chart links to raw values and environment identity.
-- No nested card-heavy dashboard or marketing landing page.
-- Desktop and mobile text never overlap; dense tables adapt to narrow screens.
-- A fixture-backed offline mode guarantees the demo without a live AWS bill.
-
-## Submission Artifacts
-
-- Public source repository.
-- Three-minute video and optional longer technical walkthrough.
-- Interactive static report hosted without a running inference server.
-- Optimized model when license permits, otherwise recipe and reproducible build.
-- Raw evidence bundle with checksums.
-- Technical architecture and benchmark methodology.
-- Arm optimization tutorial.
-- Upstream patch or contribution-ready diff.
-- Judge quickstart requiring no cloud spend for report inspection.
-
-## Backup Story If The Speed Gate Fails
-
-Do not manufacture a win. A PIVOT submission is viable only if KleidiScope
-still provides uniquely useful, accurate kernel/fallback observability and
-demonstrates a defensible size/quality or developer-workflow improvement. The
-submission must state that the tested candidate did not improve speed.
-
-If neither optimization nor actionable observability survives, do not submit
-this concept as though it succeeded.
-
+Ship the static report, short recorded terminal sequence, raw summary and
+screenshots so judging does not depend on a live AWS instance or GitHub Action.

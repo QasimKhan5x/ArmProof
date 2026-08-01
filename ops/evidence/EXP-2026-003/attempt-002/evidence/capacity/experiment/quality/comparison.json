@@ -1,0 +1,6 @@
+{
+  "accuracy_delta_pp": 0.1298701298701299,
+  "macro_f1_delta_pp": 0.002640656141772446,
+  "prediction_agreement": 0.825974025974026,
+  "schema_valid_rate": 0.5376623376623376
+}

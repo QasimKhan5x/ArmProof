@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://armproof.dev/schemas/evidence-manifest.schema.json",
+  "title": "ArmProof Evidence Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "bundle_id", "redactions", "experiments", "files", "source_archives"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "bundle_id": {"type": "string", "minLength": 1},
+    "redactions": {"type": "array", "items": {"type": "object"}},
+    "experiments": {"type": "array", "items": {"type": "object"}},
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "bytes", "sha256"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "bytes": {"type": "integer", "minimum": 0},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "source_archives": {"type": "array", "items": {"type": "object"}}
+  }
+}

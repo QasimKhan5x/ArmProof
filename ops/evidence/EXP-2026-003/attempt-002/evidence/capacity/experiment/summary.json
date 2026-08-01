@@ -1,0 +1,76 @@
+{
+  "elapsed_seconds": 1261.364398241043,
+  "experiment_id": "EXP-2026-003",
+  "mixes": {
+    "long": {
+      "disabled_boundary": [
+        0.05,
+        0.075
+      ],
+      "enabled_boundary": [
+        0.05,
+        0.075
+      ],
+      "ratio": {
+        "baseline_median": 0.06666666666666667,
+        "baseline_samples": 5,
+        "lower_95": 1.0,
+        "ratio": 1.0,
+        "treatment_median": 0.06666666666666667,
+        "treatment_samples": 5,
+        "upper_95": 1.0
+      },
+      "valid_boundary_confirmations": true
+    },
+    "mixed": {
+      "disabled_boundary": [
+        0.05,
+        0.075
+      ],
+      "enabled_boundary": [
+        0.05,
+        0.075
+      ],
+      "ratio": {
+        "baseline_median": 0.06666666666666667,
+        "baseline_samples": 5,
+        "lower_95": 1.0,
+        "ratio": 1.0,
+        "treatment_median": 0.06666666666666667,
+        "treatment_samples": 5,
+        "upper_95": 1.0
+      },
+      "valid_boundary_confirmations": true
+    },
+    "short": {
+      "disabled_boundary": [
+        0.05,
+        0.075
+      ],
+      "enabled_boundary": [
+        0.05,
+        0.075
+      ],
+      "ratio": {
+        "baseline_median": 0.06666666666666667,
+        "baseline_samples": 5,
+        "lower_95": 1.0,
+        "ratio": 1.0,
+        "treatment_median": 0.06666666666666667,
+        "treatment_samples": 5,
+        "upper_95": 1.0
+      },
+      "valid_boundary_confirmations": true
+    }
+  },
+  "passed": false,
+  "passing_mixes": 0,
+  "quality_comparison": {
+    "accuracy_delta_pp": 0.1298701298701299,
+    "macro_f1_delta_pp": 0.002640656141772446,
+    "prediction_agreement": 0.825974025974026,
+    "schema_valid_rate": 0.5376623376623376
+  },
+  "quality_passed": false,
+  "schema_version": "1.0.0"
+}

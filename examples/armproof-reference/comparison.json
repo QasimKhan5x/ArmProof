@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "comparison_id": "exp-2026-004-kleidiai",
+  "causal_scope": "arm_acceleration",
+  "baseline": {
+    "treatment_id": "kleidiai-disabled",
+    "artifact_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
+    "runtime_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
+    "workload_sha256": "b9dcaf4f73abf4c686f64fb6182fae6acb62bb01710b9ff681a0f42d6bf75f92",
+    "environment_sha256": "d75eb4ed5f78dc4e518d48e60be11076366966c07b0cafbf7bb16d506bf1ae70",
+    "controls": {"kleidiai.enabled": false, "threads": 16, "instance": "c8g.4xlarge"}
+  },
+  "treatment": {
+    "treatment_id": "kleidiai-enabled",
+    "artifact_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
+    "runtime_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
+    "workload_sha256": "b9dcaf4f73abf4c686f64fb6182fae6acb62bb01710b9ff681a0f42d6bf75f92",
+    "environment_sha256": "d75eb4ed5f78dc4e518d48e60be11076366966c07b0cafbf7bb16d506bf1ae70",
+    "controls": {"kleidiai.enabled": true, "threads": 16, "instance": "c8g.4xlarge"}
+  },
+  "metrics": {
+    "minimum_capacity_ratio": 2.5,
+    "short_capacity_ratio": 3.0,
+    "long_capacity_ratio": 2.5,
+    "mixed_capacity_ratio": 3.0,
+    "accuracy_delta_pp": -0.38961038961038974,
+    "macro_f1_delta_pp": -0.6726444303255752,
+    "schema_valid_rate": 1.0,
+    "enabled_kai_callchains_observed": 1.0
+  },
+  "evidence_kinds": ["request_samples", "boundary_confirmations", "quality_rows", "artifact_hashes", "arm_callchains"],
+  "arm_attribution": {"baseline_observed": false, "treatment_observed": true}
+}

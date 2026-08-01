@@ -1,0 +1,22 @@
+[Unit]
+Description=ArmProof verified Phi-4 Mini INT4 service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=armproof
+Group=armproof
+WorkingDirectory=/opt/armproof
+EnvironmentFile=/etc/armproof/phi4.env
+ExecStart=/opt/armproof/.venv/bin/python -m armproof.reference.phi4 --backend ort-int4 --model ${ARMPROOF_MODEL_PATH} --label ort-int4-kleidiai-enabled --host 127.0.0.1 --port 8000 --threads 16 --max-inflight 1
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+StateDirectory=armproof
+
+[Install]
+WantedBy=multi-user.target

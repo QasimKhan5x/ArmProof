@@ -1,0 +1,90 @@
+{
+  "experiment_id": "EXP-RESULT-FIRST-MEM-002",
+  "gates": {
+    "bf16_residency_sanity": true,
+    "format_validity": true,
+    "int4_speedup": true,
+    "kernel_negative": true,
+    "kernel_positive": true,
+    "peak_pss_reduction": true,
+    "quality_loss": true,
+    "repetitions": true,
+    "weighted_pss_reduction": true
+  },
+  "passed": true,
+  "summary": {
+    "bf16_peak_pss_to_model_bytes": 1.4104215108323215,
+    "disabled_kernel_observed": false,
+    "disk_reduction_percent": 35.91724249132322,
+    "int4_format_valid_percent": 100.0,
+    "int4_vs_bf16_best_speedup": 51.72218008803722,
+    "kleidiai_kernel_observed": true,
+    "kleidiai_shape_gains": [
+      1.7170141477125784,
+      2.128817498309564,
+      2.4081349473078624,
+      2.5870578477345356
+    ],
+    "memory": {
+      "bf16": {
+        "duration_seconds": 794.79783837,
+        "interval_seconds": 0.05,
+        "peak_pss_bytes": 10851862528,
+        "peak_rss_bytes": 10860773376,
+        "sample_count": 10477,
+        "time_weighted_pss_bytes": 10101106656.277378,
+        "time_weighted_rss_bytes": 10110017504.277378
+      },
+      "int4": {
+        "duration_seconds": 109.407252906,
+        "interval_seconds": 0.05,
+        "peak_pss_bytes": 4846790656,
+        "peak_rss_bytes": 4855762944,
+        "sample_count": 416,
+        "time_weighted_pss_bytes": 4074753789.0028534,
+        "time_weighted_rss_bytes": 4083570982.624313
+      }
+    },
+    "minimum_repetitions": 3,
+    "peak_pss_reduction_percent": 55.336785335288766,
+    "peak_rss_reduction_percent": 55.29081791974222,
+    "quality": {
+      "bf16_correct": 19,
+      "int4_correct": 20,
+      "total": 24
+    },
+    "quality_loss_count": 0,
+    "shapes": [
+      {
+        "batch": 1,
+        "decode_gain": 1.2840016081599528,
+        "e2e_gain": 1.7170141477125784,
+        "int4_vs_bf16": 51.72218008803722,
+        "prompt_length": 128
+      },
+      {
+        "batch": 1,
+        "decode_gain": 1.2500425339882622,
+        "e2e_gain": 2.128817498309564,
+        "int4_vs_bf16": 27.6499721425994,
+        "prompt_length": 512
+      },
+      {
+        "batch": 4,
+        "decode_gain": 1.858980574867202,
+        "e2e_gain": 2.4081349473078624,
+        "int4_vs_bf16": 6.128975294517076,
+        "prompt_length": 128
+      },
+      {
+        "batch": 4,
+        "decode_gain": 1.7299308400290965,
+        "e2e_gain": 2.5870578477345356,
+        "int4_vs_bf16": 3.7609301876021526,
+        "prompt_length": 512
+      }
+    ],
+    "weighted_pss_reduction_percent": 59.66032309469201,
+    "weighted_rss_reduction_percent": 59.608665554766624
+  }
+}

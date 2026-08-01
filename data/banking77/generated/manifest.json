@@ -1,0 +1,32 @@
+{
+  "categories": 77,
+  "dataset": "BANKING77",
+  "license": "CC-BY-4.0",
+  "outputs": {
+    "quality.jsonl": {
+      "rows": 770,
+      "sha256": "396208a4f40e7893933ed230e2f055e70aa48ef12223d56c1147ab77e73c50d4"
+    },
+    "traffic-long.jsonl": {
+      "rows": 512,
+      "sha256": "c27e030f43a722d96493d649dedfc5858dd66b1e8eef4edbf0f57df6b2514c71"
+    },
+    "traffic-mixed.jsonl": {
+      "rows": 512,
+      "sha256": "86b756c46ef2c647ddd779ccc4dd6bafd2aad0c261f4e24cf6177c224a1e1118"
+    },
+    "traffic-short.jsonl": {
+      "rows": 512,
+      "sha256": "56d5740f9e86e21c731a1cff044c1eb4b2516bb7b58a1446b9e16624991f21a8"
+    }
+  },
+  "schema_version": "1.0.0",
+  "selection": "first 10 test examples per upstream category for quality; deterministic traffic transforms",
+  "source_hashes": {
+    "LICENSE-CC-BY-4.0": "7e7170e3cebf88a9f60c7b8421418323c09304da1af4d5e90f4da1dc1c8a2661",
+    "categories.json": "53261da888122daf2d120d925458631d9619e15d82e56052e7a42e535ce32b63",
+    "test.csv": "d12d6e3bc4c3103966ae786dc435913c0c563dfa328f5a3646d0e62cfeeb474d"
+  },
+  "upstream_commit": "57ec275d8078af65b7731c2a98be812d844a6d6b",
+  "upstream_repository": "https://github.com/PolyAI-LDN/task-specific-datasets"
+}

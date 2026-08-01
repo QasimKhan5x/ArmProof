@@ -1,0 +1,10 @@
+test_followup_gates_fail_closed (test_harness.HarnessTests.test_followup_gates_fail_closed) ... ok
+test_gates_fail_closed (test_harness.HarnessTests.test_gates_fail_closed) ... ok
+test_guest_pins_required_onnx_build_directory (test_harness.HarnessTests.test_guest_pins_required_onnx_build_directory) ... ok
+test_parse_answer (test_harness.HarnessTests.test_parse_answer) ... ok
+test_variant_sets_same_binary_control (test_harness.HarnessTests.test_variant_sets_same_binary_control) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.001s
+
+OK

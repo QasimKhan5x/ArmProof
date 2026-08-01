@@ -1,55 +1,69 @@
-# Architecture Decision Log
+# Architecture And Product Decisions
 
-Use short append-only entries. Superseded decisions remain visible.
+## ADR-001: KleidiScope GGUF Optimizer
 
-## ADR-001: Build KleidiScope As A New Project
+- Status: superseded on 2026-07-31.
+- Previous decision: build a `llama.cpp`/GGUF tracing and mixed-quantization
+  optimizer.
+- Reason superseded: feasibility work found no runtime-significant fallback
+  surface or credible candidate advantage for the planned optimization thesis.
 
-- Date: 2026-07-29
-- Status: accepted
-- Decision: initialize `~/PersonalProjects/KleidiScope` rather than overwrite
-  the unrelated VerifyLane/Committee-of-One repository.
-- Reason: the active concept, architecture, users, and evidence are materially
-  different. Mixing histories would confuse agents and contributors.
+Historical documents must not be treated as active requirements.
 
-## ADR-002: Local-First, Graviton4 For Hardware Truth
+## ADR-002: Use The Validated Phi-4/KleidiAI Mechanism
 
-- Date: 2026-07-29
-- Status: accepted
-- Decision: perform implementation and fixture work locally/free CI, then use
-  `c8g.2xlarge` for bounded final experiments with `c8g.4xlarge` fallback.
-- Reason: this preserves current Arm hardware, a 3B model, and representative
-  CPU inference while keeping expected AWS spend below $10.
+- Status: accepted.
+- Decision: productize the established Phi-4 Mini INT4 ONNX Runtime GenAI and
+  KleidiAI evidence rather than search for another optimization.
+- Reason: direct speed, PSS, size, quality and attribution findings are already
+  measured on Graviton4.
 
-## ADR-003: Existing Mixed Quantization Is A Baseline
+## ADR-003: ArmProof Is A PR Release Gate
 
-- Date: 2026-07-29
-- Status: accepted
-- Decision: compare with upstream `--target-bpw` and do not claim generic
-  automatic per-tensor quantization as the invention.
-- Reason: current llama.cpp already provides per-tensor overrides and an
-  automatic quality/size optimizer. KleidiScope must demonstrate value through
-  Arm dispatch observability and hardware-aware performance constraints.
+- Status: accepted.
+- Decision: the primary workflow is a CI merge/deployment decision for an Arm
+  AI optimization PR.
+- Reason: this is recurring developer work and avoids a staged application
+  narrative. A support workload is only a reference fixture.
 
-## ADR-004: Evidence-First Architecture
+## ADR-004: Fail-Closed Claim Ledger
 
-- Date: 2026-07-29
-- Status: accepted
-- Decision: schemas and immutable evidence bundles precede dashboard and full
-  CLI work.
-- Reason: judge claims and long-horizon agent correctness require replayable
-  evidence independent of conversation state or UI.
+- Status: accepted.
+- Decision: every claim binds to identities, raw evidence, comparison,
+  threshold and reproduction command. Required unknown evidence fails.
+- Reason: a report around one hand-built experiment is not a reusable product.
 
-## ADR Template
+## ADR-005: Separate Causal Scopes
 
-```markdown
-## ADR-NNN: Title
+- Status: accepted.
+- Decision: BF16-to-INT4 describes the whole deployment transformation;
+  identical INT4 KleidiAI off/on isolates Arm acceleration; fixed-SLO load
+  testing describes cloud capacity.
+- Reason: combining them would overstate Arm attribution.
 
-- Date: YYYY-MM-DD
-- Status: proposed | accepted | superseded | rejected
-- Decision:
-- Context:
-- Alternatives:
-- Consequences:
-- Evidence/links:
-```
+## ADR-006: One Excellent Runtime Adapter
 
+- Status: accepted.
+- Decision: ship the ONNX Runtime GenAI/KleidiAI reference path. Defer vLLM,
+  llama.cpp and additional clouds.
+- Reason: shallow integrations weaken trust and completion quality.
+
+## ADR-007: Capacity Gate Before UI Critical Path
+
+- Status: accepted.
+- Decision: implement the reusable service/load harness and run fixed-SLO
+  validation before investing heavily in report polish.
+- Reason: the Cloud AI and grand-prize story depends on deployable capacity.
+
+## ADR-008: MIT Project And CC-BY-4.0 Workload
+
+- Status: accepted.
+- Decision: preserve the owner-selected MIT license and preserve BANKING77 as
+  separately attributed CC-BY-4.0 material.
+- Reason: permissive reuse is central to the community artifact, while the
+  upstream dataset's attribution terms must remain explicit.
+
+## Pending Decisions
+
+- Public repository name and remote.
+- Whether to add a second adapter after the hackathon.

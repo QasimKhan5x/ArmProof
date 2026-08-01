@@ -1,9 +1,13 @@
 # Evidence Bundles
 
-Real run bundles live under `ops/evidence/<run-id>/` and are ignored by default
-because traces and models can be large. Publish curated, license-safe bundles
-through releases or dedicated artifact storage, preserving checksums and links.
+Normalized run bundles live under `ops/evidence/<experiment-id>/<run-id>/`.
+Large raw traces and model files may use external artifact storage, but their
+manifests, hashes, licenses and immutable URLs belong here.
 
-An accepted bundle contains the files listed in `docs/ARCHITECTURE.md` and
-`docs/BENCHMARK_PROTOCOL.md`.
+An accepted bundle contains the identities, commands, environment probe, raw
+samples, profiler output, quality output, statistical summary and claim ledger
+defined by [`docs/ARCHITECTURE.md`](../../docs/ARCHITECTURE.md) and
+[`docs/BENCHMARK_PROTOCOL.md`](../../docs/BENCHMARK_PROTOCOL.md).
 
+Do not publish a metric from a prose-only summary. Do not delete failed runs.
+Redact credentials and machine identifiers before making a bundle public.

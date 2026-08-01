@@ -1,6 +1,11 @@
 {
-  "schema_version": "1.0.0",
-  "updated_at": "2026-07-29",
+  "schema_version": "2.0.0",
+  "updated_at": "2026-07-31",
+  "spec_gate": {
+    "version": "1.0.0",
+    "status": "approved",
+    "work_item": "CTX-001"
+  },
   "allowed_statuses": [
     "pending",
     "in_progress",
@@ -11,292 +16,281 @@
   ],
   "items": [
     {
-      "id": "INIT-001",
+      "id": "CTX-001",
       "phase": 0,
       "priority": 1,
-      "title": "Initialize durable project context",
+      "title": "Approve and align durable ArmProof context",
       "status": "completed",
       "dependencies": [],
-      "context": [
-        "AGENTS.md",
-        "docs/PROJECT_MAP.md",
-        "docs/AGENT_PLAYBOOK.md"
-      ],
-      "deliverables": [
-        "Stable documentation hierarchy",
-        "Machine-readable work state",
-        "Experiment schema and registry"
-      ],
-      "verification": [
-        "All JSON files parse",
-        "All relative Markdown links resolve",
-        "Requirement, claim, phase, risk, and budget documents agree"
-      ],
-      "evidence": [
-        "scripts/validate_context.py: Context validation passed on 2026-07-29"
-      ]
+      "context": ["AGENTS.md", "docs/PRODUCT_SPEC.md", "docs/PROJECT_MAP.md"],
+      "deliverables": ["Approved product contract", "Aligned agent context", "Validated task graph"],
+      "verification": ["scripts/validate_context.py passes", "Retired concepts occur only in historical records"],
+      "evidence": ["Context audit completed 2026-07-31"]
     },
     {
-      "id": "SRC-001",
+      "id": "EVID-001",
       "phase": 0,
       "priority": 2,
-      "title": "Pin and map llama.cpp KleidiAI dispatch source",
-      "status": "pending",
-      "dependencies": ["INIT-001"],
-      "context": [
-        "docs/FEASIBILITY_PLAN.md",
-        "docs/ARCHITECTURE.md",
-        "docs/SOURCES.md"
-      ],
-      "deliverables": [
-        "Pinned revisions",
-        "Dispatch path map",
-        "Observed-versus-derived field inventory",
-        "Minimal patch design"
-      ],
-      "verification": [
-        "Every proposed trace field maps to pinned source or is labeled derived",
-        "KleidiAI-off negative path is defined"
-      ],
-      "evidence": []
-    },
-    {
-      "id": "SCH-001",
-      "phase": 0,
-      "priority": 3,
-      "title": "Define trace, environment, recipe, and evidence schemas",
-      "status": "pending",
-      "dependencies": ["SRC-001"],
-      "context": [
-        "docs/REQUIREMENTS.md",
-        "docs/ARCHITECTURE.md",
-        "docs/TRACEABILITY.md"
-      ],
-      "deliverables": [
-        "Versioned schemas",
-        "Eligible, fallback, unknown, and failure fixtures"
-      ],
-      "verification": [
-        "Fixtures validate",
-        "Invalid fixtures fail",
-        "Unknown is distinct from fallback"
-      ],
-      "evidence": []
+      "title": "Import and normalize established Graviton evidence",
+      "status": "completed",
+      "dependencies": ["CTX-001"],
+      "context": ["context/packs/EVID-001.md"],
+      "deliverables": ["Immutable evidence bundles", "Checksummed manifest", "Claim-to-evidence index"],
+      "verification": ["All documented measurements trace to raw samples", "Failed historical experiments remain visible", "No pending claim is marked established"],
+      "evidence": [
+        "ops/evidence/result-first/manifest.json",
+        "tests/evidence/test_manifest.py",
+        "51 imported files verified by scripts/build_evidence_manifest.py"
+      ]
     },
     {
       "id": "BOOT-001",
       "phase": 0,
-      "priority": 4,
+      "priority": 3,
       "title": "Create reproducible local and Arm64 bootstrap",
-      "status": "pending",
-      "dependencies": ["SRC-001"],
-      "context": [
-        "docs/ROADMAP.md",
-        "docs/SECURITY_AND_LICENSES.md"
-      ],
-      "deliverables": [
-        "Pinned setup",
-        "Verified build/test/smoke commands",
-        "Free GitHub Actions Arm64 compile check"
-      ],
-      "verification": [
-        "Clean environment bootstrap succeeds",
-        "AGENTS.md and STATUS.md commands updated"
-      ],
-      "evidence": []
+      "status": "completed",
+      "dependencies": ["CTX-001"],
+      "context": ["docs/ROADMAP.md", "docs/SECURITY_AND_LICENSES.md", "docs/ARCHITECTURE.md"],
+      "deliverables": ["Pinned dependencies", "Local developer setup", "Arm64 build and smoke path"],
+      "verification": ["Clean bootstrap succeeds", "Runtime and model revisions are recorded", "No credentials enter repository state"],
+      "evidence": [
+        "pyproject.toml",
+        "Makefile: make check",
+        ".github/workflows/ci.yml",
+        "docs/DEVELOPMENT.md"
+      ]
+    },
+    {
+      "id": "SCHEMA-001",
+      "phase": 0,
+      "priority": 3,
+      "title": "Define run, comparison, evidence and claim schemas",
+      "status": "completed",
+      "dependencies": ["CTX-001"],
+      "context": ["docs/REQUIREMENTS.md", "docs/ARCHITECTURE.md", "docs/TRACEABILITY.md"],
+      "deliverables": ["Versioned schemas", "Valid and invalid fixtures", "Fail-closed claim states"],
+      "verification": ["Fixtures validate", "Invalid fixtures fail", "Unknown and unsupported remain distinct"],
+      "evidence": [
+        "schemas/contract.schema.json",
+        "schemas/comparison.schema.json",
+        "schemas/decision.schema.json",
+        "schemas/evidence-manifest.schema.json",
+        "tests/contracts/ and tests/evidence/test_records.py"
+      ]
     },
     {
       "id": "DATA-001",
       "phase": 0,
-      "priority": 5,
-      "title": "Select and license the 3B model and evaluation data",
-      "status": "pending",
-      "dependencies": ["INIT-001"],
-      "context": [
-        "docs/FEASIBILITY_PLAN.md",
-        "docs/BENCHMARK_PROTOCOL.md",
-        "docs/SECURITY_AND_LICENSES.md"
-      ],
-      "deliverables": [
-        "Canonical model/data sources",
-        "Licenses and redistribution decision",
-        "Checksummed download manifest",
-        "Calibration/held-out split"
-      ],
-      "verification": [
-        "Ungated clean download works",
-        "No calibration leakage into held-out acceptance"
-      ],
-      "evidence": []
+      "priority": 4,
+      "title": "Freeze model, workload and quality data",
+      "status": "completed",
+      "dependencies": ["CTX-001"],
+      "context": ["docs/BENCHMARK_PROTOCOL.md", "docs/SECURITY_AND_LICENSES.md", "docs/CAPACITY_VALIDATION.md"],
+      "deliverables": ["Checksummed data manifest", "Traffic mixes", "Labeled quality set"],
+      "verification": ["Licenses permit intended use", "Quality set has at least 500 examples", "Traffic mixes are immutable before capacity testing"],
+      "evidence": [
+        "data/banking77/generated/manifest.json",
+        "770 labeled quality cases and three 512-row traffic mixes",
+        "scripts/build_banking77_workload.py source/hash verification",
+        "THIRD_PARTY_NOTICES.md and CC-BY-4.0 license"
+      ]
     },
     {
       "id": "AWS-001",
       "phase": 0,
-      "priority": 6,
-      "title": "Implement dry-run AWS lifecycle and cost guard",
-      "status": "pending",
-      "dependencies": ["INIT-001"],
-      "context": [
-        "docs/AWS_BUDGET.md",
-        "docs/SECURITY_AND_LICENSES.md"
-      ],
-      "deliverables": [
-        "Plan, launch, TTL, upload, terminate, and cleanup scripts",
-        "Dry-run cost estimate",
-        "Least-privilege resource inventory"
-      ],
-      "verification": [
-        "Dry run creates no resource",
-        "Cleanup handles partial failure",
-        "No command runs without explicit approval token"
-      ],
-      "evidence": []
+      "priority": 4,
+      "title": "Implement guarded Graviton lifecycle",
+      "status": "completed",
+      "dependencies": ["CTX-001"],
+      "context": ["docs/AWS_BUDGET.md", "docs/SECURITY_AND_LICENSES.md"],
+      "deliverables": ["Dry-run plan", "TTL and cleanup guard", "Spend ledger"],
+      "verification": ["Dry run creates no resources", "Root credentials are rejected", "Cleanup handles partial failure", "Projected spend remains within the approved ceiling"],
+      "evidence": [
+        "src/armproof/cloud/",
+        "ops/aws/runner-policy.json",
+        "ops/evidence/EXP-2026-004/spend-ledger.json",
+        "Clean before/after inventory and USD 3.1632 cumulative estimate"
+      ]
     },
     {
-      "id": "TRACE-001",
+      "id": "CORE-001",
       "phase": 1,
-      "priority": 7,
-      "title": "Implement bounded runtime tracing",
-      "status": "pending",
-      "dependencies": ["SCH-001", "BOOT-001"],
-      "context": [
-        "docs/REQUIREMENTS.md",
-        "docs/ARCHITECTURE.md",
-        "docs/FEASIBILITY_PLAN.md"
-      ],
-      "deliverables": [
-        "Opt-in runtime patch",
-        "Normalizer",
-        "Rule prototype",
-        "On/off comparison"
-      ],
-      "verification": [
-        "FR-01 through FR-04 tests pass",
-        "False acceleration negative test passes",
-        "Overhead is measured"
-      ],
-      "evidence": []
+      "priority": 5,
+      "title": "Build comparison and policy engine",
+      "status": "completed",
+      "dependencies": ["EVID-001", "BOOT-001", "SCHEMA-001"],
+      "context": ["docs/ARCHITECTURE.md", "docs/REQUIREMENTS.md", "docs/BENCHMARK_PROTOCOL.md"],
+      "deliverables": ["Artifact comparator", "Statistical checks", "Arm-path policy engine", "Claim ledger"],
+      "verification": ["Causal-scope tests pass", "Missing attribution fails closed", "Unsupported claims cannot enter reports"],
+      "evidence": [
+        "src/armproof/evidence/identity.py",
+        "src/armproof/policy/",
+        "src/armproof/cli.py verify",
+        "tests/policy/ and tests/evidence/test_identity.py"
+      ]
     },
     {
-      "id": "BASE-001",
+      "id": "QUALITY-001",
+      "phase": 1,
+      "priority": 5,
+      "title": "Implement deterministic quality evaluation",
+      "status": "completed",
+      "dependencies": ["BOOT-001", "SCHEMA-001", "DATA-001"],
+      "context": ["docs/BENCHMARK_PROTOCOL.md", "docs/REQUIREMENTS.md"],
+      "deliverables": ["Quality runner", "Output normalizer", "Regression policy"],
+      "verification": ["Repeated scoring is deterministic", "Parse failures are explicit", "Quality thresholds are applied before performance claims"],
+      "evidence": [
+        "src/armproof/quality/banking77.py",
+        "src/armproof/cli.py quality",
+        "tests/quality/test_banking77.py"
+      ]
+    },
+    {
+      "id": "FIXTURE-001",
+      "phase": 1,
+      "priority": 6,
+      "title": "Create pass, fail and unknown pull-request fixtures",
+      "status": "completed",
+      "dependencies": ["CORE-001"],
+      "context": ["docs/DEMO_AND_SUBMISSION.md", "docs/REQUIREMENTS.md"],
+      "deliverables": ["Accelerated pass fixture", "False-acceleration fail fixture", "Insufficient-evidence fixture"],
+      "verification": ["Expected check conclusions are stable", "Each failure links to actionable evidence"],
+      "evidence": [
+        "examples/fixture-pass/",
+        "examples/fixture-fail/",
+        "examples/fixture-unknown/",
+        "tests/fixtures/test_cli_fixtures.py"
+      ]
+    },
+    {
+      "id": "SERVICE-001",
+      "phase": 2,
+      "priority": 7,
+      "title": "Build the reference Arm inference service adapter",
+      "status": "completed",
+      "dependencies": ["BOOT-001", "SCHEMA-001"],
+      "context": ["docs/ARCHITECTURE.md", "docs/PRODUCT_SPEC.md"],
+      "deliverables": ["BF16 reference deployment", "INT4 KleidiAI deployment", "Health and metric endpoints"],
+      "verification": ["Both deployments answer the frozen workload", "Artifact and runtime identities are recorded", "Enabled and disabled Arm paths are distinguishable"],
+      "evidence": [
+        "src/armproof/adapters/http_service.py",
+        "src/armproof/reference/phi4.py",
+        "examples/phi4-graviton/",
+        "Real EXP-2026-004 Graviton service run and artifact identities",
+        "tests/adapters/test_http_service.py"
+      ]
+    },
+    {
+      "id": "LOAD-001",
       "phase": 2,
       "priority": 8,
-      "title": "Run controlled baseline matrix",
-      "status": "pending",
-      "dependencies": ["TRACE-001", "DATA-001", "AWS-001"],
-      "context": [
-        "docs/BENCHMARK_PROTOCOL.md",
-        "docs/AWS_BUDGET.md",
-        "docs/TRACEABILITY.md"
-      ],
-      "deliverables": [
-        "F16/BF16, Q8_0, Q4_K_M, Q4_0, target-BPW, and KleidiAI-off evidence"
-      ],
-      "verification": [
-        "Required baselines share fixed environment/workload",
-        "Raw repeated samples and quality outputs exist",
-        "Spend ledger and cleanup pass"
-      ],
-      "evidence": []
+      "title": "Build fixed-SLO load harness",
+      "status": "completed",
+      "dependencies": ["CORE-001", "SERVICE-001", "DATA-001"],
+      "context": ["context/packs/CAP-001.md"],
+      "deliverables": ["Closed-loop and open-loop runners", "SLO capacity search", "Raw request traces"],
+      "verification": ["Non-profiler harness overhead is below 5%", "Three traffic mixes reproduce", "Capacity search has deterministic stop conditions"],
+      "evidence": [
+        "src/armproof/workload/",
+        "src/armproof/collectors/memory.py",
+        "src/armproof/cli.py capacity",
+        "EXP-2026-004 raw discovery and boundary request traces",
+        "tests/workload/ and tests/experiments/test_capacity.py"
+      ]
     },
     {
-      "id": "OPT-001",
+      "id": "CAP-001",
       "phase": 2,
       "priority": 9,
-      "title": "Generate and evaluate bounded Arm-aware candidates",
-      "status": "pending",
-      "dependencies": ["BASE-001"],
-      "context": [
-        "docs/FEASIBILITY_PLAN.md",
-        "docs/BENCHMARK_PROTOCOL.md",
-        "docs/RISKS.md"
-      ],
-      "deliverables": [
-        "At most three first-round recipes",
-        "Candidate GGUFs and checksums",
-        "Quality/performance comparison",
-        "GO/PIVOT/STOP decision"
-      ],
-      "verification": [
-        "FP-01 through FP-09 evaluated",
-        "Target-BPW baseline included",
-        "Unfavorable candidates retained"
-      ],
-      "evidence": []
+      "title": "Run decisive fixed-SLO capacity experiment",
+      "status": "completed",
+      "dependencies": ["EVID-001", "QUALITY-001", "AWS-001", "LOAD-001"],
+      "context": ["context/packs/CAP-001.md"],
+      "deliverables": ["Preregistered experiment", "Repeated raw runs", "Profiler evidence", "Pass/fail conclusion"],
+      "verification": ["At least 1.5x capacity in two of three traffic mixes", "Quality gate passes", "Required Arm callchains appear only where expected", "Run cost and cleanup are recorded"],
+      "evidence": [
+        "ops/evidence/EXP-2026-004/accepted/evidence/capacity/experiment/summary.json",
+        "3.0x short, 2.5x long and 3.0x mixed capacity",
+        "141 checksums verified; AWS inventory empty"
+      ]
     },
     {
-      "id": "MVP-001",
+      "id": "REPORT-001",
       "phase": 3,
       "priority": 10,
-      "title": "Build the installable MVP",
-      "status": "pending",
-      "dependencies": ["OPT-001"],
-      "context": [
-        "docs/ARCHITECTURE.md",
-        "docs/ROADMAP.md",
-        "docs/REQUIREMENTS.md"
-      ],
-      "deliverables": [
-        "Record, explain, optimize, compare CLI",
-        "Stable errors and schemas",
-        "Generated report",
-        "Worked example"
-      ],
-      "verification": [
-        "Fresh-user quickstart",
-        "Contract/integration tests",
-        "Failed candidate UX test"
-      ],
-      "evidence": []
+      "title": "Build dynamic evidence report and pull-request check",
+      "status": "completed",
+      "dependencies": ["FIXTURE-001", "CAP-001"],
+      "context": ["docs/DEMO_AND_SUBMISSION.md", "docs/JUDGING_STRATEGY.md", "docs/ARCHITECTURE.md"],
+      "deliverables": ["Interactive report", "Concise CI check", "Downloadable evidence bundle"],
+      "verification": ["Report distinguishes observed, derived and unsupported claims", "Keyboard and mobile checks pass", "Fixture outcomes are understandable without narration"],
+      "evidence": [
+        "src/armproof/report/generator.py",
+        "report/index.html",
+        "tests/report/test_generator.py",
+        "tests/ui/report.spec.mjs: desktop, tablet and 320px mobile pass"
+      ]
     },
     {
-      "id": "FULL-001",
+      "id": "ACTION-001",
+      "phase": 3,
+      "priority": 10,
+      "title": "Package reusable CI integration",
+      "status": "completed",
+      "dependencies": ["CORE-001", "CAP-001"],
+      "context": ["docs/PRODUCT_SPEC.md", "docs/AGENT_PLAYBOOK.md", "docs/SECURITY_AND_LICENSES.md"],
+      "deliverables": ["Versioned action", "Example workflow", "Configuration reference"],
+      "verification": ["Fresh repository integration succeeds", "Failures are actionable", "Secrets and untrusted pull requests are handled safely"],
+      "evidence": [
+        "action.yml",
+        ".github/workflows/armproof-example.yml",
+        "tests/test_action_package.py",
+        "tests/test_ci_command.py"
+      ]
+    },
+    {
+      "id": "DEPLOY-001",
+      "phase": 3,
+      "priority": 10,
+      "title": "Package reproducible Arm deployment templates",
+      "status": "completed",
+      "dependencies": ["SERVICE-001", "CAP-001"],
+      "context": ["docs/AWS_BUDGET.md", "docs/ARCHITECTURE.md", "docs/SECURITY_AND_LICENSES.md"],
+      "deliverables": ["Graviton deployment template", "Pinned runtime recipe", "Cleanup command"],
+      "verification": ["Clean deployment reproduces identity checks", "Template defaults stay within budget controls", "Teardown leaves no paid resources"],
+      "evidence": [
+        "examples/phi4-graviton/passing-deployment.json",
+        "deploy/armproof-phi4.service",
+        "tests/reference/test_deployment_artifact.py"
+      ]
+    },
+    {
+      "id": "REPRO-001",
       "phase": 4,
       "priority": 11,
-      "title": "Complete reusable product and interactive report",
-      "status": "pending",
-      "dependencies": ["MVP-001"],
-      "context": [
-        "docs/JUDGING_STRATEGY.md",
-        "docs/DEMO_AND_SUBMISSION.md",
-        "docs/TRACEABILITY.md"
-      ],
-      "deliverables": [
-        "Interactive X-ray",
-        "CI regression check",
-        "Clean-room reproduction",
-        "Tutorial and contribution patch"
-      ],
-      "verification": [
-        "Browser/accessibility tests",
-        "Clean Graviton4 replay",
-        "Claims matrix complete"
-      ],
-      "evidence": []
+      "title": "Run clean-room reproduction and adversarial review",
+      "status": "completed",
+      "dependencies": ["REPORT-001", "ACTION-001", "DEPLOY-001"],
+      "context": ["docs/AGENT_PLAYBOOK.md", "docs/TRACEABILITY.md", "docs/BENCHMARK_PROTOCOL.md"],
+      "deliverables": ["Fresh-environment run", "Adversarial review findings", "Resolved release blockers"],
+      "verification": ["A fresh agent can reproduce the headline result", "Claim ledger has no unsupported published claims", "All required tests and security checks pass"],
+      "evidence": [
+        "Fresh local wheel installation and 141-file integrity verification passed",
+        "ops/evidence/EXP-2026-005/reproduction-comparison.json",
+        "All three capacity ratios reproduced with 0% relative difference",
+        "141 checksums verified; enabled-only kai_* callchains; AWS inventory empty"
+      ]
     },
     {
       "id": "SHIP-001",
-      "phase": 5,
+      "phase": 4,
       "priority": 12,
-      "title": "Harden and submit",
+      "title": "Prepare release and hackathon submission",
       "status": "pending",
-      "dependencies": ["FULL-001"],
-      "context": [
-        "docs/DEMO_AND_SUBMISSION.md",
-        "docs/JUDGING_STRATEGY.md",
-        "docs/SECURITY_AND_LICENSES.md"
-      ],
-      "deliverables": [
-        "Demo video",
-        "Devpost submission",
-        "Public evidence and judge quickstart",
-        "Final adversarial review"
-      ],
-      "verification": [
-        "Every submission claim has evidence ID",
-        "Repository secret/license scan passes",
-        "Offline demo works"
-      ],
+      "dependencies": ["REPRO-001"],
+      "context": ["docs/DEMO_AND_SUBMISSION.md", "docs/JUDGING_STRATEGY.md", "docs/SOURCES.md"],
+      "deliverables": ["Tagged release", "Demo video", "Submission copy", "Public evidence bundle"],
+      "verification": ["Demo uses real recorded evidence", "Every numerical claim links to a bundle", "Installation and validation steps work from the release"],
       "evidence": []
     }
   ]

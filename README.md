@@ -1,89 +1,94 @@
-# KleidiScope
+# ArmProof
 
-KleidiScope is an Arm-aware profiler and mixed-quantization optimizer for
-GGUF models running through `llama.cpp` and KleidiAI on Arm CPUs.
+ArmProof is a fail-closed CI release gate for Arm AI optimization pull
+requests. It approves a deployment only when the submitted evidence shows that
+the change:
 
-It answers two questions that existing startup logs and generic quantizers do
-not answer together:
+- preserves the workload's declared quality contract;
+- improves its declared cloud-serving objective;
+- executes the required Arm acceleration path; and
+- can be reproduced from pinned artifacts and commands.
 
-1. Which model operations and tensor formats actually reach optimized
-   KleidiAI microkernels on this Arm machine, and why do the others fall back?
-2. Can the model's tensor formats be changed to improve the measured
-   size-quality-speed tradeoff on that machine?
+The reference path migrates Phi-4 Mini from PyTorch BF16 to INT4 ONNX Runtime
+GenAI with KleidiAI on AWS Graviton4. Existing experiments have already shown:
 
-The intended workflow is:
+- 35.92% smaller INT4 artifacts than BF16;
+- 55.34% lower peak PSS and 59.66% lower time-weighted PSS;
+- 1.72x to 2.59x end-to-end speedup from KleidiAI enabled versus disabled in
+  the identical INT4 model and runtime;
+- 20/24 versus 19/24 quality results; and
+- `kai_*` callchains only in the enabled treatment.
+
+The decisive service gate then measured 3.0x, 2.5x and 3.0x sustainable
+capacity across short, long and mixed traffic under the same 10-second p95
+SLO. A fresh `c8g.4xlarge` reproduced all three ratios exactly.
+
+## Product Workflow
 
 ```text
-GGUF model + pinned workload + Arm target
-                    |
-                    v
-       structured dispatch and fallback trace
-                    |
-                    v
-         weighted acceleration coverage report
-                    |
-                    v
-       bounded hardware-aware quantization recipes
-                    |
-                    v
-  candidate GGUFs + quality/performance/server evaluation
-                    |
-                    v
- optimized artifact + reproducible evidence + HTML report
+optimization PR + armproof.json
+              |
+              v
+matched baseline/treatment runs on Graviton
+              |
+              v
+fail-closed claim ledger
+              |
+              +--> GitHub Check: pass/fail
+              +--> interactive evidence report
+              +--> reproducible deployment manifest
 ```
 
-The proposed CLI contract is:
+Evaluate the accepted reference from one config:
 
 ```bash
-kleidiscope record --model model.gguf --workload workload.jsonl
-kleidiscope explain --trace run.json
-kleidiscope optimize --trace run.json --quality-budget 0.01
-kleidiscope compare --baseline baseline.gguf --candidate candidate.gguf
-kleidiscope report --evidence evidence/run-id
+python3.12 -m pip install -e .
+armproof ci examples/armproof-reference/armproof.json
 ```
 
-These commands are product requirements, not claims of current implementation.
-The repository starts in the feasibility phase.
+The command writes `decision.json`, normalized inputs and an offline interactive
+report. Exit `0` approves, exit `2` blocks on a failed or unknown required
+claim, and exit `1` identifies invalid input or execution failure.
 
-## Contribution Boundary
+Use the same config in GitHub Actions:
 
-`llama.cpp` already supports per-tensor `--tensor-type` overrides and a
-quality-oriented `--target-bpw` optimizer. KleidiScope must not rebrand those
-features. Its intended contribution is the integration of:
+```yaml
+- uses: QasimKhan5x/VerifyLane@v0.1.0
+  with:
+    config: armproof.json
+    output: build/armproof-report
+```
 
-- source-grounded Arm/KleidiAI dispatch observability;
-- explicit eligibility and fallback explanations;
-- runtime-weighted kernel coverage;
-- hardware-aware candidate selection under declared quality and size budgets;
-- reproducible comparisons against both standard presets and upstream
-  `--target-bpw` optimization; and
-- CI and reporting artifacts that Arm developers can reuse.
+## Current Build
 
-## Success Gate
+The repository contains strict contracts, the common Phi-4 service, fixed-SLO
+load harness, quality evaluator, Arm attribution evidence, fail-closed policy
+engine, GitHub Action, offline report and exact passing deployment.
 
-Before building the full product, one generated candidate must demonstrate on
-real Graviton4 hardware either:
+```bash
+make check
+PYTHONPATH=src python3.12 -m armproof.cli ci \
+  examples/armproof-reference/armproof.json
+```
 
-- at least 10% improvement in a primary speed metric while meeting the quality
-  budget; or
-- at least 10% reduction in disk/RSS while speed regresses by no more than 3%
-  and the quality budget is met.
-
-It must also beat or add demonstrably useful information beyond the matched
-`--target-bpw` baseline. Failure is a valid feasibility result; fabricated or
-selectively reported success is not.
+Both accepted cloud bundles contain 141 checksummed files and verify after
+relocation. Browser tests cover desktop, tablet and 320-pixel mobile layouts.
 
 ## Start Here
 
 - Current state: [`STATUS.md`](STATUS.md)
-- Project map: [`docs/PROJECT_MAP.md`](docs/PROJECT_MAP.md)
-- Concept: [`docs/CONCEPT.md`](docs/CONCEPT.md)
+- Five-minute quickstart: [`docs/QUICKSTART.md`](docs/QUICKSTART.md)
+- Agent rules: [`AGENTS.md`](AGENTS.md)
+- Product specification: [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md)
+- Established evidence: [`docs/ESTABLISHED_EVIDENCE.md`](docs/ESTABLISHED_EVIDENCE.md)
+- Architecture: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 - Requirements: [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.md)
-- Feasibility gate: [`docs/FEASIBILITY_PLAN.md`](docs/FEASIBILITY_PLAN.md)
-- Agent operating rules: [`AGENTS.md`](AGENTS.md)
+- Implementation plan: [`tasks/plan.md`](tasks/plan.md)
+- Project routing map: [`docs/PROJECT_MAP.md`](docs/PROJECT_MAP.md)
 
-## Status
+## Claim Boundary
 
-Documentation and experiment design are being initialized. No benchmark or
-optimization result is currently claimed.
-
+ArmProof is not an Arm certification authority and does not prove universal
+model quality or optimality. It evaluates a declared contract for a pinned
+model, workload, runtime and machine. User-facing copy must say "verified by
+ArmProof," never "Arm certified."

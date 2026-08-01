@@ -1,178 +1,62 @@
-# Incremental Roadmap
+# ArmProof Roadmap
 
-Each phase has an entry gate, concrete artifacts, verification, and parallel
-work lanes. A phase is not complete because its code exists.
+## Phase 0: Context And Evidence Foundation
 
-## Phase 0: Repository And Source Reconnaissance
+- Replace stale project context.
+- Import and hash accepted result-first evidence.
+- Establish verified Python bootstrap commands.
+- Freeze contract, evidence and claim schemas.
 
-Entry: initialized docs.
+Gate: existing results verify without reinterpretation.
 
-Deliverables:
+## Phase 1: Fail-Closed Vertical Slice
 
-- pinned upstream source inventory;
-- verified bootstrap and smoke commands;
-- trace and environment schemas;
-- dispatch path map and minimal patch design;
-- fixtures for eligible/fallback/unknown cases;
-- CI for docs, schemas, unit tests, and Arm64 compile check.
+- Parse one reference contract.
+- Load fixture treatments and evidence.
+- Evaluate claim dependencies and thresholds.
+- Emit one machine decision and static report.
+- Prove missing or swapped evidence fails.
 
-Parallel lanes:
+Gate: fixture-to-decision-to-report works end to end.
 
-- upstream source analysis;
-- schema/fixture design;
-- local/GitHub Actions bootstrap;
-- model/data/license selection;
-- AWS lifecycle dry run.
+## Phase 2: Real Service Execution
 
-Verification gate:
+- Implement common HTTP service adapters.
+- Implement workload replay, PSS sampling and quality plugins.
+- Add bounded `perf`/Performix attribution.
+- Measure ArmProof overhead.
 
-- clean bootstrap succeeds;
-- schemas validate fixtures;
-- proposed evidence granularity is supported by source;
-- no paid cloud required.
+Gate: local/Arm smoke tests prove lifecycle and negative behavior.
 
-## Phase 1: Feasibility Recorder
+## Phase 3: Capacity Validation
 
-Entry: Phase 0 passes.
+- Preregister and run the fixed-SLO experiment on Graviton4.
+- Freeze the accepted result and evidence bundle.
 
-Deliverables:
+Gate: `CAPACITY_VALIDATION.md` passes. Do not manufacture a weaker substitute.
 
-- minimal tracing patch/hook;
-- trace normalizer;
-- environment probe;
-- source-grounded rule prototype;
-- KleidiAI-on/off trace comparison;
-- overhead measurement.
+## Phase 4: Community Product
 
-Parallel lanes:
+- Build the interactive report against frozen schemas.
+- Add the GitHub Action and PR summary.
+- Emit the exact passing deployment manifest.
+- Publish reference contract, adapter guide and tutorial.
 
-- runtime patch;
-- parser/rules/tests;
-- trace analyzer;
-- benchmark harness.
+Gate: one YAML and one command produce an understandable decision.
 
-Verification gate:
+## Phase 5: Reproduction And Submission
 
-- observed accelerated and fallback paths reconcile;
-- disabled run cannot falsely report acceleration;
-- unknowns are explicit;
-- overhead is bounded and reported.
+- Clean-room Graviton reproduction.
+- Browser, accessibility, tamper, security and license checks.
+- Three-minute demo and offline backup.
+- Devpost submission with claim-to-evidence mapping.
 
-## Phase 2: Feasibility Optimizer
+Gate: every public claim resolves to immutable evidence.
 
-Entry: trustworthy trace.
+## Deferred
 
-Deliverables:
-
-- baseline matrix;
-- deterministic bounded recipe generator;
-- quantizer adapter;
-- candidate inspection and hashing;
-- quality and performance runners;
-- target-BPW matched baseline;
-- GO/PIVOT/STOP evidence bundle.
-
-Parallel lanes:
-
-- candidate policy;
-- quantizer/build adapter;
-- quality evaluation;
-- performance/server evaluation;
-- evidence/report fixtures.
-
-Verification gate:
-
-- requirements FP-01 through FP-09 evaluated;
-- clean evidence bundle exists;
-- AWS spend within approved budget;
-- decision is made before full UI investment.
-
-## Phase 3: MVP Product
-
-Entry: GO, or an accepted PIVOT with revised claims.
-
-Deliverables:
-
-- installable `kleidiscope` CLI;
-- record, explain, optimize, compare commands;
-- versioned public schemas;
-- stable error model;
-- resumable local orchestration;
-- generated static report;
-- one documented 3B worked example.
-
-Parallel lanes:
-
-- CLI/domain layer;
-- report application;
-- docs/tutorial;
-- contract/integration tests;
-- upstream patch packaging.
-
-Verification gate:
-
-- fresh-user quickstart succeeds;
-- all required baselines enforced;
-- report derives from fixture and real evidence;
-- failed candidate flow is understandable.
-
-## Phase 4: Full Hackathon Product
-
-Entry: end-to-end MVP.
-
-Deliverables:
-
-- polished interactive X-ray report;
-- CI acceleration-regression command/action;
-- clean-room Graviton4 reproduction;
-- optimized GGUF recipe/checksum/artifact;
-- Arm learning-ready walkthrough;
-- contribution-ready patch and technical note;
-- benchmark methodology and raw evidence release.
-
-Parallel lanes:
-
-- browser UX/accessibility;
-- CI integration;
-- reproduction and packaging;
-- technical writing;
-- demo/submission production.
-
-Verification gate:
-
-- claims-to-evidence matrix complete;
-- critical browser and CLI workflows tested;
-- no unresolved severity-1 defects;
-- submission can be judged without private infrastructure.
-
-## Phase 5: Submission Hardening
-
-Deliverables:
-
-- three-minute demo and backup recording;
-- Devpost copy aligned with measured claims;
-- public repository cleanup;
-- licenses/attributions complete;
-- cost and reproduction instructions;
-- judge quickstart and downloadable evidence;
-- final adversarial review against all four criteria.
-
-Verification gate:
-
-- every number in video/copy maps to evidence;
-- demo works from a prerecorded evidence bundle if live cloud fails;
-- repository contains no credentials, paid resources, or restricted artifacts;
-- owner approves final claims.
-
-## Parallelization Rules
-
-- Work in parallel only when write ownership is disjoint.
-- Schema changes precede dependent implementations.
-- Runtime patch and policy work may proceed together only against frozen fixture
-  contracts.
-- Report work uses fixtures and must not invent unavailable fields.
-- Cloud benchmarks are serialized under one experiment owner to prevent cost
-  and environment drift.
-- Independent verification should challenge a completed evidence bundle rather
-  than duplicate implementation work.
-
+- Second runtime adapter.
+- vLLM reference path.
+- Cross-cloud execution.
+- Hosted service.
+- Cryptographic signing or formal attestation.

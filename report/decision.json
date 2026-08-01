@@ -1,0 +1,41 @@
+{
+  "claims": [
+    {
+      "claim_id": "quality-accuracy",
+      "observed": -0.38961038961038974,
+      "reason_code": "threshold_met",
+      "status": "pass",
+      "threshold": -1.0
+    },
+    {
+      "claim_id": "quality-macro-f1",
+      "observed": -0.6726444303255752,
+      "reason_code": "threshold_met",
+      "status": "pass",
+      "threshold": -1.0
+    },
+    {
+      "claim_id": "quality-schema",
+      "observed": 1.0,
+      "reason_code": "threshold_met",
+      "status": "pass",
+      "threshold": 0.99
+    },
+    {
+      "claim_id": "cloud-capacity",
+      "observed": 2.5,
+      "reason_code": "threshold_met",
+      "status": "pass",
+      "threshold": 1.5
+    },
+    {
+      "claim_id": "arm-execution",
+      "observed": 1.0,
+      "reason_code": "threshold_met",
+      "status": "pass",
+      "threshold": 1.0
+    }
+  ],
+  "passed": true,
+  "schema_version": "1.0.0"
+}

@@ -1,0 +1,89 @@
+{
+  "experiment_id": "EXP-2026-005",
+  "protocol": {
+    "confirmation_seconds": 30.0,
+    "confirmations": 5,
+    "discovery_seconds": 30.0,
+    "experiment_id": "EXP-2026-005",
+    "max_error_rate": 0.01,
+    "max_workers": 48,
+    "maximum_quality_loss_pp": 1.0,
+    "minimum_delivery_ratio": 0.95,
+    "minimum_schema_valid_rate": 0.99,
+    "mixes": [
+      {
+        "candidates_rps": [
+          0.06666666666666667,
+          0.1,
+          0.13333333333333333,
+          0.16666666666666666,
+          0.2,
+          0.26666666666666666,
+          0.3333333333333333,
+          0.4,
+          0.5,
+          0.6,
+          0.8,
+          1.0,
+          1.2
+        ],
+        "mix_id": "short",
+        "p95_slo_ms": 10000.0,
+        "workload": "/opt/armproof/work/data/banking77/generated/traffic-short.jsonl"
+      },
+      {
+        "candidates_rps": [
+          0.06666666666666667,
+          0.1,
+          0.13333333333333333,
+          0.16666666666666666,
+          0.2,
+          0.26666666666666666,
+          0.3333333333333333,
+          0.4,
+          0.5,
+          0.6,
+          0.8,
+          1.0,
+          1.2
+        ],
+        "mix_id": "long",
+        "p95_slo_ms": 10000.0,
+        "workload": "/opt/armproof/work/data/banking77/generated/traffic-long.jsonl"
+      },
+      {
+        "candidates_rps": [
+          0.06666666666666667,
+          0.1,
+          0.13333333333333333,
+          0.16666666666666666,
+          0.2,
+          0.26666666666666666,
+          0.3333333333333333,
+          0.4,
+          0.5,
+          0.6,
+          0.8,
+          1.0,
+          1.2
+        ],
+        "mix_id": "mixed",
+        "p95_slo_ms": 10000.0,
+        "workload": "/opt/armproof/work/data/banking77/generated/traffic-mixed.jsonl"
+      }
+    ],
+    "quality_dataset": "/opt/armproof/work/data/banking77/generated/quality.jsonl",
+    "request_timeout_seconds": 60.0,
+    "warmup_requests": 3
+  },
+  "treatments": [
+    {
+      "endpoint": "http://127.0.0.1:8000/infer",
+      "treatment_id": "kleidiai-disabled"
+    },
+    {
+      "endpoint": "http://127.0.0.1:8001/infer",
+      "treatment_id": "kleidiai-enabled"
+    }
+  ]
+}

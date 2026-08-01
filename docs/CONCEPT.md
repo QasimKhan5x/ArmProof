@@ -1,117 +1,80 @@
-# Project Concept
+# ArmProof Concept
 
 ## One Sentence
 
-KleidiScope shows exactly how a GGUF model maps onto KleidiAI kernels on a
-specific Arm CPU, explains costly fallbacks, and generates measured
-hardware-aware mixed-quantization candidates under an explicit quality budget.
+ArmProof is the CI release gate that prevents an Arm AI optimization pull
+request from merging unless its quality, cloud capacity, Arm execution and
+reproducibility claims are supported by matched evidence.
 
-## The Developer Problem
+## User And Painful Moment
 
-An Arm developer can compile `llama.cpp` with KleidiAI and see that the backend
-loaded. That does not answer whether the important parts of the selected model
-use optimized kernels. When performance is disappointing, the developer must
-piece together:
+The primary user is an inference-framework maintainer or ML platform engineer
+reviewing an Arm64 deployment change. The PR author supplies benchmark charts,
+but the reviewer cannot tell whether:
 
-- runtime logs;
-- model tensor names and quantization formats;
-- GGML operator construction;
-- KleidiAI dispatch conditions;
-- CPU ISA features;
-- profiler call stacks; and
-- manual quantization experiments.
+- the workload and controls are comparable;
+- quality regressed;
+- the Arm acceleration path actually executed;
+- the improvement survives concurrent cloud serving; or
+- another developer can reproduce the result.
 
-The result is slow, architecture-specific investigation with little reusable
-evidence. Standard quantization presets optimize general size/quality
-tradeoffs. Current upstream target-BPW optimization improves estimated quality
-for a size target. Neither is designed to explain or optimize the measured
-KleidiAI coverage and end-to-end performance of a particular model/workload on
-a particular Arm server.
+The current workaround is a collection of ad hoc benchmark scripts, profiler
+reports and manually reviewed spreadsheets. It does not produce an enforceable
+merge decision.
 
 ## Product Experience
 
-A developer provides:
+The developer adds one `armproof.json` config to the repository. A trusted Arm
+benchmark job records the declared baseline and treatments; ArmProof evaluates
+the contract and posts a GitHub Check. A passing check links to a static
+interactive report and the exact deployable configuration. A failed check
+explains which claim lacks evidence.
 
-- an F16/BF16 source GGUF;
-- a representative prompt/decode or server workload;
-- a quality-loss budget;
-- a size or performance objective; and
-- an Arm64 target running a pinned `llama.cpp` build.
-
-KleidiScope then:
-
-1. inventories CPU features and runtime/build identity;
-2. records structured operator, tensor, backend, and dispatch evidence;
-3. ranks runtime-significant accelerated paths and fallbacks;
-4. explains each fallback from pinned source rules rather than model guesses;
-5. proposes a small bounded set of per-tensor type substitutions;
-6. invokes upstream quantization mechanisms to create candidate GGUFs;
-7. evaluates quality, size, RSS, prompt/decode speed, and server behavior;
-8. compares candidates with all required baselines; and
-9. exports the model, recipe, trace, raw measurements, manifest, and report.
+The reference PR migrates a Phi-4 Mini service from PyTorch BF16 to INT4 ONNX
+Runtime GenAI with KleidiAI on Graviton4. A public labeled workload is a test
+fixture, not the product story.
 
 ## Distinctive Mechanism
 
-The mechanism is **coverage-guided, hardware-constrained mixed
-quantization**:
+ArmProof uses a fail-closed claim ledger. Each claim records:
 
-- Quality sensitivity determines which tensors cannot safely lose precision.
-- KleidiAI eligibility determines which formats have optimized implementations
-  on the detected ISA.
-- Runtime weight determines which eligible changes are worth testing.
-- A bounded candidate policy prevents an unreviewable parameter sweep.
-- Measured evaluation, not static prediction, selects the final candidate.
+- exact baseline and treatment identities;
+- artifact, runtime, workload and environment hashes;
+- raw samples and statistical summary;
+- quality result and tolerance;
+- Arm execution evidence; and
+- reproduction command.
 
-KleidiScope does not need to invent a new quantization encoding. It uses
-existing GGUF formats and upstream quantization primitives while contributing
-the observability, Arm-specific decision policy, evidence model, automation,
-and developer workflow.
+It also separates causal scopes:
 
-## Primary User
-
-An inference engineer, ML systems developer, framework contributor, or Arm
-cloud adopter who needs to answer:
-
-> Why is this model not obtaining the expected Arm acceleration, and what
-> measured artifact should I deploy instead?
-
-Secondary users include KleidiAI/llama.cpp contributors diagnosing coverage,
-CI owners guarding against acceleration regressions, educators explaining
-operator-to-kernel execution, and model publishers producing Arm-qualified
-GGUF variants.
+- BF16 PyTorch versus INT4 ONNX Runtime GenAI describes the whole deployment
+  transformation.
+- Identical INT4 runtime with KleidiAI disabled versus enabled isolates the
+  Arm acceleration contribution.
+- Fixed-instance load testing describes the cloud-serving consequence.
 
 ## What Ships
 
-- A CLI and Python library with stable JSON contracts.
-- A minimal, pinned, upstream-reviewable tracing integration.
-- A source-grounded eligibility/fallback rule inventory.
-- Hardware-aware recipe generation and upstream quantizer invocation.
-- Benchmark and quality adapters with controlled repeated runs.
-- An interactive X-ray report backed by downloadable raw evidence.
-- CI coverage regression checks.
-- At least one optimized GGUF, recipe, checksum, manifest, and walkthrough.
+- Python CLI and versioned schemas.
+- Matched-control process and HTTP workload runner.
+- Quality, PSS, latency and throughput evaluation.
+- KleidiAI execution detector backed by `perf`/Performix evidence.
+- Fail-closed claim ledger and verifier.
+- Static interactive report.
+- Portable GitHub Action plus a documented Graviton evidence producer.
+- Phi-4 reference contract, deployment manifest and tutorial.
+- Checksummed evidence and clean-room reproduction instructions.
 
 ## Non-Goals
 
-- Training or fine-tuning models.
-- Creating a new quantization encoding.
-- Generating new microkernels during the hackathon.
-- GPU inference or GPU comparisons as the main result.
-- A general-purpose inference scheduler.
-- Hosted multi-tenant SaaS.
-- Universal claims across all models and Arm processors.
-- Requantizing low-bit models as primary evidence.
+- Finding optimization parameters automatically.
+- Certifying universal quality, safety or optimality.
+- Acting as an official Arm certification authority.
+- Building an inference scheduler or new kernel.
+- Supporting many shallow runtime integrations.
+- Hosted SaaS, multi-cloud orchestration, training or fine-tuning.
 
-## Honest Claim Boundary
+## Honest Claim Form
 
-The acceptable claim form is:
-
-> On model M, workload W, pinned runtime R, and Arm target H, KleidiScope
-> generated candidate C. Against baselines B under protocol P, C changed metric
-> X by Y while quality metric Q remained within budget Z.
-
-The unacceptable claim form is:
-
-> KleidiScope always finds the optimal Arm quantization or universally speeds
-> up LLM inference.
-
+> For pinned model M, workload W, runtime R and Arm target H, treatment T met
+> contract C. Claim X is supported by matched control B and evidence E.

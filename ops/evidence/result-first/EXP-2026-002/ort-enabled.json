@@ -1,0 +1,441 @@
+{
+  "label": "enabled",
+  "memory": {
+    "duration_seconds": 109.407252906,
+    "interval_seconds": 0.05,
+    "peak_pss_bytes": 4846790656,
+    "peak_rss_bytes": 4855762944,
+    "sample_count": 416,
+    "time_weighted_pss_bytes": 4074753789.0028534,
+    "time_weighted_rss_bytes": 4083570982.624313
+  },
+  "model_bytes": 4930563449,
+  "model_rss_bytes": 2883604480,
+  "performance": [
+    {
+      "batch": 1,
+      "generation_length": 64,
+      "median": {
+        "decode_seconds": 1.0018107920000148,
+        "decode_tokens_per_second": 62.886126305573946,
+        "end_to_end_seconds": 1.3470666640000104,
+        "output_tokens_per_second": 47.51064049789262,
+        "prefill_seconds": 0.34477821899997707,
+        "ttft_seconds": 0.34487033400000655
+      },
+      "prompt_length": 128,
+      "repetitions": 5,
+      "rows": [
+        {
+          "decode_seconds": 1.0131260230000407,
+          "decode_tokens_per_second": 62.18377434768297,
+          "end_to_end_seconds": 1.3577724450000233,
+          "output_tokens_per_second": 47.13602801093736,
+          "prefill_seconds": 0.3445485390000158,
+          "ttft_seconds": 0.3446464219999825
+        },
+        {
+          "decode_seconds": 1.0018107920000148,
+          "decode_tokens_per_second": 62.886126305573946,
+          "end_to_end_seconds": 1.3463769100000036,
+          "output_tokens_per_second": 47.534980379305395,
+          "prefill_seconds": 0.34447165500000665,
+          "ttft_seconds": 0.3445661179999888
+        },
+        {
+          "decode_seconds": 1.0049179110000068,
+          "decode_tokens_per_second": 62.691687858670846,
+          "end_to_end_seconds": 1.3497882450000134,
+          "output_tokens_per_second": 47.414844689212245,
+          "prefill_seconds": 0.34477821899997707,
+          "ttft_seconds": 0.34487033400000655
+        },
+        {
+          "decode_seconds": 0.9971837429999937,
+          "decode_tokens_per_second": 63.177925274299625,
+          "end_to_end_seconds": 1.3433965340000213,
+          "output_tokens_per_second": 47.64043853041457,
+          "prefill_seconds": 0.3461154679999936,
+          "ttft_seconds": 0.34621279100002766
+        },
+        {
+          "decode_seconds": 1.0014609710000286,
+          "decode_tokens_per_second": 62.908093100313344,
+          "end_to_end_seconds": 1.3470666640000104,
+          "output_tokens_per_second": 47.51064049789262,
+          "prefill_seconds": 0.3455118850000076,
+          "ttft_seconds": 0.3456056929999818
+        }
+      ]
+    },
+    {
+      "batch": 1,
+      "generation_length": 64,
+      "median": {
+        "decode_seconds": 1.2098030809999614,
+        "decode_tokens_per_second": 52.07459047626777,
+        "end_to_end_seconds": 2.6552405339999723,
+        "output_tokens_per_second": 24.10327771834198,
+        "prefill_seconds": 1.445345589999988,
+        "ttft_seconds": 1.445437453000011
+      },
+      "prompt_length": 512,
+      "repetitions": 5,
+      "rows": [
+        {
+          "decode_seconds": 1.2142509880000034,
+          "decode_tokens_per_second": 51.88383672124286,
+          "end_to_end_seconds": 2.6589552599999706,
+          "output_tokens_per_second": 24.06960393910528,
+          "prefill_seconds": 1.4446135929999855,
+          "ttft_seconds": 1.4447042719999672
+        },
+        {
+          "decode_seconds": 1.201575149000007,
+          "decode_tokens_per_second": 52.43117756923552,
+          "end_to_end_seconds": 2.647466070000007,
+          "output_tokens_per_second": 24.174058631089398,
+          "prefill_seconds": 1.4457939150000243,
+          "ttft_seconds": 1.4458909210000002
+        },
+        {
+          "decode_seconds": 1.2105590439999787,
+          "decode_tokens_per_second": 52.04207123333103,
+          "end_to_end_seconds": 2.656131271999982,
+          "output_tokens_per_second": 24.09519464443113,
+          "prefill_seconds": 1.4454738640000073,
+          "ttft_seconds": 1.4455722280000032
+        },
+        {
+          "decode_seconds": 1.2098030809999614,
+          "decode_tokens_per_second": 52.07459047626777,
+          "end_to_end_seconds": 2.6552405339999723,
+          "output_tokens_per_second": 24.10327771834198,
+          "prefill_seconds": 1.445345589999988,
+          "ttft_seconds": 1.445437453000011
+        },
+        {
+          "decode_seconds": 1.1969137140000043,
+          "decode_tokens_per_second": 52.63537317945692,
+          "end_to_end_seconds": 2.6412663149999958,
+          "output_tokens_per_second": 24.230801580491175,
+          "prefill_seconds": 1.4442603240000267,
+          "ttft_seconds": 1.4443526009999914
+        }
+      ]
+    },
+    {
+      "batch": 4,
+      "generation_length": 64,
+      "median": {
+        "decode_seconds": 1.4580037239999797,
+        "decode_tokens_per_second": 172.8390647101005,
+        "end_to_end_seconds": 2.803194506000011,
+        "output_tokens_per_second": 91.32437990016487,
+        "prefill_seconds": 1.3434946359999458,
+        "ttft_seconds": 1.3438715579999894
+      },
+      "prompt_length": 128,
+      "repetitions": 5,
+      "rows": [
+        {
+          "decode_seconds": 1.4460103929999946,
+          "decode_tokens_per_second": 174.2726063518694,
+          "end_to_end_seconds": 2.813419162999992,
+          "output_tokens_per_second": 90.99248464882967,
+          "prefill_seconds": 1.3670966729999918,
+          "ttft_seconds": 1.3674087699999973
+        },
+        {
+          "decode_seconds": 1.4603704810000409,
+          "decode_tokens_per_second": 172.5589521827598,
+          "end_to_end_seconds": 2.803194506000011,
+          "output_tokens_per_second": 91.32437990016487,
+          "prefill_seconds": 1.3424360999999863,
+          "ttft_seconds": 1.3428240249999703
+        },
+        {
+          "decode_seconds": 1.4580037239999797,
+          "decode_tokens_per_second": 172.8390647101005,
+          "end_to_end_seconds": 2.801875281999969,
+          "output_tokens_per_second": 91.36737871404043,
+          "prefill_seconds": 1.3434946359999458,
+          "ttft_seconds": 1.3438715579999894
+        },
+        {
+          "decode_seconds": 1.4537031389999697,
+          "decode_tokens_per_second": 173.35038581078916,
+          "end_to_end_seconds": 2.796251042999984,
+          "output_tokens_per_second": 91.55115047372429,
+          "prefill_seconds": 1.3422388789999786,
+          "ttft_seconds": 1.3425479040000141
+        },
+        {
+          "decode_seconds": 1.465549974000055,
+          "decode_tokens_per_second": 171.9491006589111,
+          "end_to_end_seconds": 2.8096567190000314,
+          "output_tokens_per_second": 91.11433374362953,
+          "prefill_seconds": 1.34379839799999,
+          "ttft_seconds": 1.3441067449999764
+        }
+      ]
+    },
+    {
+      "batch": 4,
+      "generation_length": 64,
+      "median": {
+        "decode_seconds": 1.8139212380000345,
+        "decode_tokens_per_second": 138.92554688749678,
+        "end_to_end_seconds": 7.61146235800004,
+        "output_tokens_per_second": 33.633484337071025,
+        "prefill_seconds": 5.804708234999964,
+        "ttft_seconds": 5.8050199879999695
+      },
+      "prompt_length": 512,
+      "repetitions": 5,
+      "rows": [
+        {
+          "decode_seconds": 1.8139212380000345,
+          "decode_tokens_per_second": 138.92554688749678,
+          "end_to_end_seconds": 7.618941226000004,
+          "output_tokens_per_second": 33.60046919989193,
+          "prefill_seconds": 5.804708234999964,
+          "ttft_seconds": 5.8050199879999695
+        },
+        {
+          "decode_seconds": 1.798735353999973,
+          "decode_tokens_per_second": 140.09843051097542,
+          "end_to_end_seconds": 7.6000100249999605,
+          "output_tokens_per_second": 33.68416609424161,
+          "prefill_seconds": 5.800959450999983,
+          "ttft_seconds": 5.801274670999987
+        },
+        {
+          "decode_seconds": 1.8643756410000378,
+          "decode_tokens_per_second": 135.16589385647035,
+          "end_to_end_seconds": 7.683778967000023,
+          "output_tokens_per_second": 33.31693963340932,
+          "prefill_seconds": 5.819095467000011,
+          "ttft_seconds": 5.8194033259999856
+        },
+        {
+          "decode_seconds": 1.8055117160000123,
+          "decode_tokens_per_second": 139.5726196439693,
+          "end_to_end_seconds": 7.61146235800004,
+          "output_tokens_per_second": 33.633484337071025,
+          "prefill_seconds": 5.805640701000016,
+          "ttft_seconds": 5.8059506420000275
+        },
+        {
+          "decode_seconds": 1.8186902470000064,
+          "decode_tokens_per_second": 138.56125330615419,
+          "end_to_end_seconds": 7.608505224999988,
+          "output_tokens_per_second": 33.6465563773074,
+          "prefill_seconds": 5.789499374000002,
+          "ttft_seconds": 5.789814977999981
+        }
+      ]
+    }
+  ],
+  "quality": {
+    "correct": 20,
+    "rows": [
+      {
+        "answer": "C",
+        "correct": false,
+        "id": "arith-01",
+        "output": "B) 96",
+        "parsed": "B",
+        "question": "What is 17 multiplied by 6? A) 92 B) 96 C) 102 D) 112"
+      },
+      {
+        "answer": "C",
+        "correct": true,
+        "id": "arith-02",
+        "output": "The correct answer is C. When ",
+        "parsed": "C",
+        "question": "What is 144 divided by 12? A) 10 B) 11 C) 12 D) 14"
+      },
+      {
+        "answer": "C",
+        "correct": false,
+        "id": "arith-03",
+        "output": "B) 25",
+        "parsed": "B",
+        "question": "What is 15 percent of 200? A) 20 B) 25 C) 30 D) 35"
+      },
+      {
+        "answer": "C",
+        "correct": true,
+        "id": "arith-04",
+        "output": "C",
+        "parsed": "C",
+        "question": "Which number is prime? A) 21 B) 27 C) 29 D) 33"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "logic-01",
+        "output": "B",
+        "parsed": "B",
+        "question": "All tulips are flowers. No flowers are metal. Can a tulip be metal? A) Yes B) No C) Sometimes D) Unknown"
+      },
+      {
+        "answer": "C",
+        "correct": false,
+        "id": "logic-02",
+        "output": "D",
+        "parsed": "D",
+        "question": "Ana is older than Bo. Bo is older than Cy. Who is youngest? A) Ana B) Bo C) Cy D) Unknown"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "logic-03",
+        "output": "B",
+        "parsed": "B",
+        "question": "If today is Tuesday, what day is three days later? A) Thursday B) Friday C) Saturday D) Sunday"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "logic-04",
+        "output": "B",
+        "parsed": "B",
+        "question": "A switch is either on or off. It is not on. What state is it? A) On B) Off C) Both D) Unknown"
+      },
+      {
+        "answer": "C",
+        "correct": true,
+        "id": "code-01",
+        "output": "C",
+        "parsed": "C",
+        "question": "In Python, which creates an empty dictionary? A) [] B) () C) {} D) set()"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "code-02",
+        "output": "B",
+        "parsed": "B",
+        "question": "What does len([4,5,6]) return? A) 2 B) 3 C) 4 D) 15"
+      },
+      {
+        "answer": "D",
+        "correct": true,
+        "id": "code-03",
+        "output": "D",
+        "parsed": "D",
+        "question": "Which HTTP status means Not Found? A) 200 B) 301 C) 401 D) 404"
+      },
+      {
+        "answer": "A",
+        "correct": true,
+        "id": "code-04",
+        "output": "A) WHERE",
+        "parsed": "A",
+        "question": "Which SQL clause filters rows? A) WHERE B) ORDER BY C) SELECT D) JOIN"
+      },
+      {
+        "answer": "A",
+        "correct": true,
+        "id": "science-01",
+        "output": "A",
+        "parsed": "A",
+        "question": "Water freezes at what Celsius temperature? A) 0 B) 10 C) 32 D) 100"
+      },
+      {
+        "answer": "C",
+        "correct": true,
+        "id": "science-02",
+        "output": "C",
+        "parsed": "C",
+        "question": "Which planet is closest to the Sun? A) Earth B) Mars C) Mercury D) Venus"
+      },
+      {
+        "answer": "A",
+        "correct": true,
+        "id": "science-03",
+        "output": "A",
+        "parsed": "A",
+        "question": "Plants primarily absorb which gas? A) Carbon dioxide B) Helium C) Hydrogen D) Nitrogen"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "science-04",
+        "output": "B",
+        "parsed": "B",
+        "question": "What force attracts objects toward Earth? A) Friction B) Gravity C) Magnetism D) Tension"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "language-01",
+        "output": "B",
+        "parsed": "B",
+        "question": "Choose the synonym of rapid. A) slow B) quick C) quiet D) heavy"
+      },
+      {
+        "answer": "C",
+        "correct": false,
+        "id": "language-02",
+        "output": "A",
+        "parsed": "A",
+        "question": "Choose the correctly spelled word. A) accomodate B) acommodate C) accommodate D) accomadate"
+      },
+      {
+        "answer": "D",
+        "correct": true,
+        "id": "language-03",
+        "output": "D) write",
+        "parsed": "D",
+        "question": "Which word is a verb? A) blue B) quickly C) table D) write"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "language-04",
+        "output": "B",
+        "parsed": "B",
+        "question": "What is the plural of analysis? A) analysises B) analyses C) analysi D) analysis"
+      },
+      {
+        "answer": "C",
+        "correct": true,
+        "id": "data-01",
+        "output": "C",
+        "parsed": "C",
+        "question": "A table has values 3, 7, and 5. What is the maximum? A) 3 B) 5 C) 7 D) 15"
+      },
+      {
+        "answer": "A",
+        "correct": true,
+        "id": "data-02",
+        "output": "A",
+        "parsed": "A",
+        "question": "JSON object keys are normally enclosed in what? A) Quotes B) Parentheses C) Brackets D) Slashes"
+      },
+      {
+        "answer": "B",
+        "correct": true,
+        "id": "data-03",
+        "output": "B",
+        "parsed": "B",
+        "question": "For values 2, 4, 6, what is the mean? A) 3 B) 4 C) 5 D) 6"
+      },
+      {
+        "answer": "A",
+        "correct": true,
+        "id": "data-04",
+        "output": "A",
+        "parsed": "A",
+        "question": "Which chart best shows parts of a whole? A) Pie chart B) Scatter plot C) Histogram D) Timeline"
+      }
+    ],
+    "total": 24,
+    "valid": 24
+  },
+  "rss_before_bytes": 36487168,
+  "rss_loaded_bytes": 2920091648
+}

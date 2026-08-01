@@ -1,0 +1,26 @@
+{
+  "maximum_relative_difference": 0.1,
+  "mixes": {
+    "long": {
+      "reference_ratio": 2.5,
+      "relative_difference": 0.0,
+      "reproduction_ratio": 2.5,
+      "within_tolerance": true
+    },
+    "mixed": {
+      "reference_ratio": 2.9999999999999996,
+      "relative_difference": 0.0,
+      "reproduction_ratio": 2.9999999999999996,
+      "within_tolerance": true
+    },
+    "short": {
+      "reference_ratio": 3.0,
+      "relative_difference": 0.0,
+      "reproduction_ratio": 3.0,
+      "within_tolerance": true
+    }
+  },
+  "passed": true,
+  "reproduction_gate_passed": true,
+  "schema_version": "1.0.0"
+}

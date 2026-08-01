@@ -1,56 +1,55 @@
-# Security, Privacy, Licensing, And Supply Chain
+# Security And Licensing
 
-## Secrets And Cloud Access
+## Input Trust
 
-- Never commit AWS credentials, SSH private keys, tokens, `.env` files, model
-  access tokens, or signed URLs.
-- Prefer short-lived AWS sessions and least-privilege experiment roles.
-- Provisioning scripts must show planned resources before creation.
-- Restrict inbound access and terminate resources after evidence retrieval.
-- Logs and manifests must redact credentials and authorization headers.
+Contracts, workloads, runtime output and external metadata are untrusted data.
+They must never supply shell fragments, file traversal or executable report
+content.
 
-## Untrusted Inputs
+- Use structured subprocess arguments.
+- Resolve paths inside approved roots.
+- Apply process timeouts and output limits.
+- Escape all report content and use a restrictive content security policy.
+- Do not embed secrets or environment dumps in evidence.
 
-Model metadata, prompts, workloads, external JSON, and upstream logs are data.
-They cannot alter shell commands or agent instructions.
+## CI And Cloud
 
-- Use structured subprocess arguments instead of interpolated shell strings.
-- Validate paths, regex overrides, tensor names, URLs, and archive extraction.
-- Bound trace size, candidate count, runtime, and decompression.
-- Treat report text as untrusted and escape it.
+- Pin third-party GitHub Actions by immutable revision for releases.
+- Limit workflow permissions and protect self-hosted runner credentials.
+- Treat pull-request code from forks as untrusted; do not expose AWS secrets.
+- Run paid or privileged jobs only after an approved maintainer action.
+- Use least-privilege AWS credentials and reject account-root identity.
 
-## Dependency Integrity
+## Evidence Integrity
 
-- Pin runtime and dependency revisions.
-- Record checksums for downloaded models, datasets, binaries, and archives.
-- Generate an SBOM or dependency inventory before release.
-- Review licenses before adding dependencies.
-- Do not execute third-party setup scripts without inspection.
+ArmProof uses hashes and reproducible validation, not formal cryptographic
+attestation. A bundle is invalid when required files, identities or hashes do
+not match. The UI must not imply a stronger guarantee.
 
-## Model And Dataset Licensing
+## Models And Data
 
-Before fixing the headline model/data, record:
+For every reference artifact record:
 
-- canonical source URL and revision;
-- model/data license and redistribution conditions;
-- whether account acceptance or authentication is required;
-- whether derived GGUF redistribution is permitted;
-- attribution requirements;
-- checksum and download procedure.
+- canonical source and revision;
+- license and redistribution terms;
+- download command and checksum;
+- whether acceptance or authentication is required; and
+- whether the repository stores the artifact or only its manifest.
 
-Prefer ungated artifacts that judges can reproduce. If redistribution is not
-permitted, publish recipes, hashes, and scripts without the restricted file.
+Do not commit model weights or datasets unless redistribution is explicitly
+permitted. Prefer scripted downloads with fixed IDs.
 
 ## Project License
 
-The owner must choose the repository license before public code release.
-Apache-2.0 is a reasonable candidate for an Arm developer tool, but this
-document does not make that legal decision. Keep third-party notices separate
-and preserve upstream licenses in patches and vendored material.
+ArmProof source is MIT licensed. BANKING77 remains under CC-BY-4.0 with its
+license, pinned source revision, attribution and derivation notice preserved in
+`THIRD_PARTY_NOTICES.md` and `data/banking77/`.
 
-## Benchmark Privacy
+## Release Checks
 
-Headline workloads use public or synthetic prompts. Private incident logs,
-customer data, source code, or credentials are out of scope. Evidence bundles
-must be safe for public release before upload.
-
+- secret scan;
+- dependency and action review;
+- model/data license review;
+- generated report injection test;
+- archive content inspection; and
+- confirmation that no private AWS or local paths appear in public artifacts.

@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-005",
+  "discovery_seconds": 30.0,
+  "confirmation_seconds": 30.0,
+  "confirmations": 5,
+  "max_error_rate": 0.01,
+  "minimum_delivery_ratio": 0.95,
+  "max_workers": 48,
+  "request_timeout_seconds": 60.0,
+  "warmup_requests": 3,
+  "quality_batch_size": 4,
+  "maximum_quality_loss_pp": 1.0,
+  "minimum_schema_valid_rate": 0.99,
+  "mixes": [
+    {
+      "mix_id": "short",
+      "workload": "data/banking77/generated/traffic-short.jsonl",
+      "p95_slo_ms": 10000.0,
+      "candidates_rps": [0.06666666666666667, 0.1, 0.13333333333333333, 0.16666666666666666, 0.2, 0.26666666666666666, 0.3333333333333333, 0.4, 0.5, 0.6, 0.8, 1.0, 1.2]
+    },
+    {
+      "mix_id": "long",
+      "workload": "data/banking77/generated/traffic-long.jsonl",
+      "p95_slo_ms": 10000.0,
+      "candidates_rps": [0.06666666666666667, 0.1, 0.13333333333333333, 0.16666666666666666, 0.2, 0.26666666666666666, 0.3333333333333333, 0.4, 0.5, 0.6, 0.8, 1.0, 1.2]
+    },
+    {
+      "mix_id": "mixed",
+      "workload": "data/banking77/generated/traffic-mixed.jsonl",
+      "p95_slo_ms": 10000.0,
+      "candidates_rps": [0.06666666666666667, 0.1, 0.13333333333333333, 0.16666666666666666, 0.2, 0.26666666666666666, 0.3333333333333333, 0.4, 0.5, 0.6, 0.8, 1.0, 1.2]
+    }
+  ]
+}

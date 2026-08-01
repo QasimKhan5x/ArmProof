@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-002",
+  "comparison": "PyTorch BF16 deployment versus ONNX Runtime GenAI INT4 deployment",
+  "metrics": {
+    "disk_reduction_percent": 35.91724249132322,
+    "peak_pss_reduction_percent": 55.336785335288766,
+    "weighted_pss_reduction_percent": 59.66032309469201,
+    "minimum_kleidiai_speedup": 1.7170141477125784,
+    "maximum_kleidiai_speedup": 2.5870578477345356
+  },
+  "history": [
+    {"id": "EXP-2026-001", "status": "failed", "note": "Loaded-RSS proxy rejected"},
+    {"id": "EXP-2026-002", "status": "passed", "note": "PSS, size, speed and Arm attribution"},
+    {"id": "EXP-2026-003", "status": "inconclusive", "note": "Offered-load accounting defect preserved"},
+    {"id": "EXP-2026-004", "status": "passed", "note": "Corrected fixed-SLO capacity gate"},
+    {"id": "EXP-2026-005", "status": "passed", "note": "Fresh instance reproduced every ratio exactly"}
+  ],
+  "reproduction": {
+    "experiment_id": "EXP-2026-005",
+    "maximum_relative_difference": 0.0,
+    "mixes_reproduced": 3
+  },
+  "evidence": "ops/evidence/result-first/EXP-2026-002/summary.json"
+}

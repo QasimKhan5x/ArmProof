@@ -4,16 +4,19 @@
 !.env.example
 __pycache__/
 *.py[cod]
+*.egg-info/
 .venv/
 build/
 dist/
 node_modules/
+test-results/
 models/
 *.gguf
 *.safetensors
-ops/evidence/*
-!ops/evidence/README.md
+# Keep manifests, summaries and claim ledgers versioned. Put external or
+# license-restricted payloads under a run's large/ directory and reference
+# their immutable URL and checksum from the manifest.
+ops/evidence/**/large/
 ops/experiments/*.local.jsonl
 performix/
 *.log
-

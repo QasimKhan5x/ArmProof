@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0.0",
+  "comparison_id": "kleidiai-on-off",
+  "causal_scope": "arm_acceleration",
+  "baseline": {
+    "treatment_id": "disabled",
+    "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "runtime_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "workload_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "environment_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "controls": {"kleidiai.enabled": false, "threads": 16}
+  },
+  "treatment": {
+    "treatment_id": "enabled",
+    "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "runtime_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "workload_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "environment_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "controls": {"kleidiai.enabled": true, "threads": 16}
+  },
+  "metrics": {"throughput_ratio": 1.2},
+  "evidence_kinds": ["request_samples", "arm_callchains"],
+  "arm_attribution": {"baseline_observed": false, "treatment_observed": true}
+}

@@ -1,0 +1,17 @@
+{
+  "hardware": "AWS Graviton4 / c8g.4xlarge / 16 cores",
+  "kleidiai": "v1.20.0",
+  "model_bf16": {
+    "id": "microsoft/Phi-4-mini-instruct",
+    "revision": "cfbefacb99257ffa30c83adab238a50856ac3083"
+  },
+  "model_int4": {
+    "id": "microsoft/Phi-4-mini-instruct-onnx",
+    "path": "cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4",
+    "revision": "fc04c8f93df696602fd9f300a30d1bf2e3081347",
+    "size_bytes": 4930563630
+  },
+  "onnxruntime": "4c4d4923b4630a2d0b3807cbbbc3b1813b1380a5",
+  "onnxruntime_genai": "d2c81fdc8ef80836ceba1bae384be80262e24bb4"
+}
+

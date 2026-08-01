@@ -1,128 +1,29 @@
-# Risks, Assumptions, And Kill Criteria
+# Risk Register
 
-Risks are ordered by probability times project impact.
+| ID | Risk | Consequence | Control |
+|---|---|---|---|
+| R-01 | Direct KleidiAI speedup does not survive concurrent serving | Cloud story fails | Run fixed-SLO gate before UI critical path |
+| R-02 | Product becomes a dashboard around one experiment | Low reuse and implementation score | Fail-closed runner, schemas and CI decision are core |
+| R-03 | Whole-stack gains are attributed to KleidiAI | Misleading Arm claim | Separate causal scopes in schema and UI |
+| R-04 | `kai_*` evidence is missing or too coarse | Arm execution unproven | Required unknown fails; never infer exact microkernel |
+| R-05 | Quality sample is too small | Deployment language is not credible | Freeze 500 minimum, 1,000 preferred public examples |
+| R-06 | Report and CLI disagree | Trust failure | Both consume one signed-off decision artifact |
+| R-07 | Accepted configuration differs from deployment | Reproduction failure | Generate deployment directly from treatment identity |
+| R-08 | Profiler changes performance | Invalid benchmark | Profile separately; measure normal collector overhead |
+| R-09 | GitHub Action requires unavailable infrastructure | Poor DX | Document self-hosted runner and preserve local CLI path |
+| R-10 | Runtime/model breadth expands scope | Incomplete product | One excellent adapter; versioned extension boundary only |
+| R-11 | AWS resources or spend escape | Financial/security incident | Approval, least privilege, TTL, tags and cleanup |
+| R-12 | External model/data cannot be redistributed | Broken public quickstart | Store manifests/checksums and scripted downloads |
+| R-13 | "Proof" implies formal or official certification | Overclaim | Explicit claim boundary in UI and docs |
+| R-14 | Superseded context resurfaces | Agent implementation drift | Context validator rejects retired terms in active docs |
 
-## R-01 Existing Upstream Optimizer Dominates
+## Stop Conditions
 
-**Assumption:** Arm-kernel-aware policy adds value beyond upstream target-BPW.
+Stop and return to the owner when:
 
-**Risk:** target-BPW already yields equal quality/size and equal or better Arm
-performance, leaving no optimization contribution.
-
-**Early test:** matched-BPW target-BPW baseline in feasibility.
-
-**Mitigation:** distinguish measured kernel coverage and fallback explanation;
-focus policy on performance constraints target-BPW does not model.
-
-**Kill/pivot:** if no candidate advantage or actionable observability remains,
-drop the optimizer claim or stop.
-
-## R-02 Dispatch Evidence Is Too Coarse
-
-**Assumption:** pinned runtime source exposes or can cheaply emit operation,
-tensor, and kernel decisions.
-
-**Risk:** only backend buffer allocation is visible, making the X-ray misleading.
-
-**Early test:** source reconnaissance plus KleidiAI-on/off trace fixture.
-
-**Mitigation:** narrow granularity to directly observable kernel family or
-eligibility class; label derived facts.
-
-**Kill/pivot:** do not advertise per-kernel execution without evidence.
-
-## R-03 Tensor Format Does Not Improve End-To-End Speed
-
-**Assumption:** repairing important fallbacks changes measured performance.
-
-**Risk:** other bottlenecks dominate, or a smaller format increases conversion
-overhead.
-
-**Early test:** baseline format matrix before policy implementation.
-
-**Mitigation:** rank by runtime weight; preserve no-change outcome; consider
-memory/quality Pareto result.
-
-**Kill/pivot:** stop optimization build if the surface is not measurable.
-
-## R-04 Small Model Is Unconvincing
-
-**Assumption:** a 3B model is representative enough for hackathon proof.
-
-**Risk:** judges view results as toy-scale.
-
-**Mitigation:** use the same 3B shape demonstrated in Arm learning material,
-show production server metrics, and make tooling model-independent.
-
-**Kill/pivot:** do not downgrade to 0.5B for final evidence solely to fit free
-hardware.
-
-## R-05 Benchmark Noise Or Bias
-
-**Risk:** shared-cloud variance, warmup, order effects, or tracing overhead
-manufacture the apparent win.
-
-**Mitigation:** preregistration, randomized/counterbalanced order, warmups,
-repeats, raw samples, uncertainty, trace-off headline runs, clean reproduction.
-
-**Kill/pivot:** mark inconclusive when the target effect is not separable.
-
-## R-06 Quality Proxy Misses Real Damage
-
-**Risk:** perplexity passes while instruction behavior degrades.
-
-**Mitigation:** held-out PPL/KLD plus a small task-relevant behavioral suite and
-qualitative examples chosen before candidate evaluation.
-
-## R-07 Upstream Drift
-
-**Risk:** `llama.cpp` or KleidiAI flags, dispatch behavior, or schemas change.
-
-**Mitigation:** pin revisions, isolate adapters, source-rule version checks,
-migration tests, and no unpinned `main` in headline evidence.
-
-## R-08 Upstream Patch Is Too Invasive
-
-**Risk:** tracing fork becomes unmaintainable and weakens reusable impact.
-
-**Mitigation:** minimal opt-in hook, structured reason codes, focused tests,
-separate patch series, and upstream-style review.
-
-## R-09 AWS Cost Escape
-
-**Risk:** stopped volumes, failed cleanup, long quality runs, or parallel agents
-exceed the small budget.
-
-**Mitigation:** one cloud experiment owner, TTL/watchdog, resource tags, no
-parallel instances, spend ledger, terminate/delete verification.
-
-## R-10 Licensing Or Gated Model Blocks Reproduction
-
-**Risk:** judges cannot download the source model or redistribute artifacts.
-
-**Mitigation:** select an ungated model with clear license; publish recipe and
-hash even if model redistribution is restricted; record dataset licenses.
-
-## R-11 UI Outruns Evidence
-
-**Risk:** polished visuals imply precision that the trace does not possess.
-
-**Mitigation:** UI consumes schemas, shows confidence/unknowns, links raw data,
-and is built against truthful fixtures after feasibility.
-
-## R-12 Project Scope Expands Again
-
-**Risk:** adding frameworks, clouds, models, schedulers, or kernel generation
-prevents finishing the central proof.
-
-**Mitigation:** non-goals, ADR approval, one model/runtime/target for headline
-evidence, and phase entry gates.
-
-## Assumption Review Cadence
-
-- Review R-01 through R-05 after every feasibility experiment.
-- Review budget and licensing before provisioning.
-- Review scope before accepting any new dependency or platform.
-- Convert a disproven assumption into an ADR and revised requirement; never
-  leave contradictory intent in conversation history.
-
+- the capacity gate fails;
+- a required claim cannot be tied to raw evidence;
+- the matched Arm control cannot remain identical;
+- public licensing prevents a reproducible reference;
+- the cloud cost ceiling must change; or
+- a proposed feature changes the approved product objective.

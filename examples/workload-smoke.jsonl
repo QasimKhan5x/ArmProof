@@ -1,0 +1,2 @@
+{"request_id":"smoke-short","payload":{"request_id":"smoke-short","prompt":"Route this support request: I cannot reset my password."}}
+{"request_id":"smoke-long","payload":{"request_id":"smoke-long","prompt":"Route this detailed support request about a duplicated invoice and return a structured category."}}

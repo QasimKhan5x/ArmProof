@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "status": "verified_by_armproof",
+  "experiment_id": "EXP-2026-004",
+  "hardware": {
+    "provider": "AWS",
+    "instance_type": "c8g.4xlarge",
+    "processor": "Graviton4",
+    "architecture": "arm64",
+    "vcpus": 16,
+    "region_tested": "us-east-1"
+  },
+  "model": {
+    "id": "microsoft/Phi-4-mini-instruct-onnx",
+    "revision": "fc04c8f93df696602fd9f300a30d1bf2e3081347",
+    "path": "cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4",
+    "source_artifact_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
+    "enabled_overlay_sha256": "24502a953953c8fcd6ccd54d4e3c1297a13abcc86f6a02f03e876717133a3984"
+  },
+  "runtime": {
+    "onnxruntime_commit": "4c4d4923b4630a2d0b3807cbbbc3b1813b1380a5",
+    "onnxruntime_genai_commit": "d2c81fdc8ef80836ceba1bae384be80262e24bb4",
+    "kleidiai_version": "v1.20.0"
+  },
+  "service": {
+    "threads": 16,
+    "max_inflight": 1,
+    "host": "127.0.0.1",
+    "port": 8000,
+    "environment": {"OMP_NUM_THREADS": "16"},
+    "session_options": {
+      "intra_op_num_threads": 16,
+      "mlas.disable_kleidiai": "0"
+    }
+  },
+  "accepted_result": {
+    "minimum_fixed_slo_capacity_ratio": 2.5,
+    "quality_accuracy_delta_pp": -0.38961038961038974,
+    "quality_macro_f1_delta_pp": -0.6726444303255752,
+    "schema_valid_rate": 1.0,
+    "arm_callchains": "kai_* observed only in enabled profile",
+    "clean_reproduction": "all three capacity ratios matched with 0% relative difference"
+  },
+  "evidence": {
+    "decision": "examples/armproof-reference/comparison.json",
+    "summary": "ops/evidence/EXP-2026-004/accepted/evidence/capacity/experiment/summary.json",
+    "checksums": "ops/evidence/EXP-2026-004/accepted/evidence/SHA256SUMS",
+    "reproduction": "ops/evidence/EXP-2026-005/reproduction-comparison.json"
+  }
+}

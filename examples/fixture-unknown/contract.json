@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "fixture-arm-capacity",
+  "treatments": [
+    {
+      "id": "disabled",
+      "command": ["serve", "--model", "fixture"],
+      "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "runtime_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "environment": {"KLEIDIAI": "0"}
+    },
+    {
+      "id": "enabled",
+      "command": ["serve", "--model", "fixture"],
+      "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "runtime_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "environment": {"KLEIDIAI": "1"}
+    }
+  ],
+  "claims": [
+    {
+      "id": "capacity",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "kleidiai-on-off",
+      "metric": "throughput_ratio",
+      "operator": "gte",
+      "threshold": 1.5,
+      "required_evidence": ["request_samples", "arm_callchains"],
+      "required": true,
+      "depends_on": []
+    }
+  ]
+}
