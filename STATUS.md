@@ -1,6 +1,6 @@
 # Current Status
 
-Last updated: 2026-07-31
+Last updated: 2026-08-01
 
 ## Product
 
@@ -32,9 +32,13 @@ Completed: guarded AWS lifecycle, reference service, fixed-SLO harness, policy
 engine, pass/fail/unknown fixtures, single-config CLI, reusable GitHub Action,
 responsive offline report, integrity verifier and pinned deployment artifact.
 
-Remaining release work is repository publication and hackathon video/submission
-packaging. The secondary measurement-overhead claim remains unpublished until
-it has a matched baseline.
+Version `v0.1.0` is public at
+`https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.1.0`. Native Arm64,
+x86 and report-browser CI pass on the release commit, and the public example
+Action passes while uploading its decision and offline report. Remaining
+submission work is the hackathon video and final Devpost packaging. The
+secondary measurement-overhead claim remains unpublished until it has a
+matched baseline.
 
 ## Verified Commands
 

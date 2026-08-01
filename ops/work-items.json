@@ -1,6 +1,6 @@
 {
   "schema_version": "2.0.0",
-  "updated_at": "2026-07-31",
+  "updated_at": "2026-08-01",
   "spec_gate": {
     "version": "1.0.0",
     "status": "approved",
@@ -286,12 +286,16 @@
       "phase": 4,
       "priority": 12,
       "title": "Prepare release and hackathon submission",
-      "status": "pending",
+      "status": "in_progress",
       "dependencies": ["REPRO-001"],
       "context": ["docs/DEMO_AND_SUBMISSION.md", "docs/JUDGING_STRATEGY.md", "docs/SOURCES.md"],
       "deliverables": ["Tagged release", "Demo video", "Submission copy", "Public evidence bundle"],
       "verification": ["Demo uses real recorded evidence", "Every numerical claim links to a bundle", "Installation and validation steps work from the release"],
-      "evidence": []
+      "evidence": [
+        "https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.1.0",
+        "GitHub CI 30684464229 passed on native Arm64, x86 and report-browser jobs",
+        "GitHub example Action 30684494688 passed and uploaded the offline report"
+      ]
     }
   ]
 }

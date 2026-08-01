@@ -71,3 +71,5 @@
 - [ ] **SHIP-001: Harden and submit**
   - Acceptance: public artifacts, demo, licenses, scans and Devpost mapping.
   - Verify: every submission claim resolves to traceability evidence.
+  - Complete: public `v0.1.0`, x86/Arm64/report CI and live example Action.
+  - Remaining: record the demo video and submit the final Devpost entry.
