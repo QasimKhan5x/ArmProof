@@ -1,8 +1,14 @@
-# ArmProof
+# SurgeDesk + ArmProof
 
-ArmProof is a fail-closed CI release gate for Arm AI optimization pull
-requests. It approves a deployment only when the submitted evidence shows that
-the change:
+SurgeDesk is a human-confirmed banking-support triage application that shows
+what a measured Arm optimization changes in a real cloud workflow. During a
+recorded support surge, the same Phi-4 Mini INT4 service on the same AWS
+Graviton4 instance sustains **3x mixed traffic** with KleidiAI enabled while
+remaining under its 10-second p95 objective.
+
+ArmProof is the reusable engine behind the demo. It is a fail-closed CI release
+gate that approves an Arm AI deployment only when submitted evidence shows
+that the change:
 
 - preserves the workload's declared quality contract;
 - improves its declared cloud-serving objective;
@@ -22,6 +28,24 @@ GenAI with KleidiAI on AWS Graviton4. Existing experiments have already shown:
 The decisive service gate then measured 3.0x, 2.5x and 3.0x sustainable
 capacity across short, long and mixed traffic under the same 10-second p95
 SLO. A fresh `c8g.4xlarge` reproduced all three ratios exactly.
+
+## Run The Product Demo
+
+```bash
+python3.12 scripts/build_surgedesk_demo.py --verify
+python3.12 -m http.server 8765 --bind 127.0.0.1
+```
+
+Open `http://127.0.0.1:8765/surgedesk/`. The three-step judge path is:
+
+1. Route and human-confirm real BANKING77 requests using recorded model output.
+2. Replay raw baseline and optimized surge samples on the same Graviton4 VM.
+3. Inspect the Arm execution, quality, reproduction and deployment proof.
+
+The app does not simulate live inference or claim autonomous routing. Its
+absolute 77-class accuracy is 46.49%, so human confirmation is a visible
+product requirement. Free-form text is rejected by the offline demo instead
+of being passed off as a recorded model result.
 
 ## Product Workflow
 
@@ -72,12 +96,14 @@ PYTHONPATH=src python3.12 -m armproof.cli ci \
 ```
 
 Both accepted cloud bundles contain 141 checksummed files and verify after
-relocation. Browser tests cover desktop, tablet and 320-pixel mobile layouts.
+relocation. Browser tests cover the complete SurgeDesk workflow plus ArmProof
+report layouts down to 320 pixels.
 
 ## Start Here
 
 - Current state: [`STATUS.md`](STATUS.md)
 - Five-minute quickstart: [`docs/QUICKSTART.md`](docs/QUICKSTART.md)
+- Product demo guide: [`docs/SURGEDESK_DEMO.md`](docs/SURGEDESK_DEMO.md)
 - Agent rules: [`AGENTS.md`](AGENTS.md)
 - Product specification: [`docs/PRODUCT_SPEC.md`](docs/PRODUCT_SPEC.md)
 - Established evidence: [`docs/ESTABLISHED_EVIDENCE.md`](docs/ESTABLISHED_EVIDENCE.md)

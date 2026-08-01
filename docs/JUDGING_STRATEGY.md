@@ -19,13 +19,16 @@ Do not attribute the whole BF16-to-INT4 transformation to KleidiAI.
 
 ## UX And Developer Experience: 15
 
-The recurring workflow is a PR merge decision, not a one-time report. A
-developer supplies one contract file and receives a GitHub Check, explanation,
-report and deployable configuration.
+SurgeDesk first makes the value tangible: a support operator can confirm or
+correct a route, watch the same queue under a measured surge and inspect why
+the optimized deployment holds its SLO. The recurring developer workflow is a
+PR merge decision. A developer supplies one contract file and receives a
+GitHub Check, explanation, report and deployable configuration.
 
 Required proof:
 
 - one-command reference run;
+- one continuous Triage -> Surge -> Release proof application path;
 - stable failure reason codes;
 - useful failed-state UX;
 - documentation for replacing workload and adapter; and
@@ -37,19 +40,27 @@ Community artifacts are the contract schema, matched-control runner,
 fail-closed claim ledger, quality interface, KleidiAI detector, GitHub Action,
 report, deployment template and reference recipe.
 
+The reference application and evidence-derived demo generator are also
+reusable learning artifacts: they show how to turn raw fixed-SLO measurements
+into an honest product demonstration without inventing live inference.
+
 The contribution is not another general benchmark. It makes Arm optimization
 claims enforceable in a workflow maintainers already use.
 
 ## WOW: 25
 
-The 90-second reveal is causal:
+The 90-second reveal is operational and causal:
 
-1. A PR claims Arm optimization.
-2. KleidiAI is disabled; the check turns red and `kai_*` disappears.
-3. KleidiAI is enabled; the check turns green and cloud capacity passes.
-4. The exact accepted deployment becomes available.
+1. A stolen-card request reaches a human-confirmed support queue.
+2. During a surge, the disabled control breaches p95 while the enabled
+   treatment remains responsive on the same Graviton4 machine.
+3. Sustainable mixed traffic rises from 0.20 to 0.60 requests/second.
+4. ArmProof reveals enabled-only `kai_*` execution and releases the exact
+   measured deployment through a reusable GitHub Action.
 
-The audience should understand the purpose within 15 seconds.
+The audience should understand the application within 10 seconds and the Arm
+optimization within 45 seconds. The report supports this reveal; it is not the
+primary product screen.
 
 ## Cloud AI Fit
 
@@ -63,4 +74,3 @@ tokens per second.
 The fully implemented concept is designed for approximately 38/40 technical,
 14/15 DX, 18/20 impact and 23/25 WOW. These are planning targets, not claims or
 guaranteed judge scores.
-

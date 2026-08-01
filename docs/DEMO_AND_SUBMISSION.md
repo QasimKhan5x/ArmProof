@@ -2,60 +2,54 @@
 
 ## Message
 
-> ArmProof catches Arm optimization pull requests that run on Graviton but are
-> not actually accelerated by the required Arm path.
+> SurgeDesk keeps a banking support queue responsive during a traffic surge by
+> deploying a measured KleidiAI optimization on Graviton4. ArmProof proves the
+> gain came from the Arm path and blocks unsupported releases.
 
 ## Ninety-Second Judge Path
 
-### 0-15 seconds: The Decision
+### 0-25 seconds: Real Work
 
-Open a real repository PR migrating the Phi-4 service from PyTorch BF16 to INT4
-ONNX Runtime GenAI with KleidiAI. Show the declared optimization contract.
+Open SurgeDesk on a stolen-card request. Load the recorded Phi-4 Mini route,
+show the account-security procedure and have the operator confirm it. Load the
+known misroute and correct it. State that the model assists; a human decides.
 
-### 15-40 seconds: Catch The False Claim
+### 25-55 seconds: The Surge
 
-Show the run with KleidiAI disabled. The GitHub Check is red because `kai_*`
-execution is absent and the Arm performance contract fails.
+Open **Surge replay**. The machine, model, runtime and 10-second p95 objective
+stay fixed; only KleidiAI changes. Replay raw confirmation events. The disabled
+control fails at 0.267 requests/second while the enabled treatment passes at
+0.600. Reveal the measured sustainable boundary: 0.20 versus 0.60, or 3x.
 
-### 40-65 seconds: Prove The Optimization
+### 55-80 seconds: Why It Is Arm Optimization
 
-Enable KleidiAI. Show the green check, fixed-SLO capacity result, preserved
-quality, clean-instance reproduction and separate whole-stack versus
-Arm-specific comparisons.
+Open **Release proof**. Show enabled-only `kai_*` callchains, the matched INT4
+control, 1.72-2.59x direct execution gain, 2.5-3x capacity across all traffic
+mixes and exact clean-machine reproduction.
 
-### 65-90 seconds: Reuse It
+### 80-90 seconds: Community Artifact
 
-Open the report provenance, show the one-command reproduction and launch or
-display the exact passing deployment manifest.
+Show the GitHub Action. ArmProof rejects missing hashes, quality regression,
+absent Arm execution or an unmeasured deployment, and emits the exact passing
+configuration.
 
 ## Three-Minute Video
 
-Add enough time to explain:
-
-- why BF16-to-INT4 and KleidiAI on/off answer different questions;
-- how the claim ledger fails closed;
-- how PSS and capacity are measured;
-- which artifacts another developer can reuse; and
-- the limits of the evidence.
-
-## Report Views
-
-1. Decision and failed requirements.
-2. Transformation and causal comparison map.
-3. Fixed-SLO cloud capacity and queue behavior.
-4. Quality and malformed-output inspection.
-5. Arm environment, `kai_*` evidence and raw provenance.
+Use the extra time to distinguish the 35.92% artifact-size reduction from the
+KleidiAI-specific comparison, show one raw event, and run the one-command gate.
+End on the application, not the report.
 
 ## Submission Claim Rules
 
 - Every number names its comparison and environment.
-- "Verified by ArmProof" is allowed; "Arm certified" is not.
-- Direct speed and PSS results remain distinct from the accepted server
-  capacity comparison.
-- Failed and inconclusive experiments remain visible.
-- The report is a product artifact, not evidence by itself.
+- Say "recorded replay," never imply that the static demo is calling AWS live.
+- Say "verified by ArmProof," never "Arm certified."
+- Absolute quality is 46.49%; human confirmation is mandatory and visible.
+- Direct speed, whole-stack size/PSS and service capacity remain separate.
+- Failed and inconclusive experiments remain preserved.
 
 ## Offline Backup
 
-Ship the static report, short recorded terminal sequence, raw summary and
-screenshots so judging does not depend on a live AWS instance or GitHub Action.
+Ship `surgedesk/`, the generated data payload, screenshots, ArmProof report,
+raw summary and checksummed evidence. Judging must not depend on AWS uptime or
+a live GitHub workflow.

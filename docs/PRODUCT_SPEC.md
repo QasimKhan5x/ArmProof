@@ -28,6 +28,19 @@ Success means a maintainer can answer, before merge:
 An inference maintainer or ML platform engineer reviewing an Arm64
 optimization PR needs trustworthy evidence to accept or reject the change.
 
+The submission showcase adds a support-operations user. The operator needs an
+assistive route suggestion and a responsive queue during traffic spikes, while
+the platform engineer needs proof that the deployed Arm treatment caused the
+capacity gain without violating the quality contract.
+
+## Reference Application
+
+SurgeDesk must present one continuous workflow: human-confirm a recorded
+BANKING77 route, replay raw same-instance baseline/treatment surge events, and
+open the ArmProof release decision. All visible measurements must derive from
+accepted evidence. Edited free-form text must never be represented as live or
+recorded model inference.
+
 ## Reference Scope
 
 | Layer | Approved reference |
@@ -120,6 +133,9 @@ generation run on any GitHub runner.
 - Fresh-user quickstart requires one contract file and one command.
 - Every Devpost number maps to a claim and raw evidence.
 - No submission copy implies official Arm certification.
+- A judge can move from customer request to service surge to causal Arm proof
+  in under three minutes without terminal narration.
+- The quality boundary and human-confirmation requirement remain visible.
 
 ## Boundaries
 

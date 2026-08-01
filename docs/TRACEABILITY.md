@@ -16,6 +16,7 @@ Status values: `established`, `pending`, `unavailable`, `rejected`.
 | C-10 | A clean machine reproduces within 10% | INV-05, FR-13 | `ops/evidence/EXP-2026-005/reproduction-comparison.json` | established |
 | C-11 | One config and one command produce the CI decision | FR-01, FR-11 | `tests/test_ci_command.py` | established |
 | C-12 | Report and deployment derive from the same accepted treatment | INV-05, FR-10, FR-12 | `tests/reference/test_deployment_artifact.py`, `tests/report/test_generator.py` | established |
+| C-13 | SurgeDesk reproduces the accepted 3.0x mixed-traffic story without invented inference | FR-14, FR-15, FR-16, NFR-08 | `surgedesk/data.json`, `tests/surgedesk/`, `tests/ui/surgedesk*.mjs` | established |
 
 The 24-item result supports only the BF16-to-INT4 feasibility comparison. The
 matched KleidiAI control uses the frozen 770-case evaluation for its accepted

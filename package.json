@@ -2,7 +2,8 @@
   "name": "armproof-report-tests",
   "private": true,
   "scripts": {
-    "test:ui": "playwright test tests/ui/report.spec.mjs"
+    "test:logic": "node --test tests/ui/surgedesk.logic.test.mjs",
+    "test:ui": "playwright test tests/ui/report.spec.mjs tests/ui/surgedesk.spec.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.57.0"

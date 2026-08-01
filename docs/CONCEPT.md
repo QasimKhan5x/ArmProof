@@ -6,6 +6,19 @@ ArmProof is the CI release gate that prevents an Arm AI optimization pull
 request from merging unless its quality, cloud capacity, Arm execution and
 reproducibility claims are supported by matched evidence.
 
+## Application Showcase
+
+SurgeDesk makes that infrastructure legible through a realistic banking
+support workflow. An operator reviews recorded Phi-4 Mini routing suggestions,
+then replays an accepted burst of BANKING77 traffic. With the model, runtime,
+machine and SLO fixed, enabling KleidiAI raises sustainable mixed-traffic
+capacity from 0.20 to 0.60 requests/second. ArmProof then shows why that result
+is releasable and provides the exact passing deployment.
+
+SurgeDesk is not a second benchmark dashboard. It is the application whose
+customer queue benefits from the optimization; ArmProof is the reusable
+developer artifact that prevents unsupported optimization claims.
+
 ## User And Painful Moment
 
 The primary user is an inference-framework maintainer or ML platform engineer

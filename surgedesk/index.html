@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>SurgeDesk | Arm-optimized support triage</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header class="app-header">
+    <div class="brand-block">
+      <span class="brand-mark" aria-hidden="true">S</span>
+      <div>
+        <strong>SurgeDesk</strong>
+        <span>Support triage on Graviton</span>
+      </div>
+    </div>
+    <div class="environment-status">
+      <span class="status-dot" aria-hidden="true"></span>
+      Recorded Graviton evidence
+    </div>
+  </header>
+
+  <nav class="view-tabs" aria-label="SurgeDesk views">
+    <div role="tablist" aria-label="Demo workflow">
+      <button id="tab-workspace" role="tab" aria-selected="true" aria-controls="view-workspace" data-view="workspace">1. Triage</button>
+      <button id="tab-surge" role="tab" aria-selected="false" aria-controls="view-surge" data-view="surge">2. Surge replay</button>
+      <button id="tab-proof" role="tab" aria-selected="false" aria-controls="view-proof" data-view="proof">3. Release proof</button>
+    </div>
+    <p id="demo-source">Loading accepted evidence…</p>
+  </nav>
+
+  <main id="main-content">
+    <section id="view-workspace" class="view" role="tabpanel" aria-labelledby="tab-workspace">
+      <div class="workspace-shell">
+        <aside class="queue-rail" aria-labelledby="queue-title">
+          <div class="section-heading compact-heading">
+            <div>
+              <p class="eyebrow">Operations</p>
+              <h1 id="queue-title">Triage queues</h1>
+            </div>
+            <span class="recorded-tag">Human confirmed</span>
+          </div>
+          <ul id="queue-list" class="queue-list" aria-label="Support queue counts"></ul>
+          <div class="rail-note">
+            <strong>Decision boundary</strong>
+            <p>Phi-4 proposes a route. A support operator confirms or corrects every ticket.</p>
+          </div>
+        </aside>
+
+        <div class="intake-workspace">
+          <header class="section-heading">
+            <div>
+              <p class="eyebrow">Customer intake</p>
+              <h2>Route an incoming request</h2>
+            </div>
+            <span id="workspace-mode" class="source-chip">BANKING77 recorded output</span>
+          </header>
+
+          <form id="intake-form" class="intake-form">
+            <label for="sample-select">Recorded customer request</label>
+            <select id="sample-select" name="sample"></select>
+            <label for="customer-message">Message</label>
+            <textarea id="customer-message" name="message" rows="4" spellcheck="false"></textarea>
+            <div class="form-actions">
+              <p id="intake-note">Select an evidence-backed request to replay its recorded model output.</p>
+              <button class="primary-button" type="submit">Load model suggestion</button>
+            </div>
+          </form>
+
+          <div id="intake-error" class="inline-alert error-alert" role="alert" hidden></div>
+
+          <section id="review-panel" class="review-panel" aria-labelledby="review-title" hidden>
+            <div class="review-summary">
+              <div>
+                <p class="eyebrow">Model suggestion</p>
+                <h3 id="review-title">Awaiting request</h3>
+              </div>
+              <span id="review-priority" class="priority-badge"></span>
+            </div>
+            <dl class="review-details">
+              <div><dt>Suggested intent</dt><dd id="suggested-intent"></dd></div>
+              <div><dt>Proposed queue</dt><dd id="suggested-queue"></dd></div>
+              <div><dt>Inference source</dt><dd>Recorded Phi-4 Mini INT4 output</dd></div>
+            </dl>
+            <div id="review-warning" class="quality-warning"></div>
+            <div class="review-actions">
+              <button id="correct-route" class="secondary-button" type="button">Apply benchmark correction</button>
+              <button id="confirm-route" class="primary-button" type="button">Confirm route</button>
+            </div>
+          </section>
+
+          <section class="recent-section" aria-labelledby="recent-title">
+            <div class="section-heading compact-heading">
+              <div>
+                <p class="eyebrow">Audit trail</p>
+                <h2 id="recent-title">Reviewed tickets</h2>
+              </div>
+              <span id="review-count" class="source-chip">0 reviewed</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Request</th><th>Final queue</th><th>Review</th><th>Runbook</th></tr></thead>
+                <tbody id="reviewed-tickets">
+                  <tr class="empty-row"><td colspan="4">No tickets reviewed in this demo session.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-surge" class="view" role="tabpanel" aria-labelledby="tab-surge" hidden>
+      <div class="view-inner">
+        <header class="page-heading">
+          <div>
+            <p class="eyebrow">Fixed-SLO experiment</p>
+            <h1>What happens when support demand surges?</h1>
+            <p>Replay raw mixed-traffic confirmation samples from the accepted Graviton4 experiment.</p>
+          </div>
+          <button id="run-replay" class="primary-button replay-button" type="button">Run recorded surge</button>
+        </header>
+
+        <div class="experiment-strip" aria-label="Experiment controls">
+          <div><span>Machine</span><strong id="experiment-machine">c8g.4xlarge</strong></div>
+          <div><span>Model</span><strong>Phi-4 Mini INT4</strong></div>
+          <div><span>SLO</span><strong id="experiment-slo">—</strong></div>
+          <div><span>Only changed control</span><strong>KleidiAI off → on</strong></div>
+        </div>
+
+        <section class="capacity-reveal" aria-labelledby="capacity-title">
+          <header class="section-heading">
+            <div>
+              <p class="eyebrow">Maximum sustainable mixed traffic</p>
+              <h2 id="capacity-title">Same instance. Measured capacity.</h2>
+            </div>
+            <strong id="headline-ratio" class="headline-ratio">—</strong>
+          </header>
+          <div class="capacity-bars">
+            <div class="capacity-row baseline-capacity">
+              <div class="bar-label"><strong>KleidiAI disabled</strong><span id="baseline-capacity-rps">—</span></div>
+              <div class="bar-track"><span id="baseline-capacity-bar"></span></div>
+            </div>
+            <div class="capacity-row optimized-capacity">
+              <div class="bar-label"><strong>KleidiAI enabled</strong><span id="optimized-capacity-rps">—</span></div>
+              <div class="bar-track"><span id="optimized-capacity-bar"></span></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="run-comparison">
+          <article class="run-panel baseline-run" aria-labelledby="baseline-title">
+            <header>
+              <div><p class="eyebrow">Control</p><h2 id="baseline-title">KleidiAI disabled</h2></div>
+              <span id="baseline-status" class="run-status waiting">Waiting</span>
+            </header>
+            <div class="run-progress"><span id="baseline-progress"></span></div>
+            <dl class="metric-grid">
+              <div><dt>Offered load</dt><dd id="baseline-rps">0.267 r/s</dd></div>
+              <div><dt>Completed</dt><dd id="baseline-completed">0 / 8</dd></div>
+              <div><dt>Observed p95</dt><dd id="baseline-p95">—</dd></div>
+              <div><dt>SLO breaches</dt><dd id="baseline-breaches">0</dd></div>
+            </dl>
+            <p id="baseline-event" class="event-line">Run not started.</p>
+          </article>
+
+          <article class="run-panel optimized-run" aria-labelledby="optimized-title">
+            <header>
+              <div><p class="eyebrow">Treatment</p><h2 id="optimized-title">KleidiAI enabled</h2></div>
+              <span id="optimized-status" class="run-status waiting">Waiting</span>
+            </header>
+            <div class="run-progress"><span id="optimized-progress"></span></div>
+            <dl class="metric-grid">
+              <div><dt>Offered load</dt><dd id="optimized-rps">0.600 r/s</dd></div>
+              <div><dt>Completed</dt><dd id="optimized-completed">0 / 18</dd></div>
+              <div><dt>Observed p95</dt><dd id="optimized-p95">—</dd></div>
+              <div><dt>SLO breaches</dt><dd id="optimized-breaches">0</dd></div>
+            </dl>
+            <p id="optimized-event" class="event-line">Run not started.</p>
+          </article>
+        </div>
+
+        <div id="replay-conclusion" class="conclusion-band" hidden>
+          <div><span>Baseline boundary</span><strong id="baseline-boundary">—</strong></div>
+          <div><span>Optimized boundary</span><strong id="optimized-boundary">—</strong></div>
+          <p id="conclusion-copy"></p>
+          <button class="secondary-button" type="button" data-go-proof>Inspect why the result is trusted</button>
+        </div>
+
+        <section class="mix-table-section" aria-labelledby="mix-title">
+          <div class="section-heading compact-heading">
+            <div><p class="eyebrow">All traffic shapes</p><h2 id="mix-title">Capacity held across three mixes</h2></div>
+            <span id="confirmation-count" class="source-chip">—</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Traffic mix</th><th>Baseline</th><th>Optimized</th><th>Capacity gain</th></tr></thead>
+              <tbody id="mix-table"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="view-proof" class="view" role="tabpanel" aria-labelledby="tab-proof" hidden>
+      <div class="view-inner proof-view">
+        <header class="proof-decision">
+          <div class="decision-mark" aria-hidden="true">✓</div>
+          <div>
+            <p class="eyebrow">ArmProof release decision</p>
+            <h1>Approved for the measured Graviton deployment</h1>
+            <p>Every required claim passed against checksum-bound evidence.</p>
+          </div>
+          <span>PASS</span>
+        </header>
+
+        <section class="proof-section" aria-labelledby="claims-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">Causal claim ledger</p><h2 id="claims-title">What the release gate established</h2></div>
+            <a class="text-link" href="../report/index.html">Open full evidence report</a>
+          </div>
+          <div class="table-wrap">
+            <table class="claims-table">
+              <thead><tr><th>Required claim</th><th>Observed</th><th>Threshold</th><th>Decision</th></tr></thead>
+              <tbody>
+                <tr><td>Cloud capacity</td><td id="proof-capacity">—</td><td>≥ 1.5×</td><td><span class="pass-label">Pass</span></td></tr>
+                <tr><td>Quality accuracy</td><td id="proof-quality">—</td><td>≥ −1.0 pp</td><td><span class="pass-label">Pass</span></td></tr>
+                <tr><td>Output schema</td><td id="proof-schema">—</td><td>≥ 99%</td><td><span class="pass-label">Pass</span></td></tr>
+                <tr><td>Arm execution</td><td id="proof-arm">—</td><td>Required</td><td><span class="pass-label">Pass</span></td></tr>
+                <tr><td>Clean reproduction</td><td id="proof-reproduction">—</td><td>≤ 10%</td><td><span class="pass-label">Pass</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="proof-section" aria-labelledby="stack-title">
+          <div class="section-heading compact-heading">
+            <div><p class="eyebrow">Arm optimization path</p><h2 id="stack-title">From model migration to executed kernels</h2></div>
+          </div>
+          <ol class="stack-path">
+            <li><span>1</span><div><strong>Phi-4 Mini</strong><small>Cloud support classification workload</small></div></li>
+            <li><span>2</span><div><strong>INT4 ONNX</strong><small id="artifact-reduction">—</small></div></li>
+            <li><span>3</span><div><strong>ONNX Runtime GenAI</strong><small>Identical runtime and model in both treatments</small></div></li>
+            <li><span>4</span><div><strong>KleidiAI</strong><small id="direct-speedup">—</small></div></li>
+            <li><span>5</span><div><strong>Graviton4</strong><small id="capacity-range">—</small></div></li>
+          </ol>
+        </section>
+
+        <div class="proof-columns">
+          <section class="proof-section quality-boundary" aria-labelledby="quality-title">
+            <p class="eyebrow">Claim boundary</p>
+            <h2 id="quality-title">Human confirmation is required</h2>
+            <p>The optimization preserved model quality, but absolute 77-class accuracy is <strong id="absolute-accuracy">—</strong>. SurgeDesk is an assistive triage demonstration, not an autonomous banking decision system.</p>
+          </section>
+          <section class="proof-section deployment-output" aria-labelledby="deploy-title">
+            <p class="eyebrow">Exact passing deployment</p>
+            <h2 id="deploy-title">No benchmark-only configuration</h2>
+            <dl>
+              <div><dt>Instance</dt><dd id="deployment-instance">—</dd></div>
+              <div><dt>Threads</dt><dd id="deployment-threads">—</dd></div>
+              <div><dt>Runtime</dt><dd>ORT GenAI INT4</dd></div>
+              <div><dt>KleidiAI</dt><dd>Enabled</dd></div>
+            </dl>
+          </section>
+        </div>
+
+        <section class="release-gate" aria-labelledby="release-title">
+          <div>
+            <p class="eyebrow">Reusable developer artifact</p>
+            <h2 id="release-title">The same decision runs in pull requests</h2>
+            <p>Missing hashes, quality regressions, absent Arm callchains or an unmeasured deployment block the release.</p>
+          </div>
+          <pre><code>- uses: QasimKhan5x/VerifyLane@v0.1.0
+  with:
+    config: armproof.json</code></pre>
+          <a class="primary-link" href="https://github.com/QasimKhan5x/VerifyLane">View source and evidence</a>
+        </section>
+      </div>
+    </section>
+
+    <section id="load-error" class="fatal-error" role="alert" hidden>
+      <h1>SurgeDesk could not load its evidence bundle</h1>
+      <p>Serve the repository over HTTP and ensure <code>surgedesk/data.json</code> exists.</p>
+    </section>
+  </main>
+
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>

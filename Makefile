@@ -1,7 +1,7 @@
 PYTHON := python3.12
 PYTHONPATH := src
 
-.PHONY: check context data-verify evidence-verify test
+.PHONY: check context data-verify evidence-verify surgedesk-verify test
 
 test:
 	PYTHONPATH=$(PYTHONPATH) $(PYTHON) -m unittest discover -s tests -v
@@ -15,5 +15,8 @@ evidence-verify:
 data-verify:
 	$(PYTHON) scripts/build_banking77_workload.py >/dev/null
 
-check: context evidence-verify data-verify test
+surgedesk-verify:
+	$(PYTHON) scripts/build_surgedesk_demo.py --verify
+
+check: context evidence-verify data-verify surgedesk-verify test
 	$(PYTHON) -m compileall -q src scripts tests

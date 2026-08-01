@@ -69,6 +69,12 @@ reproduced.
 - **FR-11 CI decision:** emit stable exit codes and a GitHub Check summary.
 - **FR-12 Deployment output:** emit the exact accepted service configuration.
 - **FR-13 Reproduction:** provide one documented clean-run command.
+- **FR-14 Application workflow:** route recorded BANKING77 requests through an
+  explicit human confirmation or correction step.
+- **FR-15 Surge replay:** animate raw accepted baseline and optimized request
+  samples and converge on their measured p95, breaches and capacity boundary.
+- **FR-16 Evidence-derived demo:** generate all product-demo metrics and cases
+  from accepted files; checked output drift must fail CI.
 
 ## Non-Functional Requirements
 
@@ -84,6 +90,8 @@ reproduced.
 - **NFR-06 Accessibility:** the report is keyboard-usable, readable and
   responsive.
 - **NFR-07 Bounded cost:** cloud runs enforce approval, TTL, tags and spend cap.
+- **NFR-08 Demo integrity:** offline replay is labeled as recorded evidence;
+  edited text cannot masquerade as live model output.
 
 ## Product Properties
 
@@ -108,4 +116,6 @@ Before marking the product complete, answer with evidence:
 6. Can a fresh developer run it from one YAML file and one command?
 7. Does the report remain honest when a metric is unfavorable or unavailable?
 8. What disappears on x86, and is that boundary visible?
-
+9. Can changing a visible demo number without changing raw evidence pass CI?
+10. Does the support workflow remain useful and honest at 46.49% absolute
+    accuracy?

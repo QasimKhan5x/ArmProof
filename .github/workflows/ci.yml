@@ -35,8 +35,10 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: PYTHONPATH=src python3.12 -m armproof.cli ci examples/armproof-reference/armproof.json --output report
+      - run: python3.12 scripts/build_surgedesk_demo.py --verify
+      - run: npm run test:logic
       - run: npm run test:ui
-      - name: Upload report screenshots
+      - name: Upload product screenshots
         if: always()
         uses: actions/upload-artifact@v7
         with:

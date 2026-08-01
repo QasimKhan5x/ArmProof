@@ -4,10 +4,10 @@ Last updated: 2026-08-01
 
 ## Product
 
-ArmProof is a fail-closed CI gate for Arm AI optimization changes. It evaluates
-a versioned quality, capacity and Arm-execution contract, emits stable reason
-codes, renders an offline evidence report and records the exact passing
-deployment.
+SurgeDesk is the judge-facing banking-support application. It routes recorded
+BANKING77 requests through human confirmation, replays the accepted
+same-instance Graviton surge, and hands off to ArmProof for causal release
+proof. ArmProof remains the reusable fail-closed CI gate and evidence engine.
 
 ## Accepted Result
 
@@ -31,6 +31,12 @@ attempts remain preserved and visible.
 Completed: guarded AWS lifecycle, reference service, fixed-SLO harness, policy
 engine, pass/fail/unknown fixtures, single-config CLI, reusable GitHub Action,
 responsive offline report, integrity verifier and pinned deployment artifact.
+
+The SurgeDesk workflow is also complete locally: evidence-derived payload,
+human confirm/correct state machine, raw-event surge replay, release-proof
+view, generated-data drift guard, logic tests and responsive browser tests.
+The offline demo explicitly exposes 46.49% absolute accuracy and refuses to
+present edited text as recorded inference.
 
 Version `v0.1.0` is public at
 `https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.1.0`. Native Arm64,

@@ -282,12 +282,30 @@
       ]
     },
     {
+      "id": "DEMOAPP-001",
+      "phase": 4,
+      "priority": 12,
+      "title": "Build the evidence-backed SurgeDesk application demo",
+      "status": "completed",
+      "dependencies": ["REPRO-001"],
+      "context": ["docs/SURGEDESK_DEMO.md", "docs/DEMO_AND_SUBMISSION.md"],
+      "deliverables": ["Human-confirmed support triage", "Raw-event surge replay", "ArmProof release-proof handoff"],
+      "verification": ["Visible values derive from accepted evidence", "Edited text is not presented as inference", "Desktop and 320px browser workflows pass"],
+      "evidence": [
+        "surgedesk/",
+        "scripts/build_surgedesk_demo.py --verify",
+        "tests/surgedesk/",
+        "tests/ui/surgedesk.logic.test.mjs",
+        "tests/ui/surgedesk.spec.mjs"
+      ]
+    },
+    {
       "id": "SHIP-001",
       "phase": 4,
       "priority": 12,
       "title": "Prepare release and hackathon submission",
       "status": "in_progress",
-      "dependencies": ["REPRO-001"],
+      "dependencies": ["REPRO-001", "DEMOAPP-001"],
       "context": ["docs/DEMO_AND_SUBMISSION.md", "docs/JUDGING_STRATEGY.md", "docs/SOURCES.md"],
       "deliverables": ["Tagged release", "Demo video", "Submission copy", "Public evidence bundle"],
       "verification": ["Demo uses real recorded evidence", "Every numerical claim links to a bundle", "Installation and validation steps work from the release"],

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -14,13 +15,32 @@ sys.path.insert(0, str(ROOT / "src"))
 from armproof.demo.surgedesk import build_surgedesk_payload  # noqa: E402
 
 
+def render_payload() -> str:
+    return json.dumps(build_surgedesk_payload(ROOT), indent=2, sort_keys=True) + "\n"
+
+
 def main() -> int:
-    output = ROOT / "surgedesk/data.json"
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(
-        json.dumps(build_surgedesk_payload(ROOT), indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="fail when surgedesk/data.json differs from accepted evidence",
     )
+    args = parser.parse_args()
+    output = ROOT / "surgedesk/data.json"
+    rendered = render_payload()
+    if args.verify:
+        if not output.exists() or output.read_text(encoding="utf-8") != rendered:
+            print(
+                "surgedesk/data.json is stale; run scripts/build_surgedesk_demo.py",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"verified {output}")
+        return 0
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(rendered, encoding="utf-8")
     print(output)
     return 0
 

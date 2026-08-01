@@ -68,6 +68,11 @@
   - Acceptance: clean Graviton run within 10% using public instructions.
   - Verify: evidence, spend and cleanup records.
 
+- [x] **DEMOAPP-001: Build the SurgeDesk application demo**
+  - Acceptance: human-confirmed triage, raw-event surge replay and ArmProof
+    release proof form one evidence-backed workflow.
+  - Verify: generated-data drift, logic, browser and 320-pixel layout tests.
+
 - [ ] **SHIP-001: Harden and submit**
   - Acceptance: public artifacts, demo, licenses, scans and Devpost mapping.
   - Verify: every submission claim resolves to traceability evidence.

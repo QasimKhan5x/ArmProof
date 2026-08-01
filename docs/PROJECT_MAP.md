@@ -41,6 +41,7 @@ context paths listed by that entry.
 
 - `docs/JUDGING_STRATEGY.md`: rubric alignment.
 - `docs/DEMO_AND_SUBMISSION.md`: judge narrative and claim rules.
+- `docs/SURGEDESK_DEMO.md`: working application flow and evidence provenance.
 - `docs/SOURCES.md`: external technical references.
 
 ## Generated Or Non-Authoritative

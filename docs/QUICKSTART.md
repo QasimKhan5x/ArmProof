@@ -1,5 +1,19 @@
 # ArmProof Quickstart
 
+## Run SurgeDesk
+
+The application demo is static, but its cases and measurements are generated
+from accepted, checksummed experiment files:
+
+```bash
+python3.12 scripts/build_surgedesk_demo.py --verify
+python3.12 -m http.server 8765 --bind 127.0.0.1
+```
+
+Open `http://127.0.0.1:8765/surgedesk/`. Use the numbered tabs in order:
+Triage, Surge replay, Release proof. See
+[`SURGEDESK_DEMO.md`](SURGEDESK_DEMO.md) for provenance and narration.
+
 ## Evaluate The Reference
 
 ArmProof's policy and report path has no runtime dependencies beyond Python

@@ -36,7 +36,8 @@ graph TD
   REPORT --> REPRO[REPRO-001]
   ACTION --> REPRO
   DEPLOY --> REPRO
-  REPRO --> SHIP[SHIP-001]
+  REPRO --> DEMO[DEMOAPP-001]
+  DEMO --> SHIP[SHIP-001]
 ```
 
 Exact dependencies and status live in `ops/work-items.json`.
@@ -95,6 +96,7 @@ decision.
 ## Phase 5: Reproduction And Submission
 
 - Clean-room Graviton replay.
+- Evidence-backed SurgeDesk application workflow.
 - Security, licensing, accessibility and secret checks.
 - Demo, offline fallback and Devpost traceability.
 
