@@ -42,10 +42,12 @@ inference; live mode remains disabled unless a trusted endpoint is configured.
 
 Version `v0.2.0` is the current public release. Native Arm64,
 x86 and report-browser CI pass on the release commit, and the public example
-Action passes while uploading its decision and offline report. Remaining
-submission work is the hackathon video and final Devpost packaging. The
-secondary measurement-overhead claim remains unpublished until it has a
-matched baseline.
+Action passes while uploading its decision and offline report. The complete
+Devpost copy, judge guide, technical evidence map, media set, final checklist
+and under-three-minute recording script are under `submission/`. Remaining
+owner work is recording/uploading the video and pasting the prepared entry
+into Devpost. The secondary measurement-overhead claim remains unpublished
+until it has a matched baseline.
 
 ## Verified Commands
 

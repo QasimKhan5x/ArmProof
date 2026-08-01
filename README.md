@@ -116,6 +116,9 @@ report layouts down to 320 pixels.
 
 ## Start Here
 
+- Devpost submission package: [`submission/README.md`](submission/README.md)
+- Three-minute recording script: [`submission/DEMO_SCRIPT.md`](submission/DEMO_SCRIPT.md)
+- Judge guide: [`submission/JUDGE_GUIDE.md`](submission/JUDGE_GUIDE.md)
 - Current state: [`STATUS.md`](STATUS.md)
 - Five-minute quickstart: [`docs/QUICKSTART.md`](docs/QUICKSTART.md)
 - Product demo guide: [`docs/SURGEDESK_DEMO.md`](docs/SURGEDESK_DEMO.md)

@@ -41,6 +41,12 @@ test("operator confirms and corrects recorded support routes", async ({ page }) 
   await expect(page.locator("#review-warning")).toContainText("changed the LLM route");
   await expect(page.locator("#llm-queue")).toHaveText("Account security");
   await expect(page.locator("#suggested-queue")).toHaveText("Cards & payments");
+  await mkdir("build/screenshots", { recursive: true });
+  await page.screenshot({
+    path: "build/screenshots/surgedesk-triage.png",
+    fullPage: true,
+    style: ".skip-link { display: none !important; }",
+  });
   await page.getByRole("button", { name: "Confirm route" }).click();
 
   await page.locator("#sample-select").selectOption("banking77-quality-0044");
@@ -55,8 +61,6 @@ test("operator confirms and corrects recorded support routes", async ({ page }) 
   await expect(page.locator("#intake-error")).toBeVisible();
   await expect(page.locator("#intake-error")).toContainText("No recorded Phi-4 result");
   expect(messages).toEqual([]);
-  await mkdir("build/screenshots", { recursive: true });
-  await page.screenshot({ path: "build/screenshots/surgedesk-triage.png", fullPage: true });
 });
 
 
