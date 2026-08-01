@@ -22,6 +22,13 @@
       "threshold": 0.99
     },
     {
+      "claim_id": "quality-operational-queue",
+      "observed": 0.8675324675324675,
+      "reason_code": "threshold_met",
+      "status": "pass",
+      "threshold": 0.85
+    },
+    {
       "claim_id": "cloud-capacity",
       "observed": 2.5,
       "reason_code": "threshold_met",

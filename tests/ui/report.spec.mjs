@@ -42,7 +42,7 @@ for (const viewport of [
     await page.goto(reportUrl);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Arm-native capacity, proven before merge.');
     await expect(page.locator('.mix')).toHaveCount(3);
-    await expect(page.locator('.claim')).toHaveCount(5);
+    await expect(page.locator('.claim')).toHaveCount(6);
     await expect(page.locator('#min-ratio')).toHaveText('2.5x');
     await expect(page.locator('#reproduction-note')).toContainText('0% relative difference');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);

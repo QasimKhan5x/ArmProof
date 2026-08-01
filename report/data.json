@@ -28,6 +28,7 @@
     "metrics": {
       "accuracy_delta_pp": -0.38961038961038974,
       "enabled_kai_callchains_observed": 1.0,
+      "guard_queue_accuracy": 0.8675324675324675,
       "long_capacity_ratio": 2.5,
       "macro_f1_delta_pp": -0.6726444303255752,
       "minimum_capacity_ratio": 2.5,
@@ -71,6 +72,13 @@
         "reason_code": "threshold_met",
         "status": "pass",
         "threshold": 0.99
+      },
+      {
+        "claim_id": "quality-operational-queue",
+        "observed": 0.8675324675324675,
+        "reason_code": "threshold_met",
+        "status": "pass",
+        "threshold": 0.85
       },
       {
         "claim_id": "cloud-capacity",

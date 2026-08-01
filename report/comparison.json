@@ -26,6 +26,7 @@
     "accuracy_delta_pp": -0.38961038961038974,
     "macro_f1_delta_pp": -0.6726444303255752,
     "schema_valid_rate": 1.0,
+    "guard_queue_accuracy": 0.8675324675324675,
     "enabled_kai_callchains_observed": 1.0
   },
   "evidence_kinds": ["request_samples", "boundary_confirmations", "quality_rows", "artifact_hashes", "arm_callchains"],
