@@ -69,9 +69,10 @@
   - Verify: evidence, spend and cleanup records.
 
 - [x] **DEMOAPP-001: Build the SurgeDesk application demo**
-  - Acceptance: human-confirmed triage, raw-event surge replay and ArmProof
-    release proof form one evidence-backed workflow.
-  - Verify: generated-data drift, logic, browser and 320-pixel layout tests.
+  - Acceptance: held-out two-stage triage, equal-load replay, optional live
+    Graviton request and ArmProof proof form one evidence-backed workflow.
+  - Verify: 85% queue gate, generated-data drift, logic, live-mode browser and
+    320-pixel layout tests.
 
 - [ ] **SHIP-001: Harden and submit**
   - Acceptance: public artifacts, demo, licenses, scans and Devpost mapping.

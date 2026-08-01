@@ -25,8 +25,8 @@ export function findRecordedCase(cases, text) {
 
 
 export function selectRecordedCase(workspace, recordedCase) {
-  if (!recordedCase || recordedCase.mode !== "recorded_model_output") {
-    throw new Error("SurgeDesk accepts only evidence-backed recorded cases");
+  if (!recordedCase || !new Set(["recorded_model_output", "live_model_output"]).has(recordedCase.mode)) {
+    throw new Error("SurgeDesk accepts only recorded or live model outputs");
   }
   return {
     ...workspace,
@@ -50,6 +50,9 @@ export function resolveTicket(workspace, decision) {
     final_intent: corrected
       ? workspace.active.expected_intent
       : workspace.active.suggested_intent,
+    procedure: corrected
+      ? workspace.active.expected_procedure
+      : workspace.active.suggested_procedure,
   };
   const queueCounts = { ...workspace.queue_counts };
   queueCounts[ticket.final_queue] = (queueCounts[ticket.final_queue] ?? 0) + 1;

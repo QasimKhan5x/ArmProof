@@ -75,6 +75,11 @@ reproduced.
   samples and converge on their measured p95, breaches and capacity boundary.
 - **FR-16 Evidence-derived demo:** generate all product-demo metrics and cases
   from accepted files; checked output drift must fail CI.
+- **FR-17 Operational quality:** evaluate the five-destination product task on a
+  frozen 770-case holdout disjoint from queue-guard training and require at
+  least 85% accuracy.
+- **FR-18 Live demonstration:** optionally route bounded text through the
+  trusted `/infer` contract; remain explicitly recorded-only when unavailable.
 
 ## Non-Functional Requirements
 
@@ -92,6 +97,8 @@ reproduced.
 - **NFR-07 Bounded cost:** cloud runs enforce approval, TTL, tags and spend cap.
 - **NFR-08 Demo integrity:** offline replay is labeled as recorded evidence;
   edited text cannot masquerade as live model output.
+- **NFR-09 Gateway safety:** live requests are size-bounded, timeout-bounded and
+  forwarded only to the operator-configured endpoint.
 
 ## Product Properties
 
@@ -117,5 +124,6 @@ Before marking the product complete, answer with evidence:
 7. Does the report remain honest when a metric is unfavorable or unavailable?
 8. What disappears on x86, and is that boundary visible?
 9. Can changing a visible demo number without changing raw evidence pass CI?
-10. Does the support workflow remain useful and honest at 46.49% absolute
-    accuracy?
+10. Are 86.75% queue accuracy and 46.49% intent accuracy clearly distinguished?
+11. Can the live control appear when no endpoint is configured or silently
+    fall back to recorded output?

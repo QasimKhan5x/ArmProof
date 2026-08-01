@@ -26,6 +26,11 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertAlmostEqual(quality["optimized_accuracy_percent"], 46.4935064935)
         self.assertAlmostEqual(quality["accuracy_delta_pp"], -0.3896103896)
         self.assertEqual(quality["schema_valid_percent"], 100.0)
+        self.assertEqual(quality["llm_queue_correct"], 573)
+        self.assertEqual(quality["guard_queue_correct"], 668)
+        self.assertAlmostEqual(quality["guard_queue_accuracy_percent"], 86.7532467532)
+        self.assertAlmostEqual(quality["guard_queue_gain_pp"], 12.3376623377)
+        self.assertEqual(quality["guard_training_cases"], 2310)
         self.assertTrue(quality["human_confirmation_required"])
 
     def test_routes_are_recorded_outputs_with_both_correct_and_review_cases(self) -> None:
@@ -33,17 +38,18 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertGreaterEqual(len(cases), 6)
         self.assertTrue(any(case["correct"] for case in cases))
         self.assertTrue(any(not case["correct"] for case in cases))
+        self.assertTrue(any(case["guard_overrode"] for case in cases))
         self.assertTrue(all(case["mode"] == "recorded_model_output" for case in cases))
         self.assertTrue(all(case["source_text"] for case in cases))
 
     def test_replay_uses_raw_confirmation_samples(self) -> None:
         replay = self.payload["replay"]
         self.assertEqual(replay["baseline"]["offered_rps"], 0.26666666666666666)
-        self.assertEqual(replay["optimized"]["offered_rps"], 0.6)
+        self.assertEqual(replay["optimized"]["offered_rps"], 0.26666666666666666)
         self.assertGreater(replay["baseline"]["p95_ms"], 10_000)
         self.assertLess(replay["optimized"]["p95_ms"], 10_000)
         self.assertEqual(len(replay["baseline"]["events"]), 8)
-        self.assertEqual(len(replay["optimized"]["events"]), 18)
+        self.assertEqual(len(replay["optimized"]["events"]), 8)
         self.assertTrue(all(event["latency_ms"] > 0 for event in replay["baseline"]["events"]))
 
     def test_reproduction_and_arm_attribution_are_explicit(self) -> None:

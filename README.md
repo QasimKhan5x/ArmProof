@@ -6,6 +6,11 @@ recorded support surge, the same Phi-4 Mini INT4 service on the same AWS
 Graviton4 instance sustains **3x mixed traffic** with KleidiAI enabled while
 remaining under its 10-second p95 objective.
 
+A dependency-free queue guard raises held-out five-destination routing accuracy from
+74.42% for direct LLM mapping to **86.75%** while retaining Phi-4 Mini for the
+fine-grained intent and procedure suggestion. Every final route remains human
+confirmed.
+
 ArmProof is the reusable engine behind the demo. It is a fail-closed CI release
 gate that approves an Arm AI deployment only when submitted evidence shows
 that the change:
@@ -33,19 +38,24 @@ SLO. A fresh `c8g.4xlarge` reproduced all three ratios exactly.
 
 ```bash
 python3.12 scripts/build_surgedesk_demo.py --verify
-python3.12 -m http.server 8765 --bind 127.0.0.1
+python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
 Open `http://127.0.0.1:8765/surgedesk/`. The three-step judge path is:
 
 1. Route and human-confirm real BANKING77 requests using recorded model output.
-2. Replay raw baseline and optimized surge samples on the same Graviton4 VM.
+2. Replay the same raw demand in both treatments, then reveal confirmed capacity.
 3. Inspect the Arm execution, quality, reproduction and deployment proof.
 
-The app does not simulate live inference or claim autonomous routing. Its
-absolute 77-class accuracy is 46.49%, so human confirmation is a visible
-product requirement. Free-form text is rejected by the offline demo instead
-of being passed off as a recorded model result.
+Recorded mode never simulates live inference or claims autonomous routing.
+Fine-grained 77-class accuracy is 46.49%, so human confirmation remains a
+visible product requirement. To record a real Graviton request, tunnel the
+measured service locally and start the gateway with:
+
+```bash
+SURGEDESK_INFERENCE_ENDPOINT=http://127.0.0.1:8000/infer \
+  python3.12 scripts/serve_surgedesk.py --port 8765
+```
 
 ## Product Workflow
 
@@ -77,7 +87,7 @@ claim, and exit `1` identifies invalid input or execution failure.
 Use the same config in GitHub Actions:
 
 ```yaml
-- uses: QasimKhan5x/VerifyLane@v0.1.0
+- uses: QasimKhan5x/VerifyLane@v0.2.0
   with:
     config: armproof.json
     output: build/armproof-report

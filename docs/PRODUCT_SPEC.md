@@ -41,6 +41,12 @@ open the ArmProof release decision. All visible measurements must derive from
 accepted evidence. Edited free-form text must never be represented as live or
 recorded model inference.
 
+The routing path is two-stage: Phi-4 Mini proposes a fine-grained intent and a
+dependency-free queue guard assigns the operational queue. The guard trains on
+2,310 examples disjoint from the frozen 770-case evaluation and must achieve at
+least 85% queue accuracy. A configured gateway may replace recorded Phi-4
+output with the same live `/infer` contract; it may not fake availability.
+
 ## Reference Scope
 
 | Layer | Approved reference |
@@ -136,6 +142,8 @@ generation run on any GitHub runner.
 - A judge can move from customer request to service surge to causal Arm proof
   in under three minutes without terminal narration.
 - The quality boundary and human-confirmation requirement remain visible.
+- Equal-load latency evidence and confirmed capacity evidence remain visually
+  and verbally distinct.
 
 ## Boundaries
 

@@ -15,6 +15,11 @@ machine and SLO fixed, enabling KleidiAI raises sustainable mixed-traffic
 capacity from 0.20 to 0.60 requests/second. ArmProof then shows why that result
 is releasable and provides the exact passing deployment.
 
+For product quality, Phi-4 supplies a detailed intent while a tiny local queue
+guard maps the request into one of five operational queues. On a disjoint
+770-request holdout this raises queue accuracy from 74.42% to 86.75%, while a
+human remains the final decision maker.
+
 SurgeDesk is not a second benchmark dashboard. It is the application whose
 customer queue benefits from the optimization; ArmProof is the reusable
 developer artifact that prevents unsupported optimization claims.

@@ -52,6 +52,17 @@
       "depends_on": []
     },
     {
+      "id": "quality-operational-queue",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-004-kleidiai",
+      "metric": "guard_queue_accuracy",
+      "operator": "gte",
+      "threshold": 0.85,
+      "required_evidence": ["quality_rows", "artifact_hashes"],
+      "required": true,
+      "depends_on": ["quality-schema"]
+    },
+    {
       "id": "cloud-capacity",
       "causal_scope": "arm_acceleration",
       "comparison_id": "exp-2026-004-kleidiai",
@@ -60,7 +71,7 @@
       "threshold": 1.5,
       "required_evidence": ["request_samples", "boundary_confirmations", "artifact_hashes", "arm_callchains"],
       "required": true,
-      "depends_on": ["quality-accuracy", "quality-macro-f1", "quality-schema"]
+      "depends_on": ["quality-accuracy", "quality-macro-f1", "quality-schema", "quality-operational-queue"]
     },
     {
       "id": "arm-execution",

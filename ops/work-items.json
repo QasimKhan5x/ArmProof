@@ -289,11 +289,13 @@
       "status": "completed",
       "dependencies": ["REPRO-001"],
       "context": ["docs/SURGEDESK_DEMO.md", "docs/DEMO_AND_SUBMISSION.md"],
-      "deliverables": ["Human-confirmed support triage", "Raw-event surge replay", "ArmProof release-proof handoff"],
-      "verification": ["Visible values derive from accepted evidence", "Edited text is not presented as inference", "Desktop and 320px browser workflows pass"],
+      "deliverables": ["Human-confirmed two-stage support triage", "Equal-load customer-outcome replay", "Optional live Graviton gateway", "ArmProof release-proof handoff"],
+      "verification": ["Queue guard exceeds 85% on a disjoint holdout", "Visible values derive from accepted evidence", "Recorded and live inference cannot be confused", "Desktop and 320px browser workflows pass"],
       "evidence": [
         "surgedesk/",
         "scripts/build_surgedesk_demo.py --verify",
+        "scripts/serve_surgedesk.py",
+        "src/armproof/demo/queue_guard.py",
         "tests/surgedesk/",
         "tests/ui/surgedesk.logic.test.mjs",
         "tests/ui/surgedesk.spec.mjs"

@@ -27,9 +27,16 @@ implementation. It is a routing summary, not a substitute for raw evidence.
 | Large-set quality | enabled versus disabled on 770 BANKING77 cases | -0.390 pp accuracy, -0.673 pp macro F1 |
 | Schema validity | both normalized treatments | 100% |
 | Clean reproduction | fresh `c8g.4xlarge` versus accepted result | 0% ratio difference in all mixes |
+| Operational queue quality | dependency-free guard on disjoint 770-case holdout | 86.75% (668/770) |
+| Direct LLM queue mapping | recorded enabled outputs mapped to five destinations plus fallback | 74.42% (573/770) |
 
 The four accepted KleidiAI speedups cover batch/prompt shapes `(1,128)`,
 `(1,512)`, `(4,128)` and `(4,512)`.
+
+The queue guard is product-layer evidence, not an Arm speedup. It uses word
+unigrams/bigrams and multinomial Naive Bayes, trains on the remaining 30 test
+examples per upstream class (2,310 total) and evaluates on the frozen first 10
+per class used by ArmProof (770 total). The sets have no shared text.
 
 ## Historical Qualification
 

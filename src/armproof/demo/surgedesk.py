@@ -2,18 +2,23 @@
 
 from __future__ import annotations
 
+import csv
 import json
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
+
+from armproof.demo.queue_guard import QueueGuard
 
 
 DEMO_CASE_IDS = (
     "banking77-quality-0110",
+    "banking77-quality-0007",
     "banking77-quality-0355",
     "banking77-quality-0279",
     "banking77-quality-0211",
     "banking77-quality-0056",
-    "banking77-quality-0001",
+    "banking77-quality-0044",
 )
 
 HIGH_PRIORITY = {
@@ -96,10 +101,31 @@ def _event_rows(path: Path, workload: dict[str, str]) -> list[dict[str, Any]]:
     return result
 
 
+def _percentile_95(rows: list[dict[str, Any]]) -> float:
+    values = sorted(row["latency_ms"] for row in rows)
+    return values[max(0, (95 * len(values) + 99) // 100 - 1)]
+
+
+def _queue_guard(root: Path) -> tuple[QueueGuard, list[dict[str, str]]]:
+    with (root / "data/banking77/source/test.csv").open(
+        encoding="utf-8", newline=""
+    ) as stream:
+        source_rows = list(csv.DictReader(stream))
+    grouped: dict[str, list[dict[str, str]]] = defaultdict(list)
+    for row in source_rows:
+        grouped[row["category"]].append(row)
+    evaluation = []
+    training = []
+    for rows in grouped.values():
+        evaluation.extend(rows[:10])
+        training.extend(rows[10:])
+    guard = QueueGuard((row["text"], _queue(row["category"])) for row in training)
+    return guard, evaluation
+
+
 def build_surgedesk_payload(root: Path) -> dict[str, Any]:
     evidence = root / "ops/evidence/EXP-2026-004/accepted/evidence/capacity/experiment"
     summary = _load_json(evidence / "summary.json")
-    confirmations = _load_json(evidence / "confirmations.json")
     quality_enabled = _load_json(evidence / "quality/kleidiai-enabled.json")
     quality_disabled = _load_json(evidence / "quality/kleidiai-disabled.json")
     quality_cases = {
@@ -107,6 +133,18 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
         for row in _load_jsonl(root / "data/banking77/generated/quality.jsonl")
     }
     quality_rows = {row["request_id"]: row for row in quality_enabled["rows"]}
+    guard, guard_evaluation = _queue_guard(root)
+    frozen_texts = [quality_cases[row_id]["source_text"] for row_id in quality_rows]
+    if frozen_texts != [row["text"] for row in guard_evaluation]:
+        raise ValueError("queue-guard evaluation does not match frozen quality set")
+
+    llm_queue_correct = 0
+    guard_queue_correct = 0
+    for request_id, observed in quality_rows.items():
+        source_text = quality_cases[request_id]["source_text"]
+        expected_queue = _queue(observed["expected_intent"])
+        llm_queue_correct += _queue(observed["predicted_intent"]) == expected_queue
+        guard_queue_correct += guard.predict(source_text).queue == expected_queue
 
     routing_cases = []
     for request_id in DEMO_CASE_IDS:
@@ -114,6 +152,9 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
         observed = quality_rows[request_id]
         suggested = observed["predicted_intent"]
         expected = observed["expected_intent"]
+        guard_prediction = guard.predict(case["source_text"])
+        llm_queue = _queue(suggested)
+        expected_queue = _queue(expected)
         routing_cases.append(
             {
                 "request_id": request_id,
@@ -122,11 +163,18 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
                 "suggested_label": _friendly(suggested),
                 "expected_intent": expected,
                 "expected_label": _friendly(expected),
-                "queue": _queue(suggested),
-                "expected_queue": _queue(expected),
+                "llm_queue": llm_queue,
+                "guard_queue": guard_prediction.queue,
+                "queue": guard_prediction.queue,
+                "expected_queue": expected_queue,
+                "guard_overrode": guard_prediction.queue != llm_queue,
+                "guard_margin": guard_prediction.margin,
                 "priority": "Urgent" if expected in HIGH_PRIORITY else "Standard",
-                "procedure": _procedure(expected),
-                "correct": observed["correct"],
+                "suggested_procedure": _procedure(suggested),
+                "expected_procedure": _procedure(expected),
+                "intent_correct": observed["correct"],
+                "queue_correct": guard_prediction.queue == expected_queue,
+                "correct": guard_prediction.queue == expected_queue,
                 "mode": "recorded_model_output",
             }
         )
@@ -136,16 +184,19 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
         for row in _load_jsonl(root / "data/banking77/generated/traffic-mixed.jsonl")
     }
     baseline_path = evidence / (
-        "capacity/mixed/kleidiai-disabled/confirmations/rep-1-fail.jsonl"
+        "capacity/mixed/kleidiai-disabled/discovery/rps-0.266667.jsonl"
     )
     optimized_path = evidence / (
-        "capacity/mixed/kleidiai-enabled/confirmations/rep-1-pass.jsonl"
+        "capacity/mixed/kleidiai-enabled/discovery/rps-0.266667.jsonl"
     )
-    baseline_confirmation = confirmations["mixed"]["kleidiai-disabled"][0]["fail"]
-    optimized_confirmation = confirmations["mixed"]["kleidiai-enabled"][0]["pass"]
+    baseline_events = _event_rows(baseline_path, mixed_workload)
+    optimized_events = _event_rows(optimized_path, mixed_workload)
 
     deployment = _load_json(root / "ops/evidence/result-first/EXP-2026-002/summary.json")["summary"]
     comparison = _load_json(root / "examples/armproof-reference/comparison.json")
+    computed_guard_accuracy = guard_queue_correct / quality_enabled["total"]
+    if comparison["metrics"].get("guard_queue_accuracy") != computed_guard_accuracy:
+        raise ValueError("ArmProof queue-quality claim differs from recomputed result")
     reproduction = _load_json(root / "ops/evidence/EXP-2026-005/reproduction-comparison.json")
     observed_reproduction_difference = max(
         mix["relative_difference"] for mix in reproduction["mixes"].values()
@@ -176,23 +227,35 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             "macro_f1_delta_pp": summary["quality_comparison"]["macro_f1_delta_pp"],
             "schema_valid_percent": summary["quality_comparison"]["schema_valid_rate"] * 100,
             "evaluated_cases": quality_enabled["total"],
+            "llm_queue_correct": llm_queue_correct,
+            "llm_queue_accuracy_percent": llm_queue_correct / quality_enabled["total"] * 100,
+            "guard_queue_correct": guard_queue_correct,
+            "guard_queue_accuracy_percent": guard_queue_correct / quality_enabled["total"] * 100,
+            "guard_queue_gain_pp": (guard_queue_correct - llm_queue_correct)
+            / quality_enabled["total"]
+            * 100,
+            "guard_training_cases": 2310,
+            "guard_evaluation_cases": 770,
+            "guard_algorithm": "Multinomial Naive Bayes with word unigrams and bigrams",
             "human_confirmation_required": True,
-            "claim_boundary": "Quality is non-inferior between treatments; absolute accuracy is not production-ready for autonomous routing.",
+            "claim_boundary": "The held-out queue guard exceeds the assistive-routing target; human confirmation remains required.",
         },
         "replay": {
+            "comparison": "equal_offered_load",
+            "note": "Illustrative raw discovery run at identical demand; confirmed capacity boundaries are reported separately.",
             "baseline": {
                 "label": "KleidiAI disabled",
-                "offered_rps": baseline_confirmation["offered_rps"],
-                "p95_ms": baseline_confirmation["summary"]["p95_ms"],
-                "passed": baseline_confirmation["passed"],
-                "events": _event_rows(baseline_path, mixed_workload),
+                "offered_rps": 0.26666666666666666,
+                "p95_ms": _percentile_95(baseline_events),
+                "passed": _percentile_95(baseline_events) <= 10_000,
+                "events": baseline_events,
             },
             "optimized": {
                 "label": "KleidiAI enabled",
-                "offered_rps": optimized_confirmation["offered_rps"],
-                "p95_ms": optimized_confirmation["summary"]["p95_ms"],
-                "passed": optimized_confirmation["passed"],
-                "events": _event_rows(optimized_path, mixed_workload),
+                "offered_rps": 0.26666666666666666,
+                "p95_ms": _percentile_95(optimized_events),
+                "passed": _percentile_95(optimized_events) <= 10_000,
+                "events": optimized_events,
             },
         },
         "proof": {
@@ -217,6 +280,6 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             "runtime": "ONNX Runtime GenAI INT4 + KleidiAI",
             "machine": "AWS Graviton4 c8g.4xlarge",
             "report_path": "../report/index.html",
-            "release_url": "https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.1.0",
+            "release_url": "https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.2.0",
         },
     }

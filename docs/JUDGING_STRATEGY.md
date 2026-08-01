@@ -14,6 +14,7 @@ Target evidence:
 - fixed-SLO capacity result;
 - missing/swapped evidence rejection; and
 - clean reproduction.
+- 86.75% held-out operational routing accuracy from a dependency-free guard.
 
 Do not attribute the whole BF16-to-INT4 transformation to KleidiAI.
 
@@ -33,6 +34,7 @@ Required proof:
 - useful failed-state UX;
 - documentation for replacing workload and adapter; and
 - report provenance accessible without cloud access.
+- a real endpoint mode that is enabled only when explicitly configured.
 
 ## Potential Impact: 20
 
@@ -52,10 +54,11 @@ claims enforceable in a workflow maintainers already use.
 The 90-second reveal is operational and causal:
 
 1. A stolen-card request reaches a human-confirmed support queue.
-2. During a surge, the disabled control breaches p95 while the enabled
-   treatment remains responsive on the same Graviton4 machine.
-3. Sustainable mixed traffic rises from 0.20 to 0.60 requests/second.
-4. ArmProof reveals enabled-only `kai_*` execution and releases the exact
+2. The two-stage route scores 86.75% held-out queue accuracy.
+3. At identical demand, disabled shows three late customers while enabled
+   shows zero on the same Graviton4 machine.
+4. Sustainable mixed traffic rises from 0.20 to 0.60 requests/second.
+5. ArmProof reveals enabled-only `kai_*` execution and releases the exact
    measured deployment through a reusable GitHub Action.
 
 The audience should understand the application within 10 seconds and the Arm

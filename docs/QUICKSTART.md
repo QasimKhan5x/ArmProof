@@ -7,7 +7,7 @@ from accepted, checksummed experiment files:
 
 ```bash
 python3.12 scripts/build_surgedesk_demo.py --verify
-python3.12 -m http.server 8765 --bind 127.0.0.1
+python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
 Open `http://127.0.0.1:8765/surgedesk/`. Use the numbered tabs in order:
@@ -46,7 +46,7 @@ Create an `armproof.json` matching
 [`schemas/ci-config.schema.json`](../schemas/ci-config.schema.json), then add:
 
 ```yaml
-- uses: QasimKhan5x/VerifyLane@v0.1.0
+- uses: QasimKhan5x/VerifyLane@v0.2.0
   with:
     config: armproof.json
     output: build/armproof-report

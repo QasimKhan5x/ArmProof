@@ -22,6 +22,8 @@ test("operator confirms and corrects recorded support routes", async ({ page }) 
 
   await expect(page.getByRole("heading", { name: "Route an incoming request" })).toBeVisible();
   await expect(page.locator("#demo-source")).toContainText("EXP-2026-004");
+  await expect(page.locator("#guard-accuracy")).toHaveText("86.75%");
+  await expect(page.locator("#guard-gain")).toHaveText("+12.34 pp");
   await expect(page.locator("#customer-message")).toHaveValue(/gym bag/);
 
   await page.getByRole("button", { name: "Load model suggestion" }).click();
@@ -31,11 +33,18 @@ test("operator confirms and corrects recorded support routes", async ({ page }) 
   await expect(page.locator("#reviewed-tickets tr")).toHaveCount(1);
   await expect(page.locator("#reviewed-tickets")).toContainText("Confirmed");
 
-  await page.locator("#sample-select").selectOption("banking77-quality-0001");
+  await page.locator("#sample-select").selectOption("banking77-quality-0007");
   await page.getByRole("button", { name: "Load model suggestion" }).click();
-  await expect(page.locator("#review-warning")).toContainText("differs from the benchmark label");
+  await expect(page.locator("#review-warning")).toContainText("changed the LLM route");
+  await expect(page.locator("#llm-queue")).toHaveText("Account security");
+  await expect(page.locator("#suggested-queue")).toHaveText("Cards & payments");
+  await page.getByRole("button", { name: "Confirm route" }).click();
+
+  await page.locator("#sample-select").selectOption("banking77-quality-0044");
+  await page.getByRole("button", { name: "Load model suggestion" }).click();
+  await expect(page.locator("#review-warning")).toContainText("differs from the benchmark queue");
   await page.getByRole("button", { name: "Apply benchmark correction" }).click();
-  await expect(page.locator("#reviewed-tickets tr")).toHaveCount(2);
+  await expect(page.locator("#reviewed-tickets tr")).toHaveCount(3);
   await expect(page.locator("#reviewed-tickets")).toContainText("Corrected");
 
   await page.locator("#customer-message").fill("A new message without recorded evidence");
@@ -45,6 +54,46 @@ test("operator confirms and corrects recorded support routes", async ({ page }) 
   expect(messages).toEqual([]);
   await mkdir("build/screenshots", { recursive: true });
   await page.screenshot({ path: "build/screenshots/surgedesk-triage.png", fullPage: true });
+});
+
+
+test("configured gateway enables a live Graviton route", async ({ page }) => {
+  const messages = captureBrowserErrors(page);
+  await page.route("**/surgedesk/live-status.json", (route) => route.fulfill({
+    contentType: "application/json",
+    body: JSON.stringify({ live_available: true, mode: "live" }),
+  }));
+  await page.route("**/api/route", (route) => route.fulfill({
+    contentType: "application/json",
+    body: JSON.stringify({
+      request_id: "live-1",
+      source_text: "My card was stolen",
+      suggested_intent: "lost_or_stolen_card",
+      suggested_label: "Lost Or Stolen Card",
+      llm_queue: "Account security",
+      guard_queue: "Account security",
+      queue: "Account security",
+      guard_overrode: false,
+      guard_margin: 9.2,
+      priority: "Urgent",
+      suggested_procedure: "Verify the customer and freeze the card.",
+      expected_procedure: null,
+      queue_correct: null,
+      correct: null,
+      mode: "live_model_output",
+      backend: "kleidiai-enabled",
+      inference_ms: 418.2,
+    }),
+  }));
+  await page.goto(appUrl);
+  await expect(page.locator("#live-mode")).toBeEnabled();
+  await page.getByLabel("Live Graviton endpoint").check();
+  await page.locator("#customer-message").fill("My card was stolen");
+  await page.getByRole("button", { name: "Run live route" }).click();
+  await expect(page.locator("#suggested-queue")).toHaveText("Account security");
+  await expect(page.locator("#inference-source")).toContainText("kleidiai-enabled");
+  await expect(page.locator("#review-warning")).toContainText("live two-stage suggestion");
+  expect(messages).toEqual([]);
 });
 
 
@@ -60,7 +109,11 @@ test("recorded surge reveals the fixed-SLO Arm result", async ({ page }) => {
   await expect(page.locator("#baseline-status")).toHaveText("failed", { timeout: 3000 });
   await expect(page.locator("#optimized-status")).toHaveText("passed");
   await expect(page.locator("#baseline-completed")).toHaveText("8 / 8");
-  await expect(page.locator("#optimized-completed")).toHaveText("18 / 18");
+  await expect(page.locator("#optimized-completed")).toHaveText("8 / 8");
+  await expect(page.locator("#baseline-rps")).toHaveText("0.267 r/s");
+  await expect(page.locator("#optimized-rps")).toHaveText("0.267 r/s");
+  await expect(page.locator("#baseline-request-strip .late")).toHaveCount(3);
+  await expect(page.locator("#optimized-request-strip .late")).toHaveCount(0);
   await expect(page.locator("#baseline-p95")).toHaveText(/s$/);
   await expect(page.locator("#replay-conclusion")).toContainText("3× mixed traffic");
   await expect(page.locator("#mix-table tr")).toHaveCount(3);
@@ -76,9 +129,10 @@ test("proof view exposes both the Arm result and quality boundary", async ({ pag
   await page.getByRole("tab", { name: "3. Release proof" }).click();
 
   await expect(page.getByRole("heading", { name: "Approved for the measured Graviton deployment" })).toBeVisible();
-  await expect(page.locator(".claims-table tbody tr")).toHaveCount(5);
+  await expect(page.locator(".claims-table tbody tr")).toHaveCount(6);
+  await expect(page.locator("#proof-queue-quality")).toHaveText("86.75%");
   await expect(page.locator("#absolute-accuracy")).toHaveText("46.49%");
-  await expect(page.getByRole("heading", { name: "Human confirmation is required" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "86.75% held-out queue accuracy" })).toBeVisible();
   await expect(page.locator(".stack-path li")).toHaveCount(5);
   expect(messages).toEqual([]);
   await page.screenshot({ path: "build/screenshots/surgedesk-proof.png", fullPage: true });

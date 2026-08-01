@@ -34,6 +34,7 @@ test("confirming a suggestion routes the ticket and records human approval", () 
   assert.equal(resolved.active, null);
   assert.equal(resolved.resolved[0].review_status, "confirmed");
   assert.equal(resolved.resolved[0].final_queue, "Account security");
+  assert.match(resolved.resolved[0].procedure, /freeze the card/i);
   assert.equal(resolved.queue_counts["Account security"], 1);
 });
 
@@ -65,7 +66,7 @@ test("replay snapshot converges on raw evidence metrics", () => {
   assert.equal(first.baseline.completed, 0);
   assert.equal(first.optimized.completed, 0);
   assert.equal(final.baseline.completed, 8);
-  assert.equal(final.optimized.completed, 18);
+  assert.equal(final.optimized.completed, 8);
   assert.equal(final.baseline.p95_ms, data.replay.baseline.p95_ms);
   assert.equal(final.optimized.p95_ms, data.replay.optimized.p95_ms);
   assert.equal(final.baseline.slo_status, "failed");

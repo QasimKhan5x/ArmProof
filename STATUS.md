@@ -17,6 +17,8 @@ The decisive reference gate passed on AWS Graviton4 `c8g.4xlarge`:
 - Quality delta: -0.390 percentage points accuracy and -0.673 points macro F1,
   both inside the preregistered one-point tolerance.
 - Schema validity: 100% across the 770-item BANKING77 evaluation.
+- Operational queue guard: 86.75% held-out five-destination accuracy (668/770), up
+  12.34 percentage points from direct LLM intent-to-queue mapping.
 - Arm attribution: `kai_*` callchains appear only in the enabled profile.
 - Whole deployment: 35.92% less disk, 55.34% lower peak PSS and 59.66% lower
   time-weighted PSS than the BF16 reference.
@@ -32,14 +34,13 @@ Completed: guarded AWS lifecycle, reference service, fixed-SLO harness, policy
 engine, pass/fail/unknown fixtures, single-config CLI, reusable GitHub Action,
 responsive offline report, integrity verifier and pinned deployment artifact.
 
-The SurgeDesk workflow is also complete locally: evidence-derived payload,
-human confirm/correct state machine, raw-event surge replay, release-proof
-view, generated-data drift guard, logic tests and responsive browser tests.
-The offline demo explicitly exposes 46.49% absolute accuracy and refuses to
-present edited text as recorded inference.
+The SurgeDesk workflow now includes a held-out two-stage queue guard, human
+confirm/correct state machine, equal-load customer-outcome replay, confirmed
+capacity boundary, release-proof view, executable adoption path and optional
+live Graviton gateway. Recorded mode refuses to present edited text as
+inference; live mode remains disabled unless a trusted endpoint is configured.
 
-Version `v0.1.0` is public at
-`https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.1.0`. Native Arm64,
+Version `v0.2.0` is the current release candidate. Native Arm64,
 x86 and report-browser CI pass on the release commit, and the public example
 Action passes while uploading its decision and offline report. Remaining
 submission work is the hackathon video and final Devpost packaging. The

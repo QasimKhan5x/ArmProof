@@ -10,16 +10,17 @@
 
 ### 0-25 seconds: Real Work
 
-Open SurgeDesk on a stolen-card request. Load the recorded Phi-4 Mini route,
-show the account-security procedure and have the operator confirm it. Load the
-known misroute and correct it. State that the model assists; a human decides.
+Open SurgeDesk on one live stolen-card request through the tunneled Graviton
+endpoint. Show the two-stage route and confirm it. Then use recorded examples
+to show one guard rescue and one human correction. State the held-out result:
+86.75% queue accuracy, up 12.34 points from direct LLM mapping.
 
 ### 25-55 seconds: The Surge
 
 Open **Surge replay**. The machine, model, runtime and 10-second p95 objective
-stay fixed; only KleidiAI changes. Replay raw confirmation events. The disabled
-control fails at 0.267 requests/second while the enabled treatment passes at
-0.600. Reveal the measured sustainable boundary: 0.20 versus 0.60, or 3x.
+stay fixed; only KleidiAI changes. At the same `0.267 requests/second`, show
+three late customer tiles and 12.66s p95 disabled versus zero and 2.21s
+enabled. Then reveal the confirmed sustainable boundary: 0.20 versus 0.60.
 
 ### 55-80 seconds: Why It Is Arm Optimization
 
@@ -29,9 +30,9 @@ mixes and exact clean-machine reproduction.
 
 ### 80-90 seconds: Community Artifact
 
-Show the GitHub Action. ArmProof rejects missing hashes, quality regression,
-absent Arm execution or an unmeasured deployment, and emits the exact passing
-configuration.
+Show the executable adoption path and GitHub Action. ArmProof rejects missing
+hashes, routing quality below 85%, absent Arm execution or an unmeasured
+deployment, and emits the exact passing configuration.
 
 ## Three-Minute Video
 
@@ -42,9 +43,10 @@ End on the application, not the report.
 ## Submission Claim Rules
 
 - Every number names its comparison and environment.
-- Say "recorded replay," never imply that the static demo is calling AWS live.
+- Label the single endpoint request live and all experiment playback recorded.
 - Say "verified by ArmProof," never "Arm certified."
-- Absolute quality is 46.49%; human confirmation is mandatory and visible.
+- Queue quality is 86.75%; 77-intent quality is 46.49%; human confirmation is
+  mandatory and visible.
 - Direct speed, whole-stack size/PSS and service capacity remain separate.
 - Failed and inconclusive experiments remain preserved.
 

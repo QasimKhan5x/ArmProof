@@ -14,6 +14,7 @@ const elements = Object.fromEntries(
 let data;
 let workspace;
 let replayTimer = null;
+let inferenceMode = "recorded";
 
 
 function setText(id, value) {
@@ -65,15 +66,30 @@ function renderReview() {
   if (!active) return;
   setText("review-title", active.source_text);
   setText("suggested-intent", active.suggested_label);
+  setText("llm-queue", active.llm_queue);
   setText("suggested-queue", active.queue);
+  setText(
+    "inference-source",
+    active.mode === "live_model_output"
+      ? `${active.backend} · ${formatMs(active.inference_ms)}`
+      : "Recorded Phi-4 Mini INT4",
+  );
   setText("review-priority", active.priority);
   elements["review-priority"].className = `priority-badge ${active.priority.toLowerCase()}`;
-  if (active.correct) {
-    elements["review-warning"].textContent = "This recorded suggestion matches the benchmark label. Human approval is still required.";
+  if (active.mode === "live_model_output") {
+    elements["review-warning"].textContent = active.guard_overrode
+      ? `The queue guard changed the live LLM route from ${active.llm_queue} to ${active.guard_queue}. Human validation is required.`
+      : "This is a live two-stage suggestion with no benchmark label. Human validation is required.";
+    elements["correct-route"].hidden = true;
+  } else if (!active.queue_correct) {
+    elements["review-warning"].textContent = `The guarded queue differs from the benchmark queue (${active.expected_queue}). Correct it before routing.`;
+    elements["correct-route"].hidden = false;
+  } else if (active.guard_overrode) {
+    elements["review-warning"].textContent = `The queue guard changed the LLM route from ${active.llm_queue} to ${active.guard_queue}, matching the held-out benchmark. Human approval is still required.`;
     elements["correct-route"].hidden = true;
   } else {
-    elements["review-warning"].textContent = `This recorded suggestion differs from the benchmark label (${active.expected_label}). Correct it before routing.`;
-    elements["correct-route"].hidden = false;
+    elements["review-warning"].textContent = "The two-stage route matches the held-out benchmark. Human approval is still required.";
+    elements["correct-route"].hidden = true;
   }
 }
 
@@ -125,8 +141,32 @@ function loadSelectedSample() {
 }
 
 
-function routeSelectedMessage(event) {
+async function routeSelectedMessage(event) {
   event.preventDefault();
+  if (inferenceMode === "live") {
+    elements["route-request"].disabled = true;
+    elements["route-request"].textContent = "Routing on Graviton…";
+    try {
+      const response = await fetch("/api/route", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: elements["customer-message"].value }),
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+      workspace = selectRecordedCase(workspace, payload);
+      elements["intake-error"].hidden = true;
+      renderWorkspace();
+      elements["review-panel"].scrollIntoView({ behavior: "smooth", block: "nearest" });
+    } catch (error) {
+      elements["intake-error"].textContent = `Live route failed: ${error.message}`;
+      elements["intake-error"].hidden = false;
+    } finally {
+      elements["route-request"].disabled = false;
+      elements["route-request"].textContent = "Run live route";
+    }
+    return;
+  }
   const recordedCase = findRecordedCase(data.routing_cases, elements["customer-message"].value);
   if (!recordedCase) {
     elements["intake-error"].textContent = "No recorded Phi-4 result exists for edited text. Select an evidence-backed BANKING77 request for this offline demo.";
@@ -137,6 +177,45 @@ function routeSelectedMessage(event) {
   workspace = selectRecordedCase(workspace, recordedCase);
   renderWorkspace();
   elements["review-panel"].scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+
+function setInferenceMode(mode) {
+  inferenceMode = mode;
+  const live = mode === "live";
+  elements["sample-select"].disabled = live;
+  elements["workspace-mode"].textContent = live ? "Live Graviton inference" : "BANKING77 recorded output";
+  elements["intake-note"].textContent = live
+    ? "This message is sent through the configured Graviton inference endpoint and local queue guard."
+    : "Select an evidence-backed request to replay its recorded model output.";
+  elements["route-request"].textContent = live ? "Run live route" : "Load model suggestion";
+  elements["customer-message"].readOnly = false;
+  if (live) {
+    elements["customer-message"].value = "";
+    elements["customer-message"].placeholder = "Enter a support request for the live Graviton service";
+    elements["customer-message"].focus();
+  } else {
+    elements["customer-message"].placeholder = "";
+    loadSelectedSample();
+  }
+  elements["intake-error"].hidden = true;
+  workspace = { ...workspace, active: null };
+  renderWorkspace();
+}
+
+
+async function configureLiveMode() {
+  try {
+    const response = await fetch("./live-status.json", { cache: "no-store" });
+    if (!response.ok) return;
+    const status = await response.json();
+    if (!status.live_available) return;
+    elements["live-mode"].disabled = false;
+    elements["live-mode-hint"].textContent = "Connected to the configured Arm inference endpoint.";
+    elements["live-mode-label"].classList.add("available");
+  } catch {
+    // Static hosting intentionally remains in recorded-evidence mode.
+  }
 }
 
 
@@ -186,6 +265,13 @@ function renderEvidenceSummary() {
   const ratios = mixes.map((mix) => mix.ratio);
   setText("capacity-title", `Same instance. ${mixed.ratio.toFixed(0)}× the capacity.`);
   setText("headline-ratio", `${mixed.ratio.toFixed(1)}×`);
+  setText("guard-accuracy", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
+  setText("guard-gain", `+${data.quality.guard_queue_gain_pp.toFixed(2)} pp`);
+  setText(
+    "guard-split",
+    `${data.quality.guard_training_cases} train / ${data.quality.guard_evaluation_cases} held out`,
+  );
+  setText("intent-accuracy", `${data.quality.optimized_accuracy_percent.toFixed(2)}%`);
   setText(
     "confirmation-count",
     `${mixed.confirmations_per_treatment} confirmations per treatment`,
@@ -203,6 +289,7 @@ function renderEvidenceSummary() {
   );
   setText("proof-capacity", `Minimum ${Math.min(...ratios).toFixed(1)}×`);
   setText("proof-quality", `${data.quality.accuracy_delta_pp.toFixed(3)} pp`);
+  setText("proof-queue-quality", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
   setText("proof-schema", `${data.quality.schema_valid_percent.toFixed(0)}%`);
   setText(
     "proof-arm",
@@ -225,6 +312,8 @@ function renderEvidenceSummary() {
   );
   setText("deployment-instance", data.proof.instance);
   setText("deployment-threads", data.proof.threads);
+  setText("queue-accuracy", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
+  setText("queue-gain", `+${data.quality.guard_queue_gain_pp.toFixed(2)} percentage points`);
 }
 
 
@@ -236,6 +325,19 @@ function renderRun(name, snapshot) {
   elements[`${name}-progress`].style.width = `${(snapshot.completed / snapshot.total) * 100}%`;
   elements[`${name}-status`].className = `run-status ${snapshot.slo_status}`;
   setText(`${name}-status`, snapshot.slo_status);
+  const requestStrip = elements[`${name}-request-strip`];
+  requestStrip.replaceChildren();
+  snapshot.events.forEach((event) => {
+    const tile = document.createElement("span");
+    tile.className = `request-tile ${event.within_slo ? "within-slo" : "late"}`;
+    tile.textContent = `${event.sequence}`;
+    tile.title = `Request ${event.sequence}: ${formatMs(event.latency_ms)}`;
+    tile.setAttribute(
+      "aria-label",
+      `Request ${event.sequence}, ${formatMs(event.latency_ms)}, ${event.within_slo ? "within SLO" : "SLO breach"}`,
+    );
+    requestStrip.append(tile);
+  });
   const latest = snapshot.events.at(-1);
   setText(
     `${name}-event`,
@@ -295,6 +397,19 @@ function bindInteractions() {
   elements["confirm-route"].addEventListener("click", () => review("confirm"));
   elements["correct-route"].addEventListener("click", () => review("correct"));
   elements["run-replay"].addEventListener("click", startReplay);
+  document.querySelectorAll('input[name="inference-mode"]').forEach((radio) => {
+    radio.addEventListener("change", () => setInferenceMode(radio.value));
+  });
+  document.querySelectorAll("[data-copy]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy);
+        elements["copy-status"].textContent = "Command copied to clipboard.";
+      } catch {
+        elements["copy-status"].textContent = "Clipboard access is unavailable; select the command text above.";
+      }
+    });
+  });
 }
 
 
@@ -313,6 +428,7 @@ async function main() {
     renderEvidenceSummary();
     renderReplay(0);
     bindInteractions();
+    await configureLiveMode();
   } catch (error) {
     console.error(error);
     document.querySelectorAll(".view").forEach((view) => { view.hidden = true; });

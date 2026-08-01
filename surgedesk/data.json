@@ -47,16 +47,24 @@
     "experiment_id": "EXP-2026-004",
     "machine": "AWS Graviton4 c8g.4xlarge",
     "model": "Phi-4 Mini",
-    "release_url": "https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.1.0",
+    "release_url": "https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.2.0",
     "report_path": "../report/index.html",
     "runtime": "ONNX Runtime GenAI INT4 + KleidiAI"
   },
   "quality": {
     "accuracy_delta_pp": -0.38961038961038974,
     "baseline_accuracy_percent": 46.883116883116884,
-    "claim_boundary": "Quality is non-inferior between treatments; absolute accuracy is not production-ready for autonomous routing.",
+    "claim_boundary": "The held-out queue guard exceeds the assistive-routing target; human confirmation remains required.",
     "evaluated_cases": 770,
+    "guard_algorithm": "Multinomial Naive Bayes with word unigrams and bigrams",
+    "guard_evaluation_cases": 770,
+    "guard_queue_accuracy_percent": 86.75324675324674,
+    "guard_queue_correct": 668,
+    "guard_queue_gain_pp": 12.337662337662337,
+    "guard_training_cases": 2310,
     "human_confirmation_required": true,
+    "llm_queue_accuracy_percent": 74.41558441558442,
+    "llm_queue_correct": 573,
     "macro_f1_delta_pp": -0.6726444303255752,
     "optimized_accuracy_percent": 46.493506493506494,
     "schema_valid_percent": 100.0
@@ -65,8 +73,8 @@
     "baseline": {
       "events": [
         {
-          "latency_ms": 7825.64406,
-          "queue_ms": 0.002096,
+          "latency_ms": 7832.594935,
+          "queue_ms": 0.002502,
           "request_id": "banking77-mixed-0000",
           "sequence": 1,
           "source_text": "I need my PIN",
@@ -74,8 +82,8 @@
           "within_slo": true
         },
         {
-          "latency_ms": 8715.211486,
-          "queue_ms": 20.182801,
+          "latency_ms": 5093.50011,
+          "queue_ms": 19.868036,
           "request_id": "banking77-mixed-0001",
           "sequence": 2,
           "source_text": "How can I stop fraud on my account right now?",
@@ -83,8 +91,8 @@
           "within_slo": true
         },
         {
-          "latency_ms": 9128.684574,
-          "queue_ms": 917.179455,
+          "latency_ms": 9142.238452,
+          "queue_ms": 970.765958,
           "request_id": "banking77-mixed-0002",
           "sequence": 3,
           "source_text": "My card broke.",
@@ -92,17 +100,17 @@
           "within_slo": true
         },
         {
-          "latency_ms": 6349.019332,
-          "queue_ms": 145.400219,
+          "latency_ms": 10012.396456,
+          "queue_ms": 98.782325,
           "request_id": "banking77-mixed-0003",
           "sequence": 4,
           "source_text": "Where can my card be delivered?",
           "status_code": 200,
-          "within_slo": true
+          "within_slo": false
         },
         {
-          "latency_ms": 10392.245465,
-          "queue_ms": 971.06613,
+          "latency_ms": 10453.839863,
+          "queue_ms": 890.941968,
           "request_id": "banking77-mixed-0004",
           "sequence": 5,
           "source_text": "do i need a pin",
@@ -110,17 +118,17 @@
           "within_slo": false
         },
         {
-          "latency_ms": 11271.026142,
-          "queue_ms": 84.157599,
+          "latency_ms": 7542.231489,
+          "queue_ms": 98.015746,
           "request_id": "banking77-mixed-0005",
           "sequence": 6,
           "source_text": "Do you do SWIFT transfers?",
           "status_code": 200,
-          "within_slo": false
+          "within_slo": true
         },
         {
-          "latency_ms": 11769.182713,
-          "queue_ms": 858.474707,
+          "latency_ms": 12655.188093,
+          "queue_ms": 5837.944068,
           "request_id": "banking77-mixed-0006",
           "sequence": 7,
           "source_text": "my phone is gone",
@@ -128,8 +136,8 @@
           "within_slo": false
         },
         {
-          "latency_ms": 8989.752304,
-          "queue_ms": 3951.688075,
+          "latency_ms": 5049.643977,
+          "queue_ms": 0.002454,
           "request_id": "banking77-mixed-0007",
           "sequence": 8,
           "source_text": "I would like to verify the source of my money",
@@ -139,14 +147,16 @@
       ],
       "label": "KleidiAI disabled",
       "offered_rps": 0.26666666666666666,
-      "p95_ms": 11769.182713,
+      "p95_ms": 12655.188093,
       "passed": false
     },
+    "comparison": "equal_offered_load",
+    "note": "Illustrative raw discovery run at identical demand; confirmed capacity boundaries are reported separately.",
     "optimized": {
       "events": [
         {
-          "latency_ms": 1419.991941,
-          "queue_ms": 0.002907,
+          "latency_ms": 1476.559061,
+          "queue_ms": 0.002307,
           "request_id": "banking77-mixed-0000",
           "sequence": 1,
           "source_text": "I need my PIN",
@@ -154,8 +164,8 @@
           "within_slo": true
         },
         {
-          "latency_ms": 2218.115384,
-          "queue_ms": 0.002974,
+          "latency_ms": 2173.60357,
+          "queue_ms": 0.003061,
           "request_id": "banking77-mixed-0001",
           "sequence": 2,
           "source_text": "How can I stop fraud on my account right now?",
@@ -163,8 +173,8 @@
           "within_slo": true
         },
         {
-          "latency_ms": 2068.017817,
-          "queue_ms": 477.868961,
+          "latency_ms": 1473.331268,
+          "queue_ms": 0.003093,
           "request_id": "banking77-mixed-0002",
           "sequence": 3,
           "source_text": "My card broke.",
@@ -172,8 +182,8 @@
           "within_slo": true
         },
         {
-          "latency_ms": 2632.963547,
-          "queue_ms": 165.451819,
+          "latency_ms": 2167.150958,
+          "queue_ms": 0.003566,
           "request_id": "banking77-mixed-0003",
           "sequence": 4,
           "source_text": "Where can my card be delivered?",
@@ -181,8 +191,8 @@
           "within_slo": true
         },
         {
-          "latency_ms": 2432.109085,
-          "queue_ms": 670.742964,
+          "latency_ms": 1507.577054,
+          "queue_ms": 0.002889,
           "request_id": "banking77-mixed-0004",
           "sequence": 5,
           "source_text": "do i need a pin",
@@ -190,8 +200,8 @@
           "within_slo": true
         },
         {
-          "latency_ms": 2901.102227,
-          "queue_ms": 91.040747,
+          "latency_ms": 2206.691927,
+          "queue_ms": 0.002928,
           "request_id": "banking77-mixed-0005",
           "sequence": 6,
           "source_text": "Do you do SWIFT transfers?",
@@ -199,8 +209,8 @@
           "within_slo": true
         },
         {
-          "latency_ms": 4175.39573,
-          "queue_ms": 665.436326,
+          "latency_ms": 1437.819499,
+          "queue_ms": 0.003177,
           "request_id": "banking77-mixed-0006",
           "sequence": 7,
           "source_text": "my phone is gone",
@@ -208,108 +218,18 @@
           "within_slo": true
         },
         {
-          "latency_ms": 4572.652234,
-          "queue_ms": 118.109046,
+          "latency_ms": 2197.257456,
+          "queue_ms": 0.003213,
           "request_id": "banking77-mixed-0007",
           "sequence": 8,
           "source_text": "I would like to verify the source of my money",
           "status_code": 200,
           "within_slo": true
-        },
-        {
-          "latency_ms": 3080.637357,
-          "queue_ms": 775.735749,
-          "request_id": "banking77-mixed-0008",
-          "sequence": 9,
-          "source_text": "I need a refund?",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 4927.554412,
-          "queue_ms": 73.680155,
-          "request_id": "banking77-mixed-0009",
-          "sequence": 10,
-          "source_text": "What is the source of my available funds?",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 4890.814243,
-          "queue_ms": 656.283075,
-          "request_id": "banking77-mixed-0010",
-          "sequence": 11,
-          "source_text": "Atm took my card",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 4007.596085,
-          "queue_ms": 1732.390225,
-          "request_id": "banking77-mixed-0011",
-          "sequence": 12,
-          "source_text": "Is it normal to have to wait over a week for my new card?",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 5249.912423,
-          "queue_ms": 2260.794799,
-          "request_id": "banking77-mixed-0012",
-          "sequence": 13,
-          "source_text": "My card got lost.",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 5634.609837,
-          "queue_ms": 2130.523298,
-          "request_id": "banking77-mixed-0013",
-          "sequence": 14,
-          "source_text": "Why did it decline my payment?",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 4173.758465,
-          "queue_ms": 2217.48587,
-          "request_id": "banking77-mixed-0014",
-          "sequence": 15,
-          "source_text": "how can i top up?",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 5942.901906,
-          "queue_ms": 2141.41882,
-          "request_id": "banking77-mixed-0015",
-          "sequence": 16,
-          "source_text": "Can you give me information about verification code?",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 5916.012606,
-          "queue_ms": 2283.114668,
-          "request_id": "banking77-mixed-0016",
-          "sequence": 17,
-          "source_text": "I lost my password",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 5020.864637,
-          "queue_ms": 2144.092562,
-          "request_id": "banking77-mixed-0017",
-          "sequence": 18,
-          "source_text": "I need information about an extra \u20ac1 fee in my statement.",
-          "status_code": 200,
-          "within_slo": true
         }
       ],
       "label": "KleidiAI enabled",
-      "offered_rps": 0.6,
-      "p95_ms": 5942.901906,
+      "offered_rps": 0.26666666666666666,
+      "p95_ms": 2206.691927,
       "passed": true
     }
   },
@@ -318,85 +238,148 @@
       "correct": true,
       "expected_intent": "lost_or_stolen_card",
       "expected_label": "Lost Or Stolen Card",
+      "expected_procedure": "Verify the customer, freeze the card, and start replacement-card intake.",
       "expected_queue": "Account security",
+      "guard_margin": 13.924828938614269,
+      "guard_overrode": false,
+      "guard_queue": "Account security",
+      "intent_correct": true,
+      "llm_queue": "Account security",
       "mode": "recorded_model_output",
       "priority": "Urgent",
-      "procedure": "Verify the customer, freeze the card, and start replacement-card intake.",
       "queue": "Account security",
+      "queue_correct": true,
       "request_id": "banking77-quality-0110",
       "source_text": "My entire gym bag, including my wallet, was stolen out of my locker today. Everything in my wallet is gone - how do I block the card to make it can't be used?",
       "suggested_intent": "lost_or_stolen_card",
-      "suggested_label": "Lost Or Stolen Card"
+      "suggested_label": "Lost Or Stolen Card",
+      "suggested_procedure": "Verify the customer, freeze the card, and start replacement-card intake."
+    },
+    {
+      "correct": true,
+      "expected_intent": "card_arrival",
+      "expected_label": "Card Arrival",
+      "expected_procedure": "Check card dispatch status and confirm the delivery address.",
+      "expected_queue": "Cards & payments",
+      "guard_margin": 2.0123905640043063,
+      "guard_overrode": true,
+      "guard_queue": "Cards & payments",
+      "intent_correct": false,
+      "llm_queue": "Account security",
+      "mode": "recorded_model_output",
+      "priority": "Standard",
+      "queue": "Cards & payments",
+      "queue_correct": true,
+      "request_id": "banking77-quality-0007",
+      "source_text": "i have not received my card",
+      "suggested_intent": "lost_or_stolen_card",
+      "suggested_label": "Lost Or Stolen Card",
+      "suggested_procedure": "Verify the customer, freeze the card, and start replacement-card intake."
     },
     {
       "correct": true,
       "expected_intent": "compromised_card",
       "expected_label": "Compromised Card",
+      "expected_procedure": "Escalate to account security and review recent access before restoring service.",
       "expected_queue": "Account security",
+      "guard_margin": 1.9926088489856113,
+      "guard_overrode": false,
+      "guard_queue": "Account security",
+      "intent_correct": true,
+      "llm_queue": "Account security",
       "mode": "recorded_model_output",
       "priority": "Urgent",
-      "procedure": "Escalate to account security and review recent access before restoring service.",
       "queue": "Account security",
+      "queue_correct": true,
       "request_id": "banking77-quality-0355",
       "source_text": "Freeze my account it's been hacked.",
       "suggested_intent": "compromised_card",
-      "suggested_label": "Compromised Card"
+      "suggested_label": "Compromised Card",
+      "suggested_procedure": "Escalate to account security and review recent access before restoring service."
     },
     {
       "correct": true,
       "expected_intent": "card_payment_not_recognised",
       "expected_label": "Card Payment Not Recognised",
+      "expected_procedure": "Secure the card and open a card-payment dispute for human review.",
       "expected_queue": "Account security",
+      "guard_margin": 8.426883382539543,
+      "guard_overrode": false,
+      "guard_queue": "Account security",
+      "intent_correct": true,
+      "llm_queue": "Account security",
       "mode": "recorded_model_output",
       "priority": "Urgent",
-      "procedure": "Secure the card and open a card-payment dispute for human review.",
       "queue": "Account security",
+      "queue_correct": true,
       "request_id": "banking77-quality-0279",
       "source_text": "I don't recall making that payment?",
       "suggested_intent": "card_payment_not_recognised",
-      "suggested_label": "Card Payment Not Recognised"
+      "suggested_label": "Card Payment Not Recognised",
+      "suggested_procedure": "Secure the card and open a card-payment dispute for human review."
     },
     {
       "correct": true,
       "expected_intent": "transfer_not_received_by_recipient",
       "expected_label": "Transfer Not Received By Recipient",
+      "expected_procedure": "Collect the transfer reference and trace recipient settlement status.",
       "expected_queue": "Transfers",
+      "guard_margin": 6.025066350464613,
+      "guard_overrode": false,
+      "guard_queue": "Transfers",
+      "intent_correct": true,
+      "llm_queue": "Transfers",
       "mode": "recorded_model_output",
       "priority": "Standard",
-      "procedure": "Collect the transfer reference and trace recipient settlement status.",
       "queue": "Transfers",
+      "queue_correct": true,
       "request_id": "banking77-quality-0211",
       "source_text": "My money transfer has not arrived.",
       "suggested_intent": "transfer_not_received_by_recipient",
-      "suggested_label": "Transfer Not Received By Recipient"
+      "suggested_label": "Transfer Not Received By Recipient",
+      "suggested_procedure": "Collect the transfer reference and trace recipient settlement status."
     },
     {
       "correct": true,
       "expected_intent": "pending_cash_withdrawal",
       "expected_label": "Pending Cash Withdrawal",
+      "expected_procedure": "Check the ATM settlement window and prevent duplicate reimbursement.",
       "expected_queue": "Cash & ATM",
+      "guard_margin": 12.611308688734141,
+      "guard_overrode": false,
+      "guard_queue": "Cash & ATM",
+      "intent_correct": true,
+      "llm_queue": "Cash & ATM",
       "mode": "recorded_model_output",
       "priority": "Standard",
-      "procedure": "Check the ATM settlement window and prevent duplicate reimbursement.",
       "queue": "Cash & ATM",
+      "queue_correct": true,
       "request_id": "banking77-quality-0056",
       "source_text": "I tried taking money from the ATM but no money came out, but the transaction is still pending? How is this possible?",
       "suggested_intent": "pending_cash_withdrawal",
-      "suggested_label": "Pending Cash Withdrawal"
+      "suggested_label": "Pending Cash Withdrawal",
+      "suggested_procedure": "Check the ATM settlement window and prevent duplicate reimbursement."
     },
     {
       "correct": false,
-      "expected_intent": "card_arrival",
-      "expected_label": "Card Arrival",
-      "expected_queue": "Cards & payments",
+      "expected_intent": "extra_charge_on_statement",
+      "expected_label": "Extra Charge On Statement",
+      "expected_procedure": "Review the extra charge on statement playbook before responding.",
+      "expected_queue": "Account support",
+      "guard_margin": 5.577159060978431,
+      "guard_overrode": true,
+      "guard_queue": "Account security",
+      "intent_correct": true,
+      "llm_queue": "Account support",
       "mode": "recorded_model_output",
       "priority": "Standard",
-      "procedure": "Check card dispatch status and confirm the delivery address.",
-      "queue": "Cards & payments",
-      "request_id": "banking77-quality-0001",
-      "source_text": "I still have not received my new card, I ordered over a week ago.",
-      "suggested_intent": "card_delivery_estimate",
-      "suggested_label": "Card Delivery Estimate"
+      "queue": "Account security",
+      "queue_correct": false,
+      "request_id": "banking77-quality-0044",
+      "source_text": "There is a fee I don't recognize on my statement.",
+      "suggested_intent": "extra_charge_on_statement",
+      "suggested_label": "Extra Charge On Statement",
+      "suggested_procedure": "Review the extra charge on statement playbook before responding."
     }
   ],
   "schema_version": "1.0.0"

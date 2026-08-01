@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
   <title>SurgeDesk | Arm-optimized support triage</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -59,14 +60,26 @@
             <span id="workspace-mode" class="source-chip">BANKING77 recorded output</span>
           </header>
 
+          <section class="quality-scoreband" aria-label="Held-out routing quality">
+            <div><span>Operational queue accuracy</span><strong id="guard-accuracy">—</strong><small>Held-out, 770 requests</small></div>
+            <div><span>Improvement over LLM mapping</span><strong id="guard-gain">—</strong><small id="guard-split">—</small></div>
+            <div><span>Fine-grained intent accuracy</span><strong id="intent-accuracy">—</strong><small>Human confirms every route</small></div>
+          </section>
+
           <form id="intake-form" class="intake-form">
+            <fieldset class="mode-control">
+              <legend>Inference mode</legend>
+              <label><input type="radio" name="inference-mode" value="recorded" checked> Recorded evidence</label>
+              <label id="live-mode-label"><input id="live-mode" type="radio" name="inference-mode" value="live" disabled> Live Graviton endpoint</label>
+              <span id="live-mode-hint">Start the demo gateway with an endpoint to enable live mode.</span>
+            </fieldset>
             <label for="sample-select">Recorded customer request</label>
             <select id="sample-select" name="sample"></select>
             <label for="customer-message">Message</label>
             <textarea id="customer-message" name="message" rows="4" spellcheck="false"></textarea>
             <div class="form-actions">
               <p id="intake-note">Select an evidence-backed request to replay its recorded model output.</p>
-              <button class="primary-button" type="submit">Load model suggestion</button>
+              <button id="route-request" class="primary-button" type="submit">Load model suggestion</button>
             </div>
           </form>
 
@@ -75,15 +88,16 @@
           <section id="review-panel" class="review-panel" aria-labelledby="review-title" hidden>
             <div class="review-summary">
               <div>
-                <p class="eyebrow">Model suggestion</p>
+                <p class="eyebrow">Two-stage suggestion</p>
                 <h3 id="review-title">Awaiting request</h3>
               </div>
               <span id="review-priority" class="priority-badge"></span>
             </div>
-            <dl class="review-details">
-              <div><dt>Suggested intent</dt><dd id="suggested-intent"></dd></div>
-              <div><dt>Proposed queue</dt><dd id="suggested-queue"></dd></div>
-              <div><dt>Inference source</dt><dd>Recorded Phi-4 Mini INT4 output</dd></div>
+            <dl class="review-details four-up">
+              <div><dt>Phi-4 intent</dt><dd id="suggested-intent"></dd></div>
+              <div><dt>LLM-mapped queue</dt><dd id="llm-queue"></dd></div>
+              <div><dt>Guarded queue</dt><dd id="suggested-queue"></dd></div>
+              <div><dt>Inference source</dt><dd id="inference-source">Recorded Phi-4 Mini INT4</dd></div>
             </dl>
             <div id="review-warning" class="quality-warning"></div>
             <div class="review-actions">
@@ -119,7 +133,7 @@
           <div>
             <p class="eyebrow">Fixed-SLO experiment</p>
             <h1>What happens when support demand surges?</h1>
-            <p>Replay raw mixed-traffic confirmation samples from the accepted Graviton4 experiment.</p>
+            <p>Replay the same eight requests at the same load, then inspect the separately confirmed capacity boundary.</p>
           </div>
           <button id="run-replay" class="primary-button replay-button" type="button">Run recorded surge</button>
         </header>
@@ -158,6 +172,10 @@
               <span id="baseline-status" class="run-status waiting">Waiting</span>
             </header>
             <div class="run-progress"><span id="baseline-progress"></span></div>
+            <div class="request-lane">
+              <div><strong>Customer outcomes</strong><span>Each tile is one request</span></div>
+              <div id="baseline-request-strip" class="request-strip" aria-label="Baseline customer request outcomes"></div>
+            </div>
             <dl class="metric-grid">
               <div><dt>Offered load</dt><dd id="baseline-rps">0.267 r/s</dd></div>
               <div><dt>Completed</dt><dd id="baseline-completed">0 / 8</dd></div>
@@ -173,6 +191,10 @@
               <span id="optimized-status" class="run-status waiting">Waiting</span>
             </header>
             <div class="run-progress"><span id="optimized-progress"></span></div>
+            <div class="request-lane">
+              <div><strong>Customer outcomes</strong><span>Each tile is one request</span></div>
+              <div id="optimized-request-strip" class="request-strip" aria-label="Optimized customer request outcomes"></div>
+            </div>
             <dl class="metric-grid">
               <div><dt>Offered load</dt><dd id="optimized-rps">0.600 r/s</dd></div>
               <div><dt>Completed</dt><dd id="optimized-completed">0 / 18</dd></div>
@@ -227,7 +249,8 @@
               <thead><tr><th>Required claim</th><th>Observed</th><th>Threshold</th><th>Decision</th></tr></thead>
               <tbody>
                 <tr><td>Cloud capacity</td><td id="proof-capacity">—</td><td>≥ 1.5×</td><td><span class="pass-label">Pass</span></td></tr>
-                <tr><td>Quality accuracy</td><td id="proof-quality">—</td><td>≥ −1.0 pp</td><td><span class="pass-label">Pass</span></td></tr>
+                <tr><td>Quality non-regression</td><td id="proof-quality">—</td><td>≥ −1.0 pp</td><td><span class="pass-label">Pass</span></td></tr>
+                <tr><td>Operational queue accuracy</td><td id="proof-queue-quality">—</td><td>≥ 85%</td><td><span class="pass-label">Pass</span></td></tr>
                 <tr><td>Output schema</td><td id="proof-schema">—</td><td>≥ 99%</td><td><span class="pass-label">Pass</span></td></tr>
                 <tr><td>Arm execution</td><td id="proof-arm">—</td><td>Required</td><td><span class="pass-label">Pass</span></td></tr>
                 <tr><td>Clean reproduction</td><td id="proof-reproduction">—</td><td>≤ 10%</td><td><span class="pass-label">Pass</span></td></tr>
@@ -252,8 +275,8 @@
         <div class="proof-columns">
           <section class="proof-section quality-boundary" aria-labelledby="quality-title">
             <p class="eyebrow">Claim boundary</p>
-            <h2 id="quality-title">Human confirmation is required</h2>
-            <p>The optimization preserved model quality, but absolute 77-class accuracy is <strong id="absolute-accuracy">—</strong>. SurgeDesk is an assistive triage demonstration, not an autonomous banking decision system.</p>
+            <h2 id="quality-title"><span id="queue-accuracy">—</span> held-out queue accuracy</h2>
+            <p>A dependency-free queue guard improves the recorded LLM mapping by <strong id="queue-gain">—</strong>. Fine-grained 77-intent accuracy remains <strong id="absolute-accuracy">—</strong>, so SurgeDesk stays assistive and every route is human-confirmed.</p>
           </section>
           <section class="proof-section deployment-output" aria-labelledby="deploy-title">
             <p class="eyebrow">Exact passing deployment</p>
@@ -273,10 +296,23 @@
             <h2 id="release-title">The same decision runs in pull requests</h2>
             <p>Missing hashes, quality regressions, absent Arm callchains or an unmeasured deployment block the release.</p>
           </div>
-          <pre><code>- uses: QasimKhan5x/VerifyLane@v0.1.0
+          <pre><code>- uses: QasimKhan5x/VerifyLane@v0.2.0
   with:
     config: armproof.json</code></pre>
           <a class="primary-link" href="https://github.com/QasimKhan5x/VerifyLane">View source and evidence</a>
+        </section>
+
+        <section class="proof-section reuse-walkthrough" aria-labelledby="reuse-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">Five-minute adoption path</p><h2 id="reuse-title">Run the same gate in another Arm AI repository</h2></div>
+            <span class="source-chip">No hosted service required</span>
+          </div>
+          <ol class="reuse-steps">
+            <li><span>1</span><div><strong>Evaluate the reference</strong><code>armproof ci examples/armproof-reference/armproof.json</code></div><button class="copy-button" type="button" data-copy="armproof ci examples/armproof-reference/armproof.json">Copy</button></li>
+            <li><span>2</span><div><strong>Inspect a blocked claim</strong><code>armproof verify --contract examples/fixture-fail/contract.json --comparison examples/fixture-fail/comparison.json</code></div><button class="copy-button" type="button" data-copy="armproof verify --contract examples/fixture-fail/contract.json --comparison examples/fixture-fail/comparison.json">Copy</button></li>
+            <li><span>3</span><div><strong>Add the portable gate</strong><code>uses: QasimKhan5x/VerifyLane@v0.2.0</code></div><button class="copy-button" type="button" data-copy="uses: QasimKhan5x/VerifyLane@v0.2.0">Copy</button></li>
+          </ol>
+          <p id="copy-status" class="copy-status" role="status" aria-live="polite"></p>
         </section>
       </div>
     </section>
