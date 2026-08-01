@@ -1,0 +1,1775 @@
+/tmp/project.tar.gz: OK
+Preconfiguring packages ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 74109 files and directories currently installed.)
+Preparing to unpack .../libc6_2.39-0ubuntu8.8_arm64.deb ...
+Unpacking libc6:arm64 (2.39-0ubuntu8.8) over (2.39-0ubuntu8.7) ...
+Setting up libc6:arm64 (2.39-0ubuntu8.8) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 74109 files and directories currently installed.)
+Preparing to unpack .../libc-bin_2.39-0ubuntu8.8_arm64.deb ...
+Unpacking libc-bin (2.39-0ubuntu8.8) over (2.39-0ubuntu8.7) ...
+Setting up libc-bin (2.39-0ubuntu8.8) ...
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 74109 files and directories currently installed.)
+Preparing to unpack .../00-locales_2.39-0ubuntu8.8_all.deb ...
+Unpacking locales (2.39-0ubuntu8.8) over (2.39-0ubuntu8.7) ...
+Selecting previously unselected package binutils-common:arm64.
+Preparing to unpack .../01-binutils-common_2.42-4ubuntu2.10_arm64.deb ...
+Unpacking binutils-common:arm64 (2.42-4ubuntu2.10) ...
+Selecting previously unselected package libsframe1:arm64.
+Preparing to unpack .../02-libsframe1_2.42-4ubuntu2.10_arm64.deb ...
+Unpacking libsframe1:arm64 (2.42-4ubuntu2.10) ...
+Selecting previously unselected package libbinutils:arm64.
+Preparing to unpack .../03-libbinutils_2.42-4ubuntu2.10_arm64.deb ...
+Unpacking libbinutils:arm64 (2.42-4ubuntu2.10) ...
+Selecting previously unselected package libctf-nobfd0:arm64.
+Preparing to unpack .../04-libctf-nobfd0_2.42-4ubuntu2.10_arm64.deb ...
+Unpacking libctf-nobfd0:arm64 (2.42-4ubuntu2.10) ...
+Selecting previously unselected package libctf0:arm64.
+Preparing to unpack .../05-libctf0_2.42-4ubuntu2.10_arm64.deb ...
+Unpacking libctf0:arm64 (2.42-4ubuntu2.10) ...
+Selecting previously unselected package libgprofng0:arm64.
+Preparing to unpack .../06-libgprofng0_2.42-4ubuntu2.10_arm64.deb ...
+Unpacking libgprofng0:arm64 (2.42-4ubuntu2.10) ...
+Selecting previously unselected package binutils-aarch64-linux-gnu.
+Preparing to unpack .../07-binutils-aarch64-linux-gnu_2.42-4ubuntu2.10_arm64.deb ...
+Unpacking binutils-aarch64-linux-gnu (2.42-4ubuntu2.10) ...
+Selecting previously unselected package binutils.
+Preparing to unpack .../08-binutils_2.42-4ubuntu2.10_arm64.deb ...
+Unpacking binutils (2.42-4ubuntu2.10) ...
+Selecting previously unselected package libc-dev-bin.
+Preparing to unpack .../09-libc-dev-bin_2.39-0ubuntu8.8_arm64.deb ...
+Unpacking libc-dev-bin (2.39-0ubuntu8.8) ...
+Selecting previously unselected package linux-libc-dev:arm64.
+Preparing to unpack .../10-linux-libc-dev_6.8.0-136.136_arm64.deb ...
+Unpacking linux-libc-dev:arm64 (6.8.0-136.136) ...
+Selecting previously unselected package libcrypt-dev:arm64.
+Preparing to unpack .../11-libcrypt-dev_1%3a4.4.36-4build1_arm64.deb ...
+Unpacking libcrypt-dev:arm64 (1:4.4.36-4build1) ...
+Selecting previously unselected package rpcsvc-proto.
+Preparing to unpack .../12-rpcsvc-proto_1.4.2-0ubuntu7_arm64.deb ...
+Unpacking rpcsvc-proto (1.4.2-0ubuntu7) ...
+Selecting previously unselected package libc6-dev:arm64.
+Preparing to unpack .../13-libc6-dev_2.39-0ubuntu8.8_arm64.deb ...
+Unpacking libc6-dev:arm64 (2.39-0ubuntu8.8) ...
+Selecting previously unselected package gcc-13-base:arm64.
+Preparing to unpack .../14-gcc-13-base_13.3.0-6ubuntu2~24.04.1_arm64.deb ...
+Unpacking gcc-13-base:arm64 (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package libisl23:arm64.
+Preparing to unpack .../15-libisl23_0.26-3build1.1_arm64.deb ...
+Unpacking libisl23:arm64 (0.26-3build1.1) ...
+Selecting previously unselected package libmpc3:arm64.
+Preparing to unpack .../16-libmpc3_1.3.1-1build1.1_arm64.deb ...
+Unpacking libmpc3:arm64 (1.3.1-1build1.1) ...
+Selecting previously unselected package cpp-13-aarch64-linux-gnu.
+Preparing to unpack .../17-cpp-13-aarch64-linux-gnu_13.3.0-6ubuntu2~24.04.1_arm64.deb ...
+Unpacking cpp-13-aarch64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package cpp-13.
+Preparing to unpack .../18-cpp-13_13.3.0-6ubuntu2~24.04.1_arm64.deb ...
+Unpacking cpp-13 (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package cpp-aarch64-linux-gnu.
+Preparing to unpack .../19-cpp-aarch64-linux-gnu_4%3a13.2.0-7ubuntu1_arm64.deb ...
+Unpacking cpp-aarch64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package cpp.
+Preparing to unpack .../20-cpp_4%3a13.2.0-7ubuntu1_arm64.deb ...
+Unpacking cpp (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package libcc1-0:arm64.
+Preparing to unpack .../21-libcc1-0_14.2.0-4ubuntu2~24.04.1_arm64.deb ...
+Unpacking libcc1-0:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libgomp1:arm64.
+Preparing to unpack .../22-libgomp1_14.2.0-4ubuntu2~24.04.1_arm64.deb ...
+Unpacking libgomp1:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libitm1:arm64.
+Preparing to unpack .../23-libitm1_14.2.0-4ubuntu2~24.04.1_arm64.deb ...
+Unpacking libitm1:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libatomic1:arm64.
+Preparing to unpack .../24-libatomic1_14.2.0-4ubuntu2~24.04.1_arm64.deb ...
+Unpacking libatomic1:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libasan8:arm64.
+Preparing to unpack .../25-libasan8_14.2.0-4ubuntu2~24.04.1_arm64.deb ...
+Unpacking libasan8:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package liblsan0:arm64.
+Preparing to unpack .../26-liblsan0_14.2.0-4ubuntu2~24.04.1_arm64.deb ...
+Unpacking liblsan0:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libtsan2:arm64.
+Preparing to unpack .../27-libtsan2_14.2.0-4ubuntu2~24.04.1_arm64.deb ...
+Unpacking libtsan2:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libubsan1:arm64.
+Preparing to unpack .../28-libubsan1_14.2.0-4ubuntu2~24.04.1_arm64.deb ...
+Unpacking libubsan1:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libhwasan0:arm64.
+Preparing to unpack .../29-libhwasan0_14.2.0-4ubuntu2~24.04.1_arm64.deb ...
+Unpacking libhwasan0:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Selecting previously unselected package libgcc-13-dev:arm64.
+Preparing to unpack .../30-libgcc-13-dev_13.3.0-6ubuntu2~24.04.1_arm64.deb ...
+Unpacking libgcc-13-dev:arm64 (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package gcc-13-aarch64-linux-gnu.
+Preparing to unpack .../31-gcc-13-aarch64-linux-gnu_13.3.0-6ubuntu2~24.04.1_arm64.deb ...
+Unpacking gcc-13-aarch64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package gcc-13.
+Preparing to unpack .../32-gcc-13_13.3.0-6ubuntu2~24.04.1_arm64.deb ...
+Unpacking gcc-13 (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package gcc-aarch64-linux-gnu.
+Preparing to unpack .../33-gcc-aarch64-linux-gnu_4%3a13.2.0-7ubuntu1_arm64.deb ...
+Unpacking gcc-aarch64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package gcc.
+Preparing to unpack .../34-gcc_4%3a13.2.0-7ubuntu1_arm64.deb ...
+Unpacking gcc (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package libstdc++-13-dev:arm64.
+Preparing to unpack .../35-libstdc++-13-dev_13.3.0-6ubuntu2~24.04.1_arm64.deb ...
+Unpacking libstdc++-13-dev:arm64 (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package g++-13-aarch64-linux-gnu.
+Preparing to unpack .../36-g++-13-aarch64-linux-gnu_13.3.0-6ubuntu2~24.04.1_arm64.deb ...
+Unpacking g++-13-aarch64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package g++-13.
+Preparing to unpack .../37-g++-13_13.3.0-6ubuntu2~24.04.1_arm64.deb ...
+Unpacking g++-13 (13.3.0-6ubuntu2~24.04.1) ...
+Selecting previously unselected package g++-aarch64-linux-gnu.
+Preparing to unpack .../38-g++-aarch64-linux-gnu_4%3a13.2.0-7ubuntu1_arm64.deb ...
+Unpacking g++-aarch64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package g++.
+Preparing to unpack .../39-g++_4%3a13.2.0-7ubuntu1_arm64.deb ...
+Unpacking g++ (4:13.2.0-7ubuntu1) ...
+Selecting previously unselected package make.
+Preparing to unpack .../40-make_4.3-4.1build2_arm64.deb ...
+Unpacking make (4.3-4.1build2) ...
+Selecting previously unselected package libdpkg-perl.
+Preparing to unpack .../41-libdpkg-perl_1.22.6ubuntu6.6_all.deb ...
+Unpacking libdpkg-perl (1.22.6ubuntu6.6) ...
+Selecting previously unselected package bzip2.
+Preparing to unpack .../42-bzip2_1.0.8-5.1build0.1_arm64.deb ...
+Unpacking bzip2 (1.0.8-5.1build0.1) ...
+Selecting previously unselected package lto-disabled-list.
+Preparing to unpack .../43-lto-disabled-list_47_all.deb ...
+Unpacking lto-disabled-list (47) ...
+Selecting previously unselected package dpkg-dev.
+Preparing to unpack .../44-dpkg-dev_1.22.6ubuntu6.6_all.deb ...
+Unpacking dpkg-dev (1.22.6ubuntu6.6) ...
+Selecting previously unselected package build-essential.
+Preparing to unpack .../45-build-essential_12.10ubuntu1_arm64.deb ...
+Unpacking build-essential (12.10ubuntu1) ...
+Selecting previously unselected package libjsoncpp25:arm64.
+Preparing to unpack .../46-libjsoncpp25_1.9.5-6build1_arm64.deb ...
+Unpacking libjsoncpp25:arm64 (1.9.5-6build1) ...
+Selecting previously unselected package librhash0:arm64.
+Preparing to unpack .../47-librhash0_1.4.3-3build1_arm64.deb ...
+Unpacking librhash0:arm64 (1.4.3-3build1) ...
+Selecting previously unselected package cmake-data.
+Preparing to unpack .../48-cmake-data_3.28.3-1build7_all.deb ...
+Unpacking cmake-data (3.28.3-1build7) ...
+Selecting previously unselected package cmake.
+Preparing to unpack .../49-cmake_3.28.3-1build7_arm64.deb ...
+Unpacking cmake (3.28.3-1build7) ...
+Selecting previously unselected package libfakeroot:arm64.
+Preparing to unpack .../50-libfakeroot_1.33-1_arm64.deb ...
+Unpacking libfakeroot:arm64 (1.33-1) ...
+Selecting previously unselected package fakeroot.
+Preparing to unpack .../51-fakeroot_1.33-1_arm64.deb ...
+Unpacking fakeroot (1.33-1) ...
+Selecting previously unselected package fonts-dejavu-mono.
+Preparing to unpack .../52-fonts-dejavu-mono_2.37-8_all.deb ...
+Unpacking fonts-dejavu-mono (2.37-8) ...
+Selecting previously unselected package fonts-dejavu-core.
+Preparing to unpack .../53-fonts-dejavu-core_2.37-8_all.deb ...
+Unpacking fonts-dejavu-core (2.37-8) ...
+Selecting previously unselected package fontconfig-config.
+Preparing to unpack .../54-fontconfig-config_2.15.0-1.1ubuntu2_arm64.deb ...
+Unpacking fontconfig-config (2.15.0-1.1ubuntu2) ...
+Selecting previously unselected package javascript-common.
+Preparing to unpack .../55-javascript-common_11+nmu1_all.deb ...
+Unpacking javascript-common (11+nmu1) ...
+Selecting previously unselected package libalgorithm-diff-perl.
+Preparing to unpack .../56-libalgorithm-diff-perl_1.201-1_all.deb ...
+Unpacking libalgorithm-diff-perl (1.201-1) ...
+Selecting previously unselected package libalgorithm-diff-xs-perl:arm64.
+Preparing to unpack .../57-libalgorithm-diff-xs-perl_0.04-8build3_arm64.deb ...
+Unpacking libalgorithm-diff-xs-perl:arm64 (0.04-8build3) ...
+Selecting previously unselected package libalgorithm-merge-perl.
+Preparing to unpack .../58-libalgorithm-merge-perl_0.08-5_all.deb ...
+Unpacking libalgorithm-merge-perl (0.08-5) ...
+Selecting previously unselected package libaom3:arm64.
+Preparing to unpack .../59-libaom3_3.8.2-2ubuntu0.1_arm64.deb ...
+Unpacking libaom3:arm64 (3.8.2-2ubuntu0.1) ...
+Selecting previously unselected package libfontconfig1:arm64.
+Preparing to unpack .../60-libfontconfig1_2.15.0-1.1ubuntu2_arm64.deb ...
+Unpacking libfontconfig1:arm64 (2.15.0-1.1ubuntu2) ...
+Selecting previously unselected package libsharpyuv0:arm64.
+Preparing to unpack .../61-libsharpyuv0_1.3.2-0.4build3_arm64.deb ...
+Unpacking libsharpyuv0:arm64 (1.3.2-0.4build3) ...
+Selecting previously unselected package libheif-plugin-aomdec:arm64.
+Preparing to unpack .../62-libheif-plugin-aomdec_1.17.6-1ubuntu4.6_arm64.deb ...
+Unpacking libheif-plugin-aomdec:arm64 (1.17.6-1ubuntu4.6) ...
+Selecting previously unselected package libheif1:arm64.
+Preparing to unpack .../63-libheif1_1.17.6-1ubuntu4.6_arm64.deb ...
+Unpacking libheif1:arm64 (1.17.6-1ubuntu4.6) ...
+Selecting previously unselected package libjpeg-turbo8:arm64.
+Preparing to unpack .../64-libjpeg-turbo8_2.1.5-2ubuntu2_arm64.deb ...
+Unpacking libjpeg-turbo8:arm64 (2.1.5-2ubuntu2) ...
+Selecting previously unselected package libjpeg8:arm64.
+Preparing to unpack .../65-libjpeg8_8c-2ubuntu11_arm64.deb ...
+Unpacking libjpeg8:arm64 (8c-2ubuntu11) ...
+Selecting previously unselected package libdeflate0:arm64.
+Preparing to unpack .../66-libdeflate0_1.19-1build1.1_arm64.deb ...
+Unpacking libdeflate0:arm64 (1.19-1build1.1) ...
+Selecting previously unselected package libjbig0:arm64.
+Preparing to unpack .../67-libjbig0_2.1-6.1ubuntu2_arm64.deb ...
+Unpacking libjbig0:arm64 (2.1-6.1ubuntu2) ...
+Selecting previously unselected package liblerc4:arm64.
+Preparing to unpack .../68-liblerc4_4.0.0+ds-4ubuntu2_arm64.deb ...
+Unpacking liblerc4:arm64 (4.0.0+ds-4ubuntu2) ...
+Selecting previously unselected package libwebp7:arm64.
+Preparing to unpack .../69-libwebp7_1.3.2-0.4build3_arm64.deb ...
+Unpacking libwebp7:arm64 (1.3.2-0.4build3) ...
+Selecting previously unselected package libtiff6:arm64.
+Preparing to unpack .../70-libtiff6_4.5.1+git230720-4ubuntu2.5_arm64.deb ...
+Unpacking libtiff6:arm64 (4.5.1+git230720-4ubuntu2.5) ...
+Selecting previously unselected package libxpm4:arm64.
+Preparing to unpack .../71-libxpm4_1%3a3.5.17-1ubuntu0.24.04.1_arm64.deb ...
+Unpacking libxpm4:arm64 (1:3.5.17-1ubuntu0.24.04.1) ...
+Selecting previously unselected package libgd3:arm64.
+Preparing to unpack .../72-libgd3_2.3.3-9ubuntu5_arm64.deb ...
+Unpacking libgd3:arm64 (2.3.3-9ubuntu5) ...
+Selecting previously unselected package libc-devtools.
+Preparing to unpack .../73-libc-devtools_2.39-0ubuntu8.8_arm64.deb ...
+Unpacking libc-devtools (2.39-0ubuntu8.8) ...
+Selecting previously unselected package libexpat1-dev:arm64.
+Preparing to unpack .../74-libexpat1-dev_2.6.1-2ubuntu0.4_arm64.deb ...
+Unpacking libexpat1-dev:arm64 (2.6.1-2ubuntu0.4) ...
+Selecting previously unselected package libfile-fcntllock-perl.
+Preparing to unpack .../75-libfile-fcntllock-perl_0.22-4ubuntu5_arm64.deb ...
+Unpacking libfile-fcntllock-perl (0.22-4ubuntu5) ...
+Selecting previously unselected package libheif-plugin-aomenc:arm64.
+Preparing to unpack .../76-libheif-plugin-aomenc_1.17.6-1ubuntu4.6_arm64.deb ...
+Unpacking libheif-plugin-aomenc:arm64 (1.17.6-1ubuntu4.6) ...
+Selecting previously unselected package libjs-jquery.
+Preparing to unpack .../77-libjs-jquery_3.6.1+dfsg+~3.5.14-1_all.deb ...
+Unpacking libjs-jquery (3.6.1+dfsg+~3.5.14-1) ...
+Selecting previously unselected package libjs-underscore.
+Preparing to unpack .../78-libjs-underscore_1.13.4~dfsg+~1.11.4-3_all.deb ...
+Unpacking libjs-underscore (1.13.4~dfsg+~1.11.4-3) ...
+Selecting previously unselected package libjs-sphinxdoc.
+Preparing to unpack .../79-libjs-sphinxdoc_7.2.6-6_all.deb ...
+Unpacking libjs-sphinxdoc (7.2.6-6) ...
+Selecting previously unselected package zlib1g-dev:arm64.
+Preparing to unpack .../80-zlib1g-dev_1%3a1.3.dfsg-3.1ubuntu2.1_arm64.deb ...
+Unpacking zlib1g-dev:arm64 (1:1.3.dfsg-3.1ubuntu2.1) ...
+Selecting previously unselected package libpython3.12-dev:arm64.
+Preparing to unpack .../81-libpython3.12-dev_3.12.3-1ubuntu0.15_arm64.deb ...
+Unpacking libpython3.12-dev:arm64 (3.12.3-1ubuntu0.15) ...
+Selecting previously unselected package libpython3-dev:arm64.
+Preparing to unpack .../82-libpython3-dev_3.12.3-0ubuntu2.1_arm64.deb ...
+Unpacking libpython3-dev:arm64 (3.12.3-0ubuntu2.1) ...
+Preparing to unpack .../83-linux-tools-common_6.8.0-136.136_all.deb ...
+Unpacking linux-tools-common (6.8.0-136.136) over (6.8.0-134.134) ...
+Selecting previously unselected package linux-tools-6.8.0-136.
+Preparing to unpack .../84-linux-tools-6.8.0-136_6.8.0-136.136_arm64.deb ...
+Unpacking linux-tools-6.8.0-136 (6.8.0-136.136) ...
+Selecting previously unselected package linux-tools-6.8.0-136-generic.
+Preparing to unpack .../85-linux-tools-6.8.0-136-generic_6.8.0-136.136_arm64.deb ...
+Unpacking linux-tools-6.8.0-136-generic (6.8.0-136.136) ...
+Selecting previously unselected package linux-tools-generic.
+Preparing to unpack .../86-linux-tools-generic_6.8.0-136.136_arm64.deb ...
+Unpacking linux-tools-generic (6.8.0-136.136) ...
+Selecting previously unselected package manpages-dev.
+Preparing to unpack .../87-manpages-dev_6.7-2_all.deb ...
+Unpacking manpages-dev (6.7-2) ...
+Selecting previously unselected package ninja-build.
+Preparing to unpack .../88-ninja-build_1.11.1-2_arm64.deb ...
+Unpacking ninja-build (1.11.1-2) ...
+Selecting previously unselected package python3.12-dev.
+Preparing to unpack .../89-python3.12-dev_3.12.3-1ubuntu0.15_arm64.deb ...
+Unpacking python3.12-dev (3.12.3-1ubuntu0.15) ...
+Selecting previously unselected package python3-dev.
+Preparing to unpack .../90-python3-dev_3.12.3-0ubuntu2.1_arm64.deb ...
+Unpacking python3-dev (3.12.3-0ubuntu2.1) ...
+Selecting previously unselected package python3-pip-whl.
+Preparing to unpack .../91-python3-pip-whl_24.0+dfsg-1ubuntu1.3_all.deb ...
+Unpacking python3-pip-whl (24.0+dfsg-1ubuntu1.3) ...
+Selecting previously unselected package python3-setuptools-whl.
+Preparing to unpack .../92-python3-setuptools-whl_68.1.2-2ubuntu1.2_all.deb ...
+Unpacking python3-setuptools-whl (68.1.2-2ubuntu1.2) ...
+Selecting previously unselected package python3.12-venv.
+Preparing to unpack .../93-python3.12-venv_3.12.3-1ubuntu0.15_arm64.deb ...
+Unpacking python3.12-venv (3.12.3-1ubuntu0.15) ...
+Selecting previously unselected package python3-venv.
+Preparing to unpack .../94-python3-venv_3.12.3-0ubuntu2.1_arm64.deb ...
+Unpacking python3-venv (3.12.3-0ubuntu2.1) ...
+Setting up javascript-common (11+nmu1) ...
+Setting up libsharpyuv0:arm64 (1.3.2-0.4build3) ...
+Setting up libaom3:arm64 (3.8.2-2ubuntu0.1) ...
+Setting up manpages-dev (6.7-2) ...
+Setting up python3-setuptools-whl (68.1.2-2ubuntu1.2) ...
+Setting up lto-disabled-list (47) ...
+Setting up liblerc4:arm64 (4.0.0+ds-4ubuntu2) ...
+Setting up libxpm4:arm64 (1:3.5.17-1ubuntu0.24.04.1) ...
+Setting up libfile-fcntllock-perl (0.22-4ubuntu5) ...
+Setting up python3-pip-whl (24.0+dfsg-1ubuntu1.3) ...
+Setting up libalgorithm-diff-perl (1.201-1) ...
+Setting up binutils-common:arm64 (2.42-4ubuntu2.10) ...
+Setting up libdeflate0:arm64 (1.19-1build1.1) ...
+Setting up linux-libc-dev:arm64 (6.8.0-136.136) ...
+Setting up libctf-nobfd0:arm64 (2.42-4ubuntu2.10) ...
+Setting up libgomp1:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up bzip2 (1.0.8-5.1build0.1) ...
+Setting up locales (2.39-0ubuntu8.8) ...
+Generating locales (this might take a while)...
+  en_US.UTF-8... done
+Generation complete.
+Setting up libjbig0:arm64 (2.1-6.1ubuntu2) ...
+Setting up libsframe1:arm64 (2.42-4ubuntu2.10) ...
+Setting up libfakeroot:arm64 (1.33-1) ...
+Setting up ninja-build (1.11.1-2) ...
+Setting up fakeroot (1.33-1) ...
+update-alternatives: using /usr/bin/fakeroot-sysv to provide /usr/bin/fakeroot (fakeroot) in auto mode
+Setting up rpcsvc-proto (1.4.2-0ubuntu7) ...
+Setting up gcc-13-base:arm64 (13.3.0-6ubuntu2~24.04.1) ...
+Setting up make (4.3-4.1build2) ...
+Setting up fonts-dejavu-mono (2.37-8) ...
+Setting up libmpc3:arm64 (1.3.1-1build1.1) ...
+Setting up libatomic1:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up libjsoncpp25:arm64 (1.9.5-6build1) ...
+Setting up fonts-dejavu-core (2.37-8) ...
+Setting up libjpeg-turbo8:arm64 (2.1.5-2ubuntu2) ...
+Setting up libdpkg-perl (1.22.6ubuntu6.6) ...
+Setting up libwebp7:arm64 (1.3.2-0.4build3) ...
+Setting up libubsan1:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up libhwasan0:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up librhash0:arm64 (1.4.3-3build1) ...
+Setting up libcrypt-dev:arm64 (1:4.4.36-4build1) ...
+Setting up libasan8:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up cmake-data (3.28.3-1build7) ...
+Setting up libtsan2:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up libjs-jquery (3.6.1+dfsg+~3.5.14-1) ...
+Setting up libbinutils:arm64 (2.42-4ubuntu2.10) ...
+Setting up libisl23:arm64 (0.26-3build1.1) ...
+Setting up libc-dev-bin (2.39-0ubuntu8.8) ...
+Setting up linux-tools-common (6.8.0-136.136) ...
+Setting up libalgorithm-diff-xs-perl:arm64 (0.04-8build3) ...
+Setting up libcc1-0:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up liblsan0:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up libitm1:arm64 (14.2.0-4ubuntu2~24.04.1) ...
+Setting up libjs-underscore (1.13.4~dfsg+~1.11.4-3) ...
+Setting up libalgorithm-merge-perl (0.08-5) ...
+Setting up libctf0:arm64 (2.42-4ubuntu2.10) ...
+Setting up libjpeg8:arm64 (8c-2ubuntu11) ...
+Setting up cpp-13-aarch64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+Setting up python3.12-venv (3.12.3-1ubuntu0.15) ...
+Setting up fontconfig-config (2.15.0-1.1ubuntu2) ...
+Setting up cpp-aarch64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Setting up libgprofng0:arm64 (2.42-4ubuntu2.10) ...
+Setting up python3-venv (3.12.3-0ubuntu2.1) ...
+Setting up linux-tools-6.8.0-136 (6.8.0-136.136) ...
+Setting up linux-tools-6.8.0-136-generic (6.8.0-136.136) ...
+Setting up libjs-sphinxdoc (7.2.6-6) ...
+Setting up libgcc-13-dev:arm64 (13.3.0-6ubuntu2~24.04.1) ...
+Setting up libtiff6:arm64 (4.5.1+git230720-4ubuntu2.5) ...
+Setting up cmake (3.28.3-1build7) ...
+Setting up libc6-dev:arm64 (2.39-0ubuntu8.8) ...
+Setting up libstdc++-13-dev:arm64 (13.3.0-6ubuntu2~24.04.1) ...
+Setting up cpp-13 (13.3.0-6ubuntu2~24.04.1) ...
+Setting up linux-tools-generic (6.8.0-136.136) ...
+Setting up binutils-aarch64-linux-gnu (2.42-4ubuntu2.10) ...
+Setting up binutils (2.42-4ubuntu2.10) ...
+Setting up gcc-13-aarch64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+Setting up dpkg-dev (1.22.6ubuntu6.6) ...
+Setting up libexpat1-dev:arm64 (2.6.1-2ubuntu0.4) ...
+Setting up gcc-13 (13.3.0-6ubuntu2~24.04.1) ...
+Setting up zlib1g-dev:arm64 (1:1.3.dfsg-3.1ubuntu2.1) ...
+Setting up cpp (4:13.2.0-7ubuntu1) ...
+Setting up g++-13-aarch64-linux-gnu (13.3.0-6ubuntu2~24.04.1) ...
+Setting up gcc-aarch64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Setting up g++-13 (13.3.0-6ubuntu2~24.04.1) ...
+Setting up libpython3.12-dev:arm64 (3.12.3-1ubuntu0.15) ...
+Setting up gcc (4:13.2.0-7ubuntu1) ...
+Setting up python3.12-dev (3.12.3-1ubuntu0.15) ...
+Setting up g++-aarch64-linux-gnu (4:13.2.0-7ubuntu1) ...
+Setting up libpython3-dev:arm64 (3.12.3-0ubuntu2.1) ...
+Setting up python3-dev (3.12.3-0ubuntu2.1) ...
+Setting up g++ (4:13.2.0-7ubuntu1) ...
+update-alternatives: using /usr/bin/g++ to provide /usr/bin/c++ (c++) in auto mode
+Setting up build-essential (12.10ubuntu1) ...
+Setting up libheif-plugin-aomdec:arm64 (1.17.6-1ubuntu4.6) ...
+Setting up libheif1:arm64 (1.17.6-1ubuntu4.6) ...
+Setting up libheif-plugin-aomenc:arm64 (1.17.6-1ubuntu4.6) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.8) ...
+Processing triggers for man-db (2.12.0-4build2) ...
+Processing triggers for sgml-base (1.31) ...
+Setting up libfontconfig1:arm64 (2.15.0-1.1ubuntu2) ...
+Setting up libgd3:arm64 (2.3.3-9ubuntu5) ...
+Setting up libc-devtools (2.39-0ubuntu8.8) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.8) ...
+
+Running kernel seems to be up-to-date.
+
+Restarting services...
+ systemctl restart acpid.service chrony.service cron.service irqbalance.service multipathd.service packagekit.service polkit.service rsyslog.service systemd-journald.service systemd-networkd.service systemd-resolved.service systemd-udevd.service udisks2.service
+
+Service restarts being deferred:
+ systemctl restart ModemManager.service
+ systemctl restart cloud-final.service
+ /etc/needrestart/restart.d/dbus.service
+ systemctl restart getty@tty1.service
+ systemctl restart networkd-dispatcher.service
+ systemctl restart serial-getty@ttyS0.service
+ systemctl restart systemd-logind.service
+ systemctl restart unattended-upgrades.service
+
+No containers need to be restarted.
+
+No user sessions are running outdated binaries.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+Requirement already satisfied: pip in /opt/result-first/venv/lib/python3.12/site-packages (24.0)
+Collecting pip
+  Downloading pip-26.2-py3-none-any.whl.metadata (4.6 kB)
+Downloading pip-26.2-py3-none-any.whl (1.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 51.7 MB/s eta 0:00:00
+Installing collected packages: pip
+  Attempting uninstall: pip
+    Found existing installation: pip 24.0
+    Uninstalling pip-24.0:
+      Successfully uninstalled pip-24.0
+Successfully installed pip-26.2
+Collecting huggingface-hub==0.36.0 (from -r requirements.txt (line 1))
+  Downloading huggingface_hub-0.36.0-py3-none-any.whl.metadata (14 kB)
+Collecting numpy==2.2.6 (from -r requirements.txt (line 2))
+  Downloading numpy-2.2.6-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (63 kB)
+Collecting packaging==25.0 (from -r requirements.txt (line 3))
+  Downloading packaging-25.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting psutil==7.0.0 (from -r requirements.txt (line 4))
+  Downloading psutil-7.0.0-cp36-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (22 kB)
+Collecting setuptools==80.9.0 (from -r requirements.txt (line 5))
+  Downloading setuptools-80.9.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting torch==2.12.1 (from -r requirements.txt (line 6))
+  Downloading torch-2.12.1-cp312-cp312-manylinux_2_28_aarch64.whl.metadata (31 kB)
+Collecting transformers==4.57.6 (from -r requirements.txt (line 7))
+  Downloading transformers-4.57.6-py3-none-any.whl.metadata (43 kB)
+Collecting wheel==0.45.1 (from -r requirements.txt (line 8))
+  Downloading wheel-0.45.1-py3-none-any.whl.metadata (2.3 kB)
+Collecting filelock (from huggingface-hub==0.36.0->-r requirements.txt (line 1))
+  Downloading filelock-3.32.2-py3-none-any.whl.metadata (2.0 kB)
+Collecting fsspec>=2023.5.0 (from huggingface-hub==0.36.0->-r requirements.txt (line 1))
+  Downloading fsspec-2026.7.0-py3-none-any.whl.metadata (10 kB)
+Collecting pyyaml>=5.1 (from huggingface-hub==0.36.0->-r requirements.txt (line 1))
+  Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl.metadata (2.4 kB)
+Collecting requests (from huggingface-hub==0.36.0->-r requirements.txt (line 1))
+  Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting tqdm>=4.42.1 (from huggingface-hub==0.36.0->-r requirements.txt (line 1))
+  Downloading tqdm-4.70.0-py3-none-any.whl.metadata (57 kB)
+Collecting typing-extensions>=3.7.4.3 (from huggingface-hub==0.36.0->-r requirements.txt (line 1))
+  Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting hf-xet<2.0.0,>=1.1.3 (from huggingface-hub==0.36.0->-r requirements.txt (line 1))
+  Downloading hf_xet-1.5.2-cp38-abi3-manylinux_2_28_aarch64.whl.metadata (4.9 kB)
+Collecting sympy>=1.13.3 (from torch==2.12.1->-r requirements.txt (line 6))
+  Downloading sympy-1.14.0-py3-none-any.whl.metadata (12 kB)
+Collecting networkx>=2.5.1 (from torch==2.12.1->-r requirements.txt (line 6))
+  Downloading networkx-3.6.1-py3-none-any.whl.metadata (6.8 kB)
+Collecting jinja2 (from torch==2.12.1->-r requirements.txt (line 6))
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting cuda-toolkit==13.0.2 (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading cuda_toolkit-13.0.2-py2.py3-none-any.whl.metadata (9.4 kB)
+Collecting nvidia-cublas<=13.1.1.3,>=13.1.0.3 (from torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_cublas-13.1.1.3-py3-none-manylinux_2_27_aarch64.whl.metadata (1.8 kB)
+Collecting cuda-bindings<14,>=13.0.3 (from torch==2.12.1->-r requirements.txt (line 6))
+  Downloading cuda_bindings-13.3.1-cp312-cp312-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl.metadata (2.5 kB)
+Collecting nvidia-cudnn-cu13==9.20.0.48 (from torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_cudnn_cu13-9.20.0.48-py3-none-manylinux_2_27_aarch64.whl.metadata (1.9 kB)
+Collecting nvidia-cusparselt-cu13==0.8.1 (from torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_cusparselt_cu13-0.8.1-py3-none-manylinux2014_aarch64.whl.metadata (12 kB)
+Collecting nvidia-nccl-cu13==2.29.7 (from torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_nccl_cu13-2.29.7-py3-none-manylinux_2_18_aarch64.whl.metadata (2.1 kB)
+Collecting nvidia-nvshmem-cu13==3.4.5 (from torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_nvshmem_cu13-3.4.5-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl.metadata (2.1 kB)
+Collecting triton==3.7.1 (from torch==2.12.1->-r requirements.txt (line 6))
+  Downloading triton-3.7.1-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl.metadata (1.7 kB)
+Collecting regex!=2019.12.17 (from transformers==4.57.6->-r requirements.txt (line 7))
+  Downloading regex-2026.7.19-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl.metadata (40 kB)
+Collecting tokenizers<=0.23.0,>=0.22.0 (from transformers==4.57.6->-r requirements.txt (line 7))
+  Downloading tokenizers-0.22.2-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (7.3 kB)
+Collecting safetensors>=0.4.3 (from transformers==4.57.6->-r requirements.txt (line 7))
+  Downloading safetensors-0.8.0-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (4.2 kB)
+Collecting nvidia-cuda-runtime==13.0.96.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_cuda_runtime-13.0.96-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl.metadata (1.7 kB)
+Collecting nvidia-cufft==12.0.0.61.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_cufft-12.0.0.61-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl.metadata (1.8 kB)
+Collecting nvidia-cufile==1.15.1.6.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_cufile-1.15.1.6-py3-none-manylinux_2_27_aarch64.whl.metadata (1.7 kB)
+Collecting nvidia-cuda-cupti==13.0.85.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_cuda_cupti-13.0.85-py3-none-manylinux_2_25_aarch64.whl.metadata (1.7 kB)
+Collecting nvidia-curand==10.4.0.35.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_curand-10.4.0.35-py3-none-manylinux_2_27_aarch64.whl.metadata (1.7 kB)
+Collecting nvidia-cusolver==12.0.4.66.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_cusolver-12.0.4.66-py3-none-manylinux_2_27_aarch64.whl.metadata (1.8 kB)
+Collecting nvidia-cusparse==12.6.3.3.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_cusparse-12.6.3.3-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl.metadata (1.8 kB)
+Collecting nvidia-nvjitlink==13.0.88.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_nvjitlink-13.0.88-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl.metadata (1.7 kB)
+Collecting nvidia-cuda-nvrtc==13.0.88.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_cuda_nvrtc-13.0.88-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl.metadata (1.7 kB)
+Collecting nvidia-nvtx==13.0.85.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading nvidia_nvtx-13.0.85-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl.metadata (1.8 kB)
+Collecting cuda-pathfinder>=1.4.2 (from cuda-bindings<14,>=13.0.3->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading cuda_pathfinder-1.6.0-py3-none-any.whl.metadata (1.9 kB)
+Collecting mpmath<1.4,>=1.1.0 (from sympy>=1.13.3->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading mpmath-1.3.0-py3-none-any.whl.metadata (8.6 kB)
+Collecting MarkupSafe>=2.0 (from jinja2->torch==2.12.1->-r requirements.txt (line 6))
+  Downloading markupsafe-3.0.3-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl.metadata (2.7 kB)
+Collecting charset_normalizer<4,>=2 (from requests->huggingface-hub==0.36.0->-r requirements.txt (line 1))
+  Downloading charset_normalizer-3.4.9-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl.metadata (41 kB)
+Collecting idna<4,>=2.5 (from requests->huggingface-hub==0.36.0->-r requirements.txt (line 1))
+  Downloading idna-3.18-py3-none-any.whl.metadata (6.1 kB)
+Collecting urllib3<3,>=1.26 (from requests->huggingface-hub==0.36.0->-r requirements.txt (line 1))
+  Downloading urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+Collecting certifi>=2023.5.7 (from requests->huggingface-hub==0.36.0->-r requirements.txt (line 1))
+  Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+Downloading huggingface_hub-0.36.0-py3-none-any.whl (566 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 566.1/566.1 kB 22.0 MB/s  0:00:00
+Downloading numpy-2.2.6-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (14.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 14.0/14.0 MB 191.3 MB/s  0:00:00
+Downloading packaging-25.0-py3-none-any.whl (66 kB)
+Downloading psutil-7.0.0-cp36-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (279 kB)
+Downloading setuptools-80.9.0-py3-none-any.whl (1.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 156.7 MB/s  0:00:00
+Downloading torch-2.12.1-cp312-cp312-manylinux_2_28_aarch64.whl (426.4 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 426.4/426.4 MB 56.9 MB/s  0:00:05
+Downloading transformers-4.57.6-py3-none-any.whl (12.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.0/12.0 MB 164.2 MB/s  0:00:00
+Downloading wheel-0.45.1-py3-none-any.whl (72 kB)
+Downloading cuda_toolkit-13.0.2-py2.py3-none-any.whl (2.4 kB)
+Downloading nvidia_cudnn_cu13-9.20.0.48-py3-none-manylinux_2_27_aarch64.whl (444.6 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 444.6/444.6 MB 66.0 MB/s  0:00:05
+Downloading nvidia_cusparselt_cu13-0.8.1-py3-none-manylinux2014_aarch64.whl (221.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 221.1/221.1 MB 116.7 MB/s  0:00:01
+Downloading nvidia_nccl_cu13-2.29.7-py3-none-manylinux_2_18_aarch64.whl (206.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 206.0/206.0 MB 123.6 MB/s  0:00:01
+Downloading nvidia_nvshmem_cu13-3.4.5-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl (60.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 60.2/60.2 MB 134.0 MB/s  0:00:00
+Downloading triton-3.7.1-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (184.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 184.7/184.7 MB 131.3 MB/s  0:00:01
+Downloading cuda_bindings-13.3.1-cp312-cp312-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl (6.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.0/6.0 MB 113.8 MB/s  0:00:00
+Downloading hf_xet-1.5.2-cp38-abi3-manylinux_2_28_aarch64.whl (4.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.2/4.2 MB 257.5 MB/s  0:00:00
+Downloading nvidia_cublas-13.1.1.3-py3-none-manylinux_2_27_aarch64.whl (542.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 542.8/542.8 MB 48.2 MB/s  0:00:06
+Downloading nvidia_cuda_cupti-13.0.85-py3-none-manylinux_2_25_aarch64.whl (10.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.3/10.3 MB 154.0 MB/s  0:00:00
+Downloading nvidia_cuda_nvrtc-13.0.88-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl (43.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 43.0/43.0 MB 107.0 MB/s  0:00:00
+Downloading nvidia_cuda_runtime-13.0.96-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl (2.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.3/2.3 MB 56.6 MB/s  0:00:00
+Downloading nvidia_cufft-12.0.0.61-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl (214.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 214.1/214.1 MB 76.3 MB/s  0:00:02
+Downloading nvidia_cufile-1.15.1.6-py3-none-manylinux_2_27_aarch64.whl (1.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 3.5 MB/s  0:00:00
+Downloading nvidia_curand-10.4.0.35-py3-none-manylinux_2_27_aarch64.whl (62.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 62.0/62.0 MB 40.5 MB/s  0:00:01
+Downloading nvidia_cusolver-12.0.4.66-py3-none-manylinux_2_27_aarch64.whl (223.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 223.5/223.5 MB 67.6 MB/s  0:00:03
+Downloading nvidia_cusparse-12.6.3.3-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl (162.2 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 162.2/162.2 MB 125.0 MB/s  0:00:01
+Downloading nvidia_nvjitlink-13.0.88-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl (38.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 38.8/38.8 MB 136.7 MB/s  0:00:00
+Downloading nvidia_nvtx-13.0.85-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl (148 kB)
+Downloading tokenizers-0.22.2-cp39-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (3.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 263.2 MB/s  0:00:00
+Downloading cuda_pathfinder-1.6.0-py3-none-any.whl (54 kB)
+Downloading fsspec-2026.7.0-py3-none-any.whl (206 kB)
+Downloading networkx-3.6.1-py3-none-any.whl (2.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 242.8 MB/s  0:00:00
+Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (775 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 775.1/775.1 kB 88.7 MB/s  0:00:00
+Downloading regex-2026.7.19-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (796 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 796.7/796.7 kB 113.5 MB/s  0:00:00
+Downloading safetensors-0.8.0-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (502 kB)
+Downloading sympy-1.14.0-py3-none-any.whl (6.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.3/6.3 MB 349.5 MB/s  0:00:00
+Downloading mpmath-1.3.0-py3-none-any.whl (536 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 536.2/536.2 kB 65.7 MB/s  0:00:00
+Downloading tqdm-4.70.0-py3-none-any.whl (80 kB)
+Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Downloading filelock-3.32.2-py3-none-any.whl (98 kB)
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+Downloading markupsafe-3.0.3-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (24 kB)
+Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+Downloading charset_normalizer-3.4.9-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (215 kB)
+Downloading idna-3.18-py3-none-any.whl (65 kB)
+Downloading urllib3-2.7.0-py3-none-any.whl (131 kB)
+Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+Installing collected packages: nvidia-cusparselt-cu13, mpmath, cuda-toolkit, wheel, urllib3, typing-extensions, triton, tqdm, sympy, setuptools, safetensors, regex, pyyaml, psutil, packaging, nvidia-nvtx, nvidia-nvshmem-cu13, nvidia-nvjitlink, nvidia-nccl-cu13, nvidia-curand, nvidia-cufile, nvidia-cuda-runtime, nvidia-cuda-nvrtc, nvidia-cuda-cupti, numpy, networkx, MarkupSafe, idna, hf-xet, fsspec, filelock, cuda-pathfinder, charset_normalizer, certifi, requests, nvidia-cusparse, nvidia-cufft, nvidia-cublas, jinja2, cuda-bindings, nvidia-cusolver, nvidia-cudnn-cu13, huggingface-hub, tokenizers, transformers, torch
+
+Successfully installed MarkupSafe-3.0.3 certifi-2026.7.22 charset_normalizer-3.4.9 cuda-bindings-13.3.1 cuda-pathfinder-1.6.0 cuda-toolkit-13.0.2 filelock-3.32.2 fsspec-2026.7.0 hf-xet-1.5.2 huggingface-hub-0.36.0 idna-3.18 jinja2-3.1.6 mpmath-1.3.0 networkx-3.6.1 numpy-2.2.6 nvidia-cublas-13.1.1.3 nvidia-cuda-cupti-13.0.85 nvidia-cuda-nvrtc-13.0.88 nvidia-cuda-runtime-13.0.96 nvidia-cudnn-cu13-9.20.0.48 nvidia-cufft-12.0.0.61 nvidia-cufile-1.15.1.6 nvidia-curand-10.4.0.35 nvidia-cusolver-12.0.4.66 nvidia-cusparse-12.6.3.3 nvidia-cusparselt-cu13-0.8.1 nvidia-nccl-cu13-2.29.7 nvidia-nvjitlink-13.0.88 nvidia-nvshmem-cu13-3.4.5 nvidia-nvtx-13.0.85 packaging-25.0 psutil-7.0.0 pyyaml-6.0.3 regex-2026.7.19 requests-2.34.2 safetensors-0.8.0 setuptools-80.9.0 sympy-1.14.0 tokenizers-0.22.2 torch-2.12.1 tqdm-4.70.0 transformers-4.57.6 triton-3.7.1 typing-extensions-4.16.0 urllib3-2.7.0 wheel-0.45.1
+/opt/result-first/evidence/build-artifacts/onnxruntime-1.29.0-cp312-cp312-linux_aarch64.whl: OK
+/opt/result-first/evidence/build-artifacts/onnxruntime-sdk.tar.gz: OK
+Processing /opt/result-first/evidence/build-artifacts/onnxruntime-1.29.0-cp312-cp312-linux_aarch64.whl
+Installing collected packages: onnxruntime
+Successfully installed onnxruntime-1.29.0
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: is subject to change. To configure the initial branch name to use in all
+hint: of your new repositories, which will suppress this warning, call:
+hint: 
+hint: 	git config --global init.defaultBranch <name>
+hint: 
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint: 
+hint: 	git branch -m <name>
+Initialized empty Git repository in /opt/result-first/onnxruntime-genai/.git/
+From https://github.com/microsoft/onnxruntime-genai
+ * branch            d2c81fdc8ef80836ceba1bae384be80262e24bb4 -> FETCH_HEAD
+HEAD is now at d2c81fd Support batch_size > 1 for Marian encoder-decoder models (#2337)
+2026-07-31 14:12:58,823 util.run [INFO] - Running subprocess in '/opt/result-first/onnxruntime-genai'
+  /usr/bin/cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=Release -S /opt/result-first/onnxruntime-genai -B /opt/result-first/onnxruntime-genai/build/Linux/Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DUSE_CUDA=OFF -DUSE_TRT_RTX=OFF -DUSE_DML=OFF -DUSE_WINML=OFF -DENABLE_JAVA=OFF -DBUILD_WHEEL=ON -DUSE_GUIDANCE=OFF -DPUBLISH_JAVA_MAVEN_LOCAL=OFF -DENABLE_TELEMETRY=ON -DORT_HOME=/opt/result-first/onnxruntime/build/Linux/Release/install -DPython_EXECUTABLE=/opt/result-first/venv/bin/python -DPYTHON_EXECUTABLE=/opt/result-first/venv/bin/python
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Using ONNX Runtime from: /opt/result-first/onnxruntime/build/Linux/Release/install [as provided]
+-- Using ONNX Runtime from: /opt/result-first/onnxruntime/build/Linux/Release/install [absolute]
+-- ORT_HEADER_DIR: /opt/result-first/onnxruntime/build/Linux/Release/install/include
+-- ORT_LIB_DIR: /opt/result-first/onnxruntime/build/Linux/Release/install/lib
+Loading Dependencies URLs ...
+Loading Dependencies ...
+-- pybind11 v2.13.6 
+-- Found PythonInterp: /opt/result-first/venv/bin/python (found suitable version "3.12.3", minimum required is "3.7") 
+-- Found PythonLibs: /usr/lib/aarch64-linux-gnu/libpython3.12.so
+-- Performing Test HAS_FLTO
+-- Performing Test HAS_FLTO - Success
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Fetch json
+-- Tokenizer needed.
+Test is using C++20
+-- Telemetry is enabled.
+-- Telemetry: MSTelemetry::mat not found; building the 1DS SDK from source via FetchContent.
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+-- Performing Test C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS
+-- Performing Test C_COMPILER_SUPPORTS_WFORMAT_SIGNEDNESS - Success
+-- USING O3
+-- Using CMake version 3.28.3
+-- curl version=[8.21.0]
+-- CMake platform flags: UNIX GCC
+-- Picky compiler options: -Werror-implicit-function-declaration -W -Wall -Wpedantic -Wbad-function-cast -Wconversion -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wno-long-long -Wno-multichar -Wpointer-arith -Wshadow -Wsign-compare -Wundef -Wunused -Wwrite-strings -Waddress -Wattributes -Wcast-align -Wcast-qual -Wdeclaration-after-statement -Wdiv-by-zero -Wempty-body -Wendif-labels -Wfloat-equal -Wformat-security -Wignored-qualifiers -Wmissing-field-initializers -Wmissing-noreturn -Wno-padded -Wno-sign-conversion -Wno-switch-default -Wno-switch-enum -Wno-system-headers -Wold-style-definition -Wredundant-decls -Wstrict-prototypes -Wtype-limits -Wunreachable-code -Wunused-parameter -Wvla -Wclobbered -Wmissing-parameter-type -Wold-style-declaration -Wpragmas -Wstrict-aliasing=3 -ftree-vrp -Wjump-misses-init -Wdouble-promotion -Wformat=2 -Wlogical-op -Wtrampolines -Warray-bounds=2 -Wformat-signedness -Wduplicated-cond -Wnull-dereference -fdelete-null-pointer-checks -Wshift-negative-value -Wshift-overflow=2 -Wunused-const-variable -Walloc-zero -Wduplicated-branches -Wformat-truncation=2 -Wimplicit-fallthrough -Wrestrict -Warith-conversion -Wenum-conversion -Warray-compare -Wenum-int-mismatch -Wxor-used-as-pow
+-- Found Perl: /usr/bin/perl (found version "5.38.2") 
+-- Looking for connect in socket
+-- Looking for connect in socket - not found
+-- Performing Test HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
+-- Performing Test HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID - Success
+-- Performing Test HAVE_SOCKADDR_IN6_SIN6_ADDR
+-- Performing Test HAVE_SOCKADDR_IN6_SIN6_ADDR - Success
+-- Found MbedTLS: /opt/result-first/onnxruntime-genai/build/Linux/Release/_deps/ortgenai_mbedtls-src/include (found version "3.6.7") 
+-- Looking for sys/eventfd.h
+-- Looking for sys/eventfd.h - found
+-- Looking for sys/filio.h
+-- Looking for sys/filio.h - not found
+-- Looking for sys/ioctl.h
+-- Looking for sys/ioctl.h - found
+-- Looking for sys/param.h
+-- Looking for sys/param.h - found
+-- Looking for sys/poll.h
+-- Looking for sys/poll.h - found
+-- Looking for sys/resource.h
+-- Looking for sys/resource.h - found
+-- Looking for 3 include files sys/socket.h, ..., sys/select.h
+-- Looking for 3 include files sys/socket.h, ..., sys/select.h - found
+-- Looking for sys/sockio.h
+-- Looking for sys/sockio.h - not found
+-- Looking for 4 include files sys/socket.h, ..., sys/types.h
+-- Looking for 4 include files sys/socket.h, ..., sys/types.h - found
+-- Looking for sys/un.h
+-- Looking for sys/un.h - found
+-- Looking for 5 include files sys/socket.h, ..., sys/utime.h
+-- Looking for 5 include files sys/socket.h, ..., sys/utime.h - not found
+-- Looking for 5 include files sys/socket.h, ..., arpa/inet.h
+-- Looking for 5 include files sys/socket.h, ..., arpa/inet.h - found
+-- Looking for dirent.h
+-- Looking for dirent.h - found
+-- Looking for fcntl.h
+-- Looking for fcntl.h - found
+-- Looking for 6 include files sys/socket.h, ..., ifaddrs.h
+-- Looking for 6 include files sys/socket.h, ..., ifaddrs.h - found
+-- Looking for io.h
+-- Looking for io.h - not found
+-- Looking for 7 include files sys/socket.h, ..., libgen.h
+-- Looking for 7 include files sys/socket.h, ..., libgen.h - found
+-- Looking for linux/tcp.h
+-- Looking for linux/tcp.h - found
+-- Looking for locale.h
+-- Looking for locale.h - found
+-- Looking for 8 include files sys/socket.h, ..., net/if.h
+-- Looking for 8 include files sys/socket.h, ..., net/if.h - found
+-- Looking for 9 include files sys/socket.h, ..., netdb.h
+-- Looking for 9 include files sys/socket.h, ..., netdb.h - found
+-- Looking for 10 include files sys/socket.h, ..., netinet/in.h
+-- Looking for 10 include files sys/socket.h, ..., netinet/in.h - found
+-- Looking for netinet/in6.h
+-- Looking for netinet/in6.h - not found
+-- Looking for 11 include files sys/socket.h, ..., netinet/tcp.h
+-- Looking for 11 include files sys/socket.h, ..., netinet/tcp.h - found
+-- Looking for 12 include files sys/socket.h, ..., netinet/udp.h
+-- Looking for 12 include files sys/socket.h, ..., netinet/udp.h - found
+-- Looking for poll.h
+-- Looking for poll.h - found
+-- Looking for pwd.h
+-- Looking for pwd.h - found
+-- Looking for stdatomic.h
+-- Looking for stdatomic.h - found
+-- Looking for stdbool.h
+-- Looking for stdbool.h - found
+-- Looking for strings.h
+-- Looking for strings.h - found
+-- Looking for stropts.h
+-- Looking for stropts.h - not found
+-- Looking for termio.h
+-- Looking for termio.h - found
+-- Looking for termios.h
+-- Looking for termios.h - found
+-- Looking for 13 include files sys/socket.h, ..., unistd.h
+-- Looking for 13 include files sys/socket.h, ..., unistd.h - found
+-- Looking for utime.h
+-- Looking for utime.h - found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for stddef.h
+-- Looking for stddef.h - found
+-- Check size of size_t
+-- Check size of size_t - done
+-- Check size of ssize_t
+-- Check size of ssize_t - done
+-- Check size of long
+-- Check size of long - done
+-- Check size of int
+-- Check size of int - done
+-- Check size of __int64
+-- Check size of __int64 - failed
+-- Check size of time_t
+-- Check size of time_t - done
+-- Check size of suseconds_t
+-- Check size of suseconds_t - done
+-- Looking for accept4
+-- Looking for accept4 - found
+-- Looking for fnmatch
+-- Looking for fnmatch - found
+-- Looking for basename
+-- Looking for basename - found
+-- Looking for opendir
+-- Looking for opendir - found
+-- Looking for poll
+-- Looking for poll - found
+-- Looking for socket
+-- Looking for socket - found
+-- Looking for socketpair
+-- Looking for socketpair - found
+-- Looking for recv
+-- Looking for recv - found
+-- Looking for send
+-- Looking for send - found
+-- Looking for sendmsg
+-- Looking for sendmsg - found
+-- Looking for sendmmsg
+-- Looking for sendmmsg - found
+-- Looking for select
+-- Looking for select - found
+-- Looking for memrchr
+-- Looking for memrchr - found
+-- Looking for alarm
+-- Looking for alarm - found
+-- Looking for fcntl
+-- Looking for fcntl - found
+-- Looking for getppid
+-- Looking for getppid - found
+-- Looking for utimes
+-- Looking for utimes - found
+-- Looking for gettimeofday
+-- Looking for gettimeofday - found
+-- Looking for closesocket
+-- Looking for closesocket - not found
+-- Looking for sigsetjmp
+-- Looking for sigsetjmp - found
+-- Looking for getpass_r
+-- Looking for getpass_r - not found
+-- Looking for getpwuid
+-- Looking for getpwuid - found
+-- Looking for getpwuid_r
+-- Looking for getpwuid_r - found
+-- Looking for geteuid
+-- Looking for geteuid - found
+-- Looking for utime
+-- Looking for utime - found
+-- Looking for gmtime_r
+-- Looking for gmtime_r - found
+-- Looking for localtime_r
+-- Looking for localtime_r - found
+-- Looking for gethostbyname_r
+-- Looking for gethostbyname_r - found
+-- Looking for gethostname
+-- Looking for gethostname - found
+-- Looking for signal
+-- Looking for signal - found
+-- Looking for strerror_r
+-- Looking for strerror_r - found
+-- Looking for sigaction
+-- Looking for sigaction - found
+-- Looking for siginterrupt
+-- Looking for siginterrupt - found
+-- Looking for getaddrinfo
+-- Looking for getaddrinfo - found
+-- Looking for getifaddrs
+-- Looking for getifaddrs - found
+-- Looking for freeaddrinfo
+-- Looking for freeaddrinfo - found
+-- Looking for pipe
+-- Looking for pipe - found
+-- Looking for eventfd
+-- Looking for eventfd - found
+-- Looking for getpeername
+-- Looking for getpeername - found
+-- Looking for getsockname
+-- Looking for getsockname - found
+-- Looking for getrlimit
+-- Looking for getrlimit - found
+-- Looking for setlocale
+-- Looking for setlocale - found
+-- Looking for setrlimit
+-- Looking for setrlimit - found
+-- Looking for pipe2
+-- Looking for pipe2 - found
+-- Looking for if_nametoindex
+-- Looking for if_nametoindex - found
+-- Looking for realpath
+-- Looking for realpath - found
+-- Looking for sched_yield
+-- Looking for sched_yield - found
+-- Looking for inet_ntop
+-- Looking for inet_ntop - found
+-- Looking for inet_pton
+-- Looking for inet_pton - found
+-- Looking for strcasecmp
+-- Looking for strcasecmp - found
+-- Looking for stricmp
+-- Looking for stricmp - not found
+-- Looking for strcmpi
+-- Looking for strcmpi - not found
+-- Looking for memset_s
+-- Looking for memset_s - not found
+-- Looking for memset_explicit
+-- Looking for memset_explicit - not found
+-- Looking for fsetxattr
+-- Looking for fsetxattr - found
+-- Performing Test HAVE_FSETXATTR_5
+-- Performing Test HAVE_FSETXATTR_5 - Success
+-- Performing Test HAVE_FSETXATTR_6
+-- Performing Test HAVE_FSETXATTR_6 - Failed
+-- Check size of sa_family_t
+-- Check size of sa_family_t - done
+-- Performing Test HAVE_FCNTL_O_NONBLOCK
+-- Performing Test HAVE_FCNTL_O_NONBLOCK - Success
+-- Performing Test HAVE_IOCTLSOCKET
+-- Performing Test HAVE_IOCTLSOCKET - Failed
+-- Performing Test HAVE_IOCTLSOCKET_CAMEL
+-- Performing Test HAVE_IOCTLSOCKET_CAMEL - Failed
+-- Performing Test HAVE_IOCTLSOCKET_CAMEL_FIONBIO
+-- Performing Test HAVE_IOCTLSOCKET_CAMEL_FIONBIO - Failed
+-- Performing Test HAVE_IOCTLSOCKET_FIONBIO
+-- Performing Test HAVE_IOCTLSOCKET_FIONBIO - Failed
+-- Performing Test HAVE_IOCTL_FIONBIO
+-- Performing Test HAVE_IOCTL_FIONBIO - Success
+-- Performing Test HAVE_IOCTL_SIOCGIFADDR
+-- Performing Test HAVE_IOCTL_SIOCGIFADDR - Success
+-- Performing Test HAVE_SETSOCKOPT_SO_NONBLOCK
+-- Performing Test HAVE_SETSOCKOPT_SO_NONBLOCK - Failed
+-- Performing Test HAVE_GETHOSTBYNAME_R_3
+-- Performing Test HAVE_GETHOSTBYNAME_R_3 - Failed
+-- Performing Test HAVE_GETHOSTBYNAME_R_5
+-- Performing Test HAVE_GETHOSTBYNAME_R_5 - Failed
+-- Performing Test HAVE_GETHOSTBYNAME_R_6
+-- Performing Test HAVE_GETHOSTBYNAME_R_6 - Success
+-- Performing Test HAVE_BOOL_T
+-- Performing Test HAVE_BOOL_T - Success
+-- Performing Test STDC_HEADERS
+-- Performing Test STDC_HEADERS - Success
+-- Performing Test HAVE_ATOMIC
+-- Performing Test HAVE_ATOMIC - Success
+-- Performing Test HAVE_GETHOSTBYNAME_R_3_REENTRANT
+-- Performing Test HAVE_GETHOSTBYNAME_R_3_REENTRANT - Failed
+-- Performing Test HAVE_GETHOSTBYNAME_R_5_REENTRANT
+-- Performing Test HAVE_GETHOSTBYNAME_R_5_REENTRANT - Failed
+-- Performing Test HAVE_GETHOSTBYNAME_R_6_REENTRANT
+-- Performing Test HAVE_GETHOSTBYNAME_R_6_REENTRANT - Success
+-- Performing Test HAVE_FILE_OFFSET_BITS
+-- Performing Test HAVE_FILE_OFFSET_BITS - Success
+-- Check size of off_t
+-- Check size of off_t - done
+-- Looking for fseeko
+-- Looking for fseeko - found
+-- Check size of curl_off_t
+-- Check size of curl_off_t - done
+-- Check size of curl_socket_t
+-- Check size of curl_socket_t - done
+-- Performing Test HAVE_WRITABLE_ARGV
+-- Performing Test HAVE_WRITABLE_ARGV - Success
+-- Performing Test HAVE_TIME_T_UNSIGNED
+-- Performing Test HAVE_TIME_T_UNSIGNED - Failed
+-- Performing Test HAVE_GLIBC_STRERROR_R
+-- Performing Test HAVE_GLIBC_STRERROR_R - Success
+-- Performing Test HAVE_POSIX_STRERROR_R
+-- Performing Test HAVE_POSIX_STRERROR_R - Failed
+-- Performing Test HAVE_CLOCK_GETTIME_MONOTONIC
+-- Performing Test HAVE_CLOCK_GETTIME_MONOTONIC - Success
+-- Check size of struct sockaddr_storage
+-- Check size of struct sockaddr_storage - done
+-- Performing Test HAVE_STRUCT_TIMEVAL
+-- Performing Test HAVE_STRUCT_TIMEVAL - Success
+-- Performing Test HAVE_H_ERRNO
+-- Performing Test HAVE_H_ERRNO - Success
+-- Performing Test HAVE_CLOCK_GETTIME_MONOTONIC_RAW
+-- Performing Test HAVE_CLOCK_GETTIME_MONOTONIC_RAW - Success
+-- Protocols: http https
+-- Features: AsynchDNS HTTPS-proxy IPv6 Largefile SSL threadsafe
+-- Enabled SSL backends: mbedTLS
+-- MATSDK_USE_VCPKG_DEPS: OFF
+-- CMAKE_SYSTEM_NAME:      Linux
+-- CMAKE_SYSTEM_PROCESSOR: aarch64
+-- CMAKE_SYSTEM:           Linux-6.17.0-1019-aws
+-- CMAKE_SYSTEM_VERSION:   6.17.0-1019-aws
+-- CMAKE_BUILD_TYPE:       Release
+-- TARGET_ARCH:            aarch64
+-- CMAKE_CXX_COMPILER_ID:  GNU
+-- /etc/os-release : PRETTY_NAME=Ubuntu 24.04.4 LTS
+-- /etc/os-release : NAME=Ubuntu
+-- /etc/os-release : VERSION_ID=24.04
+-- /etc/os-release : VERSION=24.04.4 LTS (Noble Numbat)
+-- /etc/os-release : VERSION_CODENAME=noble
+-- /etc/os-release : ID=ubuntu
+-- /etc/os-release : ID_LIKE=debian
+-- /etc/os-release : HOME_URL=https://www.ubuntu.com/
+-- /etc/os-release : SUPPORT_URL=https://help.ubuntu.com/
+-- /etc/os-release : BUG_REPORT_URL=https://bugs.launchpad.net/ubuntu/
+-- /etc/os-release : PRIVACY_POLICY_URL=https://www.ubuntu.com/legal/terms-and-policies/privacy-policy
+-- /etc/os-release : UBUNTU_CODENAME=noble
+-- /etc/os-release : LOGO=ubuntu-logo
+-- Building Release ...
+-- PAL implementation: CPP11
+-- SDK version: EVT-3.10.212.0
+-- Using vendored sqlite3, zlib, nlohmann-json
+-- Building static SDK library
+-- Library will be installed to lib
+------------------Enabling tests------------------
+Test is using C++20
+------------------Enabling Python Wheel------------------
+Test is using C++20
+-- Found Python: /opt/result-first/venv/bin/python (found version "3.12.3") found components: Interpreter Development Development.Module Development.Embed 
+Setting up wheel files in : /opt/result-first/onnxruntime-genai/build/Linux/Release/wheel
+------------------Enabling model benchmark------------------
+-- Configuring done (126.4s)
+-- Generating done (0.1s)
+-- Build files have been written to: /opt/result-first/onnxruntime-genai/build/Linux/Release
+2026-07-31 14:15:05,308 util.run [INFO] - Running subprocess in '/opt/result-first/onnxruntime-genai'
+  /usr/bin/cmake --build /opt/result-first/onnxruntime-genai/build/Linux/Release --config Release
+[  0%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/adler32.c.o
+[  0%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/compress.c.o
+[  0%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/crc32.c.o
+[  1%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/deflate.c.o
+[  1%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/gzclose.c.o
+[  1%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/gzlib.c.o
+[  1%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/gzread.c.o
+[  1%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/gzwrite.c.o
+[  1%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/infback.c.o
+[  2%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/inffast.c.o
+[  2%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/inflate.c.o
+[  2%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/inftrees.c.o
+[  2%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/trees.c.o
+[  2%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/uncompr.c.o
+[  2%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/zlib_bundled.dir/__/zlib/zutil.c.o
+[  3%] Linking C static library libzlib_bundled.a
+[  3%] Built target zlib_bundled
+[  3%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/noexcep_operators.dir/base/base64.cc.o
+[  4%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/noexcep_operators.dir/base/ocos.cc.o
+[  4%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/noexcep_operators.dir/base/string_tensor.cc.o
+[  4%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/noexcep_operators.dir/base/string_utils.cc.o
+[  4%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/noexcep_operators.dir/operators/audio/audio.cc.o
+[  4%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/noexcep_operators.dir/operators/audio/audio_decoder.cc.o
+[  4%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/noexcep_operators.dir/__/dlib-src/dlib/fft/fft.cpp.o
+[  4%] Linking CXX static library ../../lib/libnoexcep_operators.a
+[  4%] Built target noexcep_operators
+[  4%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jaricom.c.o
+[  5%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jcapimin.c.o
+[  5%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jcapistd.c.o
+[  5%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jcarith.c.o
+[  5%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jccoefct.c.o
+[  5%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jccolor.c.o
+[  5%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jcdctmgr.c.o
+[  6%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jchuff.c.o
+[  6%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jcinit.c.o
+[  6%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jcmainct.c.o
+[  6%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jcmarker.c.o
+[  6%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jcmaster.c.o
+[  6%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jcomapi.c.o
+[  7%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jcparam.c.o
+[  7%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jcprepct.c.o
+[  7%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jcsample.c.o
+[  7%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdapimin.c.o
+[  7%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdapistd.c.o
+[  7%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdarith.c.o
+[  8%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdatadst.c.o
+[  8%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdatasrc.c.o
+[  8%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdcoefct.c.o
+[  8%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdcolor.c.o
+[  8%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jddctmgr.c.o
+[  8%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdhuff.c.o
+[  8%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdinput.c.o
+[  9%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdmainct.c.o
+[  9%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdmarker.c.o
+[  9%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdmaster.c.o
+[  9%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdmerge.c.o
+[  9%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdpostct.c.o
+[  9%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jdsample.c.o
+[ 10%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jerror.c.o
+[ 10%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jfdctflt.c.o
+[ 10%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jfdctfst.c.o
+[ 10%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jfdctint.c.o
+[ 10%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jidctflt.c.o
+[ 10%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jidctfst.c.o
+[ 11%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jidctint.c.o
+[ 11%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jmemmgr.c.o
+[ 11%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jmemnobs.c.o
+[ 11%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jquant1.c.o
+[ 11%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jquant2.c.o
+[ 11%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libjpeg_static_c.dir/__/dlib-src/dlib/external/libjpeg/jutils.c.o
+[ 11%] Linking C static library liblibjpeg_static_c.a
+[ 11%] Built target libjpeg_static_c
+[ 12%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/arm/arm_init.c.o
+[ 12%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/arm/filter_neon_intrinsics.c.o
+[ 12%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/arm/palette_neon_intrinsics.c.o
+[ 12%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/png.c.o
+[ 12%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngerror.c.o
+[ 12%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngget.c.o
+[ 13%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngmem.c.o
+[ 13%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngpread.c.o
+[ 13%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngread.c.o
+[ 13%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngrio.c.o
+[ 13%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngrtran.c.o
+[ 13%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngrutil.c.o
+[ 14%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngset.c.o
+[ 14%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngtrans.c.o
+[ 14%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngwio.c.o
+[ 14%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngwrite.c.o
+[ 14%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngwtran.c.o
+[ 14%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/libpng/pngwutil.c.o
+[ 15%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/adler32.c.o
+[ 15%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/compress.c.o
+[ 15%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/crc32.c.o
+[ 15%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/deflate.c.o
+[ 15%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/gzclose.c.o
+[ 15%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/gzlib.c.o
+[ 15%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/gzread.c.o
+[ 16%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/gzwrite.c.o
+[ 16%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/infback.c.o
+[ 16%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/inffast.c.o
+[ 16%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/inflate.c.o
+[ 16%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/inftrees.c.o
+[ 16%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/trees.c.o
+[ 17%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/uncompr.c.o
+[ 17%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/libpng_static_c.dir/__/dlib-src/dlib/external/zlib/zutil.c.o
+[ 17%] Linking C static library liblibpng_static_c.a
+[ 17%] Built target libpng_static_c
+[ 18%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ocos_operators.dir/operators/ocos_operators_placeholder.cc.o
+[ 18%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ocos_operators.dir/operators/math/energy_stft_segmentation.cc.o
+[ 18%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ocos_operators.dir/operators/math/math.cc.o
+[ 18%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ocos_operators.dir/operators/math/segment_extraction.cc.o
+[ 18%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ocos_operators.dir/operators/math/segment_sum.cc.o
+[ 18%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ocos_operators.dir/__/dlib-src/dlib/test_for_odr_violations.cpp.o
+[ 19%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ocos_operators.dir/operators/vision/draw_bounding_box.cc.o
+[ 19%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ocos_operators.dir/operators/vision/vision.cc.o
+[ 19%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ocos_operators.dir/operators/tokenizer/bpe_kernels.cc.o
+[ 19%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ocos_operators.dir/operators/tokenizer/case_encoder.cc.o
+[ 19%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ocos_operators.dir/operators/tokenizer/unicode.cc.o
+[ 19%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ocos_operators.dir/operators/tokenizer/tokenizers.cc.o
+[ 20%] Linking CXX static library ../../lib/libocos_operators.a
+[ 20%] Built target ocos_operators
+[ 20%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ortcustomops.dir/shared/lib/ops_registry.cc.o
+[ 20%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ortcustomops.dir/shared/api/nemo_mel_spectrogram.cc.o
+[ 20%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ortcustomops.dir/shared/api/c_api_utils.cc.o
+[ 21%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ortcustomops.dir/shared/api/c_api_tokenizer.cc.o
+[ 21%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ortcustomops.dir/shared/api/chat_template.cc.o
+[ 21%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ortcustomops.dir/shared/api/tokenizer_impl.cc.o
+[ 21%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ortcustomops.dir/shared/api/c_api_feature_extraction.cc.o
+[ 21%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ortcustomops.dir/shared/api/speech_extractor.cc.o
+[ 21%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ortcustomops.dir/shared/api/c_api_processor.cc.o
+[ 21%] Building CXX object _deps/onnxruntime_extensions-build/CMakeFiles/ortcustomops.dir/shared/api/image_processor.cc.o
+[ 22%] Building C object _deps/onnxruntime_extensions-build/CMakeFiles/ortcustomops.dir/shared/api/image_resample.c.o
+[ 22%] Linking CXX static library ../../lib/libortcustomops.a
+[ 22%] Built target ortcustomops
+[ 22%] Building C object _deps/ortgenai_mbedtls-build/3rdparty/everest/CMakeFiles/everest.dir/library/everest.c.o
+[ 23%] Building C object _deps/ortgenai_mbedtls-build/3rdparty/everest/CMakeFiles/everest.dir/library/x25519.c.o
+[ 23%] Building C object _deps/ortgenai_mbedtls-build/3rdparty/everest/CMakeFiles/everest.dir/library/Hacl_Curve25519_joined.c.o
+[ 23%] Linking C static library libeverest.a
+[ 23%] Built target everest
+[ 23%] Building C object _deps/ortgenai_mbedtls-build/3rdparty/p256-m/CMakeFiles/p256m.dir/p256-m_driver_entrypoints.c.o
+[ 23%] Building C object _deps/ortgenai_mbedtls-build/3rdparty/p256-m/CMakeFiles/p256m.dir/p256-m/p256-m.c.o
+[ 23%] Linking C static library libp256m.a
+[ 23%] Built target p256m
+[ 23%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/aes.c.o
+[ 23%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/aesni.c.o
+[ 23%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/aesce.c.o
+[ 23%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/aria.c.o
+[ 24%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/asn1parse.c.o
+[ 24%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/asn1write.c.o
+[ 24%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/base64.c.o
+[ 24%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/bignum.c.o
+[ 24%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/bignum_core.c.o
+[ 24%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/bignum_mod.c.o
+[ 25%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/bignum_mod_raw.c.o
+[ 25%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/block_cipher.c.o
+[ 25%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/camellia.c.o
+[ 25%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/ccm.c.o
+[ 25%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/chacha20.c.o
+[ 25%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/chachapoly.c.o
+[ 26%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/cipher.c.o
+[ 26%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/cipher_wrap.c.o
+[ 26%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/constant_time.c.o
+[ 26%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/cmac.c.o
+[ 26%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/ctr_drbg.c.o
+[ 26%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/des.c.o
+[ 27%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/dhm.c.o
+[ 27%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/ecdh.c.o
+[ 27%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/ecdsa.c.o
+[ 27%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/ecjpake.c.o
+[ 27%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/ecp.c.o
+[ 27%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/ecp_curves.c.o
+[ 27%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/entropy.c.o
+[ 28%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/entropy_poll.c.o
+[ 28%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/error.c.o
+[ 28%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/gcm.c.o
+[ 28%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/hkdf.c.o
+[ 28%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/hmac_drbg.c.o
+[ 28%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/lmots.c.o
+[ 29%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/lms.c.o
+[ 29%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/md.c.o
+[ 29%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/md5.c.o
+[ 29%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/memory_buffer_alloc.c.o
+[ 29%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/nist_kw.c.o
+[ 29%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/oid.c.o
+[ 30%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/padlock.c.o
+[ 30%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/pem.c.o
+[ 30%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/pk.c.o
+[ 30%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/pk_ecc.c.o
+[ 30%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/pk_wrap.c.o
+[ 30%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/pkcs12.c.o
+[ 30%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/pkcs5.c.o
+[ 31%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/pkparse.c.o
+[ 31%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/pkwrite.c.o
+[ 31%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/platform.c.o
+[ 31%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/platform_util.c.o
+[ 31%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/poly1305.c.o
+[ 31%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto.c.o
+[ 32%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_aead.c.o
+[ 32%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_cipher.c.o
+[ 32%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_client.c.o
+[ 32%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_driver_wrappers_no_static.c.o
+[ 32%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_ecp.c.o
+[ 32%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_ffdh.c.o
+[ 33%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_hash.c.o
+[ 33%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_mac.c.o
+[ 33%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_pake.c.o
+[ 33%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_rsa.c.o
+[ 33%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_random.c.o
+[ 33%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_se.c.o
+[ 34%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_slot_management.c.o
+[ 34%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_crypto_storage.c.o
+[ 34%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_its_file.c.o
+[ 34%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/psa_util.c.o
+[ 34%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/ripemd160.c.o
+[ 34%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/rsa.c.o
+[ 34%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/rsa_alt_helpers.c.o
+[ 35%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/sha1.c.o
+[ 35%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/sha256.c.o
+[ 35%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/sha512.c.o
+[ 35%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/sha3.c.o
+[ 35%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/threading.c.o
+[ 35%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/timing.c.o
+[ 36%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/version.c.o
+[ 36%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedcrypto.dir/version_features.c.o
+[ 36%] Linking C static library libmbedcrypto.a
+[ 36%] Built target mbedcrypto
+[ 36%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedx509.dir/pkcs7.c.o
+[ 36%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedx509.dir/x509.c.o
+[ 36%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedx509.dir/x509_create.c.o
+[ 37%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedx509.dir/x509_crl.c.o
+[ 37%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedx509.dir/x509_crt.c.o
+[ 37%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedx509.dir/x509_csr.c.o
+[ 37%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedx509.dir/x509write.c.o
+[ 37%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedx509.dir/x509write_crt.c.o
+[ 37%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedx509.dir/x509write_csr.c.o
+[ 38%] Linking C static library libmbedx509.a
+[ 38%] Built target mbedx509
+[ 38%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/debug.c.o
+[ 38%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/mps_reader.c.o
+[ 38%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/mps_trace.c.o
+[ 39%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/net_sockets.c.o
+[ 39%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_cache.c.o
+[ 39%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_ciphersuites.c.o
+[ 39%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_client.c.o
+[ 39%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_cookie.c.o
+[ 39%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_debug_helpers_generated.c.o
+[ 40%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_msg.c.o
+[ 40%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_ticket.c.o
+[ 40%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_tls.c.o
+[ 40%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_tls12_client.c.o
+[ 40%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_tls12_server.c.o
+[ 40%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_tls13_keys.c.o
+[ 40%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_tls13_server.c.o
+[ 41%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_tls13_client.c.o
+[ 41%] Building C object _deps/ortgenai_mbedtls-build/library/CMakeFiles/mbedtls.dir/ssl_tls13_generic.c.o
+[ 41%] Linking C static library libmbedtls.a
+[ 41%] Built target mbedtls
+[ 41%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/altsvc.c.o
+[ 41%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/amigaos.c.o
+[ 41%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/asyn-ares.c.o
+[ 41%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/asyn-base.c.o
+[ 41%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/asyn-thrdd.c.o
+[ 41%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/bufq.c.o
+[ 42%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/bufref.c.o
+[ 42%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cf-dns.c.o
+[ 42%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cf-h1-proxy.c.o
+[ 42%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cf-h2-proxy.c.o
+[ 42%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cf-haproxy.c.o
+[ 42%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cf-https-connect.c.o
+[ 43%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cf-ip-happy.c.o
+[ 43%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cf-recvbuf.c.o
+[ 43%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cf-setup.c.o
+[ 43%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cf-socket.c.o
+[ 43%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cfilters.c.o
+[ 43%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/conncache.c.o
+[ 44%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/connect.c.o
+[ 44%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/content_encoding.c.o
+[ 44%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cookie.c.o
+[ 44%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/creds.c.o
+[ 44%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cshutdn.c.o
+[ 44%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_addrinfo.c.o
+[ 45%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_endian.c.o
+[ 45%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_fnmatch.c.o
+[ 45%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_fopen.c.o
+[ 45%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_get_line.c.o
+[ 45%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_gethostname.c.o
+[ 45%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_gssapi.c.o
+[ 45%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_memrchr.c.o
+[ 46%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_ntlm_core.c.o
+[ 46%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_range.c.o
+[ 46%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_sasl.c.o
+[ 46%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_sha512_256.c.o
+[ 46%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_share.c.o
+[ 46%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_sspi.c.o
+[ 47%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_threads.c.o
+[ 47%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curl_trc.c.o
+[ 47%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cw-out.c.o
+[ 47%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/cw-pause.c.o
+[ 47%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/dict.c.o
+[ 47%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/dnscache.c.o
+[ 48%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/doh.c.o
+[ 48%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/dynhds.c.o
+[ 48%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/easy.c.o
+[ 48%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/easygetopt.c.o
+[ 48%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/easyoptions.c.o
+[ 48%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/escape.c.o
+[ 50%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/fake_addrinfo.c.o
+[ 50%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/file.c.o
+[ 50%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/fileinfo.c.o
+[ 50%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/formdata.c.o
+[ 50%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/ftp.c.o
+[ 50%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/ftplistparser.c.o
+[ 50%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/getenv.c.o
+[ 51%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/getinfo.c.o
+[ 51%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/gopher.c.o
+[ 51%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/hash.c.o
+[ 51%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/headers.c.o
+[ 51%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/hmac.c.o
+[ 51%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/hostip.c.o
+[ 52%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/hostip4.c.o
+[ 52%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/hostip6.c.o
+[ 52%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/hsts.c.o
+[ 52%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/http.c.o
+[ 52%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/http1.c.o
+[ 52%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/http2.c.o
+[ 53%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/http_aws_sigv4.c.o
+[ 53%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/http_chunks.c.o
+[ 53%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/http_digest.c.o
+[ 53%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/http_negotiate.c.o
+[ 53%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/http_ntlm.c.o
+[ 53%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/http_proxy.c.o
+[ 53%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/httpsrr.c.o
+[ 54%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/idn.c.o
+[ 54%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/if2ip.c.o
+[ 54%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/imap.c.o
+[ 54%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/ldap.c.o
+[ 54%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/llist.c.o
+[ 54%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/macos.c.o
+[ 55%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/md4.c.o
+[ 55%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/md5.c.o
+[ 55%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/memdebug.c.o
+[ 55%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/mime.c.o
+[ 55%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/mprintf.c.o
+[ 55%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/mqtt.c.o
+[ 56%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/multi.c.o
+[ 56%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/multi_ev.c.o
+[ 56%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/multi_ntfy.c.o
+[ 56%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/netrc.c.o
+[ 56%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/openldap.c.o
+[ 56%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/parsedate.c.o
+[ 57%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/peer.c.o
+[ 57%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/pingpong.c.o
+[ 57%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/pop3.c.o
+[ 57%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/progress.c.o
+[ 57%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/protocol.c.o
+[ 57%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/proxy.c.o
+[ 57%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/psl.c.o
+[ 58%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/rand.c.o
+[ 58%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/ratelimit.c.o
+[ 58%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/request.c.o
+[ 58%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/rtsp.c.o
+[ 58%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/select.c.o
+[ 58%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/sendf.c.o
+[ 59%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/setopt.c.o
+[ 59%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/sha256.c.o
+[ 59%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/slist.c.o
+[ 59%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/smb.c.o
+[ 59%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/smtp.c.o
+[ 59%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/socketpair.c.o
+[ 60%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/socks.c.o
+[ 60%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/socks_gssapi.c.o
+[ 60%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/socks_sspi.c.o
+[ 60%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/splay.c.o
+[ 60%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/strcase.c.o
+[ 60%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/strequal.c.o
+[ 61%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/strerror.c.o
+[ 61%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/system_win32.c.o
+[ 61%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/telnet.c.o
+[ 61%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/tftp.c.o
+[ 61%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/thrdpool.c.o
+[ 61%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/thrdqueue.c.o
+[ 61%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/transfer.c.o
+[ 62%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/uint-bset.c.o
+[ 62%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/uint-hash.c.o
+[ 62%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/uint-spbset.c.o
+[ 62%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/uint-table.c.o
+[ 62%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/url.c.o
+[ 62%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/urlapi.c.o
+[ 63%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/version.c.o
+[ 63%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/ws.c.o
+[ 63%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vauth/cleartext.c.o
+[ 63%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vauth/cram.c.o
+[ 63%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vauth/digest.c.o
+[ 63%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vauth/digest_sspi.c.o
+[ 64%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vauth/gsasl.c.o
+[ 64%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vauth/krb5_gssapi.c.o
+[ 64%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vauth/krb5_sspi.c.o
+[ 64%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vauth/ntlm.c.o
+[ 64%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vauth/ntlm_sspi.c.o
+[ 64%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vauth/oauth2.c.o
+[ 64%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vauth/spnego_gssapi.c.o
+[ 65%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vauth/spnego_sspi.c.o
+[ 65%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vauth/vauth.c.o
+[ 65%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/apple.c.o
+[ 65%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/cipher_suite.c.o
+[ 65%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/gtls.c.o
+[ 65%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/hostcheck.c.o
+[ 66%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/keylog.c.o
+[ 66%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/mbedtls.c.o
+[ 66%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/openssl.c.o
+[ 66%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/rustls.c.o
+[ 66%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/schannel.c.o
+[ 66%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/schannel_verify.c.o
+[ 67%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/vtls.c.o
+[ 67%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/vtls_config.c.o
+[ 67%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/vtls_scache.c.o
+[ 67%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/vtls_spack.c.o
+[ 67%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/wolfssl.c.o
+[ 67%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vtls/x509asn1.c.o
+[ 68%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vquic/capsule.c.o
+[ 68%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vquic/cf-capsule.c.o
+[ 68%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vquic/cf-ngtcp2.c.o
+[ 68%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vquic/cf-ngtcp2-cmn.c.o
+[ 68%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vquic/cf-ngtcp2-proxy.c.o
+[ 68%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vquic/cf-quiche.c.o
+[ 68%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vquic/vquic.c.o
+[ 69%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vquic/vquic-tls.c.o
+[ 69%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vssh/libssh.c.o
+[ 69%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vssh/libssh2.c.o
+[ 69%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/vssh/vssh.c.o
+[ 69%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/base64.c.o
+[ 69%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/basename.c.o
+[ 70%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/dynbuf.c.o
+[ 70%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/fopen.c.o
+[ 70%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/inet_ntop.c.o
+[ 70%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/inet_pton.c.o
+[ 70%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/multibyte.c.o
+[ 70%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/nonblock.c.o
+[ 71%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/snprintf.c.o
+[ 71%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/strcopy.c.o
+[ 71%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/strdup.c.o
+[ 71%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/strerr.c.o
+[ 71%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/strparse.c.o
+[ 71%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/timediff.c.o
+[ 72%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/timeval.c.o
+[ 72%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/version_win32.c.o
+[ 72%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/wait.c.o
+[ 72%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/warnless.c.o
+[ 72%] Building C object _deps/ortgenai_curl-build/lib/CMakeFiles/libcurl_static.dir/curlx/winapi.c.o
+[ 72%] Linking C static library libcurl.a
+[ 72%] Built target libcurl_static
+[ 72%] Building C object _deps/cpp_client_telemetry-build/lib/CMakeFiles/sqlite3_bundled.dir/__/sqlite/sqlite3.c.o
+[ 72%] Linking C static library libsqlite3_bundled.a
+[ 72%] Built target sqlite3_bundled
+[ 72%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/decorators/BaseDecorator.cpp.o
+[ 72%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/packager/BondSplicer.cpp.o
+[ 72%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/packager/Packager.cpp.o
+[ 73%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/callbacks/DebugSource.cpp.o
+[ 73%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/bond/BondSerializer.cpp.o
+[ 73%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/filter/EventFilterCollection.cpp.o
+[ 73%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/tpm/TransmitProfiles.cpp.o
+[ 73%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/tpm/TransmissionPolicyManager.cpp.o
+[ 73%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/tpm/DeviceStateHandler.cpp.o
+[ 74%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/system/EventProperty.cpp.o
+[ 74%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/system/TelemetrySystem.cpp.o
+[ 74%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/system/EventProperties.cpp.o
+[ 74%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/compression/HttpDeflateCompression.cpp.o
+[ 74%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/AllowedLevelsCollection.cpp.o
+[ 74%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/LogManager.cpp.o
+[ 74%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/ContextFieldsProvider.cpp.o
+[ 75%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/LogManagerImpl.cpp.o
+[ 75%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/LogSessionData.cpp.o
+[ 75%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/Logger.cpp.o
+[ 75%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/LogManagerProvider.cpp.o
+[ 75%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/CorrelationVector.cpp.o
+[ 75%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/LogConfiguration.cpp.o
+[ 76%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/AuthTokensController.cpp.o
+[ 76%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/ILogConfiguration.cpp.o
+[ 76%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/LogManagerFactory.cpp.o
+[ 76%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/capi.cpp.o
+[ 76%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/api/DataViewerCollection.cpp.o
+[ 76%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/utils/FileUtils.cpp.o
+[ 77%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/utils/Utils.cpp.o
+[ 77%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/utils/StringUtils.cpp.o
+[ 77%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/utils/ZlibUtils.cpp.o
+[ 77%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/pal/InformationProviderImpl.cpp.o
+[ 77%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/http/HttpClient_CAPI.cpp.o
+[ 77%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/http/HttpClientManager.cpp.o
+[ 77%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/http/HttpRequestEncoder.cpp.o
+[ 78%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/http/HttpResponseDecoder.cpp.o
+[ 78%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/http/HttpClientFactory.cpp.o
+[ 78%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/stats/Statistics.cpp.o
+[ 78%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/stats/MetaStats.cpp.o
+[ 78%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/offline/StorageObserver.cpp.o
+[ 78%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/offline/OfflineStorageFactory.cpp.o
+[ 79%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/offline/MemoryStorage.cpp.o
+[ 79%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/offline/OfflineStorage_SQLite.cpp.o
+[ 79%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/offline/OfflineStorageHandler.cpp.o
+[ 79%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/offline/LogSessionDataProvider.cpp.o
+[ 79%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/backoff/IBackoff.cpp.o
+[ 79%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/pal/PAL.cpp.o
+[ 80%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/pal/TaskDispatcher_CAPI.cpp.o
+[ 80%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/pal/WorkerThread.cpp.o
+[ 80%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/decoder/PayloadDecoder.cpp.o
+[ 80%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/pal/posix/DeviceInformationImpl.cpp.o
+[ 80%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/pal/posix/SystemInformationImpl.cpp.o
+[ 80%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/pal/posix/sysinfo_sources.cpp.o
+[ 81%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/pal/posix/NetworkInformationImpl.cpp.o
+[ 81%] Building CXX object _deps/cpp_client_telemetry-build/lib/CMakeFiles/mat.dir/http/HttpClient_Curl.cpp.o
+[ 81%] Linking CXX static library libmat.a
+[ 81%] Built target mat
+[ 81%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/beam_search_scorer.cpp.o
+[ 81%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/config.cpp.o
+[ 81%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/config_utils.cpp.o
+[ 81%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/constrained_logits_processor.cpp.o
+[ 81%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/cpu/interface.cpp.o
+[ 82%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/cuda/session_options.cpp.o
+[ 82%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/dll_load_error.cpp.o
+[ 82%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/dml/session_options.cpp.o
+[ 82%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/engine/block.cpp.o
+[ 82%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/engine/cache_manager.cpp.o
+[ 82%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/engine/decoders/simple_decoder.cpp.o
+[ 83%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/engine/decoders/static_batch_decoder_io.cpp.o
+[ 83%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/engine/decoders/varlen_decoder_io.cpp.o
+[ 83%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/engine/engine.cpp.o
+[ 83%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/engine/model_executor.cpp.o
+[ 83%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/engine/paged_key_value_cache.cpp.o
+[ 83%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/engine/request.cpp.o
+[ 84%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/engine/scheduled_requests.cpp.o
+[ 84%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/engine/scheduler.cpp.o
+[ 84%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/generators.cpp.o
+[ 84%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/json.cpp.o
+[ 84%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/logging.cpp.o
+[ 84%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/adapters.cpp.o
+[ 85%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/audio_features.cpp.o
+[ 85%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/debugging.cpp.o
+[ 85%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/decoder_only.cpp.o
+[ 85%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/decoder_only_pipeline.cpp.o
+[ 85%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/embeddings.cpp.o
+[ 85%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/env_utils.cpp.o
+[ 85%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/extra_inputs.cpp.o
+[ 86%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/extra_outputs.cpp.o
+[ 86%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/gemma4_multimodal_processor.cpp.o
+[ 86%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/gemma_image_processor.cpp.o
+[ 86%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/gpt.cpp.o
+[ 86%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/graph_builder.cpp.o
+[ 86%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/graph_executor.cpp.o
+[ 87%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/input_ids.cpp.o
+[ 87%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/kv_cache.cpp.o
+[ 87%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/lfm2.cpp.o
+[ 87%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/logits.cpp.o
+[ 87%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/marian.cpp.o
+[ 87%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/mistral3_image_processor.cpp.o
+[ 88%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/model.cpp.o
+[ 88%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/model_package.cpp.o
+[ 88%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/multi_modal.cpp.o
+[ 88%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/multi_modal_features.cpp.o
+[ 88%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/nemotron_speech.cpp.o
+[ 88%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/nemotron_streaming_processor.cpp.o
+[ 89%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/parakeet.cpp.o
+[ 89%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/parakeet_processor.cpp.o
+[ 89%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/phi_image_processor.cpp.o
+[ 89%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/phi_multimodal_processor.cpp.o
+[ 89%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/position_inputs.cpp.o
+[ 89%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/processor.cpp.o
+[ 89%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/qwen2_5_vl_image_processor.cpp.o
+[ 90%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/qwen_vl_model.cpp.o
+[ 90%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/qwen_vl_vision.cpp.o
+[ 90%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/recurrent_state.cpp.o
+[ 90%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/session_options.cpp.o
+[ 90%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/silero_vad.cpp.o
+[ 90%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/streaming_processor.cpp.o
+[ 91%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/threadpool.cpp.o
+[ 91%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/tokenizer_tag_utils.cpp.o
+[ 91%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/utils.cpp.o
+[ 91%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/videochat_flash_processor.cpp.o
+[ 91%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/whisper.cpp.o
+[ 91%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/whisper_processor.cpp.o
+[ 92%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/models/windowed_kv_cache.cpp.o
+[ 92%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/nvtensorrtrtx/session_options.cpp.o
+[ 92%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/openvino/interface.cpp.o
+[ 92%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/openvino/session_options.cpp.o
+[ 92%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/ort_genai_c.cpp.o
+[ 92%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/qnn/interface.cpp.o
+[ 92%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/qnn/session_options.cpp.o
+[ 93%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/runtime_settings.cpp.o
+[ 93%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/ryzenai/interface.cpp.o
+[ 93%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/ryzenai/session_options.cpp.o
+[ 93%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/search.cpp.o
+[ 93%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/sequences.cpp.o
+[ 93%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/softmax_cpu.cpp.o
+[ 94%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/telemetry/device_info.cpp.o
+[ 94%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/telemetry/generation_telemetry.cpp.o
+[ 94%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/telemetry/model_telemetry.cpp.o
+[ 94%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/telemetry/telemetry.cpp.o
+[ 94%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/tensor.cpp.o
+[ 94%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/tracing.cpp.o
+[ 95%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/vitisai/session_options.cpp.o
+[ 95%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/webgpu/interface.cpp.o
+[ 95%] Building CXX object CMakeFiles/onnxruntime-genai-obj.dir/src/webgpu/session_options.cpp.o
+[ 95%] Built target onnxruntime-genai-obj
+[ 95%] Linking CXX shared library libonnxruntime-genai.so
+[ 95%] Built target onnxruntime-genai
+[ 95%] Building CXX object _deps/googletest-build/googletest/CMakeFiles/gtest.dir/src/gtest-all.cc.o
+[ 95%] Linking CXX static library ../../../lib/libgtest.a
+[ 95%] Built target gtest
+[ 95%] Building CXX object test/CMakeFiles/unit_tests.dir/c_api_tests.cpp.o
+[ 95%] Building CXX object test/CMakeFiles/unit_tests.dir/guidance_tests.cpp.o
+[ 95%] Building CXX object test/CMakeFiles/unit_tests.dir/main.cpp.o
+[ 95%] Building CXX object test/CMakeFiles/unit_tests.dir/model_package_test.cpp.o
+[ 95%] Building CXX object test/CMakeFiles/unit_tests.dir/model_tests.cpp.o
+[ 96%] Building CXX object test/CMakeFiles/unit_tests.dir/narrow_test.cpp.o
+[ 96%] Building CXX object test/CMakeFiles/unit_tests.dir/sampling_benchmark.cpp.o
+[ 96%] Building CXX object test/CMakeFiles/unit_tests.dir/sampling_tests.cpp.o
+[ 96%] Building CXX object test/CMakeFiles/unit_tests.dir/telemetry_context_tests.cpp.o
+[ 96%] Building CXX object test/CMakeFiles/unit_tests.dir/telemetry_environment_tests.cpp.o
+[ 96%] Building CXX object test/CMakeFiles/unit_tests.dir/telemetry_redaction_tests.cpp.o
+[ 96%] Building CXX object test/CMakeFiles/unit_tests.dir/validate_config_path_test.cpp.o
+[ 97%] Building CXX object test/CMakeFiles/unit_tests.dir/virtual_dispatch_test.cpp.o
+[ 97%] Building CXX object test/CMakeFiles/unit_tests.dir/worker_thread_test.cpp.o
+[ 97%] Linking CXX executable ../unit_tests
+[ 97%] Built target unit_tests
+[ 97%] Building CXX object test/CMakeFiles/reinit_tests.dir/reinit_tests.cpp.o
+[ 97%] Linking CXX executable ../reinit_tests
+[ 97%] Built target reinit_tests
+[ 97%] Building CXX object test/CMakeFiles/telemetry_device_info_tests.dir/telemetry/device_info_tests.cpp.o
+[ 98%] Linking CXX executable ../telemetry_device_info_tests
+[ 98%] Built target telemetry_device_info_tests
+[ 98%] Building CXX object src/python/CMakeFiles/python.dir/python.cpp.o
+[100%] Linking CXX shared module onnxruntime_genai.cpython-312-aarch64-linux-gnu.so
+lto-wrapper: warning: using serial compilation of 7 LTRANS jobs
+lto-wrapper: note: see the ‘-flto’ option documentation for more information
+Copying files to wheel directory: /opt/result-first/onnxruntime-genai/build/Linux/Release/wheel/onnxruntime_genai
+[100%] Built target python
+[100%] Building CXX object benchmark/c/CMakeFiles/model_benchmark.dir/main.cpp.o
+[100%] Building CXX object benchmark/c/CMakeFiles/model_benchmark.dir/options.cpp.o
+[100%] Building CXX object benchmark/c/CMakeFiles/model_benchmark.dir/posix/resource_utils.cpp.o
+[100%] Linking CXX executable model_benchmark
+[100%] Built target model_benchmark
+2026-07-31 14:25:15,398 util.run [INFO] - Running subprocess in '/opt/result-first/onnxruntime-genai'
+  /usr/bin/cmake --build /opt/result-first/onnxruntime-genai/build/Linux/Release --config Release --target PyPackageBuild
+EXCLUDE_FROM_ALL
+Processing ./.
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Getting requirements to build wheel: started
+  Getting requirements to build wheel: finished with status 'done'
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: onnxruntime-genai
+  Building wheel for onnxruntime-genai (pyproject.toml): started
+  Building wheel for onnxruntime-genai (pyproject.toml): finished with status 'done'
+  Created wheel for onnxruntime-genai: filename=onnxruntime_genai-0.15.0.dev0-cp312-cp312-linux_aarch64.whl size=4647887 sha256=47a9f0c5162678f8c4c782c7f4da3d74dd8b334bd489aba2cd1ffc576c977fd7
+  Stored in directory: /tmp/pip-ephem-wheel-cache-3rnp86st/wheels/7a/9f/8d/3737cdd1829bdc735950d6fe9c09ba496cafcab02e6ac67748
+Successfully built onnxruntime-genai
+Built target PyPackageBuild
+Processing ./build/Linux/Release/wheel/onnxruntime_genai-0.15.0.dev0-cp312-cp312-linux_aarch64.whl
+Installing collected packages: onnxruntime-genai
+Successfully installed onnxruntime-genai-0.15.0.dev0
+Fetching 11 files:   0%|          | 0/11 [00:00<?, ?it/s]Downloading 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/configuration_phi3.py' to '/opt/result-first/models/onnx-repo/.cache/huggingface/download/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/vEnnZuZbPjs88GEHAS5wEyJ0R4s=.01446e12bf573a1e96c8aa9c7af73a05e2096dec.incomplete'
+Downloading 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/special_tokens_map.json' to '/opt/result-first/models/onnx-repo/.cache/huggingface/download/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/ahkChHUJFxEmOdq5GDFEmerRzCY=.aff38493227d813e29fcf8406e8e90062f1f031aa47d589325e9c31d89ac7cc3.incomplete'
+Download complete. Moving file to /opt/result-first/models/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/configuration_phi3.py
+Downloading 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/model.onnx.data' to '/opt/result-first/models/onnx-repo/.cache/huggingface/download/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/Lzxw0O44RMmhTgKWeQQ-MMzHFnE=.cb0267fa60befa1a4ade8c98b6d32a3d67f51abbd307c7f793f132e8d9092131.incomplete'
+Still waiting to acquire lock on /opt/result-first/models/onnx-repo/.cache/huggingface/.gitignore.lock (elapsed: 0.1 seconds)
+Still waiting to acquire lock on /opt/result-first/models/onnx-repo/.cache/huggingface/.gitignore.lock (elapsed: 0.1 seconds)
+Downloading 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/tokenizer.json' to '/opt/result-first/models/onnx-repo/.cache/huggingface/download/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/HgM_lKo9sdSCfRtVg7MMFS7EKqo=.382cc235b56c725945e149cc25f191da667c836655efd0857b004320e90e91ea.incomplete'
+Downloading 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/config.json' to '/opt/result-first/models/onnx-repo/.cache/huggingface/download/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/8_PA_wEVGiVa2goH2H4KQOQpvVY=.ac65d86061d3d0d704ee2511fd0eb8713ef19eb6eedba17c3080a4165d5b933b.incomplete'
+Downloading 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/genai_config.json' to '/opt/result-first/models/onnx-repo/.cache/huggingface/download/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/yDyKFBRCOr3XTWAm4EHNQUX0s3Y=.0fcfa1e663f2bc867f8dc62fae65dd0924f0a4d68b43d1234df742dd19171470.incomplete'
+Downloading 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/merges.txt' to '/opt/result-first/models/onnx-repo/.cache/huggingface/download/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/PtHk0z_I45atnj23IIRhTExwT3w=.dcecc4524288b351bbd0da8028e74e9b5bcdb9b5.incomplete'
+Download complete. Moving file to /opt/result-first/models/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/merges.txt
+Downloading 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/added_tokens.json' to '/opt/result-first/models/onnx-repo/.cache/huggingface/download/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/SeqzFlf9ZNZ3or_wZAOIdsM3Yxw=.d4f2aceb0f20b71dd1f4bcc7e052e4412946bf281840b8f83d39f259571af486.incomplete'
+Downloading 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/tokenizer_config.json' to '/opt/result-first/models/onnx-repo/.cache/huggingface/download/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/vzaExXFZNBay89bvlQv-ZcI6BTg=.c565326a315fbe62cda093a59d298828c8f3f823122661325f41f3ba577a7dec.incomplete'
+Download complete. Moving file to /opt/result-first/models/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/tokenizer.json
+Download complete. Moving file to /opt/result-first/models/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/genai_config.json
+Download complete. Moving file to /opt/result-first/models/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/added_tokens.json
+Downloading 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/vocab.json' to '/opt/result-first/models/onnx-repo/.cache/huggingface/download/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/j3m-Hy6QvBddw8RXA1uSWl1AJ0c=.6cb65a857824fa6615bb1782d95d882617a8bbce1da0317118586b36f39e98bd.incomplete'
+Download complete. Moving file to /opt/result-first/models/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/config.json
+Download complete. Moving file to /opt/result-first/models/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/special_tokens_map.json
+Downloading 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/model.onnx' to '/opt/result-first/models/onnx-repo/.cache/huggingface/download/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/ihhw_uFzBe-Y54_HOJQmXx4GS8A=.701aa5d185b6a782bc27104a990dd5b634fa507840b7c42f7ee6f1fb812d0b83.incomplete'
+Download complete. Moving file to /opt/result-first/models/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/tokenizer_config.json
+Fetching 11 files:  73%|███████▎  | 8/11 [00:00<00:00, 18.50it/s]Download complete. Moving file to /opt/result-first/models/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/vocab.json
+Download complete. Moving file to /opt/result-first/models/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/model.onnx
+Fetching 11 files:  91%|█████████ | 10/11 [00:20<00:02,  2.00s/it]Download complete. Moving file to /opt/result-first/models/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/model.onnx.data
+Fetching 11 files: 100%|██████████| 11/11 [00:45<00:00,  4.09s/it]Fetching 11 files: 100%|██████████| 11/11 [00:45<00:00,  4.10s/it]
+/opt/result-first/models/onnx-repo
+Fetching 21 files:   0%|          | 0/21 [00:00<?, ?it/s]Downloading 'config.json' to '/opt/result-first/models/bf16/.cache/huggingface/download/8_PA_wEVGiVa2goH2H4KQOQpvVY=.679e70defca5b399ae9e8ad53ff1176c9d7c6f93.incomplete'
+Downloading 'added_tokens.json' to '/opt/result-first/models/bf16/.cache/huggingface/download/SeqzFlf9ZNZ3or_wZAOIdsM3Yxw=.af52cde61cc39aca58f7b7f04116b317116e75dd.incomplete'
+Downloading 'SECURITY.md' to '/opt/result-first/models/bf16/.cache/huggingface/download/hSrnLtSfgijFBTW07bq7w-it8Jg=.b3c89efc852e22f71eabf5dfbc6ac62493425eb6.incomplete'
+Download complete. Moving file to /opt/result-first/models/bf16/config.json
+Downloading 'LICENSE' to '/opt/result-first/models/bf16/.cache/huggingface/download/DhCjcNQuMpl4FL346qr3tvNUCgY=.8ab7b4964d147858b89544e8ca33203237161edc.incomplete'
+Download complete. Moving file to /opt/result-first/models/bf16/added_tokens.json
+Download complete. Moving file to /opt/result-first/models/bf16/SECURITY.md
+Download complete. Moving file to /opt/result-first/models/bf16/LICENSE
+Downloading '.gitattributes' to '/opt/result-first/models/bf16/.cache/huggingface/download/wPaCkH-WbT7GsmxMKKrNZTV4nSM=.52373fe24473b1aa44333d318f578ae6bf04b49b.incomplete'
+Download complete. Moving file to /opt/result-first/models/bf16/.gitattributes
+Downloading 'README.md' to '/opt/result-first/models/bf16/.cache/huggingface/download/Xn7B-BWUGOee2Y6hCZtEhtFu4BE=.0bcd41c7c7bdded52ee8c7f28d9ba636d56ea448.incomplete'
+Download complete. Moving file to /opt/result-first/models/bf16/README.md
+Downloading 'merges.txt' to '/opt/result-first/models/bf16/.cache/huggingface/download/PtHk0z_I45atnj23IIRhTExwT3w=.dcecc4524288b351bbd0da8028e74e9b5bcdb9b5.incomplete'
+Downloading 'generation_config.json' to '/opt/result-first/models/bf16/.cache/huggingface/download/3EVKVggOldJcKSsGjSdoUCN1AyQ=.43b32d0bc199571e0818489fa01c1002d7a40452.incomplete'
+Downloading 'data_summary_card.md' to '/opt/result-first/models/bf16/.cache/huggingface/download/rO2cXQjMJqsORRCCpgXS1A8CgMk=.b7d5601b9656769ee0e6552a77158697b00180b0.incomplete'
+Downloading 'NOTICE.md' to '/opt/result-first/models/bf16/.cache/huggingface/download/1kHSXNens9SagnzeekbYfJkxzXM=.56ff7dcadd87eb0bec57dbba00f005b6622c2809.incomplete'
+Download complete. Moving file to /opt/result-first/models/bf16/data_summary_card.md
+Download complete. Moving file to /opt/result-first/models/bf16/NOTICE.md
+Download complete. Moving file to /opt/result-first/models/bf16/generation_config.json
+Fetching 21 files:  38%|███▊      | 8/21 [00:00<00:00, 43.80it/s]Downloading 'model-00002-of-00002.safetensors' to '/opt/result-first/models/bf16/.cache/huggingface/download/Dr_lZJDwE1cnGAQMwA77jJEQIk8=.7ff79b9d2d31076bac2663393451f6530f4fc8ca49b09002116c92c373dba983.incomplete'
+Downloading 'CODE_OF_CONDUCT.md' to '/opt/result-first/models/bf16/.cache/huggingface/download/K98JAqu7X0Q8Wy3TIHRTrEErCiw=.c72a5749c52ac97bca71c672ef5295d303d22b05.incomplete'
+Download complete. Moving file to /opt/result-first/models/bf16/CODE_OF_CONDUCT.md
+Download complete. Moving file to /opt/result-first/models/bf16/merges.txt
+Downloading 'configuration_phi3.py' to '/opt/result-first/models/bf16/.cache/huggingface/download/vEnnZuZbPjs88GEHAS5wEyJ0R4s=.01446e12bf573a1e96c8aa9c7af73a05e2096dec.incomplete'
+Downloading 'model-00001-of-00002.safetensors' to '/opt/result-first/models/bf16/.cache/huggingface/download/aoe4E07IMh7reFyUkVoVk040mQk=.bc703090b63eda16f639fa4de7ac54635c23105ab1da2f6ec4d3403151d38ee6.incomplete'
+Downloading 'model.safetensors.index.json' to '/opt/result-first/models/bf16/.cache/huggingface/download/yVzAsSxRSINSz-tQbpx-TLpfkLU=.d87cc3650f8e8dec46fc6871826ef30b941d0c94.incomplete'
+Downloading 'sample_finetune.py' to '/opt/result-first/models/bf16/.cache/huggingface/download/jAxnWmhUwJLetDEtQVplPQs35Fk=.499f5f05391bf77626808e6c4d36f0f41fff76e6.incomplete'
+Downloading 'modeling_phi3.py' to '/opt/result-first/models/bf16/.cache/huggingface/download/LlzfabVCMqA3OEpgzTLO_-uTIq4=.71597d1417913e232b80dcafc0eb5e290dcff43e.incomplete'
+Download complete. Moving file to /opt/result-first/models/bf16/sample_finetune.py
+Download complete. Moving file to /opt/result-first/models/bf16/configuration_phi3.py
+Download complete. Moving file to /opt/result-first/models/bf16/modeling_phi3.py
+Download complete. Moving file to /opt/result-first/models/bf16/model.safetensors.index.json
+Downloading 'tokenizer.json' to '/opt/result-first/models/bf16/.cache/huggingface/download/HgM_lKo9sdSCfRtVg7MMFS7EKqo=.382cc235b56c725945e149cc25f191da667c836655efd0857b004320e90e91ea.incomplete'
+Downloading 'special_tokens_map.json' to '/opt/result-first/models/bf16/.cache/huggingface/download/ahkChHUJFxEmOdq5GDFEmerRzCY=.156262f7d61a27706bdcad9d117c579e88e2fa27.incomplete'
+Download complete. Moving file to /opt/result-first/models/bf16/special_tokens_map.json
+Downloading 'tokenizer_config.json' to '/opt/result-first/models/bf16/.cache/huggingface/download/vzaExXFZNBay89bvlQv-ZcI6BTg=.f5958080514e266176052f86c80aa53f91ce4ba0.incomplete'
+Downloading 'vocab.json' to '/opt/result-first/models/bf16/.cache/huggingface/download/j3m-Hy6QvBddw8RXA1uSWl1AJ0c=.ea953a43348cdb3776cb7fd9ea02e3784febde34.incomplete'
+Download complete. Moving file to /opt/result-first/models/bf16/tokenizer_config.json
+Download complete. Moving file to /opt/result-first/models/bf16/vocab.json
+Fetching 21 files:  86%|████████▌ | 18/21 [00:00<00:00, 59.14it/s]Download complete. Moving file to /opt/result-first/models/bf16/tokenizer.json
+Fetching 21 files:  90%|█████████ | 19/21 [00:20<00:02,  1.05s/it]Download complete. Moving file to /opt/result-first/models/bf16/model-00002-of-00002.safetensors
+Fetching 21 files:  95%|█████████▌| 20/21 [00:41<00:02,  2.06s/it]Download complete. Moving file to /opt/result-first/models/bf16/model-00001-of-00002.safetensors
+Fetching 21 files: 100%|██████████| 21/21 [01:05<00:00,  3.14s/it]Fetching 21 files: 100%|██████████| 21/21 [01:05<00:00,  3.14s/it]
+/opt/result-first/models/bf16
+Loading checkpoint shards:   0%|          | 0/2 [00:00<?, ?it/s]Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, 171.77it/s]
+[ perf record: Woken up 40 times to write data ]
+[ perf record: Captured and wrote 12.129 MB /opt/result-first/evidence/perf-enabled.data (72590 samples) ]
+[ perf record: Woken up 110 times to write data ]
+[ perf record: Captured and wrote 28.792 MB /opt/result-first/evidence/perf-disabled.data (175805 samples) ]
+{
+  "gates": {
+    "disk_reduction": true,
+    "format_validity": true,
+    "int4_speedup": true,
+    "kernel_negative": true,
+    "kernel_positive": true,
+    "kleidiai_3_of_4": true,
+    "kleidiai_no_regression": true,
+    "quality_loss": true,
+    "repetitions": true,
+    "rss_reduction": false
+  },
+  "passed": false,
+  "summary": {
+    "disabled_kernel_observed": false,
+    "disk_reduction_percent": 35.91724252463868,
+    "int4_format_valid_percent": 100.0,
+    "int4_vs_bf16_best_speedup": 47.61608499743072,
+    "kleidiai_kernel_observed": true,
+    "kleidiai_shape_gains": [
+      1.7618352858363835,
+      2.1769914504132815,
+      2.4518557039983566,
+      2.607826878169171
+    ],
+    "minimum_repetitions": 3,
+    "quality": {
+      "bf16_correct": 19,
+      "int4_correct": 20,
+      "total": 24
+    },
+    "quality_loss_count": 0,
+    "rss_reduction_percent": -165.62835340407776,
+    "shapes": [
+      {
+        "batch": 1,
+        "decode_gain": 1.2978131098575487,
+        "e2e_gain": 1.7618352858363835,
+        "int4_vs_bf16": 47.61608499743072,
+        "prompt_length": 128
+      },
+      {
+        "batch": 1,
+        "decode_gain": 1.2531812538051976,
+        "e2e_gain": 2.1769914504132815,
+        "int4_vs_bf16": 24.659274638065394,
+        "prompt_length": 512
+      },
+      {
+        "batch": 4,
+        "decode_gain": 1.8834162023776786,
+        "e2e_gain": 2.4518557039983566,
+        "int4_vs_bf16": 5.3945764778513094,
+        "prompt_length": 128
+      },
+      {
+        "batch": 4,
+        "decode_gain": 1.7460029026680612,
+        "e2e_gain": 2.607826878169171,
+        "int4_vs_bf16": 3.1634768394049737,
+        "prompt_length": 512
+      }
+    ]
+  }
+}

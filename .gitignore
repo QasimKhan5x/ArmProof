@@ -20,3 +20,4 @@ ops/evidence/**/large/
 ops/experiments/*.local.jsonl
 performix/
 *.log
+!ops/evidence/**/*.log

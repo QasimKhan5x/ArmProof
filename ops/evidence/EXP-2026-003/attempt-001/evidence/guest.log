@@ -1,0 +1,3 @@
+Shutdown scheduled for Fri 2026-07-31 21:53:51 UTC, use 'shutdown -c' to cancel.
+/tmp/project.tar.gz: OK
+cp: cannot stat 'ops/aws/cap-001/protocol.json': No such file or directory
