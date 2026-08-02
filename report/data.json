@@ -29,6 +29,7 @@
     "metrics": {
       "accuracy_delta_pp": -0.38961038961038974,
       "enabled_kai_callchains_observed": 1.0,
+      "enabled_kai_cycle_callchain_share": 0.6835,
       "guard_queue_accuracy": 0.8675324675324675,
       "long_capacity_ratio": 2.5,
       "macro_f1_delta_pp": -0.6726444303255752,
@@ -97,7 +98,14 @@
         "threshold": 1.0
       },
       {
-        "claim_id": "clean-reproduction",
+        "claim_id": "arm-cycle-attribution",
+        "observed": 0.6835,
+        "reason_code": "threshold_met",
+        "status": "pass",
+        "threshold": 0.5
+      },
+      {
+        "claim_id": "fresh-instance-confirmation",
         "observed": 0.0,
         "reason_code": "threshold_met",
         "status": "pass",
@@ -134,7 +142,7 @@
       },
       {
         "id": "EXP-2026-005",
-        "note": "Fresh instance reproduced every ratio exactly",
+        "note": "Fresh instance confirmed every tested capacity-grid boundary",
         "status": "passed"
       }
     ],
@@ -175,7 +183,7 @@
     },
     {
       "id": "EXP-2026-005",
-      "note": "Fresh instance reproduced every ratio exactly",
+      "note": "Fresh instance confirmed every tested capacity-grid boundary",
       "status": "passed"
     }
   ],
