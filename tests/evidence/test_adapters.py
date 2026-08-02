@@ -9,7 +9,11 @@ from unittest.mock import patch
 
 from armproof.cli import main
 from armproof.contracts import parse_contract
-from armproof.evidence.adapters import _bound_file, get_evidence_adapter
+from armproof.evidence.adapters import (
+    _bound_file,
+    get_evidence_adapter,
+    list_evidence_adapters,
+)
 
 
 def _sample(request_id: str, latency_ms: float) -> str:
@@ -199,6 +203,17 @@ class EvidenceAdapterTests(unittest.TestCase):
     def test_unknown_adapter_fails_with_available_adapter_names(self) -> None:
         with self.assertRaisesRegex(ValueError, "http-slo-v1"):
             get_evidence_adapter("missing-v1")
+
+    def test_adapter_listing_includes_builtins_and_plugins(self) -> None:
+        entry = unittest.mock.Mock()
+        entry.name = "external-v1"
+        entries = unittest.mock.Mock()
+        entries.select.return_value = [entry]
+        with patch("armproof.evidence.adapters.entry_points", return_value=entries):
+            self.assertEqual(
+                list_evidence_adapters(),
+                ("external-v1", "http-slo-v1", "kleidiai-capacity-v1"),
+            )
 
 
 if __name__ == "__main__":

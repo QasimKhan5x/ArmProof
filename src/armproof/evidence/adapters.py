@@ -322,6 +322,13 @@ BUILTIN_ADAPTERS: dict[str, EvidenceAdapter] = {
 }
 
 
+def list_evidence_adapters() -> tuple[str, ...]:
+    """List built-in and installed plugin adapter identifiers."""
+    names = set(BUILTIN_ADAPTERS)
+    names.update(entry.name for entry in entry_points().select(group=ENTRY_POINT_GROUP))
+    return tuple(sorted(names))
+
+
 def get_evidence_adapter(adapter_id: str) -> EvidenceAdapter:
     if adapter_id in BUILTIN_ADAPTERS:
         return BUILTIN_ADAPTERS[adapter_id]

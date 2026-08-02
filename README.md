@@ -128,6 +128,12 @@ The primary and fresh-instance confirmation bundles each contain 141 checksummed
 and verify after relocation. Browser tests cover the complete SurgeDesk workflow plus ArmProof
 report layouts down to 320 pixels.
 
+For a runtime-neutral starting point, the executable
+[`examples/http-slo/`](examples/http-slo/) kit generates a complete raw-evidence
+layout, observed identities, contract, report and Action template. External
+adapters are discovered through Python entry points and listed by
+`armproof adapters`.
+
 ## Start Here
 
 - Devpost submission package: [`submission/README.md`](submission/README.md)

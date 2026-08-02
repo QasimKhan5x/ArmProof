@@ -40,6 +40,16 @@
             "checksums": {"type": "string", "minLength": 1},
             "protocol": {"type": "string", "minLength": 1}
           }
+        },
+        {
+          "type": "object",
+          "required": ["adapter"],
+          "properties": {
+            "adapter": {
+              "type": "string",
+              "pattern": "^(?!(kleidiai-capacity-v1|http-slo-v1)$).+"
+            }
+          }
         }
       ]
     },

@@ -43,7 +43,9 @@ The tested ratio is never relabeled as an exact maximum-capacity estimate.
 }
 ```
 
-`tests/evidence/test_adapters.py` is a complete executable raw-evidence example.
+[`examples/http-slo/`](../examples/http-slo/) is a complete executable adoption
+kit. It generates raw rows, observed identities, profiler inputs, the checksum
+ledger, contract, config, report and a GitHub Action template in one command.
 
 ## External Adapters
 
@@ -68,3 +70,5 @@ class MyRuntimeAdapter:
 Adapters should fail closed on unknown fields, missing raw samples, unmatched
 treatment identities, insufficient observations and absent Arm attribution.
 They should not accept a caller-supplied normalized comparison as evidence.
+
+List built-in and installed plugin adapters with `armproof adapters`.

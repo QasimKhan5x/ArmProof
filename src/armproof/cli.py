@@ -18,6 +18,7 @@ from armproof.evidence import (
     EvidenceRecordError,
     comparison_to_dict,
     get_evidence_adapter,
+    list_evidence_adapters,
     parse_comparison,
     verify_and_derive,
     verify_checksum_ledger,
@@ -89,6 +90,7 @@ def build_parser() -> argparse.ArgumentParser:
     evidence.add_argument("--checksums", type=Path, required=True)
     evidence.add_argument("--root", type=Path, required=True)
     evidence.add_argument("--source-prefix", default="/opt/armproof/evidence")
+    subparsers.add_parser("adapters", help="list installed evidence adapters")
     ci = subparsers.add_parser("ci", help="evaluate and report from one ArmProof config")
     ci.add_argument("config", type=Path)
     ci.add_argument("--output", type=Path)
@@ -132,6 +134,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         }
         print(json.dumps(rendered, indent=2, sort_keys=True))
         return 0 if result.passed else 2
+    if args.command == "adapters":
+        print(json.dumps({"adapters": list(list_evidence_adapters())}, indent=2))
+        return 0
     if args.command == "ci":
         return _run_ci(args)
     try:

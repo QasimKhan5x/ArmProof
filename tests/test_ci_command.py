@@ -14,6 +14,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CiCommandTests(unittest.TestCase):
+    def test_lists_installed_adapters(self) -> None:
+        with redirect_stdout(io.StringIO()) as stdout:
+            self.assertEqual(main(["adapters"]), 0)
+        payload = json.loads(stdout.getvalue())
+        self.assertIn("http-slo-v1", payload["adapters"])
+
     def test_reference_config_produces_decision_and_report(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "report"
