@@ -67,6 +67,20 @@ Create an `armproof.json` matching
     path: build/armproof-report
 ```
 
+For a published release, download `armproof-evidence.tar.gz` and verify its
+GitHub build provenance:
+
+```bash
+gh attestation verify armproof-evidence.tar.gz \
+  -R QasimKhan5x/VerifyLane
+sha256sum -c armproof-evidence.tar.gz.sha256
+```
+
+The attestation binds the release bundle to this repository, workflow and
+commit. It does not independently certify the AWS machine that produced the
+raw measurements; ArmProof's checksummed evidence and matched controls cover
+that declared trust boundary.
+
 Pin the released Action commit in production. Never run paid benchmarks or
 cloud credentials in `pull_request_target` or on untrusted fork code. The
 reference Action verifies raw evidence ledgers, re-derives the comparison and

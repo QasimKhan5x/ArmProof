@@ -6,7 +6,7 @@ on:
     types: [published]
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
   attestations: write
 
@@ -43,3 +43,13 @@ jobs:
             build/armproof-evidence.tar.gz
             build/armproof-evidence.tar.gz.sha256
             build/armproof-report
+      - name: Attach durable assets to the release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          gh release upload "$RELEASE_TAG" \
+            build/armproof-evidence.tar.gz \
+            build/armproof-evidence.tar.gz.sha256 \
+            --clobber
