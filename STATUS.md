@@ -48,7 +48,7 @@ capacity boundary, release-proof view, executable adoption path and optional
 live Graviton gateway. Recorded mode refuses to present edited text as
 inference; live mode remains disabled unless a trusted endpoint is configured.
 
-Version `v0.3.0` is the intended release for this completed evidence path.
+Version `v0.4.0` is the intended release for this completed evidence path.
 Native Arm64, x86 and report-browser CI cover the Action, decision and offline
 report. The complete
 Devpost copy, judge guide, technical evidence map, media set, final checklist

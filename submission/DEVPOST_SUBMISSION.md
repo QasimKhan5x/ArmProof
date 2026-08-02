@@ -14,7 +14,7 @@
 
 **Technical proof:** https://qasimkhan5x.github.io/VerifyLane/report/
 
-**Release:** https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.3.0
+**Release:** https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.4.0
 
 **Video:** ADD THE PUBLIC YOUTUBE OR VIMEO URL AFTER RECORDING
 
@@ -33,7 +33,7 @@ measured Arm cloud optimization. On the same AWS Graviton4 instance, the same
 Phi-4 Mini INT4 service sustained 3x higher confirmed tested mixed traffic with KleidiAI enabled while
 remaining inside a 10-second p95 SLO. ArmProof is the reusable open-source
 artifact behind the demo: a fail-closed CI gate that verifies quality,
-capacity, executed Arm callchains, checksums and clean reproduction before an
+capacity, executed Arm callchains, checksums and fresh-instance confirmation before an
 optimized deployment can be released.
 
 ## Inspiration
@@ -99,7 +99,7 @@ The service-level test used fixed-rate open-loop traffic, separate warmup,
 passing/failing boundary discovery and five confirmation runs per treatment.
 KleidiAI increased the highest confirmed tested capacity by 3.0x for short
 traffic, 2.5x for long traffic and 3.0x for mixed traffic. A fresh
-`c8g.4xlarge` reproduced all three tested ratios.
+A fresh `c8g.4xlarge` confirmed all three tested capacity-grid boundaries.
 
 The queue guard improves application usefulness, but it is not presented as
 an Arm speedup.

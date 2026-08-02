@@ -14,7 +14,7 @@
     {"id": "EXP-2026-002", "status": "passed", "note": "PSS, size, speed and Arm attribution"},
     {"id": "EXP-2026-003", "status": "inconclusive", "note": "Offered-load accounting defect preserved"},
     {"id": "EXP-2026-004", "status": "passed", "note": "Corrected fixed-SLO capacity gate"},
-    {"id": "EXP-2026-005", "status": "passed", "note": "Fresh instance reproduced every ratio exactly"}
+    {"id": "EXP-2026-005", "status": "passed", "note": "Fresh instance confirmed every tested capacity-grid boundary"}
   ],
   "reproduction": {
     "experiment_id": "EXP-2026-005",

@@ -82,10 +82,11 @@ p95 cells, 3.0x headline and the three traffic-mix rows.
 > identities, and only then decides. Phi-4 moved from BF16 to INT4, reducing
 > the artifact by 35.92 percent, peak PSS by 55.34 percent and time-weighted
 > PSS by 59.66 percent. Inside the identical INT4 deployment, KleidiAI delivers
-> 1.72 to 2.59 times direct execution speedup, and kai callchains appear only
-> in the enabled profile. Quality changed by less than one percentage point,
+> 1.72 to 2.59 times direct execution speedup, and 68.4 percent of sampled
+> cycles descend through the KleidiAI matmul callchain in the enabled profile,
+> versus none in the control. Quality changed by less than one percentage point,
 > schema validity stayed at 100 percent, and a fresh Graviton4 instance
-> reproduced every capacity ratio exactly.
+> confirmed every tested capacity-grid boundary.
 
 ### 2:08-2:38 - Community Artifact
 
@@ -95,7 +96,7 @@ three concise lines print: PASS, TAMPER, BLOCK.
 
 **Say:**
 
-> ArmProof packages that method for other developers. Here all seven claims
+> ArmProof packages that method for other developers. Here all eight claims
 > pass from 282 verified files. Then the demo changes one digest in a temporary
 > ledger, and the same release gate blocks before policy evaluation. It ships
 > as a zero-dependency Python CLI,
