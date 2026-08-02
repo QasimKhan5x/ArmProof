@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 from armproof.cli import main
 from armproof.contracts import parse_contract
-from armproof.evidence.adapters import get_evidence_adapter
+from armproof.evidence.adapters import _bound_file, get_evidence_adapter
 
 
 def _sample(request_id: str, latency_ms: float) -> str:
@@ -51,6 +51,26 @@ class EvidenceAdapterTests(unittest.TestCase):
                     boundaries[treatment][outcome].append(path.name)
             (root / "baseline.perf").write_text("python\n", encoding="utf-8")
             (root / "treatment.perf").write_text("kai_matmul_clamp\n", encoding="utf-8")
+            digest = "a" * 64
+            (root / "identities.json").write_text(json.dumps({
+                "schema_version": "1.0.0",
+                "baseline": {
+                    "treatment_id": "baseline",
+                    "artifact_sha256": digest,
+                    "runtime_sha256": digest,
+                    "workload_sha256": digest,
+                    "environment_sha256": digest,
+                    "controls": {"mode": "baseline"},
+                },
+                "treatment": {
+                    "treatment_id": "optimized",
+                    "artifact_sha256": digest,
+                    "runtime_sha256": digest,
+                    "workload_sha256": digest,
+                    "environment_sha256": digest,
+                    "controls": {"mode": "optimized"},
+                },
+            }), encoding="utf-8")
             protocol = root / "protocol.json"
             protocol.write_text(json.dumps({
                 "schema_version": "1.0.0",
@@ -62,6 +82,7 @@ class EvidenceAdapterTests(unittest.TestCase):
                 "minimum_requests_per_file": 1,
                 "baseline_treatment_id": "baseline",
                 "treatment_treatment_id": "optimized",
+                "identity_manifest": "identities.json",
                 "boundaries": boundaries,
                 "arm_attribution": {
                     "baseline_profile": "baseline.perf",
@@ -76,7 +97,6 @@ class EvidenceAdapterTests(unittest.TestCase):
                 f"/opt/armproof/evidence/{path.name}\n"
                 for path in sorted(files)
             ), encoding="utf-8")
-            digest = "a" * 64
             contract_payload = {
                 "schema_version": "1.0.0",
                 "contract_id": "generic-http",
@@ -161,6 +181,20 @@ class EvidenceAdapterTests(unittest.TestCase):
         entries.select.return_value = [entry]
         with patch("armproof.evidence.adapters.entry_points", return_value=entries):
             self.assertIs(get_evidence_adapter("external-v1"), plugin)
+
+    def test_generic_adapter_rejects_unbound_and_outside_files(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "evidence"
+            root.mkdir()
+            unbound = root / "unbound.jsonl"
+            unbound.write_text("{}\n", encoding="utf-8")
+            outside = root.parent / "outside.jsonl"
+            outside.write_text("{}\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "absent from the checksum"):
+                _bound_file(root, unbound, set(), "boundary")
+            with self.assertRaisesRegex(ValueError, "inside the evidence root"):
+                _bound_file(root, outside, {"../outside.jsonl"}, "boundary")
 
     def test_unknown_adapter_fails_with_available_adapter_names(self) -> None:
         with self.assertRaisesRegex(ValueError, "http-slo-v1"):

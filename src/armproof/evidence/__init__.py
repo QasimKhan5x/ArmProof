@@ -1,6 +1,10 @@
 """Evidence collection, manifests, and verification."""
 
-from armproof.evidence.checksums import ChecksumResult, verify_checksum_ledger
+from armproof.evidence.checksums import (
+    ChecksumResult,
+    checksum_ledger_paths,
+    verify_checksum_ledger,
+)
 from armproof.evidence.adapters import EvidenceAdapter, get_evidence_adapter
 from armproof.evidence.identity import ArtifactFingerprint, fingerprint_path
 from armproof.evidence.manifest import build_manifest, verify_manifest
@@ -15,6 +19,7 @@ __all__ = [
     "VerifiedEvidence",
     "ADAPTER_ID",
     "build_manifest",
+    "checksum_ledger_paths",
     "fingerprint_path",
     "get_evidence_adapter",
     "comparison_to_dict",

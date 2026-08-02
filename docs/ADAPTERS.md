@@ -17,7 +17,13 @@ Graviton run.
 A runtime-neutral fixed-SLO adapter for bounded HTTP inference services. Its
 protocol identifies baseline and optimized treatments, at least three raw JSONL
 files for every passing and failing boundary, measurement requirements, and
-baseline/optimized profiler files.
+baseline/optimized profiler files. Every referenced file must remain inside the
+evidence root and appear in its verified SHA-256 ledger.
+
+The protocol also points to a checksummed identity manifest. ArmProof derives
+the observed artifact, runtime, workload, environment and control identities
+from that manifest and then matches them against the contract. An adapter cannot
+make evidence pass by copying the contract's expected identities.
 
 It emits a tested pass-point ratio and an identifiable capacity interval:
 

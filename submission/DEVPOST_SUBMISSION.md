@@ -157,7 +157,7 @@ required.
   percentage point regression.
 - Enabled-only `kai_*` runtime attribution and exact clean-instance
   reproduction.
-- A tamper challenge that passes seven claims from 282 files, then proves one
+- A tamper challenge that passes eight claims from 282 files, then proves one
   changed temporary ledger digest blocks release before policy evaluation.
 - A zero-runtime-dependency Python CLI, reusable GitHub Action, strict public
   schemas, portable evidence ledger, deployment template and responsive

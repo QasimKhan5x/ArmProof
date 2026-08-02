@@ -12,7 +12,7 @@ from typing import Any, Mapping, Protocol
 
 from armproof.contracts import Contract, validate_comparison_identities
 from armproof.domain import Comparison, TreatmentIdentity
-from armproof.evidence.checksums import verify_checksum_ledger
+from armproof.evidence.checksums import checksum_ledger_paths, verify_checksum_ledger
 from armproof.evidence.pipeline import (
     ADAPTER_ID,
     VerifiedEvidence,
@@ -74,19 +74,38 @@ class KleidiAICapacityAdapter:
         )
 
 
-def _identity(contract: Contract, treatment_id: str) -> TreatmentIdentity:
-    treatment = next(
-        (item for item in contract.treatments if item.treatment_id == treatment_id), None
-    )
-    if treatment is None:
-        raise ValueError(f"adapter treatment is absent from contract: {treatment_id}")
+def _identity(payload: Mapping[str, Any], treatment_id: str) -> TreatmentIdentity:
+    required = {
+        "treatment_id", "artifact_sha256", "runtime_sha256", "workload_sha256",
+        "environment_sha256", "controls",
+    }
+    if (
+        not isinstance(payload, Mapping)
+        or set(payload) != required
+        or payload.get("treatment_id") != treatment_id
+    ):
+        raise ValueError(f"observed identity is invalid: {treatment_id}")
+    digests = {
+        name: payload[name]
+        for name in (
+            "artifact_sha256", "runtime_sha256", "workload_sha256",
+            "environment_sha256",
+        )
+    }
+    if any(
+        not isinstance(value, str)
+        or len(value) != 64
+        or any(char not in "0123456789abcdef" for char in value)
+        for value in digests.values()
+    ) or not isinstance(payload["controls"], Mapping):
+        raise ValueError(f"observed identity fields are invalid: {treatment_id}")
     return TreatmentIdentity(
-        treatment_id=treatment.treatment_id,
-        artifact_sha256=treatment.artifact_sha256,
-        runtime_sha256=treatment.runtime_sha256,
-        workload_sha256=treatment.workload_sha256,
-        environment_sha256=treatment.environment_sha256,
-        controls=MappingProxyType(dict(treatment.environment)),
+        treatment_id=treatment_id,
+        artifact_sha256=digests["artifact_sha256"],
+        runtime_sha256=digests["runtime_sha256"],
+        workload_sha256=digests["workload_sha256"],
+        environment_sha256=digests["environment_sha256"],
+        controls=MappingProxyType(dict(payload["controls"])),
     )
 
 
@@ -95,6 +114,19 @@ def _json(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"adapter JSON must contain an object: {path}")
     return payload
+
+
+def _bound_file(root: Path, candidate: Path, ledger_paths: set[str], field: str) -> Path:
+    resolved_root = root.resolve()
+    resolved = candidate.resolve()
+    if not resolved.is_relative_to(resolved_root):
+        raise ValueError(f"HTTP SLO {field} must be inside the evidence root")
+    relative = resolved.relative_to(resolved_root).as_posix()
+    if relative not in ledger_paths:
+        raise ValueError(f"HTTP SLO {field} is absent from the checksum ledger: {relative}")
+    if not resolved.is_file():
+        raise ValueError(f"HTTP SLO {field} is not a file: {relative}")
+    return resolved
 
 
 class HttpSloAdapter:
@@ -108,23 +140,26 @@ class HttpSloAdapter:
         fields = {"adapter", "root", "checksums", "protocol"}
         _exact_config(config, fields, self.adapter_id)
         root = _path(base, config["root"], "root")
-        checksums = verify_checksum_ledger(
-            _path(base, config["checksums"], "checksums"), root
-        )
+        ledger = _path(base, config["checksums"], "checksums")
+        checksums = verify_checksum_ledger(ledger, root)
         if not checksums.passed:
             raise ValueError(
                 f"checksum verification failed: missing={checksums.missing}, "
                 f"mismatched={checksums.mismatched}"
             )
-        protocol_path = _path(base, config["protocol"], "protocol").resolve()
-        if not protocol_path.is_relative_to(root.resolve()):
-            raise ValueError("HTTP SLO protocol must be inside the checksummed evidence root")
+        ledger_paths = set(checksum_ledger_paths(ledger))
+        protocol_path = _bound_file(
+            root,
+            _path(base, config["protocol"], "protocol"),
+            ledger_paths,
+            "protocol",
+        )
         protocol = _json(protocol_path)
         expected = {
             "schema_version", "comparison_id", "measurement_seconds", "p95_slo_ms",
             "max_error_rate", "minimum_delivery_ratio", "minimum_requests_per_file",
             "baseline_treatment_id", "treatment_treatment_id", "boundaries",
-            "arm_attribution",
+            "arm_attribution", "identity_manifest",
         }
         if set(protocol) != expected or protocol["schema_version"] != "1.0.0":
             raise ValueError("HTTP SLO protocol has unsupported fields or schema")
@@ -156,7 +191,12 @@ class HttpSloAdapter:
                 if not isinstance(paths, list) or len(paths) < 3:
                     raise ValueError("each HTTP SLO boundary requires at least three files")
                 for relative in paths:
-                    samples = _samples(root / relative)
+                    samples = _samples(_bound_file(
+                        root,
+                        root / str(relative),
+                        ledger_paths,
+                        f"{name}.{outcome} boundary",
+                    ))
                     if len(samples) < minimum_rows:
                         raise ValueError(
                             f"HTTP SLO boundary has fewer than {minimum_rows} requests: {relative}"
@@ -185,16 +225,38 @@ class HttpSloAdapter:
         }:
             raise ValueError("HTTP SLO Arm attribution config is invalid")
         pattern = re.compile(str(attribution["symbol_regex"]))
+        baseline_profile = _bound_file(
+            root,
+            root / str(attribution["baseline_profile"]),
+            ledger_paths,
+            "baseline profile",
+        )
+        treatment_profile = _bound_file(
+            root,
+            root / str(attribution["treatment_profile"]),
+            ledger_paths,
+            "treatment profile",
+        )
         baseline_arm = bool(pattern.search(
-            (root / str(attribution["baseline_profile"])).read_text(
+            baseline_profile.read_text(
                 encoding="utf-8", errors="replace"
             )
         ))
         treatment_arm = bool(pattern.search(
-            (root / str(attribution["treatment_profile"])).read_text(
+            treatment_profile.read_text(
                 encoding="utf-8", errors="replace"
             )
         ))
+        identities = _json(_bound_file(
+            root,
+            root / str(protocol["identity_manifest"]),
+            ledger_paths,
+            "identity manifest",
+        ))
+        if set(identities) != {"schema_version", "baseline", "treatment"} or (
+            identities.get("schema_version") != "1.0.0"
+        ):
+            raise ValueError("HTTP SLO identity manifest is invalid")
         comparison_ids = {claim.comparison_id for claim in contract.claims}
         scopes = {claim.causal_scope for claim in contract.claims}
         if comparison_ids != {protocol["comparison_id"]} or len(scopes) != 1:
@@ -213,8 +275,12 @@ class HttpSloAdapter:
         comparison = Comparison(
             comparison_id=str(protocol["comparison_id"]),
             causal_scope=next(iter(scopes)),
-            baseline=_identity(contract, str(protocol["baseline_treatment_id"])),
-            treatment=_identity(contract, str(protocol["treatment_treatment_id"])),
+            baseline=_identity(
+                identities["baseline"], str(protocol["baseline_treatment_id"])
+            ),
+            treatment=_identity(
+                identities["treatment"], str(protocol["treatment_treatment_id"])
+            ),
             metrics=MappingProxyType(metrics),
             evidence_kinds=frozenset({
                 "request_samples", "boundary_confirmations", "artifact_hashes",

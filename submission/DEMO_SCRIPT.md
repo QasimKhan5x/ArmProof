@@ -72,7 +72,7 @@ p95 cells, 3.0x headline and the three traffic-mix rows.
 
 ### 1:25-2:08 - Prove It Is Optimization On Arm
 
-**Do:** Click **3. Release proof**. Point to the seven-claim ledger and the
+**Do:** Click **3. Release proof**. Point to the eight-claim ledger and the
 **dashboard cannot approve itself** chain. Scroll once to the optimization path.
 
 **Say:**
@@ -82,7 +82,7 @@ p95 cells, 3.0x headline and the three traffic-mix rows.
 > identities, and only then decides. Phi-4 moved from BF16 to INT4, reducing
 > the artifact by 35.92 percent, peak PSS by 55.34 percent and time-weighted
 > PSS by 59.66 percent. Inside the identical INT4 deployment, KleidiAI delivers
-> 1.72 to 2.59 times direct execution speedup, and 68.4 percent of sampled
+> 1.72 to 2.59 times direct execution speedup, and 68.35 percent of sampled
 > cycles descend through the KleidiAI matmul callchain in the enabled profile,
 > versus none in the control. Quality changed by less than one percentage point,
 > schema validity stayed at 100 percent, and a fresh Graviton4 instance

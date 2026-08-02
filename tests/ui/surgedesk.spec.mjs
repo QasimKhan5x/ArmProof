@@ -159,7 +159,7 @@ test("proof view exposes the authoritative evidence chain", async ({ page }) => 
   await expect(page.getByRole("heading", { name: "The dashboard cannot approve itself" })).toBeVisible();
   await expect(page.locator("#proof-evidence-count")).toHaveText("282 files verified");
   await expect(page.locator("#proof-decision-detail")).toContainText("8 required claims");
-  await expect(page.locator("#proof-arm")).toContainText("68.4% of sampled cycles");
+  await expect(page.locator("#proof-arm")).toContainText("68.35% of sampled cycles");
   await expect(page.locator(".evidence-chain li")).toHaveCount(4);
 });
 

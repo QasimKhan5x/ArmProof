@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from armproof.evidence import verify_checksum_ledger
+from armproof.evidence import checksum_ledger_paths, verify_checksum_ledger
 
 
 class ChecksumLedgerTests(unittest.TestCase):
@@ -24,6 +24,10 @@ class ChecksumLedgerTests(unittest.TestCase):
             result = verify_checksum_ledger(ledger, root)
             self.assertTrue(result.passed)
             self.assertEqual(result.checked, 1)
+            self.assertEqual(
+                checksum_ledger_paths(ledger),
+                {"capacity/summary.json": digest},
+            )
 
     def test_reports_mismatch_without_accepting_bundle(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

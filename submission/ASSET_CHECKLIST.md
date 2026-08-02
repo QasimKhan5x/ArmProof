@@ -18,7 +18,7 @@ Suggested captions:
   reaches 86.75% held-out operational queue accuracy and remains
   human-confirmed.
 - **The dashboard cannot approve itself.** ArmProof verifies 282 files, derives
-  metrics, binds identities and evaluates seven claims before deployment.
+  metrics, binds identities and evaluates eight claims before deployment.
 - **Judgeable on any screen.** SurgeDesk and the offline evidence report are
   tested down to 320 pixels.
 

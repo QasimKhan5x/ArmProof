@@ -55,7 +55,7 @@ python3.12 scripts/demo_release_gate.py
 ```
 
 The script alters only a temporary copy of one ledger digest. Expected output
-is a valid seven-claim pass followed by a checksum block before policy runs.
+is a valid eight-claim pass followed by a checksum block before policy runs.
 
 ## Full Test Suite
 

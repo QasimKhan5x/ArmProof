@@ -74,7 +74,7 @@ verify two SHA-256 ledgers and workload identity
 derive metrics + bind treatment identities
               |
               v
-fail-closed seven-claim ledger
+fail-closed eight-claim ledger
               |
               +--> GitHub Check: pass/fail
               +--> interactive evidence report
@@ -100,7 +100,7 @@ Demonstrate the trust boundary without altering repository evidence:
 python3.12 scripts/demo_release_gate.py
 ```
 
-It first passes all seven claims, then changes one digest in a temporary ledger
+It first passes all eight claims, then changes one digest in a temporary ledger
 and shows the release blocked before policy evaluation.
 
 Use the same config in GitHub Actions:

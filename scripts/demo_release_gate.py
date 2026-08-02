@@ -69,7 +69,10 @@ def demonstrate() -> int:
         decision = json.loads(
             (temporary / "valid-report/decision.json").read_text(encoding="utf-8")
         )
-        print(f"PASS    {len(decision['claims'])}/7 claims from {checked} verified files")
+        claim_count = len(decision["claims"])
+        print(
+            f"PASS    {claim_count}/{claim_count} claims from {checked} verified files"
+        )
 
         lines = (primary / "SHA256SUMS").read_text(encoding="utf-8").splitlines()
         lines[0] = f"{'0' * 64}  {lines[0].split(maxsplit=1)[1]}"

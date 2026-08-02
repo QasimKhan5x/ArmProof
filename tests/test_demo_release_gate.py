@@ -12,7 +12,7 @@ class DemoReleaseGateTests(unittest.TestCase):
         with redirect_stdout(io.StringIO()) as output:
             self.assertEqual(demonstrate(), 0)
         rendered = output.getvalue()
-        self.assertIn("PASS    7/7 claims from 282 verified files", rendered)
+        self.assertIn("PASS    8/8 claims from 282 verified files", rendered)
         self.assertIn("BLOCK   release refused", rendered)
 
 

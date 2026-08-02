@@ -172,6 +172,18 @@
         </div>
 
         <div id="experiment-results" class="experiment-results" hidden>
+        <section class="arm-reveal" aria-labelledby="arm-reveal-title">
+          <div>
+            <p class="eyebrow">One controlled Arm change</p>
+            <h2 id="arm-reveal-title">Arm-optimized matrix kernels changed the service outcome</h2>
+            <p>Same Phi-4 model, INT4 artifact, ONNX Runtime, 16 threads and Graviton4 instance. Only KleidiAI changes.</p>
+          </div>
+          <dl>
+            <div><dt>KleidiAI cycle share</dt><dd><span>0%</span> → <strong id="reveal-cycle-share">—</strong></dd></div>
+            <div><dt>Equal-load p95</dt><dd><span id="reveal-baseline-p95">—</span> → <strong id="reveal-optimized-p95">—</strong></dd></div>
+            <div><dt>Confirmed tested traffic</dt><dd><span id="reveal-baseline-rps">—</span> → <strong id="reveal-optimized-rps">—</strong></dd></div>
+          </dl>
+        </section>
         <section class="capacity-reveal" aria-labelledby="capacity-title">
           <header class="section-heading">
             <div>
@@ -200,7 +212,7 @@
             </header>
             <div class="run-progress"><span id="baseline-progress"></span></div>
             <div class="request-lane">
-              <div><strong>Customer outcomes</strong><span>Each tile is one request</span></div>
+              <div><strong>Same customer requests</strong><span>Actual wait outcome</span></div>
               <div id="baseline-request-strip" class="request-strip" aria-label="Baseline customer request outcomes"></div>
             </div>
             <dl class="metric-grid">
@@ -219,7 +231,7 @@
             </header>
             <div class="run-progress"><span id="optimized-progress"></span></div>
             <div class="request-lane">
-              <div><strong>Customer outcomes</strong><span>Each tile is one request</span></div>
+              <div><strong>Same customer requests</strong><span>Actual wait outcome</span></div>
               <div id="optimized-request-strip" class="request-strip" aria-label="Optimized customer request outcomes"></div>
             </div>
             <dl class="metric-grid">

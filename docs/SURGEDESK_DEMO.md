@@ -33,7 +33,7 @@ Direct links are available at `#triage`, `#surge`, and `#proof`.
    same requests at `0.267 requests/second`, and inspect confirmed capacity.
    Disabled records three SLO breaches and `12.66s` p95; enabled records none
    and `2.21s` p95. The separate five-run boundary is 0.20 versus 0.60.
-3. **Release proof:** inspect the seven-claim ledger, authoritative
+3. **Release proof:** inspect the eight-claim ledger, authoritative
    verify-derive-bind-decide path, executed Arm path, quality boundary, exact
    deployment and reusable GitHub Action.
 

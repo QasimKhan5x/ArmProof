@@ -329,6 +329,14 @@ function renderEvidenceSummary() {
   setText("baseline-boundary", formatRps(mixed.baseline_sustainable_rps));
   setText("optimized-boundary", formatRps(mixed.optimized_sustainable_rps));
   setText(
+    "reveal-cycle-share",
+    `${data.proof.kleidiai_cycle_callchain_share_percent.toFixed(2)}%`,
+  );
+  setText("reveal-baseline-p95", formatMs(data.replay.baseline.p95_ms));
+  setText("reveal-optimized-p95", formatMs(data.replay.optimized.p95_ms));
+  setText("reveal-baseline-rps", formatRps(mixed.baseline_sustainable_rps));
+  setText("reveal-optimized-rps", formatRps(mixed.optimized_sustainable_rps));
+  setText(
     "conclusion-copy",
     `KleidiAI sustained ${mixed.ratio.toFixed(0)}× higher confirmed tested mixed traffic under the same ${(data.capacity.slo_ms / 1000).toFixed(0)}-second p95 objective.`,
   );
@@ -340,7 +348,7 @@ function renderEvidenceSummary() {
   setText(
     "proof-arm",
     data.proof.kleidiai_enabled_callchains && !data.proof.kleidiai_disabled_callchains
-      ? `${data.proof.kleidiai_cycle_callchain_share_percent.toFixed(1)}% of sampled cycles`
+      ? `${data.proof.kleidiai_cycle_callchain_share_percent.toFixed(2)}% of sampled cycles`
       : "Attribution unavailable",
   );
   setText(
@@ -385,10 +393,16 @@ function renderRun(name, snapshot) {
   setText(`${name}-status`, snapshot.slo_status);
   const requestStrip = elements[`${name}-request-strip`];
   requestStrip.replaceChildren();
-  snapshot.events.forEach((event) => {
+  snapshot.events.filter((event) => [4, 5, 7].includes(event.sequence)).forEach((event) => {
     const tile = document.createElement("span");
     tile.className = `request-tile ${event.within_slo ? "within-slo" : "late"}`;
-    tile.textContent = `${event.sequence}`;
+    const request = document.createElement("span");
+    request.className = "request-copy";
+    request.textContent = event.source_text;
+    const outcome = document.createElement("strong");
+    outcome.className = "request-outcome";
+    outcome.textContent = `${formatMs(event.latency_ms)} · ${event.within_slo ? "on time" : "missed SLO"}`;
+    tile.append(request, outcome);
     tile.title = `Request ${event.sequence}: ${formatMs(event.latency_ms)}`;
     tile.setAttribute(
       "aria-label",

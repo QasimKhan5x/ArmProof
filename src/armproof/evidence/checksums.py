@@ -18,13 +18,12 @@ class ChecksumResult:
         return not self.missing and not self.mismatched
 
 
-def verify_checksum_ledger(
+def checksum_ledger_paths(
     ledger: Path,
-    root: Path,
     *,
     source_prefix: str = "/opt/armproof/evidence",
-) -> ChecksumResult:
-    """Verify ledger entries under root while rejecting duplicates and traversal."""
+) -> dict[str, str]:
+    """Parse a ledger into relative paths and digests, rejecting ambiguity."""
     prefix = PurePosixPath(source_prefix)
     expected: dict[str, str] = {}
     for line_number, raw in enumerate(ledger.read_text(encoding="utf-8").splitlines(), 1):
@@ -47,6 +46,17 @@ def verify_checksum_ledger(
         expected[key] = digest
     if not expected:
         raise ValueError("checksum ledger is empty")
+    return expected
+
+
+def verify_checksum_ledger(
+    ledger: Path,
+    root: Path,
+    *,
+    source_prefix: str = "/opt/armproof/evidence",
+) -> ChecksumResult:
+    """Verify ledger entries under root while rejecting duplicates and traversal."""
+    expected = checksum_ledger_paths(ledger, source_prefix=source_prefix)
 
     missing: list[str] = []
     mismatched: list[str] = []

@@ -169,6 +169,16 @@ tbody tr:last-child td { border-bottom: 0; }
 .evidence-facts dt { color: var(--subtle); font-size: 9px; text-transform: uppercase; }
 .evidence-facts dd { margin: 3px 0 0; font-size: 12px; font-weight: 750; overflow-wrap: anywhere; }
 .experiment-results[hidden] { display: none; }
+.arm-reveal { display: grid; grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr); gap: 22px; align-items: center; margin-bottom: 22px; padding: 18px; color: #fff; background: var(--nav-soft); border-left: 5px solid #55d39b; border-radius: var(--radius); }
+.arm-reveal h2 { margin: 2px 0 5px; font-size: 20px; }
+.arm-reveal p:last-child { margin: 0; color: #c8d8d9; font-size: 12px; }
+.arm-reveal dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; border: 1px solid #47666a; }
+.arm-reveal dl div { min-width: 0; padding: 12px; }
+.arm-reveal dl div + div { border-left: 1px solid #47666a; }
+.arm-reveal dt { color: #a9c0c2; font-size: 9px; text-transform: uppercase; }
+.arm-reveal dd { margin: 5px 0 0; white-space: nowrap; font-size: 14px; }
+.arm-reveal dd span { color: #e5b5af; }
+.arm-reveal dd strong { color: #8be0b8; }
 .experiment-strip { display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 22px; border: 1px solid var(--line); background: #fff; }
 .experiment-strip div { min-width: 0; padding: 12px 14px; }
 .experiment-strip div + div { border-left: 1px solid var(--line); }
@@ -202,10 +212,14 @@ tbody tr:last-child td { border-bottom: 0; }
 .request-lane > div:first-child { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
 .request-lane strong, .request-lane span { font-size: 11px; }
 .request-lane > div:first-child span { color: var(--subtle); }
-.request-strip { min-height: 28px; display: grid; grid-template-columns: repeat(8, minmax(20px, 1fr)); gap: 5px; }
-.request-tile { display: grid; min-width: 0; height: 28px; place-items: center; border-radius: 3px; color: #fff; font-size: 10px; font-weight: 850; }
-.request-tile.within-slo { background: var(--green); }
-.request-tile.late { background: var(--red); }
+.request-strip { min-height: 112px; display: grid; gap: 5px; }
+.request-tile { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; min-width: 0; min-height: 34px; padding: 6px 8px; border-left: 4px solid; border-radius: 3px; background: #fff; font-size: 10px; }
+.request-tile.within-slo { border-color: var(--green); }
+.request-tile.late { border-color: var(--red); }
+.request-copy { min-width: 0; overflow: hidden; color: var(--ink); text-overflow: ellipsis; white-space: nowrap; }
+.request-outcome { white-space: nowrap; }
+.request-tile.within-slo .request-outcome { color: var(--green); }
+.request-tile.late .request-outcome { color: var(--red); }
 .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
 .metric-grid div { min-width: 0; padding: 12px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .metric-grid dd { font-size: 18px; }
@@ -260,6 +274,7 @@ code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .fatal-error { width: min(720px, calc(100% - 32px)); margin: 48px auto; padding: 24px; background: var(--red-soft); border: 1px solid #e0a39e; border-radius: var(--radius); }
 
 @media (max-width: 900px) {
+  .arm-reveal { grid-template-columns: 1fr; }
   .evidence-loader { grid-template-columns: auto 1fr; }
   .evidence-facts, .evidence-loader .replay-button { grid-column: 2; }
   .workspace-shell { grid-template-columns: 210px minmax(0, 1fr); }
@@ -285,6 +300,9 @@ code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 }
 
 @media (max-width: 680px) {
+  .arm-reveal { padding: 16px; }
+  .arm-reveal dl { grid-template-columns: 1fr; }
+  .arm-reveal dl div + div { border-top: 1px solid #47666a; border-left: 0; }
   .evidence-loader { grid-template-columns: 1fr; }
   .evidence-seal { display: none; }
   .evidence-facts, .evidence-loader .replay-button { grid-column: auto; }
