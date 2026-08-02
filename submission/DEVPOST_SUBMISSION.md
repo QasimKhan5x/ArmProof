@@ -14,7 +14,7 @@
 
 **Technical proof:** https://qasimkhan5x.github.io/VerifyLane/report/
 
-**Release:** https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.2.0
+**Release:** https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.3.0
 
 **Video:** ADD THE PUBLIC YOUTUBE OR VIMEO URL AFTER RECORDING
 

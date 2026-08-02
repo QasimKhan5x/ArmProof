@@ -106,7 +106,7 @@ and shows the release blocked before policy evaluation.
 Use the same config in GitHub Actions:
 
 ```yaml
-- uses: QasimKhan5x/VerifyLane@v0.2.0
+- uses: QasimKhan5x/VerifyLane@v0.3.0
   with:
     config: armproof.json
     output: build/armproof-report
