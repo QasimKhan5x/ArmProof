@@ -4,7 +4,7 @@
 
 **Project name:** SurgeDesk + ArmProof
 
-**Tagline:** 3x the AI serving capacity on Graviton, with a release gate that proves every optimization claim.
+**Tagline:** 3x higher confirmed tested traffic on Graviton, with a release gate that derives every decision from raw evidence.
 
 **Track:** Cloud AI
 

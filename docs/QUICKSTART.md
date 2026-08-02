@@ -73,6 +73,12 @@ reference Action verifies raw evidence ledgers, re-derives the comparison and
 binds it to the contract. Produce evidence on a trusted Arm runner; the ledger
 detects later modification but does not independently attest who produced it.
 
+Release workflow `.github/workflows/evidence-attestation.yml` packages the
+accepted evidence and derived report and uses GitHub artifact attestations to
+bind that published bundle to a repository, workflow and commit. This protects
+publication provenance; it does not independently certify the original AWS
+measurement process.
+
 ## Produce Evidence
 
 The built-in collector only needs a bounded HTTP endpoint accepting `POST /infer` with a

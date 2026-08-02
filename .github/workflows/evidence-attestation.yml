@@ -1,0 +1,45 @@
+name: Attest ArmProof evidence
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  attest-evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Derive and evaluate the release decision
+        run: |
+          python -m pip install .
+          armproof ci examples/armproof-reference/armproof.json --output build/armproof-report
+      - name: Assemble immutable publication bundle
+        run: |
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner \
+            -czf build/armproof-evidence.tar.gz \
+            ops/evidence/EXP-2026-004/accepted/evidence \
+            ops/evidence/EXP-2026-005/accepted/evidence \
+            examples/armproof-reference \
+            build/armproof-report
+          sha256sum build/armproof-evidence.tar.gz > build/armproof-evidence.tar.gz.sha256
+      - name: Attest bundle provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: build/armproof-evidence.tar.gz
+      - name: Upload attested evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: armproof-attested-evidence
+          path: |
+            build/armproof-evidence.tar.gz
+            build/armproof-evidence.tar.gz.sha256
+            build/armproof-report
