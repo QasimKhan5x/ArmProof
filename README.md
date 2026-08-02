@@ -32,7 +32,7 @@ GenAI with KleidiAI on AWS Graviton4. Existing experiments have already shown:
 
 The decisive service gate confirmed 3.0x, 2.5x and 3.0x higher tested capacity
 across short, long and mixed traffic under the same 10-second p95 SLO. A fresh
-`c8g.4xlarge` reproduced all three tested ratios.
+A second fresh `c8g.4xlarge` instance confirmed all three tested grid boundaries.
 
 ## Run The Product Demo
 
@@ -106,7 +106,7 @@ and shows the release blocked before policy evaluation.
 Use the same config in GitHub Actions:
 
 ```yaml
-- uses: QasimKhan5x/VerifyLane@v0.3.0
+- uses: QasimKhan5x/VerifyLane@v0.4.0
   with:
     config: armproof.json
     output: build/armproof-report
@@ -124,7 +124,7 @@ PYTHONPATH=src python3.12 -m armproof.cli ci \
   examples/armproof-reference/armproof.json
 ```
 
-The primary and clean-reproduction bundles each contain 141 checksummed files
+The primary and fresh-instance confirmation bundles each contain 141 checksummed files
 and verify after relocation. Browser tests cover the complete SurgeDesk workflow plus ArmProof
 report layouts down to 320 pixels.
 

@@ -56,10 +56,11 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         proof = self.payload["proof"]
         self.assertEqual(proof["decision"], "PASS")
         self.assertEqual(proof["decision_source"], "derived_from_verified_evidence")
-        self.assertEqual(proof["verified_claims"], 7)
+        self.assertEqual(proof["verified_claims"], 8)
         self.assertEqual(proof["reproduction_max_relative_difference_percent"], 0.0)
         self.assertTrue(proof["kleidiai_enabled_callchains"])
         self.assertFalse(proof["kleidiai_disabled_callchains"])
+        self.assertGreater(proof["kleidiai_cycle_callchain_share_percent"], 50.0)
         self.assertEqual(proof["instance"], "c8g.4xlarge")
 
     def test_demo_identifies_a_verified_matched_control_bundle(self) -> None:

@@ -28,7 +28,7 @@ PYTHONPATH=src python3.12 -m armproof.cli evidence-verify \
   --root ops/evidence/EXP-2026-004/accepted/evidence
 ```
 
-The accepted and clean-reproduction bundles each verify 141 files with no
+The accepted and fresh-instance confirmation bundles each verify 141 files with no
 missing or mismatched entries. `armproof ci` verifies both, derives capacity
 and quality, binds identities to the contract, then evaluates policy. Run the
 safe integrity demonstration with:

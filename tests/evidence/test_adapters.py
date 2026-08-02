@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from armproof.cli import main
 from armproof.contracts import parse_contract
 from armproof.evidence.adapters import get_evidence_adapter
 
@@ -76,7 +77,7 @@ class EvidenceAdapterTests(unittest.TestCase):
                 for path in sorted(files)
             ), encoding="utf-8")
             digest = "a" * 64
-            contract = parse_contract({
+            contract_payload = {
                 "schema_version": "1.0.0",
                 "contract_id": "generic-http",
                 "treatments": [
@@ -102,7 +103,8 @@ class EvidenceAdapterTests(unittest.TestCase):
                     "required": True,
                     "depends_on": [],
                 }],
-            })
+            }
+            contract = parse_contract(contract_payload)
 
             verified = get_evidence_adapter("http-slo-v1").verify(
                 contract,
@@ -124,6 +126,31 @@ class EvidenceAdapterTests(unittest.TestCase):
             self.assertTrue(verified.comparison.arm_path_treatment_observed)
             self.assertFalse(verified.comparison.arm_path_baseline_observed)
             self.assertIsNone(verified.reproduction_checksums)
+
+            contract_path = root / "contract.json"
+            contract_path.write_text(json.dumps(contract_payload), encoding="utf-8")
+            config_path = root / "armproof.json"
+            config_path.write_text(json.dumps({
+                "schema_version": "1.0.0",
+                "contract": "contract.json",
+                "evidence": {
+                    "adapter": "http-slo-v1",
+                    "root": ".",
+                    "checksums": "SHA256SUMS",
+                    "protocol": "protocol.json",
+                },
+            }), encoding="utf-8")
+            output = root / "report"
+
+            self.assertEqual(
+                main(["ci", str(config_path), "--output", str(output)]),
+                0,
+            )
+            self.assertTrue((output / "index.html").is_file())
+            receipt = json.loads(
+                (output / "verification.json").read_text(encoding="utf-8")
+            )
+            self.assertIsNone(receipt["reproduction_checksums"])
 
     def test_external_adapter_can_be_discovered_by_entry_point(self) -> None:
         plugin = object()

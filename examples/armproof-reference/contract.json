@@ -89,7 +89,18 @@
       "depends_on": []
     },
     {
-      "id": "clean-reproduction",
+      "id": "arm-cycle-attribution",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-004-kleidiai",
+      "metric": "enabled_kai_cycle_callchain_share",
+      "operator": "gte",
+      "threshold": 0.5,
+      "required_evidence": ["arm_callchains", "artifact_hashes"],
+      "required": true,
+      "depends_on": ["arm-execution"]
+    },
+    {
+      "id": "fresh-instance-confirmation",
       "causal_scope": "arm_acceleration",
       "comparison_id": "exp-2026-004-kleidiai",
       "metric": "reproduction_max_relative_difference",

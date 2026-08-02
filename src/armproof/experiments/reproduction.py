@@ -1,4 +1,4 @@
-"""Compare a clean reproduction against an accepted capacity summary."""
+"""Compare a fresh-instance confirmation against an accepted capacity summary."""
 
 from __future__ import annotations
 

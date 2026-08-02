@@ -67,7 +67,7 @@ seconds p95 and zero breaches. Five confirmation runs at each passing boundary
 confirmed 0.20 versus 0.60 requests/second tested mixed-traffic boundaries.
 
 ArmProof evaluates the evidence behind that result. It verifies 282 files
-across primary and clean-reproduction bundles, re-derives capacity and quality,
+across primary and fresh-instance confirmation bundles, re-derives capacity and quality,
 binds model/runtime/workload/environment identities, and only then evaluates a versioned contract
 declares required quality, service-capacity, schema, attribution and
 reproduction claims. Required failures or unknowns block the release. A
@@ -191,7 +191,7 @@ contribution is the workflow:
 - fixed-SLO load and quality collectors;
 - matched-treatment templates;
 - public contract and decision schemas;
-- primary and clean-reproduction SHA-256 evidence verification;
+- primary and fresh-instance confirmation SHA-256 evidence verification;
 - raw-evidence derivation and contract identity binding;
 - explicit Arm execution attribution;
 - pass, fail and unknown fixtures;

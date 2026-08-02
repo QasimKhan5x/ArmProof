@@ -131,7 +131,7 @@ generation run on any GitHub runner.
 - Quality loss is no more than one percentage point under the frozen task
   metric, with at least 99% schema-valid outputs.
 - ArmProof measurement overhead is below 5% outside explicit profiler runs.
-- A clean reproduction is within 10% of accepted headline measurements.
+- A fresh-instance confirmation matches tested capacity-grid boundaries within 10%.
 
 ### Community And Submission
 

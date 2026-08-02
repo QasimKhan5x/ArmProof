@@ -43,7 +43,7 @@ armproof ci examples/armproof-reference/armproof.json
 Expected behavior:
 
 - exit `0`;
-- 282 files across the primary and clean-reproduction bundles verify;
+- 282 files across the primary and fresh-instance confirmation bundles verify;
 - seven required claims pass from a comparison derived by the adapter;
 - an offline report and machine-readable decision are written; and
 - the exact passing deployment remains linked to the decision.

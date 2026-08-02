@@ -270,6 +270,10 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             "threads": comparison["treatment"]["controls"]["threads"],
             "kleidiai_enabled_callchains": comparison["arm_attribution"]["treatment_observed"],
             "kleidiai_disabled_callchains": comparison["arm_attribution"]["baseline_observed"],
+            "kleidiai_cycle_callchain_share_percent": comparison["metrics"][
+                "enabled_kai_cycle_callchain_share"
+            ]
+            * 100,
             "artifact_reduction_percent": deployment["disk_reduction_percent"],
             "peak_pss_reduction_percent": deployment["peak_pss_reduction_percent"],
             "weighted_pss_reduction_percent": deployment["weighted_pss_reduction_percent"],
@@ -297,6 +301,6 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             "runtime": "ONNX Runtime GenAI INT4 + KleidiAI",
             "machine": "AWS Graviton4 c8g.4xlarge",
             "report_path": "../report/index.html",
-            "release_url": "https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.3.0",
+            "release_url": "https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.4.0",
         },
     }

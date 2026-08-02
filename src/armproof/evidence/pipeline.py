@@ -18,6 +18,7 @@ from armproof.demo.queue_guard import QueueGuard, queue_for_intent
 from armproof.domain import CausalScope, Comparison, TreatmentIdentity
 from armproof.evidence.checksums import ChecksumResult, verify_checksum_ledger
 from armproof.policy.statistics import estimate_ratio
+from armproof.profiling import parse_perf_attribution
 from armproof.quality import compare_quality, load_quality_cases, quality_from_dict
 from armproof.workload import RequestSample, SloPolicy, summarize_samples
 
@@ -409,12 +410,22 @@ def verify_and_derive(
         environment_sha256=environment_sha256,
         instance=match.group(1),
     )
-    baseline_arm = "kai_" in (evidence_root / "perf-disabled.txt").read_text(
-        encoding="utf-8", errors="replace"
+    baseline_profile = parse_perf_attribution(
+        (evidence_root / "perf-disabled.txt").read_text(
+            encoding="utf-8", errors="replace"
+        ),
+        r"^kai_run_matmul",
     )
-    treatment_arm = "kai_" in (evidence_root / "perf-enabled.txt").read_text(
-        encoding="utf-8", errors="replace"
+    treatment_profile = parse_perf_attribution(
+        (evidence_root / "perf-enabled.txt").read_text(
+            encoding="utf-8", errors="replace"
+        ),
+        r"^kai_run_matmul",
     )
+    baseline_arm = baseline_profile.matching_rows > 0
+    treatment_arm = treatment_profile.matching_rows > 0
+    if baseline_profile.lost_samples or treatment_profile.lost_samples:
+        raise ValueError("profiler attribution contains lost samples")
     comparison_ids = {claim.comparison_id for claim in contract.claims}
     scopes = {claim.causal_scope for claim in contract.claims}
     if len(comparison_ids) != 1 or scopes != {CausalScope.ARM_ACCELERATION}:
@@ -510,6 +521,9 @@ def verify_and_derive(
             workload_manifest, quality_treatment.rows
         ),
         "enabled_kai_callchains_observed": float(treatment_arm),
+        "enabled_kai_cycle_callchain_share": (
+            treatment_profile.maximum_children_share
+        ),
         "reproduction_max_relative_difference": max(relative_differences.values()),
     }
     comparison = Comparison(

@@ -35,7 +35,7 @@ engine, pass/fail/unknown fixtures, single-config CLI, reusable GitHub Action,
 responsive offline report, integrity verifier and pinned deployment artifact.
 
 The authoritative release path now verifies 282 files across the primary and
-clean-reproduction bundles, re-derives capacity and quality, binds model,
+fresh-instance confirmation bundles, re-derives capacity and quality, binds model,
 runtime, workload, environment and treatment identities to the contract, and
 only then evaluates seven required claims. Caller-authored normalized
 comparisons are rejected by `armproof ci`. The report emits a verification

@@ -340,7 +340,7 @@ function renderEvidenceSummary() {
   setText(
     "proof-arm",
     data.proof.kleidiai_enabled_callchains && !data.proof.kleidiai_disabled_callchains
-      ? "kai_* enabled only"
+      ? `${data.proof.kleidiai_cycle_callchain_share_percent.toFixed(1)}% of sampled cycles`
       : "Attribution unavailable",
   );
   setText(
@@ -420,7 +420,7 @@ function loadVerifiedExperiment() {
   elements["load-experiment"].disabled = true;
   elements["load-experiment"].textContent = "Verified experiment loaded";
   elements["evidence-load-note"].textContent =
-    `Loaded ${data.provenance.evidence.total_checksummed_files} verified files across the primary and clean-reproduction bundles; metrics recomputed from accepted evidence.`;
+    `Loaded ${data.provenance.evidence.total_checksummed_files} verified files across the primary and fresh-instance confirmation bundles; metrics recomputed from accepted evidence.`;
   elements["evidence-loader"].classList.add("loaded");
   elements["tab-surge"].classList.add("completed");
 }

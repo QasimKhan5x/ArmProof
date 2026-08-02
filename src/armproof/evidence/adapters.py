@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import re
-import statistics
 from dataclasses import asdict
 from importlib.metadata import entry_points
 from pathlib import Path
@@ -234,6 +233,11 @@ class HttpSloAdapter:
                 "disabled_boundary": [bracket.baseline_pass, bracket.baseline_fail],
                 "enabled_boundary": [bracket.treatment_pass, bracket.treatment_fail],
                 "capacity_bracket": asdict(bracket),
+                "ratio": {
+                    "baseline_median": bracket.baseline_pass,
+                    "treatment_median": bracket.treatment_pass,
+                    "ratio": bracket.tested_ratio,
+                },
             }},
             "minimum_requests_per_boundary": minimum_observed,
         }

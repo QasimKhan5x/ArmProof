@@ -13,7 +13,7 @@ Target evidence:
 - 1.72x to 2.59x direct KleidiAI speedup;
 - fixed-SLO capacity result;
 - missing/swapped evidence rejection; and
-- clean reproduction.
+- fresh-instance confirmation of tested boundaries.
 - 86.75% held-out operational routing accuracy from a dependency-free guard.
 
 Do not attribute the whole BF16-to-INT4 transformation to KleidiAI.
