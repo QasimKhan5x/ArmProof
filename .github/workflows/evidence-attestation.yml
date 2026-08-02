@@ -30,7 +30,7 @@ jobs:
             ops/evidence/EXP-2026-005/accepted/evidence \
             examples/armproof-reference \
             build/armproof-report
-          sha256sum build/armproof-evidence.tar.gz > build/armproof-evidence.tar.gz.sha256
+          (cd build && sha256sum armproof-evidence.tar.gz > armproof-evidence.tar.gz.sha256)
       - name: Attest bundle provenance
         uses: actions/attest@v4
         with:
