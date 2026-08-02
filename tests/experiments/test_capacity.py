@@ -17,9 +17,9 @@ from armproof.workload import RequestInput, RequestSample
 
 
 class CapacityProtocolTests(unittest.TestCase):
-    def test_protocol_requires_three_mixes_and_five_confirmations(self) -> None:
+    def test_protocol_requires_enough_distinct_mixes_and_five_confirmations(self) -> None:
         mix = MixProtocol("short", Path("short.jsonl"), 1000, (0.1, 0.2))
-        with self.assertRaisesRegex(ValueError, "three"):
+        with self.assertRaisesRegex(ValueError, "minimum passing mixes"):
             CapacityProtocol("EXP-2026-003", (mix,), Path("quality.jsonl"))
         with self.assertRaisesRegex(ValueError, "five"):
             CapacityProtocol(
@@ -42,6 +42,28 @@ class CapacityProtocolTests(unittest.TestCase):
     def test_treatment_value_object_is_serializable(self) -> None:
         endpoint = TreatmentEndpoint("kleidiai-enabled", "http://127.0.0.1:8001/infer")
         self.assertEqual(endpoint.treatment_id, "kleidiai-enabled")
+
+    def test_high_confidence_protocol_enforces_confirmation_sample_count(self) -> None:
+        mix = MixProtocol("mixed", Path("mixed.jsonl"), 10_000, (0.20, 0.24))
+        protocol = CapacityProtocol(
+            "EXP-2026-006",
+            (mix,),
+            Path("quality.jsonl"),
+            confirmation_seconds=500,
+            minimum_confirmation_requests=100,
+            minimum_passing_mixes=1,
+        )
+        self.assertEqual(protocol.minimum_confirmation_requests, 100)
+
+        with self.assertRaisesRegex(ValueError, "at least 100 requests"):
+            CapacityProtocol(
+                "EXP-2026-006",
+                (mix,),
+                Path("quality.jsonl"),
+                confirmation_seconds=30,
+                minimum_confirmation_requests=100,
+                minimum_passing_mixes=1,
+            )
 
     def test_nominal_rate_rounding_uses_actual_offered_rate(self) -> None:
         from armproof.experiments.capacity import _run_window

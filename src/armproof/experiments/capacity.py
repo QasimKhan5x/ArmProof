@@ -9,7 +9,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
-from armproof.policy.statistics import estimate_ratio
+from armproof.policy.statistics import estimate_capacity_bracket, estimate_ratio
 from armproof.quality import (
     QualityResult,
     compare_quality,
@@ -67,16 +67,31 @@ class CapacityProtocol:
     warmup_requests: int = 3
     maximum_quality_loss_pp: float = 1.0
     minimum_schema_valid_rate: float = 0.99
+    minimum_confirmation_requests: int = 1
+    minimum_passing_mixes: int = 2
+    minimum_tested_ratio: float = 1.5
+    minimum_capacity_ratio_lower_bound: float = 1.15
 
     def __post_init__(self) -> None:
         if not self.experiment_id.startswith("EXP-"):
             raise ValueError("experiment ID must start with EXP-")
-        if len(self.mixes) != 3 or len({mix.mix_id for mix in self.mixes}) != 3:
-            raise ValueError("protocol requires three distinct traffic mixes")
+        if not self.mixes or len({mix.mix_id for mix in self.mixes}) != len(self.mixes):
+            raise ValueError("protocol requires distinct traffic mixes")
         if self.discovery_seconds <= 0 or self.confirmation_seconds <= 0:
             raise ValueError("measurement windows must be positive")
         if self.confirmations < 5:
             raise ValueError("at least five confirmations are required")
+        if not 1 <= self.minimum_passing_mixes <= len(self.mixes):
+            raise ValueError("minimum passing mixes must fit the configured traffic mixes")
+        if self.minimum_confirmation_requests < 1:
+            raise ValueError("minimum confirmation requests must be positive")
+        for mix in self.mixes:
+            minimum_rows = round(mix.candidates_rps[0] * self.confirmation_seconds)
+            if minimum_rows < self.minimum_confirmation_requests:
+                raise ValueError(
+                    "confirmation window must contain at least "
+                    f"{self.minimum_confirmation_requests} requests at the lowest candidate rate"
+                )
         if self.maximum_quality_loss_pp < 0 or not 0 <= self.minimum_schema_valid_rate <= 1:
             raise ValueError("quality thresholds are invalid")
 
@@ -284,12 +299,26 @@ def run_capacity_experiment(
         valid = all(row["pass"]["passed"] and not row["fail"]["passed"] for row in baseline_rows + treatment_rows)
         baseline_rates = [row["pass"]["summary"]["accepted_rps"] for row in baseline_rows]
         treatment_rates = [row["pass"]["summary"]["accepted_rps"] for row in treatment_rows]
+        baseline_fail_rates = [row["fail"]["offered_rps"] for row in baseline_rows]
+        treatment_fail_rates = [row["fail"]["offered_rps"] for row in treatment_rows]
         ratio = estimate_ratio(treatment_rates, baseline_rates, seed=20260731)
+        bracket = estimate_capacity_bracket(
+            baseline_rates,
+            baseline_fail_rates,
+            treatment_rates,
+            treatment_fail_rates,
+        )
         mix_results[mix.mix_id] = {
             "valid_boundary_confirmations": valid,
             "disabled_boundary": boundaries[mix.mix_id]["kleidiai-disabled"],
             "enabled_boundary": boundaries[mix.mix_id]["kleidiai-enabled"],
             "ratio": asdict(ratio),
+            "capacity_bracket": asdict(bracket),
+            "minimum_requests_per_confirmation": min(
+                row[boundary]["summary"]["total"]
+                for row in baseline_rows + treatment_rows
+                for boundary in ("pass", "fail")
+            ),
         }
     quality_passed = (
         comparison.accuracy_delta_pp >= -protocol.maximum_quality_loss_pp
@@ -301,8 +330,11 @@ def run_capacity_experiment(
     )
     passing_mixes = sum(
         row["valid_boundary_confirmations"]
-        and row["ratio"]["ratio"] >= 1.5
-        and row["ratio"]["lower_95"] > 1.15
+        and row["capacity_bracket"]["tested_ratio"] >= protocol.minimum_tested_ratio
+        and row["capacity_bracket"]["lower_bound"]
+        >= protocol.minimum_capacity_ratio_lower_bound
+        and row["minimum_requests_per_confirmation"]
+        >= protocol.minimum_confirmation_requests
         for row in mix_results.values()
     )
     summary = {
@@ -310,7 +342,7 @@ def run_capacity_experiment(
         "experiment_id": protocol.experiment_id,
         "quality_passed": quality_passed,
         "passing_mixes": passing_mixes,
-        "passed": quality_passed and passing_mixes >= 2,
+        "passed": quality_passed and passing_mixes >= protocol.minimum_passing_mixes,
         "mixes": mix_results,
         "quality_comparison": asdict(comparison),
         "elapsed_seconds": time.time() - started_at,

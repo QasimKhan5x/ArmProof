@@ -59,6 +59,12 @@ def load_protocol(path: Path) -> tuple[CapacityProtocol, int]:
         warmup_requests=raw["warmup_requests"],
         maximum_quality_loss_pp=raw.get("maximum_quality_loss_pp", 1.0),
         minimum_schema_valid_rate=raw.get("minimum_schema_valid_rate", 0.99),
+        minimum_confirmation_requests=raw.get("minimum_confirmation_requests", 1),
+        minimum_passing_mixes=raw.get("minimum_passing_mixes", 2),
+        minimum_tested_ratio=raw.get("minimum_tested_ratio", 1.5),
+        minimum_capacity_ratio_lower_bound=raw.get(
+            "minimum_capacity_ratio_lower_bound", 1.15
+        ),
     ), raw["quality_batch_size"]
 
 

@@ -52,8 +52,8 @@ def make_plan(
         raise ValueError(f"instance type not allowed: {instance_type}")
     if not experiment_id.startswith("EXP-"):
         raise ValueError("experiment_id must start with EXP-")
-    if not 1 <= maximum_runtime_minutes <= 180:
-        raise ValueError("maximum_runtime_minutes must be between 1 and 180")
+    if not 1 <= maximum_runtime_minutes <= 360:
+        raise ValueError("maximum_runtime_minutes must be between 1 and 360")
     if not 40 <= volume_gib <= 80:
         raise ValueError("volume_gib must be between 40 and 80")
     if prior_spend_usd < 0:

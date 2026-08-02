@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from armproof.policy.statistics import estimate_ratio
+from armproof.policy.statistics import estimate_capacity_bracket, estimate_ratio
 
 
 class RatioStatisticsTests(unittest.TestCase):
@@ -20,6 +20,30 @@ class RatioStatisticsTests(unittest.TestCase):
             estimate_ratio([2.0, 2.1], [1.0, 1.1])
         with self.assertRaisesRegex(ValueError, "positive"):
             estimate_ratio([2.0, 2.1, 2.2], [1.0, 0.0, 1.1])
+
+
+class CapacityBracketTests(unittest.TestCase):
+    def test_reports_tested_ratio_and_identifiable_capacity_interval(self) -> None:
+        result = estimate_capacity_bracket(
+            baseline_pass=[0.20] * 5,
+            baseline_fail=[0.24] * 5,
+            treatment_pass=[0.66] * 5,
+            treatment_fail=[0.70] * 5,
+        )
+
+        self.assertAlmostEqual(result.tested_ratio, 3.3)
+        self.assertAlmostEqual(result.lower_bound, 2.75)
+        self.assertAlmostEqual(result.upper_bound, 3.5)
+        self.assertEqual(result.method, "confirmed-grid-bracket")
+
+    def test_rejects_unordered_boundaries(self) -> None:
+        with self.assertRaisesRegex(ValueError, "ordered"):
+            estimate_capacity_bracket(
+                baseline_pass=[0.20] * 5,
+                baseline_fail=[0.20] * 5,
+                treatment_pass=[0.60] * 5,
+                treatment_fail=[0.80] * 5,
+            )
 
 
 if __name__ == "__main__":

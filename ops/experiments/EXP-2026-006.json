@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-006",
+  "causal_scope": "arm_acceleration",
+  "hypothesis": "On one c8g.4xlarge, KleidiAI raises the confirmed mixed-traffic fixed-SLO boundary by at least 2.5x, with an identifiable capacity-ratio lower bound above 2.0, when every boundary is measured for 500 seconds and at least 100 requests.",
+  "workload_ref": "data/banking77/generated/manifest.json",
+  "environment_ref": "examples/phi4-graviton/runtime-lock.json",
+  "treatments": [
+    {
+      "id": "kleidiai-disabled",
+      "command_ref": "ops/aws/cap-001/guest.sh:kleidiai-disabled",
+      "environment_overrides": {
+        "mlas.disable_kleidiai": "1",
+        "intra_op_num_threads": 16
+      }
+    },
+    {
+      "id": "kleidiai-enabled",
+      "command_ref": "ops/aws/cap-001/guest.sh:kleidiai-enabled",
+      "environment_overrides": {
+        "mlas.disable_kleidiai": "0",
+        "intra_op_num_threads": 16
+      }
+    }
+  ],
+  "acceptance": {
+    "minimum_tested_ratio": 2.5,
+    "minimum_capacity_ratio_lower_bound": 2.0,
+    "maximum_accuracy_loss_pp": 1.0,
+    "maximum_macro_f1_loss_pp": 1.0,
+    "minimum_schema_valid_rate": 0.99,
+    "minimum_requests_per_boundary": 100
+  },
+  "statistics": {
+    "method": "confirmed-grid-bracket",
+    "confirmations": 5,
+    "confirmation_seconds": 500,
+    "treatment_order": "alternating",
+    "note": "The tested pass-point ratio is not labeled as an estimate of exact maximum capacity. The identifiable lower and upper bounds are derived from confirmed passing and failing rates."
+  },
+  "budget": {
+    "prior_spend_usd": 3.8689,
+    "hard_project_ceiling_usd": 15.0,
+    "maximum_runtime_minutes": 240
+  },
+  "status": "preregistered"
+}

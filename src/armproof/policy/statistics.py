@@ -20,6 +20,21 @@ class RatioEstimate:
     treatment_samples: int
 
 
+@dataclass(frozen=True)
+class CapacityBracket:
+    """Identifiable capacity ratio interval from confirmed pass/fail rates."""
+
+    tested_ratio: float
+    lower_bound: float
+    upper_bound: float
+    baseline_pass: float
+    baseline_fail: float
+    treatment_pass: float
+    treatment_fail: float
+    samples_per_boundary: int
+    method: str = "confirmed-grid-bracket"
+
+
 def _quantile(values: Sequence[float], probability: float) -> float:
     ordered = sorted(values)
     position = (len(ordered) - 1) * probability
@@ -61,4 +76,41 @@ def estimate_ratio(
         treatment_median=treatment_median,
         baseline_samples=len(baseline),
         treatment_samples=len(treatment),
+    )
+
+
+def estimate_capacity_bracket(
+    baseline_pass: Sequence[float],
+    baseline_fail: Sequence[float],
+    treatment_pass: Sequence[float],
+    treatment_fail: Sequence[float],
+) -> CapacityBracket:
+    """Bound the unknown capacity ratio without treating grid points as samples."""
+    groups = (baseline_pass, baseline_fail, treatment_pass, treatment_fail)
+    lengths = {len(group) for group in groups}
+    if len(lengths) != 1 or next(iter(lengths), 0) < 3:
+        raise ValueError("capacity brackets require equal groups of at least three samples")
+    if any(
+        not math.isfinite(value) or value <= 0
+        for group in groups
+        for value in group
+    ):
+        raise ValueError("capacity boundary samples must be finite and positive")
+
+    base_pass = statistics.median(baseline_pass)
+    base_fail = statistics.median(baseline_fail)
+    treat_pass = statistics.median(treatment_pass)
+    treat_fail = statistics.median(treatment_fail)
+    if base_pass >= base_fail or treat_pass >= treat_fail:
+        raise ValueError("capacity pass/fail boundaries must be ordered")
+
+    return CapacityBracket(
+        tested_ratio=treat_pass / base_pass,
+        lower_bound=treat_pass / base_fail,
+        upper_bound=treat_fail / base_pass,
+        baseline_pass=base_pass,
+        baseline_fail=base_fail,
+        treatment_pass=treat_pass,
+        treatment_fail=treat_fail,
+        samples_per_boundary=len(baseline_pass),
     )

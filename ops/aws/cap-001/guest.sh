@@ -13,6 +13,12 @@ case "${EXPERIMENT_APPROVAL_TOKEN:-}" in
   exp-2026-005-reproduction)
     EXPERIMENT_ID="EXP-2026-005"
     PROTOCOL_PATH="ops/aws/repro-001/protocol.json"
+    WATCHDOG_MINUTES=115
+    ;;
+  exp-2026-006-sustained)
+    EXPERIMENT_ID="EXP-2026-006"
+    PROTOCOL_PATH="ops/aws/sustained-001/protocol.json"
+    WATCHDOG_MINUTES=235
     ;;
   *) exit 64 ;;
 esac
@@ -38,7 +44,7 @@ upload_results() {
 trap upload_results EXIT
 
 # Independent guest watchdog; the controller has a separate immutable deadline.
-shutdown -h +115
+shutdown -h +"${WATCHDOG_MINUTES:-115}"
 curl -fsSL "$PROJECT_BUNDLE_URL" -o /tmp/project.tar.gz
 echo "$PROJECT_BUNDLE_SHA256  /tmp/project.tar.gz" | sha256sum -c -
 tar -xzf /tmp/project.tar.gz -C "$WORK"
@@ -80,7 +86,7 @@ export OMP_PROC_BIND=close
 export OMP_PLACES=cores
 set +e
 QUALITY_ARGS=()
-if [[ "$EXPERIMENT_ID" == "EXP-2026-004" || "$EXPERIMENT_ID" == "EXP-2026-005" ]]; then
+if [[ "$EXPERIMENT_ID" == "EXP-2026-004" || "$EXPERIMENT_ID" == "EXP-2026-005" || "$EXPERIMENT_ID" == "EXP-2026-006" ]]; then
   mkdir -p "$ROOT/quality-reuse"
   curl -fsSL "$QUALITY_DISABLED_URL" -o "$ROOT/quality-reuse/kleidiai-disabled.json"
   echo "$QUALITY_DISABLED_SHA256  $ROOT/quality-reuse/kleidiai-disabled.json" | sha256sum -c -
