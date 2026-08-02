@@ -16,7 +16,7 @@ KleidiAI evidence adapter
      |-- re-derive fixed-SLO boundaries from request JSONL
      |-- re-derive quality from row-level evidence
      |-- validate positive/negative Arm callchains
-     `-- compare clean-instance reproduction
+     `-- compare fresh-instance confirmation
      |
      v
 contract identity binding

@@ -67,10 +67,10 @@ seconds p95 and zero breaches. Five confirmation runs at each passing boundary
 confirmed 0.20 versus 0.60 requests/second tested mixed-traffic boundaries.
 
 ArmProof evaluates the evidence behind that result. It verifies 282 files
-across primary and fresh-instance confirmation bundles, re-derives capacity and quality,
-binds model/runtime/workload/environment identities, and only then evaluates a versioned contract
-declares required quality, service-capacity, schema, attribution and
-reproduction claims. Required failures or unknowns block the release. A
+across primary and fresh-instance confirmation bundles, re-derives capacity and
+quality, binds model/runtime/workload/environment identities, and only then
+evaluates a versioned contract declaring required quality, service-capacity,
+schema, attribution and fresh-instance claims. Required failures or unknowns block the release. A
 passing run emits:
 
 - a machine-readable decision;
@@ -92,14 +92,15 @@ baseline and treatment used the same model bytes, ONNX Runtime GenAI build,
 endpoint, 16 threads, one in-flight request, workload, instance and SLO. The
 declared treatment control was KleidiAI enabled versus
 `mlas.disable_kleidiai=1`. Across four batch/prompt shapes, KleidiAI improved
-end-to-end execution by 1.72x to 2.59x. Linux perf callchains contained
-`kai_*` frames only in the enabled treatment.
+end-to-end execution by 1.72x to 2.59x. Linux perf attributed 68.35% of sampled
+cycles to the KleidiAI matmul callchain in the enabled treatment and none in
+the disabled control.
 
 The service-level test used fixed-rate open-loop traffic, separate warmup,
 passing/failing boundary discovery and five confirmation runs per treatment.
 KleidiAI increased the highest confirmed tested capacity by 3.0x for short
 traffic, 2.5x for long traffic and 3.0x for mixed traffic. A fresh
-A fresh `c8g.4xlarge` confirmed all three tested capacity-grid boundaries.
+`c8g.4xlarge` confirmed all three tested capacity-grid boundaries.
 
 The queue guard improves application usefulness, but it is not presented as
 an Arm speedup.
@@ -119,7 +120,7 @@ an Arm speedup.
 5. We captured positive and negative `kai_*` callchain evidence separately
    from the primary load run so profiler overhead could not contaminate it.
 6. We reran the accepted protocol on a clean Graviton4 instance and compared
-   metrics re-derived from the clean-instance raw evidence.
+   metrics re-derived from the fresh-instance raw evidence.
 7. We built ArmProof around strict JSON schemas, immutable artifact identities,
    two SHA-256 ledgers, dependency-aware claims and pass/fail/unknown semantics.
    `armproof ci` rejects supplied normalized comparisons and derives its own.
@@ -155,14 +156,14 @@ required.
   time-weighted PSS after BF16-to-INT4 migration.
 - A 770-request quality gate with 100% schema validity and less than one
   percentage point regression.
-- Enabled-only `kai_*` runtime attribution and exact clean-instance
-  reproduction.
+- 68.35% sampled-cycle attribution to the enabled KleidiAI matmul callchain,
+  absent from the control, plus fresh-instance boundary confirmation.
 - A tamper challenge that passes eight claims from 282 files, then proves one
   changed temporary ledger digest blocks release before policy evaluation.
 - A zero-runtime-dependency Python CLI, reusable GitHub Action, strict public
   schemas, portable evidence ledger, deployment template and responsive
   offline report.
-- Native Arm64, x86 and browser CI, including ten end-to-end UI workflows.
+- Native Arm64, x86 and browser CI, including eleven end-to-end UI workflows.
 
 ## What We Learned
 
@@ -206,13 +207,14 @@ optimization claims fail CI. No hosted service is required.
 
 This is not an AI application that merely happens to run on Arm. It combines a
 real model migration, an isolated Arm-specific acceleration path, quality and
-memory gates, service-level capacity testing, runtime attribution and clean
-reproduction. It then converts those results into both a compelling cloud
-application and a reusable developer workflow.
+memory gates, service-level capacity testing, runtime attribution and
+fresh-instance confirmation. It then converts those results into both a
+compelling cloud application and a reusable developer workflow.
 
 The headline is simple: the same Graviton4 instance served 3x higher confirmed
-tested mixed AI traffic under the same p95 SLO. The implementation underneath that sentence is inspectable,
-fail-closed and available for another Arm developer to adopt.
+tested mixed AI traffic under the same p95 SLO. The implementation underneath
+that sentence is inspectable, fail-closed and available for another Arm
+developer to adopt.
 
 ## What's Next
 
@@ -223,7 +225,7 @@ fail-closed and available for another Arm developer to adopt.
 - Validate the same contract on Google Axion and Microsoft Cobalt.
 - Publish reusable contract templates for generation, vision and speech
   workloads.
-- Add signed evidence bundles and commit-status annotations for larger teams.
+- Add commit-status annotations and organizational policy templates for larger teams.
 
 ## Setup And Validation
 

@@ -37,7 +37,7 @@ responsive offline report, integrity verifier and pinned deployment artifact.
 The authoritative release path now verifies 282 files across the primary and
 fresh-instance confirmation bundles, re-derives capacity and quality, binds model,
 runtime, workload, environment and treatment identities to the contract, and
-only then evaluates seven required claims. Caller-authored normalized
+only then evaluates eight required claims. Caller-authored normalized
 comparisons are rejected by `armproof ci`. The report emits a verification
 receipt, and the safe tamper challenge proves one changed ledger digest blocks
 before policy evaluation.
