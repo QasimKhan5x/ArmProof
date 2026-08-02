@@ -17,7 +17,7 @@ from armproof.contracts import Contract, validate_comparison_identities
 from armproof.demo.queue_guard import QueueGuard, queue_for_intent
 from armproof.domain import CausalScope, Comparison, TreatmentIdentity
 from armproof.evidence.checksums import ChecksumResult, verify_checksum_ledger
-from armproof.policy.statistics import estimate_ratio
+from armproof.policy.statistics import estimate_capacity_bracket, estimate_ratio
 from armproof.profiling import parse_perf_attribution
 from armproof.quality import compare_quality, load_quality_cases, quality_from_dict
 from armproof.workload import RequestSample, SloPolicy, summarize_samples
@@ -134,10 +134,14 @@ def _derive_capacity(
     if not isinstance(repetitions, int) or repetitions < 5:
         raise ValueError("at least five raw boundary confirmations are required")
     mixes = protocol.get("mixes")
-    if not isinstance(mixes, list) or {row.get("mix_id") for row in mixes if isinstance(row, dict)} != {
-        "short", "long", "mixed",
-    }:
-        raise ValueError("capacity protocol must contain short, long, and mixed traffic")
+    if not isinstance(mixes, list) or not mixes or not all(
+        isinstance(row, dict) and isinstance(row.get("mix_id"), str)
+        for row in mixes
+    ):
+        raise ValueError("capacity protocol must contain named traffic mixes")
+    mix_ids = [row["mix_id"] for row in mixes]
+    if len(set(mix_ids)) != len(mix_ids):
+        raise ValueError("capacity protocol traffic mixes must be unique")
 
     result: dict[str, Any] = {}
     experiment = evidence_root / "capacity/experiment"
@@ -150,11 +154,18 @@ def _derive_capacity(
         )
         rates: dict[str, list[float]] = {name: [] for name in TREATMENT_IDS}
         fail_rates: dict[str, list[float]] = {name: [] for name in TREATMENT_IDS}
+        minimum_requests: int | None = None
         for treatment_id in TREATMENT_IDS:
             for repetition in range(1, repetitions + 1):
                 directory = experiment / "capacity" / mix_id / treatment_id / "confirmations"
                 pass_rows = _samples(directory / f"rep-{repetition}-pass.jsonl")
                 fail_rows = _samples(directory / f"rep-{repetition}-fail.jsonl")
+                observed_minimum = min(len(pass_rows), len(fail_rows))
+                minimum_requests = (
+                    observed_minimum
+                    if minimum_requests is None
+                    else min(minimum_requests, observed_minimum)
+                )
                 pass_summary = summarize_samples(pass_rows, float(seconds))
                 fail_summary = summarize_samples(fail_rows, float(seconds))
                 pass_offered = len(pass_rows) / float(seconds)
@@ -176,6 +187,12 @@ def _derive_capacity(
             rates["kleidiai-disabled"],
             seed=20260731,
         )
+        bracket = estimate_capacity_bracket(
+            rates["kleidiai-disabled"],
+            fail_rates["kleidiai-disabled"],
+            rates["kleidiai-enabled"],
+            fail_rates["kleidiai-enabled"],
+        )
         result[mix_id] = {
             "valid_boundary_confirmations": True,
             "disabled_boundary": [
@@ -187,6 +204,8 @@ def _derive_capacity(
                 min(fail_rates["kleidiai-enabled"]),
             ],
             "ratio": asdict(estimate),
+            "capacity_bracket": asdict(bracket),
+            "minimum_requests_per_confirmation": minimum_requests,
         }
     return result
 
