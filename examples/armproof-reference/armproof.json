@@ -1,8 +1,16 @@
 {
   "schema_version": "1.0.0",
   "contract": "contract.json",
-  "comparisons": ["comparison.json"],
-  "summary": "../../ops/evidence/EXP-2026-004/accepted/evidence/capacity/experiment/summary.json",
+  "evidence": {
+    "adapter": "kleidiai-capacity-v1",
+    "root": "../../ops/evidence/EXP-2026-004/accepted/evidence",
+    "checksums": "../../ops/evidence/EXP-2026-004/accepted/evidence/SHA256SUMS",
+    "workload_manifest": "../../data/banking77/generated/manifest.json",
+    "reproduction": {
+      "root": "../../ops/evidence/EXP-2026-005/accepted/evidence",
+      "checksums": "../../ops/evidence/EXP-2026-005/accepted/evidence/SHA256SUMS"
+    }
+  },
   "deployment_summary": "deployment-summary.json",
   "output": "../../build/armproof-report"
 }

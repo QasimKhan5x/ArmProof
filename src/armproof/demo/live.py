@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from armproof.demo.queue_guard import QueueGuard
-from armproof.demo.surgedesk import HIGH_PRIORITY, _friendly, _procedure, _queue
+from armproof.demo.queue_guard import QueueGuard, queue_for_intent
+from armproof.demo.surgedesk import HIGH_PRIORITY, _friendly, _procedure
 from armproof.quality.banking77 import _parse_intent
 
 
@@ -27,7 +27,7 @@ def compose_live_route(
 ) -> dict[str, Any]:
     intent, schema_valid, error = _parse_intent(upstream.get("output"), set(categories))
     prediction = guard.predict(text)
-    llm_queue = _queue(intent)
+    llm_queue = queue_for_intent(intent)
     return {
         "request_id": upstream.get("request_id", "live-request"),
         "source_text": text,

@@ -95,3 +95,29 @@ def parse_comparison(payload: Mapping[str, Any]) -> Comparison:
         arm_path_baseline_observed=attribution["baseline_observed"],
         arm_path_treatment_observed=attribution["treatment_observed"],
     )
+
+
+def comparison_to_dict(comparison: Comparison) -> dict[str, Any]:
+    def identity_to_dict(identity: TreatmentIdentity) -> dict[str, Any]:
+        return {
+            "treatment_id": identity.treatment_id,
+            "artifact_sha256": identity.artifact_sha256,
+            "runtime_sha256": identity.runtime_sha256,
+            "workload_sha256": identity.workload_sha256,
+            "environment_sha256": identity.environment_sha256,
+            "controls": dict(identity.controls),
+        }
+
+    return {
+        "schema_version": "1.0.0",
+        "comparison_id": comparison.comparison_id,
+        "causal_scope": comparison.causal_scope.value,
+        "baseline": identity_to_dict(comparison.baseline),
+        "treatment": identity_to_dict(comparison.treatment),
+        "metrics": dict(comparison.metrics),
+        "evidence_kinds": sorted(comparison.evidence_kinds),
+        "arm_attribution": {
+            "baseline_observed": comparison.arm_path_baseline_observed,
+            "treatment_observed": comparison.arm_path_treatment_observed,
+        },
+    }

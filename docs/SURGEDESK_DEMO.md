@@ -29,17 +29,19 @@ Direct links are available at `#triage`, `#surge`, and `#proof`.
 1. **Triage:** inspect the held-out `86.75%` queue result, load a recorded
    Phi-4 intent, observe the queue guard rescue or error, then confirm or
    correct the proposed route.
-2. **Arm result:** load the accepted checksum-bound experiment, compare the
+2. **Arm result:** load both checksum-bound evidence bundles, compare the
    same requests at `0.267 requests/second`, and inspect confirmed capacity.
    Disabled records three SLO breaches and `12.66s` p95; enabled records none
    and `2.21s` p95. The separate five-run boundary is 0.20 versus 0.60.
-3. **Release proof:** inspect the claim ledger, executed Arm path, quality
-   boundary, exact deployment and reusable GitHub Action.
+3. **Release proof:** inspect the seven-claim ledger, authoritative
+   verify-derive-bind-decide path, executed Arm path, quality boundary, exact
+   deployment and reusable GitHub Action.
 
 ## Evidence Provenance
 
 `scripts/build_surgedesk_demo.py` calls
-`src/armproof/demo/surgedesk.py`, which joins:
+`src/armproof/demo/surgedesk.py`, which invokes the same authoritative
+verification and derivation pipeline as `armproof ci`, then joins:
 
 - accepted BANKING77 quality inputs and recorded Phi-4 outputs;
 - equal-load discovery samples plus five-run confirmed capacity boundaries;
@@ -61,6 +63,8 @@ if it drifts.
   46.49%. The app therefore requires human confirmation.
 - All claims are scoped to the pinned Phi-4 Mini workload, ONNX Runtime GenAI
   INT4 runtime and AWS Graviton4 `c8g.4xlarge`.
+- The repository SHA-256 ledgers detect post-capture modification; they are not
+  independent attestation of who produced the original evidence.
 
 ## Live Graviton Mode
 

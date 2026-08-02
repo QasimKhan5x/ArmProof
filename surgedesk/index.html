@@ -175,7 +175,7 @@
         <section class="capacity-reveal" aria-labelledby="capacity-title">
           <header class="section-heading">
             <div>
-              <p class="eyebrow">Maximum sustainable mixed traffic</p>
+              <p class="eyebrow">Highest confirmed tested mixed traffic</p>
               <h2 id="capacity-title">Same instance. Measured capacity.</h2>
             </div>
             <strong id="headline-ratio" class="headline-ratio">—</strong>
@@ -262,7 +262,7 @@
           <div>
             <p class="eyebrow">ArmProof release decision</p>
             <h1>Approved for the measured Graviton deployment</h1>
-            <p>Every required claim passed against checksum-bound evidence.</p>
+            <p id="proof-decision-detail">Every required claim passed against checksum-bound evidence.</p>
           </div>
           <span>PASS</span>
         </header>
@@ -278,6 +278,7 @@
               <tbody>
                 <tr><td>Cloud capacity</td><td id="proof-capacity">—</td><td>≥ 1.5×</td><td><span class="pass-label">Pass</span></td></tr>
                 <tr><td>Quality non-regression</td><td id="proof-quality">—</td><td>≥ −1.0 pp</td><td><span class="pass-label">Pass</span></td></tr>
+                <tr><td>Macro F1 non-regression</td><td id="proof-macro-f1">—</td><td>≥ −1.0 pp</td><td><span class="pass-label">Pass</span></td></tr>
                 <tr><td>Operational queue accuracy</td><td id="proof-queue-quality">—</td><td>≥ 85%</td><td><span class="pass-label">Pass</span></td></tr>
                 <tr><td>Output schema</td><td id="proof-schema">—</td><td>≥ 99%</td><td><span class="pass-label">Pass</span></td></tr>
                 <tr><td>Arm execution</td><td id="proof-arm">—</td><td>Required</td><td><span class="pass-label">Pass</span></td></tr>
@@ -285,6 +286,19 @@
               </tbody>
             </table>
           </div>
+        </section>
+
+        <section class="proof-section" aria-labelledby="evidence-chain-title">
+          <div class="section-heading compact-heading">
+            <div><p class="eyebrow">Authoritative evidence path</p><h2 id="evidence-chain-title">The dashboard cannot approve itself</h2></div>
+            <span id="proof-evidence-count" class="source-chip">Verifying evidence...</span>
+          </div>
+          <ol class="evidence-chain">
+            <li><span>1</span><div><strong>Verify</strong><small>Check both SHA-256 evidence ledgers and the frozen workload manifest.</small></div></li>
+            <li><span>2</span><div><strong>Derive</strong><small>Recompute capacity, quality and reproduction metrics from request and quality rows.</small></div></li>
+            <li><span>3</span><div><strong>Bind</strong><small>Match model, runtime, workload, environment and treatment identities to the contract.</small></div></li>
+            <li><span>4</span><div><strong>Decide</strong><small id="proof-derived-claims">Evaluate the contract; missing or inconsistent evidence blocks release.</small></div></li>
+          </ol>
         </section>
 
         <section class="proof-section" aria-labelledby="stack-title">
@@ -322,7 +336,7 @@
           <div>
             <p class="eyebrow">Reusable developer artifact</p>
             <h2 id="release-title">The same decision runs in pull requests</h2>
-            <p>Missing hashes, quality regressions, absent Arm callchains or an unmeasured deployment block the release.</p>
+            <p>Tampered raw files, identity swaps, quality regressions, absent Arm callchains or failed reproduction block the release.</p>
           </div>
           <pre><code>- uses: QasimKhan5x/VerifyLane@v0.2.0
   with:

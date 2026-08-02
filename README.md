@@ -3,7 +3,7 @@
 SurgeDesk is a human-confirmed banking-support triage application that shows
 what a measured Arm optimization changes in a real cloud workflow. During a
 recorded support surge, the same Phi-4 Mini INT4 service on the same AWS
-Graviton4 instance sustains **3x mixed traffic** with KleidiAI enabled while
+Graviton4 instance sustains **3x higher confirmed tested mixed traffic** with KleidiAI enabled while
 remaining under its 10-second p95 objective.
 
 A dependency-free queue guard raises held-out five-destination routing accuracy from
@@ -30,9 +30,9 @@ GenAI with KleidiAI on AWS Graviton4. Existing experiments have already shown:
 - 20/24 versus 19/24 quality results; and
 - `kai_*` callchains only in the enabled treatment.
 
-The decisive service gate then measured 3.0x, 2.5x and 3.0x sustainable
-capacity across short, long and mixed traffic under the same 10-second p95
-SLO. A fresh `c8g.4xlarge` reproduced all three ratios exactly.
+The decisive service gate confirmed 3.0x, 2.5x and 3.0x higher tested capacity
+across short, long and mixed traffic under the same 10-second p95 SLO. A fresh
+`c8g.4xlarge` reproduced all three tested ratios.
 
 ## Run The Product Demo
 
@@ -65,13 +65,16 @@ SURGEDESK_INFERENCE_ENDPOINT=http://127.0.0.1:8000/infer \
 ## Product Workflow
 
 ```text
-optimization PR + armproof.json
+optimization PR + contract + raw evidence
               |
               v
-matched baseline/treatment runs on Graviton
+verify two SHA-256 ledgers and workload identity
               |
               v
-fail-closed claim ledger
+derive metrics + bind treatment identities
+              |
+              v
+fail-closed seven-claim ledger
               |
               +--> GitHub Check: pass/fail
               +--> interactive evidence report
@@ -85,9 +88,20 @@ python3.12 -m pip install -e .
 armproof ci examples/armproof-reference/armproof.json
 ```
 
-The command writes `decision.json`, normalized inputs and an offline interactive
-report. Exit `0` approves, exit `2` blocks on a failed or unknown required
-claim, and exit `1` identifies invalid input or execution failure.
+The command verifies 282 files across the primary and reproduction bundles,
+derives the normalized comparison from request and quality evidence, binds it
+to the declared identities, and writes `decision.json`, `verification.json`
+and an offline report. Exit `0` approves, exit `2` blocks on a failed or
+unknown required claim, and exit `1` identifies invalid evidence.
+
+Demonstrate the trust boundary without altering repository evidence:
+
+```bash
+python3.12 scripts/demo_release_gate.py
+```
+
+It first passes all seven claims, then changes one digest in a temporary ledger
+and shows the release blocked before policy evaluation.
 
 Use the same config in GitHub Actions:
 
@@ -110,8 +124,8 @@ PYTHONPATH=src python3.12 -m armproof.cli ci \
   examples/armproof-reference/armproof.json
 ```
 
-Both accepted cloud bundles contain 141 checksummed files and verify after
-relocation. Browser tests cover the complete SurgeDesk workflow plus ArmProof
+The primary and clean-reproduction bundles each contain 141 checksummed files
+and verify after relocation. Browser tests cover the complete SurgeDesk workflow plus ArmProof
 report layouts down to 320 pixels.
 
 ## Start Here
@@ -132,7 +146,8 @@ report layouts down to 320 pixels.
 
 ## Claim Boundary
 
-ArmProof is not an Arm certification authority and does not prove universal
-model quality or optimality. It evaluates a declared contract for a pinned
-model, workload, runtime and machine. User-facing copy must say "verified by
-ArmProof," never "Arm certified."
+ArmProof is not an Arm certification authority and its repository checksum
+ledgers are integrity controls, not independent attestation of the evidence
+producer. It evaluates a declared contract for a pinned model, workload,
+runtime and machine. User-facing copy must say "verified by ArmProof," never
+"Arm certified."

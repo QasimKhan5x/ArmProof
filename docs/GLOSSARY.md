@@ -11,12 +11,11 @@
   hashes.
 - **Fail closed:** Required missing, mismatched or unknown evidence prevents
   approval.
-- **Fixed-SLO capacity:** Maximum sustainable accepted throughput while the
-  declared latency objective remains satisfied.
+- **Fixed-SLO capacity:** Highest tested accepted throughput confirmed while
+  the declared latency objective remains satisfied.
 - **PSS:** Proportional Set Size; shared pages are divided among processes.
 - **Reference workload:** Public task data used to demonstrate ArmProof. It is
   not the product itself.
 - **Treatment:** One pinned service configuration evaluated by a run.
 - **Whole deployment transformation:** BF16 PyTorch versus INT4 ONNX Runtime
   GenAI; it includes multiple changes and is not a KleidiAI-only comparison.
-

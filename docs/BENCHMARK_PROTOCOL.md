@@ -37,7 +37,7 @@ supports KleidiAI-attributable performance claims.
 
 ### Cloud Consequence
 
-For each INT4 treatment, measure maximum sustainable accepted throughput under
+For each INT4 treatment, measure the highest confirmed tested accepted throughput under
 the same p95 SLO. Use short, long and mixed prompt traffic.
 
 ## Measurement Rules
@@ -93,4 +93,3 @@ must be labeled as intrusive.
 Every accepted run stores contract, environment, hashes, commands, logs, raw
 request samples, memory samples, quality rows, profiler output, normalized
 evidence, claim ledger, spend record and cleanup record.
-

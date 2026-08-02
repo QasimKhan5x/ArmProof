@@ -1,0 +1,17 @@
+{
+  "adapter": "kleidiai-capacity-v1",
+  "checksums": {
+    "checked": 141,
+    "mismatched": [],
+    "missing": [],
+    "passed": true
+  },
+  "comparison_source": "derived_from_raw_evidence",
+  "reproduction_checksums": {
+    "checked": 141,
+    "mismatched": [],
+    "missing": [],
+    "passed": true
+  },
+  "schema_version": "1.0.0"
+}

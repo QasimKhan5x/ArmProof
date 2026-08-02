@@ -228,6 +228,12 @@ tbody tr:last-child td { border-bottom: 0; }
 .text-link { color: var(--blue); font-weight: 700; }
 .pass-label { color: var(--green); font-weight: 850; }
 code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.evidence-chain { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding: 0; border: 1px solid var(--line); list-style: none; }
+.evidence-chain li { min-width: 0; display: flex; gap: 10px; padding: 14px; background: var(--surface-soft); }
+.evidence-chain li + li { border-left: 1px solid var(--line); }
+.evidence-chain li > span { display: grid; flex: 0 0 24px; height: 24px; place-items: center; color: #fff; background: var(--teal-dark); border-radius: 50%; font-size: 11px; font-weight: 850; }
+.evidence-chain strong, .evidence-chain small { display: block; }
+.evidence-chain small { margin-top: 4px; color: var(--muted); line-height: 1.4; }
 .stack-path { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; }
 .stack-path li { position: relative; min-width: 0; display: flex; align-items: flex-start; gap: 9px; padding: 12px; border-top: 2px solid var(--teal); background: var(--surface-soft); }
 .stack-path li + li { border-left: 1px solid var(--line); }
@@ -269,6 +275,9 @@ code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
   .conclusion-band p { grid-column: 1 / -1; }
   .stack-path { grid-template-columns: 1fr; }
   .stack-path li + li { border-top: 1px solid var(--line); border-left: 2px solid var(--teal); }
+  .evidence-chain { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .evidence-chain li:nth-child(3) { border-top: 1px solid var(--line); border-left: 0; }
+  .evidence-chain li:nth-child(4) { border-top: 1px solid var(--line); }
   .proof-columns { grid-template-columns: 1fr; }
   .release-gate { grid-template-columns: 1fr; }
   .reuse-steps { grid-template-columns: 1fr; }
@@ -322,6 +331,8 @@ code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
   .proof-section { padding: 14px; }
   .proof-section .section-heading { flex-direction: column; gap: 8px; }
   .proof-decision { padding: 16px; }
+  .evidence-chain { grid-template-columns: 1fr; }
+  .evidence-chain li + li, .evidence-chain li:nth-child(3), .evidence-chain li:nth-child(4) { border-top: 1px solid var(--line); border-left: 0; }
   .release-gate { padding: 16px; }
   .release-gate pre { max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; }
   table[data-mobile-cards] { display: block; background: transparent; }

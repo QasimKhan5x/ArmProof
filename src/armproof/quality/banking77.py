@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -196,6 +197,19 @@ def quality_from_dict(payload: Any) -> QualityResult:
         raise ValueError("quality result aggregates do not match rows")
     if result.schema_valid != sum(row.schema_valid for row in rows):
         raise ValueError("quality schema-valid aggregate does not match rows")
+    labels = {row.expected_intent for row in rows}
+    expected_accuracy = result.correct / result.total if result.total else 0.0
+    expected_schema_rate = result.schema_valid / result.total if result.total else 0.0
+    expected_macro_f1 = _macro_f1(rows, labels)
+    for name, observed, expected in (
+        ("accuracy", result.accuracy, expected_accuracy),
+        ("schema_valid_rate", result.schema_valid_rate, expected_schema_rate),
+        ("macro_f1", result.macro_f1, expected_macro_f1),
+    ):
+        if not isinstance(observed, (int, float)) or not math.isfinite(observed) or not math.isclose(
+            observed, expected, rel_tol=1e-12, abs_tol=1e-12
+        ):
+            raise ValueError(f"quality {name} aggregate does not match rows")
     return result
 
 

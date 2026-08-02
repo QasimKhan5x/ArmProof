@@ -54,6 +54,9 @@ class SurgeDeskPayloadTests(unittest.TestCase):
 
     def test_reproduction_and_arm_attribution_are_explicit(self) -> None:
         proof = self.payload["proof"]
+        self.assertEqual(proof["decision"], "PASS")
+        self.assertEqual(proof["decision_source"], "derived_from_verified_evidence")
+        self.assertEqual(proof["verified_claims"], 7)
         self.assertEqual(proof["reproduction_max_relative_difference_percent"], 0.0)
         self.assertTrue(proof["kleidiai_enabled_callchains"])
         self.assertFalse(proof["kleidiai_disabled_callchains"])
@@ -63,6 +66,9 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         evidence = self.payload["provenance"]["evidence"]
         self.assertTrue(evidence["checksum_verified"])
         self.assertEqual(evidence["checksummed_files"], 141)
+        self.assertTrue(evidence["reproduction_checksum_verified"])
+        self.assertEqual(evidence["reproduction_checksummed_files"], 141)
+        self.assertEqual(evidence["total_checksummed_files"], 282)
         self.assertEqual(evidence["comparison"], "matched_control")
         self.assertEqual(evidence["only_changed_control"], "mlas.disable_kleidiai")
 

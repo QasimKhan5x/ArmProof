@@ -41,6 +41,13 @@
       "reason_code": "threshold_met",
       "status": "pass",
       "threshold": 1.0
+    },
+    {
+      "claim_id": "clean-reproduction",
+      "observed": 0.0,
+      "reason_code": "threshold_met",
+      "status": "pass",
+      "threshold": 0.1
     }
   ],
   "passed": true,

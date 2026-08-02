@@ -1,6 +1,6 @@
 # Current Status
 
-Last updated: 2026-08-01
+Last updated: 2026-08-02
 
 ## Product
 
@@ -34,15 +34,23 @@ Completed: guarded AWS lifecycle, reference service, fixed-SLO harness, policy
 engine, pass/fail/unknown fixtures, single-config CLI, reusable GitHub Action,
 responsive offline report, integrity verifier and pinned deployment artifact.
 
+The authoritative release path now verifies 282 files across the primary and
+clean-reproduction bundles, re-derives capacity and quality, binds model,
+runtime, workload, environment and treatment identities to the contract, and
+only then evaluates seven required claims. Caller-authored normalized
+comparisons are rejected by `armproof ci`. The report emits a verification
+receipt, and the safe tamper challenge proves one changed ledger digest blocks
+before policy evaluation.
+
 The SurgeDesk workflow now includes a held-out two-stage queue guard, human
 confirm/correct state machine, equal-load customer-outcome replay, confirmed
 capacity boundary, release-proof view, executable adoption path and optional
 live Graviton gateway. Recorded mode refuses to present edited text as
 inference; live mode remains disabled unless a trusted endpoint is configured.
 
-Version `v0.2.0` is the current public release. Native Arm64,
-x86 and report-browser CI pass on the release commit, and the public example
-Action passes while uploading its decision and offline report. The complete
+Version `v0.2.0` is the intended release for this completed evidence path.
+Native Arm64, x86 and report-browser CI cover the Action, decision and offline
+report. The complete
 Devpost copy, judge guide, technical evidence map, media set, final checklist
 and under-three-minute recording script are under `submission/`. Remaining
 owner work is recording/uploading the video and pasting the prepared entry
@@ -54,6 +62,7 @@ until it has a matched baseline.
 ```bash
 make check
 armproof ci examples/armproof-reference/armproof.json
+python3.12 scripts/demo_release_gate.py
 armproof evidence-verify \
   --checksums ops/evidence/EXP-2026-004/accepted/evidence/SHA256SUMS \
   --root ops/evidence/EXP-2026-004/accepted/evidence

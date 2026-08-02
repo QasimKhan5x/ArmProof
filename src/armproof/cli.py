@@ -9,8 +9,19 @@ import sys
 from pathlib import Path
 from typing import Sequence
 
-from armproof.contracts import ContractError, parse_contract
-from armproof.evidence import EvidenceRecordError, parse_comparison, verify_checksum_ledger
+from armproof.contracts import (
+    ContractError,
+    parse_contract,
+    validate_comparison_identities,
+)
+from armproof.evidence import (
+    ADAPTER_ID,
+    EvidenceRecordError,
+    comparison_to_dict,
+    parse_comparison,
+    verify_and_derive,
+    verify_checksum_ledger,
+)
 from armproof.policy import decision_to_dict, evaluate_claims
 from armproof.quality import evaluate_quality, load_quality_cases, quality_to_dict
 from armproof.report import generate_report
@@ -40,6 +51,7 @@ def _json_object(path: Path) -> dict:
 def _evaluate(contract_path: Path, comparison_paths: Sequence[Path]) -> dict:
     contract = parse_contract(_json_object(contract_path))
     comparisons = [parse_comparison(_json_object(path)) for path in comparison_paths]
+    validate_comparison_identities(contract, comparisons)
     return decision_to_dict(evaluate_claims(contract.claims, comparisons))
 
 
@@ -71,6 +83,7 @@ def build_parser() -> argparse.ArgumentParser:
     report.add_argument("--summary", type=Path, required=True)
     report.add_argument("--comparison", type=Path)
     report.add_argument("--deployment-summary", type=Path)
+    report.add_argument("--verification", type=Path)
     report.add_argument("--output", type=Path, required=True)
     evidence = subparsers.add_parser("evidence-verify", help="verify a relocated SHA-256 evidence ledger")
     evidence.add_argument("--checksums", type=Path, required=True)
@@ -96,6 +109,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 args.output,
                 comparison_path=args.comparison,
                 deployment_summary_path=args.deployment_summary,
+                verification_path=args.verification,
             )
         except (OSError, ValueError, json.JSONDecodeError) as exc:
             print(f"armproof: {exc}", file=sys.stderr)
@@ -138,23 +152,46 @@ def _run_ci(args: argparse.Namespace) -> int:
     try:
         config = _json_object(args.config)
         allowed = {
-            "schema_version", "contract", "comparisons", "summary",
-            "deployment_summary", "output",
+            "schema_version", "contract", "evidence", "deployment_summary", "output",
         }
-        required = {"schema_version", "contract", "comparisons", "summary"}
+        required = {"schema_version", "contract", "evidence"}
         if set(config) - allowed or not required <= set(config) or config["schema_version"] != "1.0.0":
             raise ValueError("config must be ArmProof 1.0 with no unknown fields")
-        if not isinstance(config["contract"], str) or not isinstance(config["summary"], str):
-            raise ValueError("config contract and summary must be paths")
-        comparisons = config["comparisons"]
-        if not isinstance(comparisons, list) or len(comparisons) != 1 or not all(
-            isinstance(item, str) and item for item in comparisons
+        if not isinstance(config["contract"], str):
+            raise ValueError("config contract must be a path")
+        evidence_config = config["evidence"]
+        evidence_fields = {
+            "adapter", "root", "checksums", "workload_manifest", "reproduction",
+        }
+        if not isinstance(evidence_config, dict) or set(evidence_config) != evidence_fields:
+            raise ValueError(
+                "config evidence must declare adapter, primary and reproduction evidence"
+            )
+        if evidence_config["adapter"] != ADAPTER_ID:
+            raise ValueError(f"unsupported evidence adapter: {evidence_config['adapter']}")
+        if not all(
+            isinstance(evidence_config[field], str) and evidence_config[field]
+            for field in {"root", "checksums", "workload_manifest"}
         ):
-            raise ValueError("ArmProof 0.1 config requires exactly one comparison path")
+            raise ValueError("config evidence paths must be non-empty strings")
+        reproduction_config = evidence_config["reproduction"]
+        if not isinstance(reproduction_config, dict) or set(reproduction_config) != {
+            "root", "checksums",
+        } or not all(
+            isinstance(value, str) and value for value in reproduction_config.values()
+        ):
+            raise ValueError("config reproduction evidence must declare root and checksums")
         base = args.config.resolve().parent
         contract_path = base / config["contract"]
-        comparison_paths = [base / item for item in comparisons]
-        summary_path = base / config["summary"]
+        contract = parse_contract(_json_object(contract_path))
+        verified = verify_and_derive(
+            contract,
+            base / evidence_config["root"],
+            base / evidence_config["checksums"],
+            base / evidence_config["workload_manifest"],
+            base / reproduction_config["root"],
+            base / reproduction_config["checksums"],
+        )
         deployment_value = config.get("deployment_summary")
         if deployment_value is not None and not isinstance(deployment_value, str):
             raise ValueError("config deployment_summary must be a path")
@@ -163,8 +200,43 @@ def _run_ci(args: argparse.Namespace) -> int:
         if not isinstance(configured_output, str) or not configured_output:
             raise ValueError("config output must be a non-empty path")
         output = args.output or (base / configured_output)
-        decision = _evaluate(contract_path, comparison_paths)
+        decision = decision_to_dict(evaluate_claims(contract.claims, (verified.comparison,)))
         output.mkdir(parents=True, exist_ok=True)
+        comparison_path = output / "comparison.json"
+        comparison_path.write_text(
+            json.dumps(comparison_to_dict(verified.comparison), indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        summary_path = output / "summary.json"
+        summary_path.write_text(
+            json.dumps(dict(verified.summary), indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        verification_path = output / "verification.json"
+        verification_path.write_text(
+            json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "adapter": verified.adapter,
+                    "comparison_source": "derived_from_raw_evidence",
+                    "checksums": {
+                        "passed": verified.checksums.passed,
+                        "checked": verified.checksums.checked,
+                        "missing": list(verified.checksums.missing),
+                        "mismatched": list(verified.checksums.mismatched),
+                    },
+                    "reproduction_checksums": {
+                        "passed": verified.reproduction_checksums.passed,
+                        "checked": verified.reproduction_checksums.checked,
+                        "missing": list(verified.reproduction_checksums.missing),
+                        "mismatched": list(verified.reproduction_checksums.mismatched),
+                    },
+                },
+                indent=2,
+                sort_keys=True,
+            ) + "\n",
+            encoding="utf-8",
+        )
         decision_path = output / "decision.json"
         decision_path.write_text(
             json.dumps(decision, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -173,8 +245,9 @@ def _run_ci(args: argparse.Namespace) -> int:
             decision_path,
             summary_path,
             output,
-            comparison_path=comparison_paths[0],
+            comparison_path=comparison_path,
             deployment_summary_path=deployment_path,
+            verification_path=verification_path,
         )
     except (OSError, ValueError, ContractError, EvidenceRecordError) as exc:
         print(f"armproof: {exc}", file=sys.stderr)

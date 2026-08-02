@@ -11,7 +11,7 @@ the product demo are checked into the public repository.
    LLM queue versus the guarded queue.
 3. Open **Arm result**, inspect the accepted experiment identity and checksum
    status, then click **Load verified experiment**. The page derives same-load
-   customer outcomes and the confirmed 3x capacity boundary from accepted
+   customer outcomes and the confirmed 3x tested capacity boundary from accepted
    events.
 4. Open **Release proof**. Inspect the claim ledger, optimization path, exact
    deployment and reusable GitHub Action.
@@ -43,19 +43,19 @@ armproof ci examples/armproof-reference/armproof.json
 Expected behavior:
 
 - exit `0`;
-- six required claims pass;
+- 282 files across the primary and clean-reproduction bundles verify;
+- seven required claims pass from a comparison derived by the adapter;
 - an offline report and machine-readable decision are written; and
 - the exact passing deployment remains linked to the decision.
 
 To see a release blocked:
 
 ```bash
-armproof verify \
-  --contract examples/fixture-fail/contract.json \
-  --comparison examples/fixture-fail/comparison.json
+python3.12 scripts/demo_release_gate.py
 ```
 
-Expected exit code: `2`.
+The script alters only a temporary copy of one ledger digest. Expected output
+is a valid seven-claim pass followed by a checksum block before policy runs.
 
 ## Full Test Suite
 
@@ -82,6 +82,8 @@ the frozen capacity protocol; and the passing deployment is captured in
 
 ## Trust Boundary
 
-ArmProof verifies declared claims for a pinned deployment. It is not an Arm
-certification authority and does not claim that one result generalizes to all
-models or Arm machines.
+ArmProof verifies declared claims for a pinned deployment. The authoritative
+CI path is `ledgers + raw evidence -> derived comparison -> identity binding ->
+policy`; a caller-authored normalized comparison cannot enter `armproof ci`.
+It is not an Arm certification authority, and its repository checksums are not
+independent attestation of the original evidence producer.

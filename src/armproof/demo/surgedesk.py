@@ -8,8 +8,10 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from armproof.demo.queue_guard import QueueGuard
-from armproof.evidence import verify_checksum_ledger
+from armproof.contracts import parse_contract
+from armproof.demo.queue_guard import QueueGuard, queue_for_intent
+from armproof.evidence import comparison_to_dict, verify_and_derive
+from armproof.policy import decision_to_dict, evaluate_claims
 
 
 DEMO_CASE_IDS = (
@@ -52,20 +54,6 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 def _friendly(intent: str | None) -> str:
     return "Needs human review" if intent is None else intent.replace("?", "").replace("_", " ").title()
-
-
-def _queue(intent: str | None) -> str:
-    if intent is None:
-        return "Manual review"
-    if intent in HIGH_PRIORITY:
-        return "Account security"
-    if "cash_withdrawal" in intent or intent in {"atm_support", "cash_withdrawal_charge", "card_swallowed"}:
-        return "Cash & ATM"
-    if "transfer" in intent or intent in {"beneficiary_not_allowed", "receiving_money"}:
-        return "Transfers"
-    if "card" in intent:
-        return "Cards & payments"
-    return "Account support"
 
 
 def _procedure(intent: str | None) -> str:
@@ -120,23 +108,27 @@ def _queue_guard(root: Path) -> tuple[QueueGuard, list[dict[str, str]]]:
     for rows in grouped.values():
         evaluation.extend(rows[:10])
         training.extend(rows[10:])
-    guard = QueueGuard((row["text"], _queue(row["category"])) for row in training)
+    guard = QueueGuard((row["text"], queue_for_intent(row["category"])) for row in training)
     return guard, evaluation
 
 
 def build_surgedesk_payload(root: Path) -> dict[str, Any]:
     accepted_evidence = root / "ops/evidence/EXP-2026-004/accepted/evidence"
-    checksum_result = verify_checksum_ledger(
-        accepted_evidence / "SHA256SUMS",
-        accepted_evidence,
+    contract = parse_contract(
+        _load_json(root / "examples/armproof-reference/contract.json")
     )
-    if not checksum_result.passed:
-        raise ValueError(
-            "accepted evidence failed checksum verification: "
-            f"missing={checksum_result.missing}, mismatched={checksum_result.mismatched}"
-        )
+    verified = verify_and_derive(
+        contract,
+        accepted_evidence,
+        accepted_evidence / "SHA256SUMS",
+        root / "data/banking77/generated/manifest.json",
+        root / "ops/evidence/EXP-2026-005/accepted/evidence",
+        root / "ops/evidence/EXP-2026-005/accepted/evidence/SHA256SUMS",
+    )
+    decision = decision_to_dict(evaluate_claims(contract.claims, (verified.comparison,)))
+    checksum_result = verified.checksums
     evidence = accepted_evidence / "capacity/experiment"
-    summary = _load_json(evidence / "summary.json")
+    summary = dict(verified.summary)
     quality_enabled = _load_json(evidence / "quality/kleidiai-enabled.json")
     quality_disabled = _load_json(evidence / "quality/kleidiai-disabled.json")
     quality_cases = {
@@ -153,8 +145,8 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
     guard_queue_correct = 0
     for request_id, observed in quality_rows.items():
         source_text = quality_cases[request_id]["source_text"]
-        expected_queue = _queue(observed["expected_intent"])
-        llm_queue_correct += _queue(observed["predicted_intent"]) == expected_queue
+        expected_queue = queue_for_intent(observed["expected_intent"])
+        llm_queue_correct += queue_for_intent(observed["predicted_intent"]) == expected_queue
         guard_queue_correct += guard.predict(source_text).queue == expected_queue
 
     routing_cases = []
@@ -164,8 +156,8 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
         suggested = observed["predicted_intent"]
         expected = observed["expected_intent"]
         guard_prediction = guard.predict(case["source_text"])
-        llm_queue = _queue(suggested)
-        expected_queue = _queue(expected)
+        llm_queue = queue_for_intent(suggested)
+        expected_queue = queue_for_intent(expected)
         routing_cases.append(
             {
                 "request_id": request_id,
@@ -204,14 +196,13 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
     optimized_events = _event_rows(optimized_path, mixed_workload)
 
     deployment = _load_json(root / "ops/evidence/result-first/EXP-2026-002/summary.json")["summary"]
-    comparison = _load_json(root / "examples/armproof-reference/comparison.json")
+    comparison = comparison_to_dict(verified.comparison)
     computed_guard_accuracy = guard_queue_correct / quality_enabled["total"]
     if comparison["metrics"].get("guard_queue_accuracy") != computed_guard_accuracy:
         raise ValueError("ArmProof queue-quality claim differs from recomputed result")
-    reproduction = _load_json(root / "ops/evidence/EXP-2026-005/reproduction-comparison.json")
-    observed_reproduction_difference = max(
-        mix["relative_difference"] for mix in reproduction["mixes"].values()
-    )
+    observed_reproduction_difference = summary["reproduction"][
+        "maximum_relative_difference"
+    ]
 
     mixes = {}
     for name, result in summary["mixes"].items():
@@ -270,7 +261,11 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             },
         },
         "proof": {
-            "decision": "PASS",
+            "decision": "PASS" if decision["passed"] else "BLOCK",
+            "decision_source": "derived_from_verified_evidence",
+            "verified_claims": sum(
+                claim["status"] == "pass" for claim in decision["claims"]
+            ),
             "instance": comparison["treatment"]["controls"]["instance"],
             "threads": comparison["treatment"]["controls"]["threads"],
             "kleidiai_enabled_callchains": comparison["arm_attribution"]["treatment_observed"],
@@ -288,6 +283,11 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             "evidence": {
                 "checksum_verified": checksum_result.passed,
                 "checksummed_files": checksum_result.checked,
+                "reproduction_checksum_verified": verified.reproduction_checksums.passed,
+                "reproduction_checksummed_files": verified.reproduction_checksums.checked,
+                "total_checksummed_files": (
+                    checksum_result.checked + verified.reproduction_checksums.checked
+                ),
                 "comparison": "matched_control",
                 "only_changed_control": "mlas.disable_kleidiai",
             },

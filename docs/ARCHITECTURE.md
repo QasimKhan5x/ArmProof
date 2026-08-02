@@ -6,21 +6,25 @@ ArmProof orchestrates existing inference runtimes and profiling tools. It does
 not implement model kernels, inference scheduling or model conversion.
 
 ```text
-armproof.json
+contract + workload manifest + raw evidence + SHA-256 ledgers
      |
      v
-contract validator
+integrity and schema verification
      |
      v
-experiment orchestrator
-     |-- treatment adapters
-     |-- workload/load generator
-     |-- quality evaluator
-     |-- resource sampler
-     `-- Arm attribution collector
+KleidiAI evidence adapter
+     |-- re-derive fixed-SLO boundaries from request JSONL
+     |-- re-derive quality from row-level evidence
+     |-- validate positive/negative Arm callchains
+     `-- compare clean-instance reproduction
      |
      v
-normalized evidence store
+contract identity binding
+     |-- model artifact hash
+     |-- runtime hash
+     |-- workload hash
+     |-- environment hash
+     `-- exact treatment controls
      |
      v
 fail-closed claim ledger
@@ -85,10 +89,20 @@ Pure policy code evaluates claims. A claim has a causal scope, comparison,
 metric, threshold, evidence IDs and status: `pass`, `fail`, `unknown` or
 `not_applicable`. Required `unknown` claims fail the contract.
 
+### Authoritative CI Path
+
+`armproof ci` does not accept a caller-authored normalized comparison. It
+verifies both evidence ledgers, re-derives metrics with the selected adapter,
+binds observed identities to the contract, and only then evaluates policy.
+Its `verification.json` receipt records the adapter, derivation source and both
+ledger results. Invalid checksums, swapped identities, inconsistent summaries
+and failed reproduction stop before a release decision is emitted.
+
 ### Presenters
 
-CLI, GitHub and web report consume the same verified decision artifact. They
-cannot independently reinterpret metrics.
+CLI, GitHub, the report and SurgeDesk consume the same verification, derivation
+and policy path. SurgeDesk rebuilds its payload through that path; it does not
+contain a hardcoded passing decision.
 
 ## Repository Structure
 

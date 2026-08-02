@@ -308,7 +308,7 @@ function renderEvidenceSummary() {
     mixed.optimized_sustainable_rps,
   );
   const ratios = mixes.map((mix) => mix.ratio);
-  setText("capacity-title", `Same instance. ${mixed.ratio.toFixed(0)}× the capacity.`);
+  setText("capacity-title", `Same instance. ${mixed.ratio.toFixed(0)}× higher confirmed tested traffic.`);
   setText("headline-ratio", `${mixed.ratio.toFixed(1)}×`);
   setText("guard-accuracy", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
   setText("guard-gain", `+${data.quality.guard_queue_gain_pp.toFixed(2)} pp`);
@@ -330,10 +330,11 @@ function renderEvidenceSummary() {
   setText("optimized-boundary", formatRps(mixed.optimized_sustainable_rps));
   setText(
     "conclusion-copy",
-    `The optimized service sustained ${mixed.ratio.toFixed(0)}× mixed traffic under the same ${(data.capacity.slo_ms / 1000).toFixed(0)}-second p95 objective.`,
+    `KleidiAI sustained ${mixed.ratio.toFixed(0)}× higher confirmed tested mixed traffic under the same ${(data.capacity.slo_ms / 1000).toFixed(0)}-second p95 objective.`,
   );
   setText("proof-capacity", `Minimum ${Math.min(...ratios).toFixed(1)}×`);
   setText("proof-quality", `${data.quality.accuracy_delta_pp.toFixed(3)} pp`);
+  setText("proof-macro-f1", `${data.quality.macro_f1_delta_pp.toFixed(3)} pp`);
   setText("proof-queue-quality", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
   setText("proof-schema", `${data.quality.schema_valid_percent.toFixed(0)}%`);
   setText(
@@ -345,6 +346,18 @@ function renderEvidenceSummary() {
   setText(
     "proof-reproduction",
     `${data.proof.reproduction_max_relative_difference_percent.toFixed(0)}% ratio difference`,
+  );
+  setText(
+    "proof-decision-detail",
+    `${data.proof.verified_claims} required claims passed after raw evidence verification and derivation.`,
+  );
+  setText(
+    "proof-evidence-count",
+    `${data.provenance.evidence.total_checksummed_files} files verified`,
+  );
+  setText(
+    "proof-derived-claims",
+    `${data.proof.verified_claims} contract claims evaluated from derived evidence; missing or inconsistent inputs block release.`,
   );
   setText("artifact-reduction", `${data.proof.artifact_reduction_percent.toFixed(2)}% smaller deployment artifact`);
   setText(
@@ -407,7 +420,7 @@ function loadVerifiedExperiment() {
   elements["load-experiment"].disabled = true;
   elements["load-experiment"].textContent = "Verified experiment loaded";
   elements["evidence-load-note"].textContent =
-    `Loaded ${data.provenance.evidence.checksummed_files} verified files; summary recomputed from accepted raw events.`;
+    `Loaded ${data.provenance.evidence.total_checksummed_files} verified files across the primary and clean-reproduction bundles; metrics recomputed from accepted evidence.`;
   elements["evidence-loader"].classList.add("loaded");
   elements["tab-surge"].classList.add("completed");
 }
@@ -470,7 +483,7 @@ async function main() {
     setText("evidence-experiment-id", data.provenance.experiment_id);
     setText(
       "evidence-checksum-status",
-      `${data.provenance.evidence.checksummed_files} files · ${data.provenance.evidence.checksum_verified ? "SHA-256 verified" : "verification failed"}`,
+      `${data.provenance.evidence.total_checksummed_files} files · ${data.provenance.evidence.checksum_verified && data.provenance.evidence.reproduction_checksum_verified ? "both SHA-256 ledgers verified" : "verification failed"}`,
     );
     setText(
       "evidence-comparison",

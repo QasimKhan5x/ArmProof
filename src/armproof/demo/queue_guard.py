@@ -12,6 +12,30 @@ from typing import Iterable, Mapping
 TOKEN_RE = re.compile(r"[a-z0-9]+")
 
 
+def queue_for_intent(intent: str | None) -> str:
+    """Map a BANKING77 intent into SurgeDesk's operational queue."""
+    if intent is None:
+        return "Manual review"
+    if intent in {
+        "lost_or_stolen_card",
+        "compromised_card",
+        "card_payment_not_recognised",
+        "cash_withdrawal_not_recognised",
+        "direct_debit_payment_not_recognised",
+        "lost_or_stolen_phone",
+    }:
+        return "Account security"
+    if "cash_withdrawal" in intent or intent in {
+        "atm_support", "cash_withdrawal_charge", "card_swallowed",
+    }:
+        return "Cash & ATM"
+    if "transfer" in intent or intent in {"beneficiary_not_allowed", "receiving_money"}:
+        return "Transfers"
+    if "card" in intent:
+        return "Cards & payments"
+    return "Account support"
+
+
 def features(text: str) -> list[str]:
     words = TOKEN_RE.findall(text.lower())
     return words + [f"{left}_{right}" for left, right in zip(words, words[1:])]

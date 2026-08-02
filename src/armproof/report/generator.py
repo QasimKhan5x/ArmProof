@@ -79,6 +79,7 @@ def generate_report(
     *,
     comparison_path: Path | None = None,
     deployment_summary_path: Path | None = None,
+    verification_path: Path | None = None,
 ) -> Path:
     decision = _object(decision_path)
     summary = _object(summary_path)
@@ -90,6 +91,23 @@ def generate_report(
     ratios = _validated_summary_ratios(summary)
     _validate_comparison_summary(comparison, summary, ratios)
     deployment = _object(deployment_summary_path) if deployment_summary_path else None
+    verification = _object(verification_path) if verification_path else None
+    if verification is not None:
+        primary = verification.get("checksums", {})
+        reproduction = verification.get("reproduction_checksums", {})
+        if (
+            verification.get("schema_version") != "1.0.0"
+            or verification.get("comparison_source") != "derived_from_raw_evidence"
+            or primary.get("passed") is not True
+            or reproduction.get("passed") is not True
+            or not isinstance(primary.get("checked"), int)
+            or isinstance(primary.get("checked"), bool)
+            or primary["checked"] < 1
+            or not isinstance(reproduction.get("checked"), int)
+            or isinstance(reproduction.get("checked"), bool)
+            or reproduction["checked"] < 1
+        ):
+            raise ValueError("verification receipt is not a passing raw-evidence receipt")
     if deployment is not None:
         required = {"disk_reduction_percent", "peak_pss_reduction_percent"}
         if deployment.get("schema_version") != "1.0.0" or not required.issubset(
@@ -101,6 +119,7 @@ def generate_report(
         "summary": summary,
         "comparison": comparison,
         "deployment": deployment,
+        "verification": verification,
         "history": deployment.get("history", []) if deployment else [],
     }
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).replace("</", "<\\/")
@@ -112,6 +131,8 @@ def generate_report(
         _copy_input(comparison_path, output / "comparison.json")
     if deployment_summary_path:
         _copy_input(deployment_summary_path, output / "deployment-summary.json")
+    if verification_path:
+        _copy_input(verification_path, output / "verification.json")
     _copy_input(decision_path, output / "decision.json")
     _copy_input(summary_path, output / "summary.json")
     title = "Verified" if decision["passed"] else "Blocked"
@@ -135,7 +156,7 @@ _HTML = r'''<!doctype html>
 </head>
 <body>
 <main class="shell">
-<nav class="topbar" aria-label="Report actions"><div class="brand">Arm<span>Proof</span></div><div class="top-actions"><a class="button" href="summary.json" download>Download summary</a><a class="button" href="decision.json">Decision JSON</a></div></nav>
+<nav class="topbar" aria-label="Report actions"><div class="brand">Arm<span>Proof</span></div><div class="top-actions"><a class="button" href="verification.json">Verification receipt</a><a class="button" href="summary.json" download>Download summary</a><a class="button" href="decision.json">Decision JSON</a></div></nav>
 <header class="hero"><div><div class="eyebrow">Graviton4 release evidence</div><h1 id="report-headline">Arm-native capacity, proven before merge.</h1><p id="report-lead">A fail-closed release decision for Phi-4 Mini INT4 on ONNX Runtime GenAI, with KleidiAI isolated by a matched control.</p></div><div class="decision"><strong id="decision-title">Verified</strong><span id="decision-subtitle">All required claims passed</span></div></header>
 <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" aria-controls="overview" id="overview-tab">Overview</button><button class="tab" role="tab" aria-selected="false" aria-controls="evidence" id="evidence-tab">Evidence &amp; provenance</button></div>
 <section class="view" id="overview" role="tabpanel" aria-labelledby="overview-tab">
@@ -147,13 +168,14 @@ _HTML = r'''<!doctype html>
 </section>
 <section class="view" id="evidence" role="tabpanel" aria-labelledby="evidence-tab" hidden>
   <div class="section" id="history-section"><h2>Evidence history</h2><p class="section-lead">Negative and inconclusive experiments remain visible; later runs do not rewrite them.</p><div class="timeline" id="history"></div></div>
-  <div class="section"><h2>Artifact identity</h2><table class="provenance"><thead><tr><th>Identity</th><th>SHA-256</th></tr></thead><tbody id="provenance"></tbody></table><div class="callout"><b>Not Arm certification.</b> ArmProof verifies a declared contract from supplied evidence. It does not claim official Arm approval.</div></div>
+  <div class="section"><h2>Authoritative evidence path</h2><p class="section-lead" id="verification-detail">No verification receipt supplied.</p><div class="scope"><div class="node"><b>Verify</b><br><span>SHA-256 ledgers and workload manifest</span></div><div class="arrow">&rarr;</div><div class="node"><b>Derive and bind</b><br><span>Raw metrics plus contract identities</span></div><div class="arrow">&rarr;</div><div class="node"><b>Decide</b><br><span>Fail-closed policy evaluation</span></div></div></div>
+  <div class="section"><h2>Artifact identity</h2><table class="provenance"><thead><tr><th>Identity</th><th>SHA-256</th></tr></thead><tbody id="provenance"></tbody></table><div class="callout"><b>Not Arm certification.</b> ArmProof verifies a declared contract from supplied evidence. It does not claim official Arm approval or independently attest the evidence producer.</div></div>
 </section>
 <footer class="footer"><span>Offline report generated by ArmProof</span><span id="report-context"></span></footer>
 </main>
 <script id="report-data" type="application/json">{{DATA}}</script>
 <script>
-const data=JSON.parse(document.getElementById('report-data').textContent);const decision=data.decision,summary=data.summary,comparison=data.comparison,deployment=data.deployment;const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const data=JSON.parse(document.getElementById('report-data').textContent);const decision=data.decision,summary=data.summary,comparison=data.comparison,deployment=data.deployment,verification=data.verification;const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const title=document.getElementById('decision-title');title.textContent=decision.passed?'Verified':'Blocked';title.parentElement.style.borderColor=decision.passed?'var(--green)':'var(--red)';document.getElementById('decision-subtitle').textContent=decision.passed?'All required claims passed':'Required claims did not pass';
 if(!decision.passed){document.getElementById('report-headline').textContent='Optimization evidence blocked before merge.';document.getElementById('report-lead').textContent='The declared Arm optimization contract did not pass. Review the failed or unknown claims before deploying this treatment.';}
 const mixes=document.getElementById('mixes');let ratios=[];for(const name of ['short','long','mixed']){const row=summary.mixes[name];if(!row)continue;const base=row.ratio.baseline_median,opt=row.ratio.treatment_median,ratio=row.ratio.ratio;ratios.push(ratio);const max=Math.max(base,opt);const el=document.createElement('article');el.className='mix';el.innerHTML=`<div class="mix-head"><h3>${name}</h3><span class="ratio">${ratio.toFixed(1)}x</span></div><div class="bar-row"><span>Disabled</span><div class="track"><div class="bar" style="width:${base/max*100}%"></div></div><b>${base.toFixed(2)}</b></div><div class="bar-row"><span>Enabled</span><div class="track"><div class="bar enabled" style="width:${opt/max*100}%"></div></div><b>${opt.toFixed(2)}</b></div>`;mixes.appendChild(el)}if(ratios.length)document.getElementById('min-ratio').textContent=Math.min(...ratios).toFixed(1)+'x';document.getElementById('schema-rate').textContent=(summary.quality_comparison.schema_valid_rate*100).toFixed(0)+'%';
@@ -161,6 +183,7 @@ if(deployment){const disk=deployment.metrics.disk_reduction_percent,pss=deployme
 const claims=document.getElementById('claims');for(const row of decision.claims){const el=document.createElement('div');el.className='claim';const symbol=row.status==='pass'?'✓':'!';el.innerHTML=`<span class="check ${esc(row.status)}">${symbol}</span><div><b>${esc(row.claim_id.replaceAll('-',' '))}</b><br><code>${esc(row.reason_code)}</code></div><code>${row.observed===null?'unknown':Number(row.observed).toFixed(2)} / ${Number(row.threshold)}</code>`;claims.appendChild(el)}
 const history=document.getElementById('history');for(const row of data.history){const el=document.createElement('div');el.className='event';const status=document.createElement('span');status.className='status';if(['passed','failed','inconclusive'].includes(row.status))status.classList.add(row.status);status.textContent=row.status;const id=document.createElement('b');id.textContent=row.id;const note=document.createElement('span');note.textContent=row.note;el.append(status,id,note);history.appendChild(el)}
 if(!data.history.length)document.getElementById('history-section').hidden=true;const experiment=summary.experiment_id||(comparison&&comparison.comparison_id)||'ArmProof comparison';const instance=comparison&&comparison.treatment.controls.instance||'Arm target';document.getElementById('report-context').textContent=`${experiment} / ${instance}`;
+if(verification){const checked=verification.checksums.checked+verification.reproduction_checksums.checked;document.getElementById('verification-detail').textContent=`${checked} files verified across primary and clean-reproduction bundles. The comparison and decision were derived from bound evidence, not accepted as input.`;}
 const prov=document.getElementById('provenance');if(comparison){for(const [name,value] of [['Model artifact',comparison.baseline.artifact_sha256],['Runtime lock',comparison.baseline.runtime_sha256],['Workload',comparison.baseline.workload_sha256],['Environment',comparison.baseline.environment_sha256]]){const tr=document.createElement('tr');const a=document.createElement('td');a.textContent=name;const b=document.createElement('td');const code=document.createElement('code');code.textContent=value;b.appendChild(code);tr.append(a,b);prov.appendChild(tr)}}
 for(const tab of document.querySelectorAll('.tab'))tab.addEventListener('click',()=>{for(const item of document.querySelectorAll('.tab'))item.setAttribute('aria-selected',String(item===tab));for(const panel of document.querySelectorAll('.view'))panel.hidden=panel.id!==tab.getAttribute('aria-controls')});
 </script>

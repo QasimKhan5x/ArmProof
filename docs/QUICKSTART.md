@@ -25,11 +25,19 @@ python3.12 -m pip install .
 armproof ci examples/armproof-reference/armproof.json
 ```
 
-The command writes a machine-readable decision and an offline `index.html`.
+The command verifies and derives from 282 checksum-bound files, then writes a
+machine-readable decision, a verification receipt and an offline `index.html`.
 Exit `0` means all required claims passed, `2` means at least one required
 claim failed or is unknown, and `1` means the inputs could not be evaluated.
 
-Use the negative fixtures to inspect fail-closed behavior:
+Run the integrity challenge to see valid evidence pass and a temporary
+one-digest mutation block before policy evaluation:
+
+```bash
+python3.12 scripts/demo_release_gate.py
+```
+
+Use the normalized negative fixtures to inspect policy fail-closed behavior:
 
 ```bash
 armproof verify \
@@ -61,8 +69,9 @@ Create an `armproof.json` matching
 
 Pin the released Action commit in production. Never run paid benchmarks or
 cloud credentials in `pull_request_target` or on untrusted fork code. The
-portable Action verifies normalized evidence; produce that evidence on a
-trusted Arm runner.
+reference Action verifies raw evidence ledgers, re-derives the comparison and
+binds it to the contract. Produce evidence on a trusted Arm runner; the ledger
+detects later modification but does not independently attest who produced it.
 
 ## Produce Evidence
 
@@ -109,8 +118,8 @@ Keep these boundaries intact:
 
 1. Baseline and treatment expose the same HTTP contract.
 2. Only the declared optimization control changes in an Arm-causal comparison.
-3. Raw collection, normalized comparison, policy decision and report remain
-   separate artifacts.
+3. Raw collection, verified derivation, policy decision and report remain
+   separate artifacts; CI must derive rather than trust a supplied comparison.
 4. Quality claims pass before dependent performance claims.
 5. The deployment manifest points to the exact passing treatment.
 

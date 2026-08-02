@@ -27,7 +27,7 @@ and the accepted
 | Time-weighted PSS | INT4 versus BF16 | 59.66% lower | [`summary.json`](../ops/evidence/result-first/EXP-2026-002/summary.json) |
 | Direct Arm speed | KleidiAI enabled versus disabled, same INT4 runtime | 1.72x-2.59x | [`summary.json`](../ops/evidence/result-first/EXP-2026-002/summary.json) |
 | Arm execution | Enabled and disabled perf callchains | `kai_*` only when enabled | [`perf-enabled.txt`](../ops/evidence/EXP-2026-004/accepted/evidence/perf-enabled.txt), [`perf-disabled.txt`](../ops/evidence/EXP-2026-004/accepted/evidence/perf-disabled.txt) |
-| Fixed-SLO capacity | Enabled versus disabled | 3.0x short, 2.5x long, 3.0x mixed | [`summary.json`](../ops/evidence/EXP-2026-004/accepted/evidence/capacity/experiment/summary.json) |
+| Confirmed tested fixed-SLO capacity | Enabled versus disabled | 3.0x short, 2.5x long, 3.0x mixed | Re-derived from request JSONL; accepted [`summary.json`](../ops/evidence/EXP-2026-004/accepted/evidence/capacity/experiment/summary.json) is cross-checked |
 | Large-set quality | Enabled versus disabled, 770 requests | -0.390 pp accuracy; -0.673 pp macro F1 | [`comparison.json`](../ops/evidence/EXP-2026-004/accepted/evidence/capacity/experiment/quality/comparison.json) |
 | Schema validity | Both normalized treatments | 100% | [`comparison.json`](../ops/evidence/EXP-2026-004/accepted/evidence/capacity/experiment/quality/comparison.json) |
 | Clean reproduction | Fresh c8g.4xlarge versus accepted ratios | 0% difference for all mixes | [`reproduction-comparison.json`](../ops/evidence/EXP-2026-005/reproduction-comparison.json) |
@@ -50,12 +50,16 @@ python3.12 -m pip install -e .
 armproof ci examples/armproof-reference/armproof.json
 ```
 
-Expected exit code: `0`. The command regenerates `decision.json`, normalized
-inputs and an offline report from the checked-in comparison and contract.
+Expected exit code: `0`. The command verifies 282 files, re-derives capacity
+and quality, binds treatment identities to the contract, checks reproduction,
+and then regenerates `verification.json`, `comparison.json`, `decision.json`
+and the offline report. A supplied normalized comparison is not accepted.
 
-Test fail-closed behavior:
+Test integrity and fail-closed behavior:
 
 ```bash
+python3.12 scripts/demo_release_gate.py
+
 armproof verify \
   --contract examples/fixture-fail/contract.json \
   --comparison examples/fixture-fail/comparison.json
@@ -77,4 +81,5 @@ armproof evidence-verify \
 
 The accepted and reproduction bundles each contain 141 checksummed guest
 files. Empty, changed, duplicate, missing or out-of-root ledger entries fail.
-
+The ledgers prove repository consistency after capture, not independent
+attestation of who produced the original measurements.

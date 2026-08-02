@@ -72,5 +72,26 @@
     "schema_valid_rate": 1.0
   },
   "quality_passed": true,
+  "reproduction": {
+    "experiment_id": "EXP-2026-005",
+    "maximum_relative_difference": 0.0,
+    "mixes": {
+      "long": {
+        "reference_ratio": 2.5,
+        "relative_difference": 0.0,
+        "reproduction_ratio": 2.5
+      },
+      "mixed": {
+        "reference_ratio": 2.9999999999999996,
+        "relative_difference": 0.0,
+        "reproduction_ratio": 2.9999999999999996
+      },
+      "short": {
+        "reference_ratio": 3.0,
+        "relative_difference": 0.0,
+        "reproduction_ratio": 3.0
+      }
+    }
+  },
   "schema_version": "1.0.0"
 }

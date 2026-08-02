@@ -30,7 +30,7 @@ finding compatible cloud hardware.
 
 SurgeDesk is a human-confirmed banking-support triage application backed by a
 measured Arm cloud optimization. On the same AWS Graviton4 instance, the same
-Phi-4 Mini INT4 service sustained 3x mixed traffic with KleidiAI enabled while
+Phi-4 Mini INT4 service sustained 3x higher confirmed tested mixed traffic with KleidiAI enabled while
 remaining inside a 10-second p95 SLO. ArmProof is the reusable open-source
 artifact behind the demo: a fail-closed CI gate that verifies quality,
 capacity, executed Arm callchains, checksums and clean reproduction before an
@@ -64,9 +64,11 @@ The application then shows what changes under load. At an identical 0.267
 requests/second, the KleidiAI-disabled service recorded 12.66 seconds p95 and
 three SLO breaches across eight requests; the enabled service recorded 2.21
 seconds p95 and zero breaches. Five confirmation runs at each passing boundary
-established 0.20 versus 0.60 requests/second sustainable mixed traffic.
+confirmed 0.20 versus 0.60 requests/second tested mixed-traffic boundaries.
 
-ArmProof evaluates the evidence behind that result. A versioned contract
+ArmProof evaluates the evidence behind that result. It verifies 282 files
+across primary and clean-reproduction bundles, re-derives capacity and quality,
+binds model/runtime/workload/environment identities, and only then evaluates a versioned contract
 declares required quality, service-capacity, schema, attribution and
 reproduction claims. Required failures or unknowns block the release. A
 passing run emits:
@@ -95,9 +97,9 @@ end-to-end execution by 1.72x to 2.59x. Linux perf callchains contained
 
 The service-level test used fixed-rate open-loop traffic, separate warmup,
 passing/failing boundary discovery and five confirmation runs per treatment.
-KleidiAI increased sustainable capacity by 3.0x for short traffic, 2.5x for
-long traffic and 3.0x for mixed traffic. A fresh `c8g.4xlarge` reproduced all
-three ratios exactly.
+KleidiAI increased the highest confirmed tested capacity by 3.0x for short
+traffic, 2.5x for long traffic and 3.0x for mixed traffic. A fresh
+`c8g.4xlarge` reproduced all three tested ratios.
 
 The queue guard improves application usefulness, but it is not presented as
 an Arm speedup.
@@ -117,10 +119,12 @@ an Arm speedup.
 5. We captured positive and negative `kai_*` callchain evidence separately
    from the primary load run so profiler overhead could not contaminate it.
 6. We reran the accepted protocol on a clean Graviton4 instance and compared
-   the normalized outputs.
+   metrics re-derived from the clean-instance raw evidence.
 7. We built ArmProof around strict JSON schemas, immutable artifact identities,
-   SHA-256 ledgers, dependency-aware claims and pass/fail/unknown semantics.
-8. We generated SurgeDesk only from accepted, checksummed evidence. Recorded
+   two SHA-256 ledgers, dependency-aware claims and pass/fail/unknown semantics.
+   `armproof ci` rejects supplied normalized comparisons and derives its own.
+8. We generated SurgeDesk through the same authoritative verification,
+   derivation and policy path. Recorded
    mode never pretends edited text is live inference.
 
 ## Challenges
@@ -144,7 +148,7 @@ required.
 
 ## Accomplishments
 
-- 3.0x sustainable mixed and short traffic, and 2.5x long traffic, on the same
+- 3.0x higher confirmed tested mixed and short traffic, and 2.5x long traffic, on the same
   Graviton4 instance.
 - 1.72x to 2.59x direct KleidiAI execution speedup across four shapes.
 - 35.92% smaller artifacts, 55.34% lower peak PSS and 59.66% lower
@@ -153,6 +157,8 @@ required.
   percentage point regression.
 - Enabled-only `kai_*` runtime attribution and exact clean-instance
   reproduction.
+- A tamper challenge that passes seven claims from 282 files, then proves one
+  changed temporary ledger digest blocks release before policy evaluation.
 - A zero-runtime-dependency Python CLI, reusable GitHub Action, strict public
   schemas, portable evidence ledger, deployment template and responsive
   offline report.
@@ -165,9 +171,10 @@ and need different controls. BF16-to-INT4 explains the size and memory change;
 KleidiAI enabled versus disabled explains the Arm-specific execution change;
 fixed-SLO traffic explains the operational capacity change.
 
-We also learned that reproducibility improves when the experiment result is a
-typed artifact rather than prose. Every presenter in ArmProof consumes the
-same verified decision, and every headline number links back to raw evidence.
+We also learned that a typed result is insufficient if CI trusts it as input.
+ArmProof therefore verifies raw evidence, derives its own comparison, binds
+that comparison to the contract and only then emits the decision consumed by
+the Action, report and SurgeDesk.
 
 Finally, a benchmark becomes much easier to understand when it is attached to
 a user outcome. In SurgeDesk, 3x capacity means a support queue remains inside
@@ -184,7 +191,8 @@ contribution is the workflow:
 - fixed-SLO load and quality collectors;
 - matched-treatment templates;
 - public contract and decision schemas;
-- SHA-256 evidence verification;
+- primary and clean-reproduction SHA-256 evidence verification;
+- raw-evidence derivation and contract identity binding;
 - explicit Arm execution attribution;
 - pass, fail and unknown fixtures;
 - a GitHub Action and offline report; and
@@ -202,8 +210,8 @@ memory gates, service-level capacity testing, runtime attribution and clean
 reproduction. It then converts those results into both a compelling cloud
 application and a reusable developer workflow.
 
-The headline is simple: the same Graviton4 instance serves 3x the mixed AI
-traffic. The implementation underneath that sentence is inspectable,
+The headline is simple: the same Graviton4 instance served 3x higher confirmed
+tested mixed AI traffic under the same p95 SLO. The implementation underneath that sentence is inspectable,
 fail-closed and available for another Arm developer to adopt.
 
 ## What's Next
@@ -225,6 +233,7 @@ cd VerifyLane
 python3.12 -m pip install -e .
 make check
 armproof ci examples/armproof-reference/armproof.json
+python3.12 scripts/demo_release_gate.py
 python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
@@ -248,4 +257,3 @@ systemd unit and passing deployment are under `examples/phi4-graviton/` and
 Project source is MIT licensed. BANKING77 is used under CC BY 4.0 and is
 attributed in `THIRD_PARTY_NOTICES.md`. Large model weights are not
 redistributed by this repository.
-

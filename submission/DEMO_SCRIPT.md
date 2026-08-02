@@ -17,7 +17,7 @@ be loaded or validated during the recording.
 5. Open a terminal beside the browser with this command already typed:
 
    ```bash
-   armproof ci examples/armproof-reference/armproof.json
+   python3.12 scripts/demo_release_gate.py
    ```
 
 6. Close notifications, hide bookmarks and enable Do Not Disturb. Record only
@@ -34,7 +34,7 @@ the first viewport.
 
 > This is SurgeDesk, a banking-support AI service on AWS Graviton4. We migrated
 > Phi-4 Mini to INT4 ONNX Runtime GenAI and isolated Arm KleidiAI against the
-> same model and runtime. The result is three times the sustainable mixed
+> same model and runtime. The result is three times higher confirmed tested mixed
 > traffic on the same instance. ArmProof makes that claim reproducible and
 > blocks it from regressing.
 
@@ -53,8 +53,8 @@ the first viewport.
 
 ### 0:43-1:25 - The Arm Result, Loaded Honestly
 
-**Do:** Click **2. Arm result**. Point briefly to `EXP-2026-004`, **141 files ·
-SHA-256 verified**, and **Matched INT4 control**. Click **Load verified
+**Do:** Click **2. Arm result**. Point briefly to `EXP-2026-004`, **282 files ·
+both SHA-256 ledgers verified**, and **Matched INT4 control**. Click **Load verified
 experiment**. Point in this order: experiment strip, equal-load request rows,
 p95 cells, 3.0x headline and the three traffic-mix rows.
 
@@ -62,21 +62,24 @@ p95 cells, 3.0x headline and the three traffic-mix rows.
 
 > Now the optimization. I am loading accepted experiment EXP-2026-004, not
 > pretending to run a benchmark in three seconds. This view is recomputed from
-> raw events in a 141-file SHA-256 ledger. The matched deployment is one
+> accepted request and quality evidence across two 141-file SHA-256 ledgers.
+> The matched deployment is one
 > c8g.4xlarge, one Phi-4 Mini INT4 model, 16 threads and a 10-second p95 target;
 > only KleidiAI changes. At equal load, disabled breaches the target three
 > times at 12.66 seconds p95; enabled breaches none at 2.21. Five confirmations
 > per boundary put mixed capacity at 0.20 versus 0.60 requests per second,
-> with 2.5 to 3 times capacity across every traffic shape.
+> with 2.5 to 3 times higher confirmed tested capacity across every traffic shape.
 
 ### 1:25-2:08 - Prove It Is Optimization On Arm
 
-**Do:** Click **3. Release proof**. Point to the claim ledger. Scroll once to
-the five-step optimization path and claim boundary.
+**Do:** Click **3. Release proof**. Point to the seven-claim ledger and the
+**dashboard cannot approve itself** chain. Scroll once to the optimization path.
 
 **Say:**
 
-> This is not a dashboard assertion. Phi-4 moved from BF16 to INT4, reducing
+> This is not a dashboard assertion. ArmProof verifies both ledgers, derives
+> metrics from the evidence, binds model, runtime, workload and environment
+> identities, and only then decides. Phi-4 moved from BF16 to INT4, reducing
 > the artifact by 35.92 percent, peak PSS by 55.34 percent and time-weighted
 > PSS by 59.66 percent. Inside the identical INT4 deployment, KleidiAI delivers
 > 1.72 to 2.59 times direct execution speedup, and kai callchains appear only
@@ -86,15 +89,16 @@ the five-step optimization path and claim boundary.
 
 ### 2:08-2:38 - Community Artifact
 
-**Do:** Scroll to **The same decision runs in pull requests** and the
-three-step adoption path. Switch to the terminal and press Enter on the
-prepared command. Let the six passing claims print.
+**Do:** Scroll to **The same decision runs in pull requests**. Switch to the
+terminal and press Enter on the prepared integrity-challenge command. Let the
+three concise lines print: PASS, TAMPER, BLOCK.
 
 **Say:**
 
-> ArmProof packages that method for other developers. One versioned contract
-> connects quality, capacity, Arm execution, checksums and reproduction. A
-> failure or unknown blocks CI. It ships as a zero-dependency Python CLI,
+> ArmProof packages that method for other developers. Here all seven claims
+> pass from 282 verified files. Then the demo changes one digest in a temporary
+> ledger, and the same release gate blocks before policy evaluation. It ships
+> as a zero-dependency Python CLI,
 > GitHub Action, public schemas, matched-treatment runner, offline report and
 > exact deployment manifest. Replace the adapter and workload to gate another
 > Arm AI optimization.
@@ -108,7 +112,7 @@ browser visible side by side.
 
 > SurgeDesk shows what Arm optimization changes for users. ArmProof proves why
 > it changed and lets the next Arm developer reuse the work. Same instance,
-> three times the capacity, verified before merge.
+> three times higher confirmed tested capacity, verified before merge.
 
 Stop recording immediately.
 

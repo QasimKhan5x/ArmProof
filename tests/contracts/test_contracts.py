@@ -15,6 +15,8 @@ def valid_contract() -> dict:
                 "command": ["serve", "--model", "model"],
                 "artifact_sha256": "a" * 64,
                 "runtime_sha256": "b" * 64,
+                "workload_sha256": "c" * 64,
+                "environment_sha256": "d" * 64,
                 "environment": {"KLEIDIAI": "0"},
             },
             {
@@ -22,6 +24,8 @@ def valid_contract() -> dict:
                 "command": ["serve", "--model", "model"],
                 "artifact_sha256": "a" * 64,
                 "runtime_sha256": "b" * 64,
+                "workload_sha256": "c" * 64,
+                "environment_sha256": "d" * 64,
                 "environment": {"KLEIDIAI": "1"},
             },
         ],

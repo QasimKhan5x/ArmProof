@@ -7,14 +7,18 @@
       "command": ["python", "-m", "armproof.reference.phi4", "--backend", "ort-int4", "--threads", "16"],
       "artifact_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
       "runtime_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
-      "environment": {"mlas.disable_kleidiai": "1", "OMP_NUM_THREADS": "16"}
+      "workload_sha256": "b9dcaf4f73abf4c686f64fb6182fae6acb62bb01710b9ff681a0f42d6bf75f92",
+      "environment_sha256": "d75eb4ed5f78dc4e518d48e60be11076366966c07b0cafbf7bb16d506bf1ae70",
+      "environment": {"mlas.disable_kleidiai": "1", "intra_op_num_threads": "16"}
     },
     {
       "id": "kleidiai-enabled",
       "command": ["python", "-m", "armproof.reference.phi4", "--backend", "ort-int4", "--threads", "16"],
       "artifact_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
       "runtime_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
-      "environment": {"mlas.disable_kleidiai": "0", "OMP_NUM_THREADS": "16"}
+      "workload_sha256": "b9dcaf4f73abf4c686f64fb6182fae6acb62bb01710b9ff681a0f42d6bf75f92",
+      "environment_sha256": "d75eb4ed5f78dc4e518d48e60be11076366966c07b0cafbf7bb16d506bf1ae70",
+      "environment": {"mlas.disable_kleidiai": "0", "intra_op_num_threads": "16"}
     }
   ],
   "claims": [
@@ -83,6 +87,17 @@
       "required_evidence": ["arm_callchains", "artifact_hashes"],
       "required": true,
       "depends_on": []
+    },
+    {
+      "id": "clean-reproduction",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-004-kleidiai",
+      "metric": "reproduction_max_relative_difference",
+      "operator": "lte",
+      "threshold": 0.1,
+      "required_evidence": ["request_samples", "boundary_confirmations", "artifact_hashes", "arm_callchains", "reproduction"],
+      "required": true,
+      "depends_on": ["cloud-capacity", "arm-execution"]
     }
   ]
 }

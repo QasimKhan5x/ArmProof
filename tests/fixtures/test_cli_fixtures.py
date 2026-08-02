@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import io
 import tempfile
 import unittest
+from contextlib import redirect_stderr
 from pathlib import Path
 
 from armproof.cli import main
@@ -43,6 +45,31 @@ class CliFixtureTests(unittest.TestCase):
         self.assertFalse(decision["passed"])
         self.assertEqual(decision["claims"][0]["status"], "unknown")
         self.assertEqual(decision["claims"][0]["reason_code"], "attribution_missing")
+
+    def test_normalized_verify_rejects_identities_not_declared_by_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            comparison = json.loads(
+                (ROOT / "examples/fixture-pass/comparison.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            comparison["baseline"]["artifact_sha256"] = "f" * 64
+            comparison["treatment"]["artifact_sha256"] = "f" * 64
+            comparison_path = root / "comparison.json"
+            comparison_path.write_text(json.dumps(comparison), encoding="utf-8")
+            with redirect_stderr(io.StringIO()) as stderr:
+                status = main(
+                    [
+                        "verify",
+                        "--contract",
+                        str(ROOT / "examples/fixture-pass/contract.json"),
+                        "--comparison",
+                        str(comparison_path),
+                    ]
+                )
+            self.assertEqual(status, 1)
+            self.assertIn("mismatched artifact_sha256", stderr.getvalue())
 
 
 if __name__ == "__main__":

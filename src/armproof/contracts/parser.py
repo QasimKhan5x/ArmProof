@@ -23,6 +23,8 @@ class Treatment:
     command: tuple[str, ...]
     artifact_sha256: str
     runtime_sha256: str
+    workload_sha256: str
+    environment_sha256: str
     environment: Mapping[str, str]
 
 
@@ -52,7 +54,10 @@ def _digest(value: Any, field: str) -> str:
 def _treatment(payload: Any, index: int) -> Treatment:
     if not isinstance(payload, Mapping):
         raise ContractError(f"treatment {index} must be an object")
-    fields = {"id", "command", "artifact_sha256", "runtime_sha256", "environment"}
+    fields = {
+        "id", "command", "artifact_sha256", "runtime_sha256",
+        "workload_sha256", "environment_sha256", "environment",
+    }
     _exact_fields(payload, fields, f"treatment {index}")
     command = payload["command"]
     environment = payload["environment"]
@@ -70,6 +75,8 @@ def _treatment(payload: Any, index: int) -> Treatment:
         command=tuple(command),
         artifact_sha256=_digest(payload["artifact_sha256"], "artifact_sha256"),
         runtime_sha256=_digest(payload["runtime_sha256"], "runtime_sha256"),
+        workload_sha256=_digest(payload["workload_sha256"], "workload_sha256"),
+        environment_sha256=_digest(payload["environment_sha256"], "environment_sha256"),
         environment=MappingProxyType(dict(environment)),
     )
 

@@ -18,8 +18,9 @@ The canonical submission package is [`../submission/README.md`](../submission/RE
 - Final owner checklist: [`../submission/SUBMISSION_CHECKLIST.md`](../submission/SUBMISSION_CHECKLIST.md)
 
 The recording script visibly loads the accepted surge experiment during
-capture. The app explicitly says it derives the view from checksum-bound raw
-events rather than running the Graviton benchmark live.
+capture. The app explicitly says it verifies both 141-file ledgers and derives
+the view from accepted request and quality evidence rather than running the
+Graviton benchmark live.
 
 ## Submission Claim Rules
 
@@ -35,5 +36,7 @@ events rather than running the Graviton benchmark live.
 ## Offline Backup
 
 The repository ships `surgedesk/`, the generated data payload, screenshots,
-the ArmProof report, normalized summaries and checksummed raw evidence.
-Judging does not depend on AWS uptime or a live GitHub workflow.
+the ArmProof report, derived summaries, verification receipt and checksummed
+evidence. The terminal segment runs `scripts/demo_release_gate.py` so judges
+see both a valid release and a deliberate temporary checksum block. Judging
+does not depend on AWS uptime or a live GitHub workflow.

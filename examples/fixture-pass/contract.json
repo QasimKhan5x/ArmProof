@@ -7,6 +7,8 @@
       "command": ["serve", "--model", "fixture"],
       "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "runtime_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "workload_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "environment_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
       "environment": {"KLEIDIAI": "0"}
     },
     {
@@ -14,6 +16,8 @@
       "command": ["serve", "--model", "fixture"],
       "artifact_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "runtime_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "workload_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "environment_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
       "environment": {"KLEIDIAI": "1"}
     }
   ],

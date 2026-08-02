@@ -5,8 +5,7 @@ import unittest
 from collections import defaultdict
 from pathlib import Path
 
-from armproof.demo.queue_guard import QueueGuard, evaluate, features
-from armproof.demo.surgedesk import _queue
+from armproof.demo.queue_guard import QueueGuard, evaluate, features, queue_for_intent
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -45,11 +44,13 @@ class QueueGuardTests(unittest.TestCase):
 
     def test_guard_clears_frozen_queue_accuracy_target(self) -> None:
         training, evaluation = split_rows()
-        guard = QueueGuard((row["text"], _queue(row["category"])) for row in training)
+        guard = QueueGuard(
+            (row["text"], queue_for_intent(row["category"])) for row in training
+        )
         correct, total = evaluate(
             guard,
             (
-                {"text": row["text"], "queue": _queue(row["category"])}
+                {"text": row["text"], "queue": queue_for_intent(row["category"])}
                 for row in evaluation
             ),
         )

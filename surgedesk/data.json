@@ -30,6 +30,7 @@
   "proof": {
     "artifact_reduction_percent": 35.91724249132322,
     "decision": "PASS",
+    "decision_source": "derived_from_verified_evidence",
     "direct_speedup_max": 2.5870578477345356,
     "direct_speedup_min": 1.7170141477125784,
     "instance": "c8g.4xlarge",
@@ -39,6 +40,7 @@
     "reproduction_experiment_id": "EXP-2026-005",
     "reproduction_max_relative_difference_percent": 0.0,
     "threads": 16,
+    "verified_claims": 7,
     "weighted_pss_reduction_percent": 59.66032309469201
   },
   "provenance": {
@@ -48,7 +50,10 @@
       "checksum_verified": true,
       "checksummed_files": 141,
       "comparison": "matched_control",
-      "only_changed_control": "mlas.disable_kleidiai"
+      "only_changed_control": "mlas.disable_kleidiai",
+      "reproduction_checksum_verified": true,
+      "reproduction_checksummed_files": 141,
+      "total_checksummed_files": 282
     },
     "experiment_id": "EXP-2026-004",
     "machine": "AWS Graviton4 c8g.4xlarge",

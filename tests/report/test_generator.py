@@ -74,6 +74,32 @@ class ReportGeneratorTests(unittest.TestCase):
                     comparison_path=root / "comparison",
                 )
 
+    def test_rejects_unbounded_verification_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "decision").write_text(
+                '{"schema_version":"1.0.0","passed":true,"claims":[]}'
+            )
+            (root / "summary").write_text(json.dumps({
+                "schema_version": "1.0.0",
+                "mixes": {"short": {"ratio": {
+                    "baseline_median": 1.0, "treatment_median": 2.0, "ratio": 2.0,
+                }}},
+            }))
+            (root / "verification").write_text(json.dumps({
+                "schema_version": "1.0.0",
+                "comparison_source": "derived_from_raw_evidence",
+                "checksums": {"passed": True},
+                "reproduction_checksums": {"passed": True},
+            }))
+            with self.assertRaisesRegex(ValueError, "verification receipt"):
+                generate_report(
+                    root / "decision",
+                    root / "summary",
+                    root / "out",
+                    verification_path=root / "verification",
+                )
+
 
 if __name__ == "__main__":
     unittest.main()
