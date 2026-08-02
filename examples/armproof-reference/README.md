@@ -1,7 +1,8 @@
 # ArmProof Reference Decision
 
-This config, contract and comparison are normalized from accepted experiment
-`EXP-2026-004`. Verify them and build the report without AWS:
+This config verifies checksum-bound raw evidence from accepted experiment
+`EXP-2026-004`. The adapter derives the comparison and builds the report without
+AWS:
 
 ```bash
 armproof ci examples/armproof-reference/armproof.json

@@ -1,0 +1,64 @@
+# Evidence Adapters
+
+ArmProof adapters turn raw, checksum-bound experiment files into one normalized
+comparison. Policy evaluation and report generation operate on that comparison;
+an adapter cannot bypass the contract.
+
+## Built-In Adapters
+
+### `kleidiai-capacity-v1`
+
+The complete Phi-4 Mini reference workflow. It validates matched KleidiAI
+controls, BANKING77 quality, three traffic shapes, Arm callchains and a second
+Graviton run.
+
+### `http-slo-v1`
+
+A runtime-neutral fixed-SLO adapter for bounded HTTP inference services. Its
+protocol identifies baseline and optimized treatments, at least three raw JSONL
+files for every passing and failing boundary, measurement requirements, and
+baseline/optimized profiler files.
+
+It emits a tested pass-point ratio and an identifiable capacity interval:
+
+```text
+lower bound = optimized passing rate / baseline failing rate
+upper bound = optimized failing rate / baseline passing rate
+```
+
+The tested ratio is never relabeled as an exact maximum-capacity estimate.
+
+```json
+{
+  "adapter": "http-slo-v1",
+  "root": "evidence",
+  "checksums": "evidence/SHA256SUMS",
+  "protocol": "evidence/protocol.json"
+}
+```
+
+`tests/evidence/test_adapters.py` is a complete executable raw-evidence example.
+
+## External Adapters
+
+An adapter package implements the public `EvidenceAdapter` protocol and
+registers an entry point:
+
+```toml
+[project.entry-points."armproof.evidence_adapters"]
+my-runtime-v1 = "my_package.adapter:MyRuntimeAdapter"
+```
+
+```python
+class MyRuntimeAdapter:
+    adapter_id = "my-runtime-v1"
+
+    def verify(self, contract, config, base):
+        # Verify integrity, derive metrics from raw files, bind identities,
+        # and return armproof.evidence.VerifiedEvidence.
+        ...
+```
+
+Adapters should fail closed on unknown fields, missing raw samples, unmatched
+treatment identities, insufficient observations and absent Arm attribution.
+They should not accept a caller-supplied normalized comparison as evidence.

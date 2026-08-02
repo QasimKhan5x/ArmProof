@@ -31,7 +31,7 @@ class VerifiedEvidence:
     comparison: Comparison
     summary: Mapping[str, Any]
     checksums: ChecksumResult
-    reproduction_checksums: ChecksumResult
+    reproduction_checksums: ChecksumResult | None
     adapter: str = ADAPTER_ID
 
 

@@ -15,9 +15,9 @@ from armproof.contracts import (
     validate_comparison_identities,
 )
 from armproof.evidence import (
-    ADAPTER_ID,
     EvidenceRecordError,
     comparison_to_dict,
+    get_evidence_adapter,
     parse_comparison,
     verify_and_derive,
     verify_checksum_ledger,
@@ -160,37 +160,16 @@ def _run_ci(args: argparse.Namespace) -> int:
         if not isinstance(config["contract"], str):
             raise ValueError("config contract must be a path")
         evidence_config = config["evidence"]
-        evidence_fields = {
-            "adapter", "root", "checksums", "workload_manifest", "reproduction",
-        }
-        if not isinstance(evidence_config, dict) or set(evidence_config) != evidence_fields:
-            raise ValueError(
-                "config evidence must declare adapter, primary and reproduction evidence"
-            )
-        if evidence_config["adapter"] != ADAPTER_ID:
-            raise ValueError(f"unsupported evidence adapter: {evidence_config['adapter']}")
-        if not all(
-            isinstance(evidence_config[field], str) and evidence_config[field]
-            for field in {"root", "checksums", "workload_manifest"}
-        ):
-            raise ValueError("config evidence paths must be non-empty strings")
-        reproduction_config = evidence_config["reproduction"]
-        if not isinstance(reproduction_config, dict) or set(reproduction_config) != {
-            "root", "checksums",
-        } or not all(
-            isinstance(value, str) and value for value in reproduction_config.values()
-        ):
-            raise ValueError("config reproduction evidence must declare root and checksums")
+        if not isinstance(evidence_config, dict):
+            raise ValueError("config evidence must be an object")
+        adapter_id = evidence_config.get("adapter")
+        if not isinstance(adapter_id, str) or not adapter_id:
+            raise ValueError("config evidence must declare an adapter")
         base = args.config.resolve().parent
         contract_path = base / config["contract"]
         contract = parse_contract(_json_object(contract_path))
-        verified = verify_and_derive(
-            contract,
-            base / evidence_config["root"],
-            base / evidence_config["checksums"],
-            base / evidence_config["workload_manifest"],
-            base / reproduction_config["root"],
-            base / reproduction_config["checksums"],
+        verified = get_evidence_adapter(adapter_id).verify(
+            contract, evidence_config, base
         )
         deployment_value = config.get("deployment_summary")
         if deployment_value is not None and not isinstance(deployment_value, str):
@@ -225,12 +204,15 @@ def _run_ci(args: argparse.Namespace) -> int:
                         "missing": list(verified.checksums.missing),
                         "mismatched": list(verified.checksums.mismatched),
                     },
-                    "reproduction_checksums": {
-                        "passed": verified.reproduction_checksums.passed,
-                        "checked": verified.reproduction_checksums.checked,
-                        "missing": list(verified.reproduction_checksums.missing),
-                        "mismatched": list(verified.reproduction_checksums.mismatched),
-                    },
+                    "reproduction_checksums": (
+                        {
+                            "passed": verified.reproduction_checksums.passed,
+                            "checked": verified.reproduction_checksums.checked,
+                            "missing": list(verified.reproduction_checksums.missing),
+                            "mismatched": list(verified.reproduction_checksums.mismatched),
+                        }
+                        if verified.reproduction_checksums is not None else None
+                    ),
                 },
                 indent=2,
                 sort_keys=True,

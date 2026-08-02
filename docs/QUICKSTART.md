@@ -75,7 +75,7 @@ detects later modification but does not independently attest who produced it.
 
 ## Produce Evidence
 
-An adapter only needs a bounded HTTP endpoint accepting `POST /infer` with a
+The built-in collector only needs a bounded HTTP endpoint accepting `POST /infer` with a
 request ID, prompt and token limit. ArmProof provides separate commands for
 load and quality collection:
 
@@ -113,6 +113,10 @@ An empty ledger, missing file, changed digest, duplicate entry or path outside
 the declared guest prefix fails verification.
 
 ## Adapt Another Runtime
+
+Use the built-in `http-slo-v1` raw-evidence adapter or publish an external
+adapter through the `armproof.evidence_adapters` entry-point group. See
+[`ADAPTERS.md`](ADAPTERS.md) for the public contract and an executable example.
 
 Keep these boundaries intact:
 
