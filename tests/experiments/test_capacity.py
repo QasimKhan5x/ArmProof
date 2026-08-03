@@ -130,6 +130,7 @@ class CapacityProtocolTests(unittest.TestCase):
                 ]
 
             with patch("armproof.experiments.capacity.run_open_loop", side_effect=no_sleep_open_loop):
+                prepared = []
                 summary = run_capacity_experiment(
                     protocol,
                     [
@@ -142,11 +143,20 @@ class CapacityProtocolTests(unittest.TestCase):
                         "kleidiai-disabled": quality_result,
                         "kleidiai-enabled": quality_result,
                     },
+                    prepare_window=lambda treatment, window: prepared.append(
+                        (treatment, window)
+                    ),
                 )
             self.assertTrue(summary["passed"])
             self.assertEqual(summary["passing_mixes"], 3)
             self.assertEqual(summary["mixes"]["short"]["ratio"]["ratio"], 2.0)
             self.assertTrue((root / "evidence/summary.json").is_file())
+            self.assertEqual(len(prepared), len(set(prepared)))
+            self.assertEqual(len(prepared), 84)
+            self.assertEqual(
+                len(list((root / "evidence/window-warmup").glob("*.jsonl"))),
+                84,
+            )
 
 
 if __name__ == "__main__":

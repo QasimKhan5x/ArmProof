@@ -12,7 +12,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from armproof.adapters.http_service import ManagedHttpService, ServiceSpec
-from armproof.collectors.memory import ProcessMemorySampler
+from armproof.collectors.memory import parse_smaps_rollup
 from armproof.evidence.identity import fingerprint_path
 from armproof.experiments import CapacityProtocol, MixProtocol, TreatmentEndpoint, run_capacity_experiment
 from armproof.quality import (
@@ -142,7 +142,28 @@ def main() -> int:
     ]
     with ExitStack() as stack:
         services = [stack.enter_context(ManagedHttpService(spec)) for spec in specs]
-        samplers = [stack.enter_context(ProcessMemorySampler(service.pid or 0, 0.25)) for service in services]
+        service_index = {
+            service.spec.treatment_id: service for service in services
+        }
+        memory: dict[str, list[dict[str, int]]] = {
+            treatment_id: [] for treatment_id in service_index
+        }
+
+        def prepare_window(treatment_id: str, window_id: str) -> None:
+            service = service_index[treatment_id]
+            service.restart()
+            pid = service.pid
+            if pid is None:
+                raise RuntimeError(f"service restart produced no PID for {window_id}")
+            sample = parse_smaps_rollup(
+                Path(f"/proc/{pid}/smaps_rollup").read_text(encoding="utf-8")
+            )
+            memory[treatment_id].append({
+                **asdict(sample),
+                "window_id": window_id,
+                "pid": pid,
+            })
+
         summary = run_capacity_experiment(
             protocol,
             [
@@ -151,11 +172,8 @@ def main() -> int:
             ],
             output / "experiment",
             precomputed_quality=quality_results,
+            prepare_window=prepare_window,
         )
-    memory = {
-        spec.treatment_id: [asdict(sample) for sample in sampler.samples]
-        for spec, sampler in zip(specs, samplers)
-    }
     (output / "memory.json").write_text(
         json.dumps(memory, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )

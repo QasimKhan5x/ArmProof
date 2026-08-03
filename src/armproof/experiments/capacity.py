@@ -97,6 +97,7 @@ class CapacityProtocol:
 
 
 SendRequest = Callable[[str, RequestInput, int, float], RequestSample]
+PrepareWindow = Callable[[str, str], None]
 
 
 def _default_send(endpoint: str, item: RequestInput, scheduled_ns: int, timeout: float) -> RequestSample:
@@ -148,6 +149,7 @@ def run_capacity_experiment(
     *,
     send: SendRequest = _default_send,
     precomputed_quality: Mapping[str, QualityResult] | None = None,
+    prepare_window: PrepareWindow | None = None,
 ) -> dict[str, Any]:
     if len(treatments) != 2 or len({item.treatment_id for item in treatments}) != 2:
         raise ValueError("exactly two distinct treatments are required")
@@ -214,6 +216,24 @@ def run_capacity_experiment(
     )
     _write_json(output / "quality" / "comparison.json", asdict(comparison))
 
+    def prepare(treatment_id: str, endpoint: str, window_id: str) -> None:
+        if prepare_window is None:
+            return
+        prepare_window(treatment_id, window_id)
+        requests = materialize_requests(
+            warm_base, protocol.warmup_requests, f"window-warmup-{window_id}"
+        )
+        samples = run_closed_loop(
+            requests,
+            lambda item, scheduled: send(
+                endpoint, item, scheduled, protocol.request_timeout_seconds
+            ),
+            concurrency=1,
+        )
+        write_samples_jsonl(output / "window-warmup" / f"{window_id}.jsonl", samples)
+        if not all(sample.accepted for sample in samples):
+            raise RuntimeError(f"window warmup failed for {window_id}")
+
     discovery: dict[str, dict[str, Any]] = {}
     boundaries: dict[str, dict[str, tuple[float, float]]] = {}
     for mix in protocol.mixes:
@@ -228,6 +248,7 @@ def run_capacity_experiment(
             failing_rate: float | None = None
             for index, target in enumerate(mix.candidates_rps):
                 prefix = f"discovery-{mix.mix_id}-{treatment_id}-{target:g}"
+                prepare(treatment_id, endpoint, prefix)
                 samples, summary, offered_rps = _run_window(
                     endpoint, base, target, protocol.discovery_seconds,
                     protocol.max_workers, protocol.request_timeout_seconds, prefix, send,
@@ -273,6 +294,9 @@ def run_capacity_experiment(
                 row: dict[str, Any] = {"repetition": repetition + 1}
                 for boundary_name, target in (("pass", passing_rate), ("fail", failing_rate)):
                     prefix = f"confirm-{repetition + 1}-{mix.mix_id}-{treatment_id}-{boundary_name}"
+                    prepare(
+                        treatment_id, treatment_index[treatment_id].endpoint, prefix
+                    )
                     samples, summary, offered_rps = _run_window(
                         treatment_index[treatment_id].endpoint, base, target,
                         protocol.confirmation_seconds, protocol.max_workers,

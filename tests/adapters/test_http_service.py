@@ -22,6 +22,21 @@ def free_port() -> int:
 
 
 class ManagedHttpServiceTests(unittest.TestCase):
+    def test_restart_stops_then_starts_service(self) -> None:
+        spec = ServiceSpec(
+            treatment_id="test",
+            command=("python", "service.py"),
+            environment={},
+            health_url="http://127.0.0.1:8000/health",
+            request_url="http://127.0.0.1:8000/infer",
+            log_path=Path("service.log"),
+        )
+        service = ManagedHttpService(spec)
+        with patch.object(service, "stop") as stop, patch.object(service, "start") as start:
+            service.restart()
+        stop.assert_called_once_with()
+        start.assert_called_once_with()
+
     def test_lifecycle_and_request_contract(self) -> None:
         class Response:
             status = 200

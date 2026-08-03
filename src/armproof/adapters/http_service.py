@@ -119,10 +119,14 @@ class ManagedHttpService:
             self._log.close()
             self._log = None
 
+    def restart(self) -> None:
+        """Start the next measurement window with no inherited server work."""
+        self.stop()
+        self.start()
+
     def __enter__(self) -> "ManagedHttpService":
         self.start()
         return self
 
     def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
         self.stop()
-
