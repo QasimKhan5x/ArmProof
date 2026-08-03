@@ -18,7 +18,13 @@ from armproof.adapters.http_service import (
 )
 from armproof.collectors.memory import parse_smaps_rollup
 from armproof.evidence.identity import fingerprint_path
-from armproof.experiments import CapacityProtocol, MixProtocol, TreatmentEndpoint, run_capacity_experiment
+from armproof.experiments import (
+    CapacityProtocol,
+    FixedBoundary,
+    MixProtocol,
+    TreatmentEndpoint,
+    run_capacity_experiment,
+)
 from armproof.quality import (
     load_quality_cases,
     quality_from_dict,
@@ -68,6 +74,13 @@ def load_protocol(path: Path) -> tuple[CapacityProtocol, int]:
         minimum_tested_ratio=raw.get("minimum_tested_ratio", 1.5),
         minimum_capacity_ratio_lower_bound=raw.get(
             "minimum_capacity_ratio_lower_bound", 1.15
+        ),
+        fixed_boundaries=tuple(
+            FixedBoundary(
+                row["mix_id"], row["treatment_id"],
+                row["passing_rps"], row["failing_rps"],
+            )
+            for row in raw.get("fixed_boundaries", [])
         ),
     ), raw["quality_batch_size"]
 

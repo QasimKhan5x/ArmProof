@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from armproof.experiments.capacity import (
     CapacityProtocol,
+    FixedBoundary,
     MixProtocol,
     TreatmentEndpoint,
     run_capacity_experiment,
@@ -38,6 +39,17 @@ class CapacityProtocolTests(unittest.TestCase):
             MixProtocol("short", Path("short"), 1000, (0.2, 0.1))
         with self.assertRaisesRegex(ValueError, "ascending"):
             MixProtocol("short", Path("short"), 1000, (0.1, 0.1))
+
+    def test_fixed_boundaries_must_cover_every_mix_and_treatment(self) -> None:
+        mix = MixProtocol("mixed", Path("mixed"), 1000, (0.1, 0.2))
+        with self.assertRaisesRegex(ValueError, "cover each mix"):
+            CapacityProtocol(
+                "EXP-2026-009", (mix,), Path("quality"),
+                minimum_passing_mixes=1,
+                fixed_boundaries=(
+                    FixedBoundary("mixed", "kleidiai-enabled", 0.1, 0.2),
+                ),
+            )
 
     def test_treatment_value_object_is_serializable(self) -> None:
         endpoint = TreatmentEndpoint("kleidiai-enabled", "http://127.0.0.1:8001/infer")
@@ -156,6 +168,90 @@ class CapacityProtocolTests(unittest.TestCase):
             self.assertEqual(
                 len(list((root / "evidence/window-warmup").glob("*.jsonl"))),
                 84,
+            )
+
+            def unstable_confirmation(requests, send, target_rps, max_workers):
+                treatment = "enabled" if "kleidiai-enabled" in requests[0].request_id else "disabled"
+                capacity = 0.4 if treatment == "enabled" else 0.2
+                is_invalid_pass = (
+                    "confirm-" in requests[0].request_id
+                    and "kleidiai-enabled-pass" in requests[0].request_id
+                )
+                latency_ns = (
+                    2_000_000_000
+                    if target_rps > capacity or is_invalid_pass
+                    else 1_000_000
+                )
+                return [
+                    RequestSample(item.request_id, 0, 0, latency_ns, 200, None, {})
+                    for item in requests
+                ]
+
+            with patch(
+                "armproof.experiments.capacity.run_open_loop",
+                side_effect=unstable_confirmation,
+            ):
+                invalid = run_capacity_experiment(
+                    protocol,
+                    [
+                        TreatmentEndpoint("kleidiai-disabled", "disabled"),
+                        TreatmentEndpoint("kleidiai-enabled", "enabled"),
+                    ],
+                    root / "invalid-evidence",
+                    send=send,
+                    precomputed_quality={
+                        "kleidiai-disabled": quality_result,
+                        "kleidiai-enabled": quality_result,
+                    },
+                )
+            self.assertFalse(invalid["passed"])
+            self.assertIsNone(invalid["mixes"]["short"]["ratio"])
+            self.assertIsNone(invalid["mixes"]["short"]["capacity_bracket"])
+
+            fixed_protocol = CapacityProtocol(
+                "EXP-2026-009",
+                tuple(
+                    MixProtocol(name, traffic, 1000, (0.1, 0.2))
+                    for name in ("short", "long", "mixed")
+                ),
+                quality,
+                confirmation_seconds=10,
+                fixed_boundaries=tuple(
+                    FixedBoundary(name, treatment, passing, failing)
+                    for name in ("short", "long", "mixed")
+                    for treatment, passing, failing in (
+                        ("kleidiai-disabled", 0.2, 0.3),
+                        ("kleidiai-enabled", 0.4, 0.5),
+                    )
+                ),
+            )
+            fixed_prepared = []
+            with patch(
+                "armproof.experiments.capacity.run_open_loop",
+                side_effect=no_sleep_open_loop,
+            ):
+                fixed = run_capacity_experiment(
+                    fixed_protocol,
+                    [
+                        TreatmentEndpoint("kleidiai-disabled", "disabled"),
+                        TreatmentEndpoint("kleidiai-enabled", "enabled"),
+                    ],
+                    root / "fixed-evidence",
+                    send=send,
+                    precomputed_quality={
+                        "kleidiai-disabled": quality_result,
+                        "kleidiai-enabled": quality_result,
+                    },
+                    prepare_window=lambda treatment, window: fixed_prepared.append(
+                        (treatment, window)
+                    ),
+                )
+            self.assertTrue(fixed["passed"])
+            self.assertEqual(len(fixed_prepared), 60)
+            self.assertEqual(
+                json.loads((root / "fixed-evidence/discovery.json").read_text())
+                ["short"]["kleidiai-enabled"][0]["source"],
+                "preregistered_fixed_boundary",
             )
 
 

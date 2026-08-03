@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-009",
+  "causal_scope": "paired_boundary_characterization",
+  "hypothesis": "On one fresh c8g.4xlarge, the disabled service confirms 0.24/0.28 requests/s pass/fail boundaries and the KleidiAI-enabled service confirms 0.56/0.60 pass/fail boundaries under the same 10-second p95 SLO in five isolated 500-second repetitions each.",
+  "parent_experiment_id": "EXP-2026-008",
+  "parent_evidence_sha256": "b77ac91477bb51d0f4514ee14b205521b080bce2cd59427c9e6b042de4f97317",
+  "acceptance": {
+    "disabled_pass_rps": 0.24,
+    "disabled_fail_rps": 0.28,
+    "enabled_pass_rps": 0.56,
+    "enabled_fail_rps": 0.60,
+    "maximum_p95_ms": 10000.0,
+    "maximum_error_rate": 0.0,
+    "minimum_delivery_ratio": 0.95,
+    "confirmations": 5,
+    "confirmation_seconds": 500,
+    "minimum_requests_per_confirmation": 100,
+    "maximum_quality_loss_pp": 1.0
+  },
+  "derived_claim_on_success": {
+    "tested_pass_point_ratio": 2.3333333333333335,
+    "identifiable_lower_bound": 2.0,
+    "identifiable_upper_bound": 2.5,
+    "wording": "2.3x confirmed pass-point capacity; identifiable sustained-capacity ratio between 2.0x and 2.5x."
+  },
+  "budget": {
+    "prior_spend_usd": 8.8144,
+    "hard_project_ceiling_usd": 15.0,
+    "maximum_runtime_minutes": 250
+  },
+  "status": "preregistered"
+}

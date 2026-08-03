@@ -53,6 +53,20 @@ class MixProtocol:
 
 
 @dataclass(frozen=True)
+class FixedBoundary:
+    mix_id: str
+    treatment_id: str
+    passing_rps: float
+    failing_rps: float
+
+    def __post_init__(self) -> None:
+        if not self.mix_id or not self.treatment_id:
+            raise ValueError("fixed boundary IDs must be non-empty")
+        if self.passing_rps <= 0 or self.failing_rps <= self.passing_rps:
+            raise ValueError("fixed boundary rates must be positive and ordered")
+
+
+@dataclass(frozen=True)
 class CapacityProtocol:
     experiment_id: str
     mixes: tuple[MixProtocol, ...]
@@ -71,6 +85,7 @@ class CapacityProtocol:
     minimum_passing_mixes: int = 2
     minimum_tested_ratio: float = 1.5
     minimum_capacity_ratio_lower_bound: float = 1.15
+    fixed_boundaries: tuple[FixedBoundary, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.experiment_id.startswith("EXP-"):
@@ -92,6 +107,18 @@ class CapacityProtocol:
                     "confirmation window must contain at least "
                     f"{self.minimum_confirmation_requests} requests at the lowest candidate rate"
                 )
+        if self.fixed_boundaries:
+            expected = {
+                (mix.mix_id, treatment_id)
+                for mix in self.mixes
+                for treatment_id in ("kleidiai-disabled", "kleidiai-enabled")
+            }
+            observed = {
+                (boundary.mix_id, boundary.treatment_id)
+                for boundary in self.fixed_boundaries
+            }
+            if observed != expected or len(observed) != len(self.fixed_boundaries):
+                raise ValueError("fixed boundaries must cover each mix and treatment exactly once")
         if self.maximum_quality_loss_pp < 0 or not 0 <= self.minimum_schema_valid_rate <= 1:
             raise ValueError("quality thresholds are invalid")
 
@@ -242,6 +269,21 @@ def run_capacity_experiment(
         discovery[mix.mix_id] = {}
         boundaries[mix.mix_id] = {}
         for treatment_id in ("kleidiai-disabled", "kleidiai-enabled"):
+            fixed = next((
+                boundary for boundary in protocol.fixed_boundaries
+                if boundary.mix_id == mix.mix_id
+                and boundary.treatment_id == treatment_id
+            ), None)
+            if fixed is not None:
+                boundaries[mix.mix_id][treatment_id] = (
+                    fixed.passing_rps, fixed.failing_rps
+                )
+                discovery[mix.mix_id][treatment_id] = [{
+                    "source": "preregistered_fixed_boundary",
+                    "passing_rps": fixed.passing_rps,
+                    "failing_rps": fixed.failing_rps,
+                }]
+                continue
             endpoint = treatment_index[treatment_id].endpoint
             attempts = []
             passing_rate: float | None = None
@@ -325,19 +367,25 @@ def run_capacity_experiment(
         treatment_rates = [row["pass"]["summary"]["accepted_rps"] for row in treatment_rows]
         baseline_fail_rates = [row["fail"]["offered_rps"] for row in baseline_rows]
         treatment_fail_rates = [row["fail"]["offered_rps"] for row in treatment_rows]
-        ratio = estimate_ratio(treatment_rates, baseline_rates, seed=20260731)
-        bracket = estimate_capacity_bracket(
-            baseline_rates,
-            baseline_fail_rates,
-            treatment_rates,
-            treatment_fail_rates,
+        ratio = (
+            estimate_ratio(treatment_rates, baseline_rates, seed=20260731)
+            if valid else None
+        )
+        bracket = (
+            estimate_capacity_bracket(
+                baseline_rates,
+                baseline_fail_rates,
+                treatment_rates,
+                treatment_fail_rates,
+            )
+            if valid else None
         )
         mix_results[mix.mix_id] = {
             "valid_boundary_confirmations": valid,
             "disabled_boundary": boundaries[mix.mix_id]["kleidiai-disabled"],
             "enabled_boundary": boundaries[mix.mix_id]["kleidiai-enabled"],
-            "ratio": asdict(ratio),
-            "capacity_bracket": asdict(bracket),
+            "ratio": asdict(ratio) if ratio is not None else None,
+            "capacity_bracket": asdict(bracket) if bracket is not None else None,
             "minimum_requests_per_confirmation": min(
                 row[boundary]["summary"]["total"]
                 for row in baseline_rows + treatment_rows
@@ -354,6 +402,7 @@ def run_capacity_experiment(
     )
     passing_mixes = sum(
         row["valid_boundary_confirmations"]
+        and row["capacity_bracket"] is not None
         and row["capacity_bracket"]["tested_ratio"] >= protocol.minimum_tested_ratio
         and row["capacity_bracket"]["lower_bound"]
         >= protocol.minimum_capacity_ratio_lower_bound
