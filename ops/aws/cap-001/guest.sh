@@ -25,6 +25,11 @@ case "${EXPERIMENT_APPROVAL_TOKEN:-}" in
     PROTOCOL_PATH="ops/aws/sustained-002/protocol.json"
     WATCHDOG_MINUTES=265
     ;;
+  exp-2026-008-exclusive-sustained)
+    EXPERIMENT_ID="EXP-2026-008"
+    PROTOCOL_PATH="ops/aws/sustained-003/protocol.json"
+    WATCHDOG_MINUTES=300
+    ;;
   *) exit 64 ;;
 esac
 
@@ -91,7 +96,7 @@ export OMP_PROC_BIND=close
 export OMP_PLACES=cores
 set +e
 QUALITY_ARGS=()
-if [[ "$EXPERIMENT_ID" == "EXP-2026-004" || "$EXPERIMENT_ID" == "EXP-2026-005" || "$EXPERIMENT_ID" == "EXP-2026-006" || "$EXPERIMENT_ID" == "EXP-2026-007" ]]; then
+if [[ "$EXPERIMENT_ID" == "EXP-2026-004" || "$EXPERIMENT_ID" == "EXP-2026-005" || "$EXPERIMENT_ID" == "EXP-2026-006" || "$EXPERIMENT_ID" == "EXP-2026-007" || "$EXPERIMENT_ID" == "EXP-2026-008" ]]; then
   mkdir -p "$ROOT/quality-reuse"
   curl -fsSL "$QUALITY_DISABLED_URL" -o "$ROOT/quality-reuse/kleidiai-disabled.json"
   echo "$QUALITY_DISABLED_SHA256  $ROOT/quality-reuse/kleidiai-disabled.json" | sha256sum -c -

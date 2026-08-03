@@ -11,7 +11,11 @@ from contextlib import ExitStack
 from dataclasses import asdict
 from pathlib import Path
 
-from armproof.adapters.http_service import ManagedHttpService, ServiceSpec
+from armproof.adapters.http_service import (
+    ExclusiveHttpServicePool,
+    ManagedHttpService,
+    ServiceSpec,
+)
 from armproof.collectors.memory import parse_smaps_rollup
 from armproof.evidence.identity import fingerprint_path
 from armproof.experiments import CapacityProtocol, MixProtocol, TreatmentEndpoint, run_capacity_experiment
@@ -142,16 +146,14 @@ def main() -> int:
     ]
     with ExitStack() as stack:
         services = [stack.enter_context(ManagedHttpService(spec)) for spec in specs]
-        service_index = {
-            service.spec.treatment_id: service for service in services
-        }
-        memory: dict[str, list[dict[str, int]]] = {
+        pool = ExclusiveHttpServicePool(services)
+        service_index = pool.index
+        memory: dict[str, list[dict[str, object]]] = {
             treatment_id: [] for treatment_id in service_index
         }
 
         def prepare_window(treatment_id: str, window_id: str) -> None:
-            service = service_index[treatment_id]
-            service.restart()
+            service = pool.activate(treatment_id)
             pid = service.pid
             if pid is None:
                 raise RuntimeError(f"service restart produced no PID for {window_id}")

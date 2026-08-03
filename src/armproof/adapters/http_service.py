@@ -10,7 +10,7 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 
 class ServiceError(RuntimeError):
@@ -130,3 +130,23 @@ class ManagedHttpService:
 
     def __exit__(self, exc_type: object, exc: object, traceback: object) -> None:
         self.stop()
+
+
+class ExclusiveHttpServicePool:
+    """Keep exactly one matched treatment alive during a measurement window."""
+
+    def __init__(self, services: Sequence[ManagedHttpService]) -> None:
+        self.services = tuple(services)
+        self.index = {service.spec.treatment_id: service for service in services}
+        if not self.services or len(self.index) != len(self.services):
+            raise ValueError("services must have distinct treatment IDs")
+
+    def activate(self, treatment_id: str) -> ManagedHttpService:
+        try:
+            selected = self.index[treatment_id]
+        except KeyError as exc:
+            raise ValueError(f"unknown treatment: {treatment_id}") from exc
+        for service in self.services:
+            service.stop()
+        selected.start()
+        return selected

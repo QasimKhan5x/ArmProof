@@ -1,0 +1,16 @@
+{
+  "cleanup_complete": true,
+  "cleanup_errors": [],
+  "error": "KeyboardInterrupt()",
+  "estimated_cumulative_cost_usd": 6.3626,
+  "estimated_session_cost_usd": 0.0421,
+  "experiment_id": "EXP-2026-007",
+  "instance_id": "i-06fa4d5209cae6aed",
+  "instance_type": "c8g.4xlarge",
+  "maximum_projected_total_usd": 9.2219,
+  "maximum_runtime_minutes": 270,
+  "prior_spend_usd": 6.3205,
+  "recorded_at": "2026-08-03T08:51:31.032812+00:00",
+  "region": "us-east-1",
+  "terminated": true
+}

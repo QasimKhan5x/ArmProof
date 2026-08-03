@@ -9,7 +9,12 @@ from io import BytesIO
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from armproof.adapters import ManagedHttpService, ServiceError, ServiceSpec
+from armproof.adapters import (
+    ExclusiveHttpServicePool,
+    ManagedHttpService,
+    ServiceError,
+    ServiceSpec,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -22,6 +27,25 @@ def free_port() -> int:
 
 
 class ManagedHttpServiceTests(unittest.TestCase):
+    def test_exclusive_pool_stops_every_peer_before_starting_selected(self) -> None:
+        first = ManagedHttpService(ServiceSpec(
+            "first", ("python", "first.py"), {}, "http://one/health",
+            "http://one/infer", Path("first.log"),
+        ))
+        second = ManagedHttpService(ServiceSpec(
+            "second", ("python", "second.py"), {}, "http://two/health",
+            "http://two/infer", Path("second.log"),
+        ))
+        events = []
+        with (
+            patch.object(first, "stop", side_effect=lambda: events.append("stop-first")),
+            patch.object(second, "stop", side_effect=lambda: events.append("stop-second")),
+            patch.object(second, "start", side_effect=lambda: events.append("start-second")),
+        ):
+            selected = ExclusiveHttpServicePool((first, second)).activate("second")
+        self.assertIs(selected, second)
+        self.assertEqual(events, ["stop-first", "stop-second", "start-second"])
+
     def test_restart_stops_then_starts_service(self) -> None:
         spec = ServiceSpec(
             treatment_id="test",
