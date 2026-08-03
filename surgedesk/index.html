@@ -146,16 +146,16 @@
           <div>
             <p class="eyebrow">Fixed-SLO experiment</p>
             <h1>What happens when support demand surges?</h1>
-            <p>Load the accepted checksum-bound experiment, then inspect equal-load outcomes and confirmed capacity.</p>
+            <p>Load the checksum-bound audit, then inspect equal-load outcomes and the conservative capacity claim.</p>
           </div>
         </header>
 
         <section id="evidence-loader" class="evidence-loader" aria-labelledby="evidence-loader-title">
           <div class="evidence-seal" aria-hidden="true">✓</div>
           <div class="evidence-identity">
-            <p class="eyebrow">Accepted evidence bundle</p>
+            <p class="eyebrow">Sustained evidence audit</p>
             <h2 id="evidence-loader-title"><span id="evidence-experiment-id">—</span> is ready</h2>
-            <p id="evidence-load-note" aria-live="polite">The browser will derive this view from checked-in raw request events. It will not simulate a live benchmark.</p>
+            <p id="evidence-load-note" aria-live="polite">The view is generated from a SHA-256 locked archive of long-window request events. It does not simulate a benchmark.</p>
           </div>
           <dl class="evidence-facts">
             <div><dt>Integrity</dt><dd id="evidence-checksum-status">Verifying…</dd></div>
@@ -176,7 +176,7 @@
           <div>
             <p class="eyebrow">One controlled Arm change</p>
             <h2 id="arm-reveal-title">Arm-optimized matrix kernels changed the service outcome</h2>
-            <p>Same Phi-4 model, INT4 artifact, ONNX Runtime, 16 threads and Graviton4 instance. Only KleidiAI changes.</p>
+            <p>The contract binds the same model source, runtime lock, workload, Graviton4 identity and 16-thread setting. Its treatment overlay changes <code>mlas.disable_kleidiai</code>.</p>
           </div>
           <dl>
             <div><dt>KleidiAI cycle share</dt><dd><span>0%</span> → <strong id="reveal-cycle-share">—</strong></dd></div>
@@ -184,10 +184,21 @@
             <div><dt>Confirmed tested traffic</dt><dd><span id="reveal-baseline-rps">—</span> → <strong id="reveal-optimized-rps">—</strong></dd></div>
           </dl>
         </section>
+        <section class="audit-correction" aria-labelledby="audit-correction-title">
+          <div>
+            <p class="eyebrow">Fail-closed claim correction</p>
+            <h2 id="audit-correction-title">The longer test rejected the prettier number</h2>
+            <p id="audit-correction-copy">Loading the sustained boundary decision…</p>
+          </div>
+          <dl>
+            <div><dt>Original exact 2.5× bracket</dt><dd id="original-gate-status">—</dd></div>
+            <div><dt>Conservative ≥2.0× claim</dt><dd id="corrected-claim-status">—</dd></div>
+          </dl>
+        </section>
         <section class="capacity-reveal" aria-labelledby="capacity-title">
           <header class="section-heading">
             <div>
-              <p class="eyebrow">Highest confirmed tested mixed traffic</p>
+              <p class="eyebrow">Conservative sustained lower bound</p>
               <h2 id="capacity-title">Same instance. Measured capacity.</h2>
             </div>
             <strong id="headline-ratio" class="headline-ratio">—</strong>
@@ -204,6 +215,7 @@
           </div>
         </section>
 
+        <p class="source-chip">Supporting equal-load slice: <span id="equal-load-source">—</span></p>
         <div class="run-comparison">
           <article class="run-panel baseline-run" aria-labelledby="baseline-title">
             <header>
@@ -253,12 +265,12 @@
 
         <section class="mix-table-section" aria-labelledby="mix-title">
           <div class="section-heading compact-heading">
-            <div><p class="eyebrow">All traffic shapes</p><h2 id="mix-title">Capacity held across three mixes</h2></div>
+            <div><p class="eyebrow">Long-window evidence</p><h2 id="mix-title">Five confirmations at every boundary</h2></div>
             <span id="confirmation-count" class="source-chip">—</span>
           </div>
           <div class="table-wrap">
             <table data-mobile-cards>
-              <thead><tr><th>Traffic mix</th><th>Baseline</th><th>Optimized</th><th>Capacity gain</th></tr></thead>
+              <thead><tr><th>Traffic mix</th><th>Baseline pass</th><th>Optimized pass</th><th>Pass-point ratio</th></tr></thead>
               <tbody id="mix-table"></tbody>
             </table>
           </div>
@@ -273,7 +285,7 @@
           <div class="decision-mark" aria-hidden="true">✓</div>
           <div>
             <p class="eyebrow">ArmProof release decision</p>
-            <h1>Approved for the measured Graviton deployment</h1>
+            <h1>Approved at the conservative Graviton boundary</h1>
             <p id="proof-decision-detail">Every required claim passed against checksum-bound evidence.</p>
           </div>
           <span>PASS</span>
@@ -282,20 +294,12 @@
         <section class="proof-section" aria-labelledby="claims-title">
           <div class="section-heading">
             <div><p class="eyebrow">Causal claim ledger</p><h2 id="claims-title">What the release gate established</h2></div>
-            <a class="text-link" href="../report/index.html">Open full evidence report</a>
+            <a class="text-link" href="https://github.com/QasimKhan5x/VerifyLane/blob/main/submission/TECHNICAL_EVIDENCE.md">Open technical evidence</a>
           </div>
           <div class="table-wrap">
             <table class="claims-table" data-mobile-cards>
               <thead><tr><th>Required claim</th><th>Observed</th><th>Threshold</th><th>Decision</th></tr></thead>
-              <tbody>
-                <tr><td>Cloud capacity</td><td id="proof-capacity">—</td><td>≥ 1.5×</td><td><span class="pass-label">Pass</span></td></tr>
-                <tr><td>Quality non-regression</td><td id="proof-quality">—</td><td>≥ −1.0 pp</td><td><span class="pass-label">Pass</span></td></tr>
-                <tr><td>Macro F1 non-regression</td><td id="proof-macro-f1">—</td><td>≥ −1.0 pp</td><td><span class="pass-label">Pass</span></td></tr>
-                <tr><td>Operational queue accuracy</td><td id="proof-queue-quality">—</td><td>≥ 85%</td><td><span class="pass-label">Pass</span></td></tr>
-                <tr><td>Output schema</td><td id="proof-schema">—</td><td>≥ 99%</td><td><span class="pass-label">Pass</span></td></tr>
-                <tr><td>Arm cycle attribution</td><td id="proof-arm">—</td><td>≥ 50%</td><td><span class="pass-label">Pass</span></td></tr>
-                <tr><td>Fresh-instance confirmation</td><td id="proof-reproduction">—</td><td>≤ 10%</td><td><span class="pass-label">Pass</span></td></tr>
-              </tbody>
+              <tbody id="proof-claims"></tbody>
             </table>
           </div>
         </section>
@@ -306,8 +310,8 @@
             <span id="proof-evidence-count" class="source-chip">Verifying evidence...</span>
           </div>
           <ol class="evidence-chain">
-            <li><span>1</span><div><strong>Verify</strong><small>Check both SHA-256 evidence ledgers and the frozen workload manifest.</small></div></li>
-            <li><span>2</span><div><strong>Derive</strong><small>Recompute capacity, quality and reproduction metrics from request and quality rows.</small></div></li>
+            <li><span>1</span><div><strong>Verify</strong><small>Check the sustained archive, its 69-file ledger and frozen workload; keep the 282-file reference history separate.</small></div></li>
+            <li><span>2</span><div><strong>Derive</strong><small>Recompute sustained capacity and quality metrics from request and quality rows.</small></div></li>
             <li><span>3</span><div><strong>Bind</strong><small>Match model, runtime, workload, environment and treatment identities to the contract.</small></div></li>
             <li><span>4</span><div><strong>Decide</strong><small id="proof-derived-claims">Evaluate the contract; missing or inconsistent evidence blocks release.</small></div></li>
           </ol>
@@ -333,7 +337,7 @@
             <p>A dependency-free queue guard improves the recorded LLM mapping by <strong id="queue-gain">—</strong>. Fine-grained 77-intent accuracy remains <strong id="absolute-accuracy">—</strong>, so SurgeDesk stays assistive and every route is human-confirmed.</p>
           </section>
           <section class="proof-section deployment-output" aria-labelledby="deploy-title">
-            <p class="eyebrow">Exact passing deployment</p>
+            <p class="eyebrow">Conservative passing deployment</p>
             <h2 id="deploy-title">No benchmark-only configuration</h2>
             <dl>
               <div><dt>Instance</dt><dd id="deployment-instance">—</dd></div>
@@ -347,8 +351,8 @@
         <section class="release-gate" aria-labelledby="release-title">
           <div>
             <p class="eyebrow">Reusable developer artifact</p>
-            <h2 id="release-title">The same decision runs in pull requests</h2>
-            <p>Tampered raw files, identity swaps, quality regressions, absent Arm callchains or failed reproduction block the release.</p>
+            <h2 id="release-title">The same fail-closed method runs in pull requests</h2>
+            <p>The reusable Action evaluates versioned contracts and blocks tampered files, identity swaps, quality regressions and absent Arm callchains. The EXP009 sustained adapter ships in this repository.</p>
           </div>
           <pre><code>- uses: QasimKhan5x/VerifyLane@v0.4.0
   with:
@@ -358,7 +362,7 @@
 
         <section class="proof-section reuse-walkthrough" aria-labelledby="reuse-title">
           <div class="section-heading">
-            <div><p class="eyebrow">Five-minute adoption path</p><h2 id="reuse-title">Run the same gate in another Arm AI repository</h2></div>
+            <div><p class="eyebrow">Five-minute adoption path</p><h2 id="reuse-title">Adopt the same method in another Arm AI repository</h2></div>
             <span class="source-chip">No hosted service required</span>
           </div>
           <ol class="reuse-steps">

@@ -187,6 +187,16 @@ def quality_from_dict(payload: Any) -> QualityResult:
     if set(payload) != required or payload["schema_version"] != "1.0.0":
         raise ValueError("invalid quality result fields or schema version")
     rows = tuple(QualityRow(**row) for row in payload["rows"])
+    request_ids = [row.request_id for row in rows]
+    if len(request_ids) != len(set(request_ids)):
+        raise ValueError("quality result contains duplicate request IDs")
+    for row in rows:
+        if row.correct != (row.predicted_intent == row.expected_intent):
+            raise ValueError("quality row correctness does not match its prediction")
+        if row.predicted_intent is not None and (
+            not row.schema_valid or row.error is not None
+        ):
+            raise ValueError("quality row prediction conflicts with schema or error state")
     result = QualityResult(
         total=payload["total"], correct=payload["correct"],
         schema_valid=payload["schema_valid"], missing=payload["missing"],
@@ -197,6 +207,8 @@ def quality_from_dict(payload: Any) -> QualityResult:
         raise ValueError("quality result aggregates do not match rows")
     if result.schema_valid != sum(row.schema_valid for row in rows):
         raise ValueError("quality schema-valid aggregate does not match rows")
+    if result.missing != sum(row.error == "missing" for row in rows):
+        raise ValueError("quality missing aggregate does not match rows")
     labels = {row.expected_intent for row in rows}
     expected_accuracy = result.correct / result.total if result.total else 0.0
     expected_schema_rate = result.schema_valid / result.total if result.total else 0.0

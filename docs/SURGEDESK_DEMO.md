@@ -29,27 +29,30 @@ Direct links are available at `#triage`, `#surge`, and `#proof`.
 1. **Triage:** inspect the held-out `86.75%` queue result, load a recorded
    Phi-4 intent, observe the queue guard rescue or error, then confirm or
    correct the proposed route.
-2. **Arm result:** load both checksum-bound evidence bundles, compare the
+2. **Arm result:** load the SHA-256 locked sustained audit, compare the
    same requests at `0.267 requests/second`, and inspect confirmed capacity.
    Disabled records three SLO breaches and `12.66s` p95; enabled records none
-   and `2.21s` p95. The separate five-run boundary is 0.20 versus 0.60.
-3. **Release proof:** inspect the eight-claim ledger, authoritative
+   and `2.21s` p95. The separate sustained audit passes five 500-second windows
+   at 0.24 versus 0.56 r/s, proving at least 2.0x capacity. It also shows why
+   the original exact 2.5x bracket was rejected.
+3. **Release proof:** inspect the nine-claim sustained ledger, authoritative
    verify-derive-bind-decide path, executed Arm path, quality boundary, exact
    deployment and reusable GitHub Action.
 
 ## Evidence Provenance
 
 `scripts/build_surgedesk_demo.py` calls
-`src/armproof/demo/surgedesk.py`, which invokes the same authoritative
-verification and derivation pipeline as `armproof ci`, then joins:
+`src/armproof/demo/surgedesk.py`, which uses ArmProof's shared
+verify-derive-bind-decide architecture with the EXP009 sustained adapter, then joins:
 
 - accepted BANKING77 quality inputs and recorded Phi-4 outputs;
-- equal-load discovery samples plus five-run confirmed capacity boundaries;
+- equal-load discovery samples plus five long-window sustained boundaries;
 - a queue guard trained on 2,310 disjoint examples and evaluated on the frozen
   770-case quality set;
-- accepted short, long and mixed capacity boundaries;
+- the conservative sustained mixed-traffic lower bound and rejected overclaim;
 - quality, artifact size, PSS and direct KleidiAI summaries; and
-- clean-machine reproduction plus enabled/disabled callchain evidence.
+- separately labeled short-window reproduction history plus enabled/disabled
+  callchain evidence.
 
 The generated `surgedesk/data.json` is checked into the repository for an
 offline demo. `--verify` byte-compares it with a fresh derivation and fails CI

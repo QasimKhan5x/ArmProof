@@ -42,5 +42,6 @@
 - [ ] Queue-guard quality is not presented as an Arm speedup.
 - [ ] Recorded evidence is labeled and not called live inference.
 - [ ] ArmProof is not described as Arm certification.
-- [ ] The 3x result is scoped to the pinned Graviton4 deployment and SLO.
-
+- [ ] The at-least-2x result is scoped to the pinned Graviton4 deployment and SLO.
+- [ ] The 2.33x number is labeled a tested pass-point ratio, not exact capacity.
+- [ ] The rejected original 2.5x bracket remains visible.

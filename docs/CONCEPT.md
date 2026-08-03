@@ -10,10 +10,11 @@ reproducibility claims are supported by matched evidence.
 
 SurgeDesk makes that infrastructure legible through a realistic banking
 support workflow. An operator reviews recorded Phi-4 Mini routing suggestions,
-then replays an accepted burst of BANKING77 traffic. With the model, runtime,
-machine and SLO fixed, enabling KleidiAI raises sustainable mixed-traffic
-capacity from 0.20 to 0.60 requests/second. ArmProof then shows why that result
-is releasable and provides the exact passing deployment.
+then inspects recorded BANKING77 traffic. With the model, runtime, machine and
+SLO fixed, enabling KleidiAI raises the five-of-five passing point from 0.24 to
+0.56 requests/second; baseline 0.28 fails five of five, proving at least 2.0x
+more sustainable capacity. ArmProof also shows why an earlier exact 2.5x claim
+was rejected and provides the conservative passing deployment.
 
 For product quality, Phi-4 supplies a detailed intent while a tiny local queue
 guard maps the request into one of five operational queues. On a disjoint

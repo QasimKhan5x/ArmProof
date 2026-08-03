@@ -4,7 +4,7 @@
 
 **Project name:** SurgeDesk + ArmProof
 
-**Tagline:** 3x higher confirmed tested traffic on Graviton, with a release gate that derives every decision from raw evidence.
+**Tagline:** At least 2x sustainable AI capacity on Graviton, with a release gate honest enough to reject its own prettier number.
 
 **Track:** Cloud AI
 
@@ -30,10 +30,10 @@ finding compatible cloud hardware.
 
 SurgeDesk is a human-confirmed banking-support triage application backed by a
 measured Arm cloud optimization. On the same AWS Graviton4 instance, the same
-Phi-4 Mini INT4 service sustained 3x higher confirmed tested mixed traffic with KleidiAI enabled while
-remaining inside a 10-second p95 SLO. ArmProof is the reusable open-source
+Phi-4 Mini INT4 service sustained at least 2x more mixed traffic with KleidiAI
+enabled while remaining inside a 10-second p95 SLO. ArmProof is the reusable open-source
 artifact behind the demo: a fail-closed CI gate that verifies quality,
-capacity, executed Arm callchains, checksums and fresh-instance confirmation before an
+capacity, executed Arm callchains and checksums before an
 optimized deployment can be released.
 
 ## Inspiration
@@ -60,22 +60,26 @@ and a human confirms or corrects every route. The guard reaches 86.75% on a
 disjoint 770-request holdout, 12.34 percentage points above direct LLM
 intent-to-queue mapping.
 
-The application then shows what changes under load. At an identical 0.267
+The application first shows a supporting equal-load slice from `EXP-2026-004`.
+At an identical 0.267
 requests/second, the KleidiAI-disabled service recorded 12.66 seconds p95 and
 three SLO breaches across eight requests; the enabled service recorded 2.21
-seconds p95 and zero breaches. Five confirmation runs at each passing boundary
-confirmed 0.20 versus 0.60 requests/second tested mixed-traffic boundaries.
+seconds p95 and zero breaches. The decisive sustained audit then ran five
+500-second confirmations at every boundary. Baseline `0.24 r/s` and optimized
+`0.56 r/s` passed all five; baseline `0.28 r/s` failed all five. This proves an
+at-least-2.0x sustainable-capacity improvement and a 2.33x tested pass-point ratio.
+ArmProof re-derives all 4,200 raw request outcomes across the 20 long windows.
 
-ArmProof evaluates the evidence behind that result. It verifies 282 files
-across primary and fresh-instance confirmation bundles, re-derives capacity and
-quality, binds model/runtime/workload/environment identities, and only then
-evaluates a versioned contract declaring required quality, service-capacity,
-schema, attribution and fresh-instance claims. Required failures or unknowns block the release. A
-passing run emits:
+ArmProof evaluates the sustained result from its SHA-256 locked 69-file archive.
+It re-derives capacity and quality, binds model/runtime/workload/environment
+identities, and only then evaluates nine required quality, service-capacity,
+schema, attribution and profiler-integrity claims. Supporting EXP004/EXP005
+bundles remain separately identified. Required failures or unknowns block the
+release. The reusable reference workflow emits:
 
 - a machine-readable decision;
 - an offline evidence report;
-- the exact passing deployment manifest; and
+- a pinned conservative deployment manifest; and
 - a GitHub Action result suitable for pull requests.
 
 ## What Was Optimized
@@ -92,15 +96,17 @@ baseline and treatment used the same model bytes, ONNX Runtime GenAI build,
 endpoint, 16 threads, one in-flight request, workload, instance and SLO. The
 declared treatment control was KleidiAI enabled versus
 `mlas.disable_kleidiai=1`. Across four batch/prompt shapes, KleidiAI improved
-end-to-end execution by 1.72x to 2.59x. Linux perf attributed 68.35% of sampled
+end-to-end execution by 1.72x to 2.59x. Linux perf attributed 68.53% of sampled
 cycles to the KleidiAI matmul callchain in the enabled treatment and none in
 the disabled control.
 
-The service-level test used fixed-rate open-loop traffic, separate warmup,
-passing/failing boundary discovery and five confirmation runs per treatment.
-KleidiAI increased the highest confirmed tested capacity by 3.0x for short
-traffic, 2.5x for long traffic and 3.0x for mixed traffic. A fresh
-`c8g.4xlarge` confirmed all three tested capacity-grid boundaries.
+The decisive service-level test used fixed-rate open-loop traffic, process
+isolation and five 500-second confirmations at four frozen pass/fail points.
+The original exact 2.5x bracket gate was rejected because optimized `0.60 r/s`
+passed one window by 72 ms. ArmProof emitted no exact bracket. The unchanged
+rows still prove at least 2.0x sustainable capacity: optimized `0.56 r/s`
+passed all five while baseline `0.28 r/s` failed all five. The failed gate is
+preserved and visible in the product rather than rewritten as a success.
 
 The queue guard improves application usefulness, but it is not presented as
 an Arm speedup.
@@ -119,13 +125,14 @@ an Arm speedup.
    inside the preregistered one-point tolerance; schema validity was 100%.
 5. We captured positive and negative `kai_*` callchain evidence separately
    from the primary load run so profiler overhead could not contaminate it.
-6. We reran the accepted protocol on a clean Graviton4 instance and compared
-   metrics re-derived from the fresh-instance raw evidence.
+6. We reproduced the earlier short-window grid on a clean Graviton4 instance;
+   it remains supporting history and is not presented as reproduction of the
+   later 500-second sustained audit.
 7. We built ArmProof around strict JSON schemas, immutable artifact identities,
    two SHA-256 ledgers, dependency-aware claims and pass/fail/unknown semantics.
    `armproof ci` rejects supplied normalized comparisons and derives its own.
-8. We generated SurgeDesk through the same authoritative verification,
-   derivation and policy path. Recorded
+8. We generated SurgeDesk through ArmProof's shared verify-derive-bind-decide
+   architecture with a dedicated sustained-evidence adapter. Recorded
    mode never pretends edited text is live inference.
 
 ## Challenges
@@ -149,17 +156,19 @@ required.
 
 ## Accomplishments
 
-- 3.0x higher confirmed tested mixed and short traffic, and 2.5x long traffic, on the same
-  Graviton4 instance.
+- At least 2.0x higher sustainable mixed traffic on the same Graviton4
+  instance, with a 2.33x tested pass-point ratio over 4,200 requests in twenty
+  500-second windows.
 - 1.72x to 2.59x direct KleidiAI execution speedup across four shapes.
 - 35.92% smaller artifacts, 55.34% lower peak PSS and 59.66% lower
   time-weighted PSS after BF16-to-INT4 migration.
 - A 770-request quality gate with 100% schema validity and less than one
   percentage point regression.
-- 68.35% sampled-cycle attribution to the enabled KleidiAI matmul callchain,
-  absent from the control, plus fresh-instance boundary confirmation.
-- A tamper challenge that passes eight claims from 282 files, then proves one
-  changed temporary ledger digest blocks release before policy evaluation.
+- 68.53% sampled-cycle attribution to the enabled KleidiAI matmul callchain,
+  absent from the control, with zero lost profiler samples.
+- A tamper challenge that passes eight release claims from 282 files, plus a
+  SHA-256 locked 69-file sustained audit that blocks the original exact bracket;
+  one changed temporary ledger digest also blocks before policy evaluation.
 - A zero-runtime-dependency Python CLI, reusable GitHub Action, strict public
   schemas, portable evidence ledger, deployment template and responsive
   offline report.
@@ -178,7 +187,7 @@ that comparison to the contract and only then emits the decision consumed by
 the Action, report and SurgeDesk.
 
 Finally, a benchmark becomes much easier to understand when it is attached to
-a user outcome. In SurgeDesk, 3x capacity means a support queue remains inside
+a user outcome. In SurgeDesk, at least 2x capacity means a support queue remains inside
 its response objective during a surge, not just that one isolated call ran
 faster.
 
@@ -192,12 +201,12 @@ contribution is the workflow:
 - fixed-SLO load and quality collectors;
 - matched-treatment templates;
 - public contract and decision schemas;
-- primary and fresh-instance confirmation SHA-256 evidence verification;
+- portable SHA-256 evidence verification, plus a sustained-archive adapter;
 - raw-evidence derivation and contract identity binding;
 - explicit Arm execution attribution;
 - pass, fail and unknown fixtures;
 - a GitHub Action and offline report; and
-- an exact passing deployment manifest.
+- a pinned conservative deployment manifest.
 
 A maintainer can fork the repository, replace the model adapter and workload,
 declare the claims that matter to their service, and make unproven Arm
@@ -208,13 +217,14 @@ optimization claims fail CI. No hosted service is required.
 This is not an AI application that merely happens to run on Arm. It combines a
 real model migration, an isolated Arm-specific acceleration path, quality and
 memory gates, service-level capacity testing, runtime attribution and
-fresh-instance confirmation. It then converts those results into both a
+an honestly scoped supporting reproduction. It then converts those results into both a
 compelling cloud application and a reusable developer workflow.
 
-The headline is simple: the same Graviton4 instance served 3x higher confirmed
-tested mixed AI traffic under the same p95 SLO. The implementation underneath
-that sentence is inspectable, fail-closed and available for another Arm
-developer to adopt.
+The headline is simple: the same Graviton4 instance sustained at least 2x more
+mixed AI traffic under the same p95 SLO. The more important technical signal is
+that ArmProof rejected an initially stronger 2.5x claim when one long window
+contradicted it, then exposed only the lower bound supported by every run. The
+implementation is inspectable and available for another Arm developer to adopt.
 
 ## What's Next
 

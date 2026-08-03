@@ -61,7 +61,18 @@ Historical documents must not be treated as active requirements.
 - Decision: preserve the owner-selected MIT license and preserve BANKING77 as
   separately attributed CC-BY-4.0 material.
 - Reason: permissive reuse is central to the community artifact, while the
-  upstream dataset's attribution terms must remain explicit.
+upstream dataset's attribution terms must remain explicit.
+
+## ADR-009: Publish The Sustained Lower Bound, Not The Short-Window Headline
+
+- Status: accepted on 2026-08-03.
+- Decision: the judge-facing capacity claim is at least 2.0x sustained mixed
+  traffic, with 2.33x labeled only as the tested pass-point ratio. Preserve and
+  display the rejected original 2.5x exact-bracket gate.
+- Reason: EXP-2026-009 confirmed disabled 0.24 r/s and enabled 0.56 r/s in all
+  five 500-second windows and baseline failure at 0.28 r/s, but enabled 0.60
+  r/s passed one window. The lower bound is fully supported; an exact bracket
+  is not. This is the product's fail-closed behavior operating on itself.
 
 ## Pending Decisions
 

@@ -9,12 +9,13 @@ the product demo are checked into the public repository.
 1. Open https://qasimkhan5x.github.io/VerifyLane/surgedesk/#triage.
 2. Choose **Guard intervention**, load the suggestion and inspect the direct
    LLM queue versus the guarded queue.
-3. Open **Arm result**, inspect the accepted experiment identity and checksum
-   status, then click **Load verified experiment**. The page derives same-load
-   customer outcomes and the confirmed 3x tested capacity boundary from accepted
-   events.
+3. Open **Arm result**, inspect the sustained experiment identity and checksum
+   status, then click **Load verified experiment**. The page shows why the
+   original exact 2.5x gate was blocked and derives the conservative at-least-2x
+   capacity result from five 500-second confirmations per boundary.
 4. Open **Release proof**. Inspect the claim ledger, optimization path, exact
-   deployment and reusable GitHub Action.
+   deployment and reusable GitHub Action. This view evaluates nine sustained
+   claims, including zero lost profiler samples.
 
 The public page is an evidence-backed application, not a live AWS dependency.
 Recorded output is labeled. Edited text is rejected rather than presented as
@@ -43,10 +44,11 @@ armproof ci examples/armproof-reference/armproof.json
 Expected behavior:
 
 - exit `0`;
-- 282 files across the primary and fresh-instance confirmation bundles verify;
+- 282 files across the reference release bundles verify, and the product also
+  binds the 69-file sustained audit through its immutable archive digest;
 - eight required claims pass from a comparison derived by the adapter;
 - an offline report and machine-readable decision are written; and
-- the exact passing deployment remains linked to the decision.
+- the reference passing deployment remains linked to that reference decision.
 
 To see a release blocked:
 

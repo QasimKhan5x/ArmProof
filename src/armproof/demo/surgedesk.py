@@ -11,7 +11,8 @@ from typing import Any
 from armproof.contracts import parse_contract
 from armproof.demo.queue_guard import QueueGuard, queue_for_intent
 from armproof.evidence import comparison_to_dict, verify_and_derive
-from armproof.policy import decision_to_dict, evaluate_claims
+from armproof.evidence.sustained_audit import derive_sustained_audit
+from armproof.policy import decision_to_dict
 
 
 DEMO_CASE_IDS = (
@@ -69,6 +70,33 @@ def _extract_customer_text(prompt: str) -> str:
     return prompt.rsplit(marker, 1)[1]
 
 
+def _claim_rows(contract: Any, decision: dict[str, Any]) -> list[dict[str, Any]]:
+    labels = {
+        "quality-accuracy": "Quality accuracy",
+        "quality-macro-f1": "Macro F1",
+        "quality-schema": "Output schema",
+        "sustained-capacity-lower-bound": "Sustained capacity lower bound",
+        "sustained-window-count": "Long confirmation windows",
+        "sustained-request-count": "Raw request outcomes",
+        "arm-execution": "Executed Arm path",
+        "arm-cycle-attribution": "KleidiAI cycle attribution",
+        "perf-sample-integrity": "Profiler sample integrity",
+    }
+    results = {row["claim_id"]: row for row in decision["claims"]}
+    return [
+        {
+            "id": spec.claim_id,
+            "label": labels[spec.claim_id],
+            "metric": spec.metric,
+            "operator": spec.operator,
+            "observed": results[spec.claim_id]["observed"],
+            "threshold": spec.threshold,
+            "status": results[spec.claim_id]["status"],
+        }
+        for spec in contract.claims
+    ]
+
+
 def _event_rows(path: Path, workload: dict[str, str]) -> list[dict[str, Any]]:
     result = []
     for index, row in enumerate(_load_jsonl(path)):
@@ -114,6 +142,15 @@ def _queue_guard(root: Path) -> tuple[QueueGuard, list[dict[str, str]]]:
 
 def build_surgedesk_payload(root: Path) -> dict[str, Any]:
     accepted_evidence = root / "ops/evidence/EXP-2026-004/accepted/evidence"
+    sustained_contract = parse_contract(
+        _load_json(root / "examples/armproof-reference/sustained-contract.json")
+    )
+    sustained = derive_sustained_audit(
+        root / "ops/evidence/EXP-2026-009/evidence.tar.gz",
+        expected_sha256="f22e647aabe40eefd2abc5548306f40e2a5558ce1a85bc31c18319e6e51d78da",
+        contract=sustained_contract,
+        workload_manifest=root / "data/banking77/generated/manifest.json",
+    )
     contract = parse_contract(
         _load_json(root / "examples/armproof-reference/contract.json")
     )
@@ -125,7 +162,7 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
         root / "ops/evidence/EXP-2026-005/accepted/evidence",
         root / "ops/evidence/EXP-2026-005/accepted/evidence/SHA256SUMS",
     )
-    decision = decision_to_dict(evaluate_claims(contract.claims, (verified.comparison,)))
+    decision = decision_to_dict(sustained.decision)
     checksum_result = verified.checksums
     evidence = accepted_evidence / "capacity/experiment"
     summary = dict(verified.summary)
@@ -204,14 +241,22 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
         "maximum_relative_difference"
     ]
 
-    mixes = {}
-    for name, result in summary["mixes"].items():
-        mixes[name] = {
-            "baseline_sustainable_rps": result["ratio"]["baseline_median"],
-            "optimized_sustainable_rps": result["ratio"]["treatment_median"],
-            "ratio": round(result["ratio"]["ratio"], 6),
-            "confirmations_per_treatment": result["ratio"]["baseline_samples"],
+    mixes = {
+        "mixed": {
+            "baseline_sustainable_rps": sustained.baseline_pass_rps,
+            "baseline_fail_rps": sustained.baseline_fail_rps,
+            "optimized_sustainable_rps": sustained.treatment_pass_rps,
+            "optimized_probe_rps": sustained.treatment_fail_rps,
+            "tested_pass_point_ratio": sustained.tested_pass_point_ratio,
+            "minimum_capacity_ratio": sustained.minimum_capacity_ratio,
+            "confirmations_per_treatment": sustained.confirmations,
+            "confirmation_seconds": sustained.confirmation_seconds,
+            "baseline_pass_p95_ms": sustained.baseline_pass_p95_ms,
+            "optimized_pass_p95_ms": sustained.treatment_pass_p95_ms,
+            "optimized_probe_p95_ms": sustained.treatment_fail_probe_p95_ms,
+            "optimized_probe_failures": sustained.treatment_failures_at_fail_probe,
         }
+    }
 
     return {
         "schema_version": "1.0.0",
@@ -244,7 +289,8 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
         },
         "replay": {
             "comparison": "equal_offered_load",
-            "note": "Illustrative raw discovery run at identical demand; confirmed capacity boundaries are reported separately.",
+            "source_experiment_id": "EXP-2026-004",
+            "note": "Supporting short-window raw slice at identical demand; the EXP-2026-009 sustained boundaries are reported separately.",
             "baseline": {
                 "label": "KleidiAI disabled",
                 "offered_rps": 0.26666666666666666,
@@ -262,18 +308,19 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
         },
         "proof": {
             "decision": "PASS" if decision["passed"] else "BLOCK",
-            "decision_source": "derived_from_verified_evidence",
+            "decision_source": "derived_from_versioned_sustained_contract",
+            "contract_id": sustained_contract.contract_id,
+            "claims": _claim_rows(sustained_contract, decision),
             "verified_claims": sum(
                 claim["status"] == "pass" for claim in decision["claims"]
             ),
-            "instance": comparison["treatment"]["controls"]["instance"],
-            "threads": comparison["treatment"]["controls"]["threads"],
-            "kleidiai_enabled_callchains": comparison["arm_attribution"]["treatment_observed"],
-            "kleidiai_disabled_callchains": comparison["arm_attribution"]["baseline_observed"],
-            "kleidiai_cycle_callchain_share_percent": comparison["metrics"][
-                "enabled_kai_cycle_callchain_share"
-            ]
-            * 100,
+            "instance": sustained.comparison.treatment.controls["instance"],
+            "threads": sustained.comparison.treatment.controls["threads"],
+            "kleidiai_enabled_callchains": sustained.comparison.arm_path_treatment_observed,
+            "kleidiai_disabled_callchains": sustained.comparison.arm_path_baseline_observed,
+            "kleidiai_cycle_callchain_share_percent": (
+                sustained.enabled_kai_cycle_share * 100
+            ),
             "artifact_reduction_percent": deployment["disk_reduction_percent"],
             "peak_pss_reduction_percent": deployment["peak_pss_reduction_percent"],
             "weighted_pss_reduction_percent": deployment["weighted_pss_reduction_percent"],
@@ -283,17 +330,34 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             "reproduction_experiment_id": "EXP-2026-005",
         },
         "provenance": {
-            "experiment_id": "EXP-2026-004",
+            "experiment_id": sustained.experiment_id,
+            "release_experiment_id": "EXP-2026-004",
+            "original_gate_passed": sustained.original_gate_passed,
+            "corrected_claim_passed": sustained.corrected_claim_passed,
+            "claim_boundary": (
+                "The original exact 2.5x bracket gate was rejected. The public claim "
+                "is the independently supported >=2.0x sustained-capacity lower bound."
+            ),
             "evidence": {
                 "checksum_verified": checksum_result.passed,
                 "checksummed_files": checksum_result.checked,
                 "reproduction_checksum_verified": verified.reproduction_checksums.passed,
                 "reproduction_checksummed_files": verified.reproduction_checksums.checked,
+                "sustained_archive_verified": True,
+                "sustained_archive_sha256": sustained.archive_sha256,
+                "sustained_internal_checksums_verified": (
+                    sustained.internal_checksums_verified
+                ),
+                "sustained_checksummed_files": sustained.internal_checksummed_files,
+                "sustained_raw_confirmation_files": sustained.raw_confirmation_files,
+                "sustained_raw_confirmation_samples": sustained.raw_confirmation_samples,
+                "sustained_matched_control_verified": sustained.matched_control_verified,
                 "total_checksummed_files": (
                     checksum_result.checked + verified.reproduction_checksums.checked
+                    + sustained.internal_checksummed_files
                 ),
                 "comparison": "matched_control",
-                "only_changed_control": "mlas.disable_kleidiai",
+                "only_changed_control": sustained.only_changed_control,
             },
             "dataset": "BANKING77",
             "dataset_license": "CC-BY-4.0",

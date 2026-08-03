@@ -3,8 +3,10 @@
 SurgeDesk is a human-confirmed banking-support triage application that shows
 what a measured Arm optimization changes in a real cloud workflow. During a
 recorded support surge, the same Phi-4 Mini INT4 service on the same AWS
-Graviton4 instance sustains **3x higher confirmed tested mixed traffic** with KleidiAI enabled while
-remaining under its 10-second p95 objective.
+Graviton4 instance sustains **at least 2x more mixed traffic** with KleidiAI
+enabled while remaining under its 10-second p95 objective. The tested passing
+points are `0.24` versus `0.56 r/s`, a 2.33x ratio, across five 500-second
+confirmations per boundary.
 
 A dependency-free queue guard raises held-out five-destination routing accuracy from
 74.42% for direct LLM mapping to **86.75%** while retaining Phi-4 Mini for the
@@ -30,9 +32,12 @@ GenAI with KleidiAI on AWS Graviton4. Existing experiments have already shown:
 - 20/24 versus 19/24 quality results; and
 - `kai_*` callchains only in the enabled treatment.
 
-The decisive service gate confirmed 3.0x, 2.5x and 3.0x higher tested capacity
-across short, long and mixed traffic under the same 10-second p95 SLO. A fresh
-A second fresh `c8g.4xlarge` instance confirmed all three tested grid boundaries.
+Short discovery runs initially suggested 2.5x-3.0x capacity. The decisive
+long-window audit correctly rejected that exact bracket: `0.60 r/s` passed one
+of five optimized windows. It still established the conservative result used
+publicly: baseline `0.24 r/s` and optimized `0.56 r/s` passed all five windows,
+while baseline `0.28 r/s` failed all five. Therefore the sustainable-capacity
+improvement is at least `0.56 / 0.28 = 2.0x`; it is not labeled an exact maximum.
 
 ## Run The Product Demo
 
@@ -45,7 +50,7 @@ Open `http://127.0.0.1:8765/surgedesk/`. The three-step judge path is:
 
 1. Use **Guard intervention** and **Human correction** to inspect both sides of
    the human-confirmed BANKING77 routing boundary.
-2. Replay the same raw demand in both treatments, then reveal confirmed capacity.
+2. Inspect the equal-load customer outcome, then reveal the long-window lower bound.
 3. Inspect the Arm execution, quality, reproduction and deployment proof.
 
 Each view has a stable URL: `#triage`, `#surge`, and `#proof`. The tabs support
@@ -68,13 +73,13 @@ SURGEDESK_INFERENCE_ENDPOINT=http://127.0.0.1:8000/infer \
 optimization PR + contract + raw evidence
               |
               v
-verify two SHA-256 ledgers and workload identity
+verify two SHA-256 ledgers, sustained archive and workload identity
               |
               v
-derive metrics + bind treatment identities
+re-derive raw request metrics + bind treatment identities
               |
               v
-fail-closed eight-claim ledger
+fail-closed versioned claim ledger
               |
               +--> GitHub Check: pass/fail
               +--> interactive evidence report
@@ -88,7 +93,7 @@ python3.12 -m pip install -e .
 armproof ci examples/armproof-reference/armproof.json
 ```
 
-The command verifies 282 files across the primary and reproduction bundles,
+The reference command verifies 282 files across the primary and reproduction bundles,
 derives the normalized comparison from request and quality evidence, binds it
 to the declared identities, and writes `decision.json`, `verification.json`
 and an offline report. Exit `0` approves, exit `2` blocks on a failed or
@@ -116,7 +121,7 @@ Use the same config in GitHub Actions:
 
 The repository contains strict contracts, the common Phi-4 service, fixed-SLO
 load harness, quality evaluator, Arm attribution evidence, fail-closed policy
-engine, GitHub Action, offline report and exact passing deployment.
+engine, GitHub Action, offline report and pinned conservative deployment.
 
 ```bash
 make check
@@ -127,6 +132,10 @@ PYTHONPATH=src python3.12 -m armproof.cli ci \
 The primary and fresh-instance confirmation bundles each contain 141 checksummed files
 and verify after relocation. Browser tests cover the complete SurgeDesk workflow plus ArmProof
 report layouts down to 320 pixels.
+
+SurgeDesk additionally verifies the SHA-256 locked `EXP-2026-009` sustained
+archive and derives the conservative public capacity claim from its recorded
+confirmation rows. The failed original 2.5x bracket remains visible in the app.
 
 For a runtime-neutral starting point, the executable
 [`examples/http-slo/`](examples/http-slo/) kit generates a complete raw-evidence

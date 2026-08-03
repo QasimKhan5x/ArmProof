@@ -1,23 +1,37 @@
 {
   "capacity": {
     "mixes": {
-      "long": {
-        "baseline_sustainable_rps": 0.2,
-        "confirmations_per_treatment": 5,
-        "optimized_sustainable_rps": 0.5,
-        "ratio": 2.5
-      },
       "mixed": {
-        "baseline_sustainable_rps": 0.2,
+        "baseline_fail_rps": 0.28,
+        "baseline_pass_p95_ms": [
+          8331.46282,
+          8241.560369,
+          8428.073218,
+          8362.083283,
+          8292.810668
+        ],
+        "baseline_sustainable_rps": 0.24,
+        "confirmation_seconds": 500,
         "confirmations_per_treatment": 5,
-        "optimized_sustainable_rps": 0.6,
-        "ratio": 3.0
-      },
-      "short": {
-        "baseline_sustainable_rps": 0.26666666666666666,
-        "confirmations_per_treatment": 5,
-        "optimized_sustainable_rps": 0.8,
-        "ratio": 3.0
+        "minimum_capacity_ratio": 2.0,
+        "optimized_pass_p95_ms": [
+          3295.10353,
+          3279.866876,
+          3293.478156,
+          3305.65856,
+          3292.177148
+        ],
+        "optimized_probe_failures": 4,
+        "optimized_probe_p95_ms": [
+          10338.03675,
+          9927.676582,
+          10137.207889,
+          13130.901494,
+          11224.422493
+        ],
+        "optimized_probe_rps": 0.6,
+        "optimized_sustainable_rps": 0.56,
+        "tested_pass_point_ratio": 2.3333333333333335
       }
     },
     "slo_ms": 10000
@@ -29,22 +43,108 @@
   },
   "proof": {
     "artifact_reduction_percent": 35.91724249132322,
+    "claims": [
+      {
+        "id": "quality-accuracy",
+        "label": "Quality accuracy",
+        "metric": "accuracy_delta_pp",
+        "observed": -0.38961038961038974,
+        "operator": "gte",
+        "status": "pass",
+        "threshold": -1.0
+      },
+      {
+        "id": "quality-macro-f1",
+        "label": "Macro F1",
+        "metric": "macro_f1_delta_pp",
+        "observed": -0.6726444303255752,
+        "operator": "gte",
+        "status": "pass",
+        "threshold": -1.0
+      },
+      {
+        "id": "quality-schema",
+        "label": "Output schema",
+        "metric": "schema_valid_rate",
+        "observed": 1.0,
+        "operator": "gte",
+        "status": "pass",
+        "threshold": 0.99
+      },
+      {
+        "id": "sustained-capacity-lower-bound",
+        "label": "Sustained capacity lower bound",
+        "metric": "minimum_capacity_ratio",
+        "observed": 2.0,
+        "operator": "gte",
+        "status": "pass",
+        "threshold": 2.0
+      },
+      {
+        "id": "sustained-window-count",
+        "label": "Long confirmation windows",
+        "metric": "raw_confirmation_files",
+        "observed": 20.0,
+        "operator": "gte",
+        "status": "pass",
+        "threshold": 20.0
+      },
+      {
+        "id": "sustained-request-count",
+        "label": "Raw request outcomes",
+        "metric": "raw_confirmation_samples",
+        "observed": 4200.0,
+        "operator": "gte",
+        "status": "pass",
+        "threshold": 4200.0
+      },
+      {
+        "id": "arm-execution",
+        "label": "Executed Arm path",
+        "metric": "enabled_kai_callchains_observed",
+        "observed": 1.0,
+        "operator": "eq",
+        "status": "pass",
+        "threshold": 1.0
+      },
+      {
+        "id": "arm-cycle-attribution",
+        "label": "KleidiAI cycle attribution",
+        "metric": "enabled_kai_cycle_callchain_share",
+        "observed": 0.6853,
+        "operator": "gte",
+        "status": "pass",
+        "threshold": 0.5
+      },
+      {
+        "id": "perf-sample-integrity",
+        "label": "Profiler sample integrity",
+        "metric": "lost_perf_samples",
+        "observed": 0.0,
+        "operator": "eq",
+        "status": "pass",
+        "threshold": 0.0
+      }
+    ],
+    "contract_id": "phi4-graviton-kleidiai-sustained-release",
     "decision": "PASS",
-    "decision_source": "derived_from_verified_evidence",
+    "decision_source": "derived_from_versioned_sustained_contract",
     "direct_speedup_max": 2.5870578477345356,
     "direct_speedup_min": 1.7170141477125784,
     "instance": "c8g.4xlarge",
-    "kleidiai_cycle_callchain_share_percent": 68.35,
+    "kleidiai_cycle_callchain_share_percent": 68.53,
     "kleidiai_disabled_callchains": false,
     "kleidiai_enabled_callchains": true,
     "peak_pss_reduction_percent": 55.336785335288766,
     "reproduction_experiment_id": "EXP-2026-005",
     "reproduction_max_relative_difference_percent": 0.0,
     "threads": 16,
-    "verified_claims": 8,
+    "verified_claims": 9,
     "weighted_pss_reduction_percent": 59.66032309469201
   },
   "provenance": {
+    "claim_boundary": "The original exact 2.5x bracket gate was rejected. The public claim is the independently supported >=2.0x sustained-capacity lower bound.",
+    "corrected_claim_passed": true,
     "dataset": "BANKING77",
     "dataset_license": "CC-BY-4.0",
     "evidence": {
@@ -54,11 +154,20 @@
       "only_changed_control": "mlas.disable_kleidiai",
       "reproduction_checksum_verified": true,
       "reproduction_checksummed_files": 141,
-      "total_checksummed_files": 282
+      "sustained_archive_sha256": "f22e647aabe40eefd2abc5548306f40e2a5558ce1a85bc31c18319e6e51d78da",
+      "sustained_archive_verified": true,
+      "sustained_checksummed_files": 69,
+      "sustained_internal_checksums_verified": true,
+      "sustained_matched_control_verified": true,
+      "sustained_raw_confirmation_files": 20,
+      "sustained_raw_confirmation_samples": 4200,
+      "total_checksummed_files": 351
     },
-    "experiment_id": "EXP-2026-004",
+    "experiment_id": "EXP-2026-009",
     "machine": "AWS Graviton4 c8g.4xlarge",
     "model": "Phi-4 Mini",
+    "original_gate_passed": false,
+    "release_experiment_id": "EXP-2026-004",
     "release_url": "https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.4.0",
     "report_path": "../report/index.html",
     "runtime": "ONNX Runtime GenAI INT4 + KleidiAI"
@@ -163,7 +272,7 @@
       "passed": false
     },
     "comparison": "equal_offered_load",
-    "note": "Illustrative raw discovery run at identical demand; confirmed capacity boundaries are reported separately.",
+    "note": "Supporting short-window raw slice at identical demand; the EXP-2026-009 sustained boundaries are reported separately.",
     "optimized": {
       "events": [
         {
@@ -243,7 +352,8 @@
       "offered_rps": 0.26666666666666666,
       "p95_ms": 2206.691927,
       "passed": true
-    }
+    },
+    "source_experiment_id": "EXP-2026-004"
   },
   "routing_cases": [
     {

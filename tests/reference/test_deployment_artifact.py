@@ -21,8 +21,8 @@ class DeploymentArtifactTests(unittest.TestCase):
             ROOT / "ops" / "evidence" / "EXP-2026-004" / "accepted" / "evidence"
             / "runtime-lock.json"
         ).read_text(encoding="utf-8"))
-        comparison = json.loads((
-            ROOT / "examples" / "armproof-reference" / "comparison.json"
+        contract = json.loads((
+            ROOT / "examples" / "armproof-reference" / "sustained-contract.json"
         ).read_text(encoding="utf-8"))
         self.assertEqual(manifest["status"], "verified_by_armproof")
         self.assertEqual(manifest["hardware"]["architecture"], "arm64")
@@ -40,12 +40,16 @@ class DeploymentArtifactTests(unittest.TestCase):
         )
         self.assertEqual(
             manifest["model"]["source_artifact_sha256"],
-            comparison["treatment"]["artifact_sha256"],
+            contract["treatments"][1]["artifact_sha256"],
         )
-        self.assertTrue(comparison["treatment"]["controls"]["kleidiai.enabled"])
+        capacity_claim = next(
+            row
+            for row in contract["claims"]
+            if row["id"] == "sustained-capacity-lower-bound"
+        )
         self.assertEqual(
             manifest["accepted_result"]["minimum_fixed_slo_capacity_ratio"],
-            comparison["metrics"]["minimum_capacity_ratio"],
+            capacity_claim["threshold"],
         )
 
     def test_systemd_unit_uses_verified_enabled_overlay(self) -> None:

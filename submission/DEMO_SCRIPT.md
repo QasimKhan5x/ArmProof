@@ -34,9 +34,9 @@ the first viewport.
 
 > This is SurgeDesk, a banking-support AI service on AWS Graviton4. We migrated
 > Phi-4 Mini to INT4 ONNX Runtime GenAI and isolated Arm KleidiAI against the
-> same model and runtime. The result is three times higher confirmed tested mixed
-> traffic on the same instance. ArmProof makes that claim reproducible and
-> blocks it from regressing.
+> same model and runtime. The result is at least twice the sustainable mixed
+> traffic on the same instance. ArmProof is why I can defend that number: it
+> rejected our earlier, prettier 2.5-times claim.
 
 ### 0:15-0:43 - Real Application And Honest Quality Boundary
 
@@ -53,26 +53,29 @@ the first viewport.
 
 ### 0:43-1:25 - The Arm Result, Loaded Honestly
 
-**Do:** Click **2. Arm result**. Point briefly to `EXP-2026-004`, **282 files ·
-both SHA-256 ledgers verified**, and **Matched INT4 control**. Click **Load verified
-experiment**. Point in this order: experiment strip, equal-load request rows,
-p95 cells, 3.0x headline and the three traffic-mix rows.
+**Do:** Click **2. Arm result**. Point briefly to `EXP-2026-009`, the verified
+archive status and **Matched INT4 control**. Click **Load verified experiment**.
+Point in this order: experiment strip, the blocked original gate, the proven
+conservative claim, equal-load outcomes and the `≥2.0x` headline.
 
 **Say:**
 
-> Now the optimization. I am loading accepted experiment EXP-2026-004, not
-> pretending to run a benchmark in three seconds. This view is recomputed from
-> accepted request and quality evidence across two 141-file SHA-256 ledgers.
-> The matched deployment is one
+> Now the optimization. I am loading the immutable EXP-2026-009 sustained
+> audit, not pretending to run a three-hour benchmark in three seconds. The matched deployment is one
 > c8g.4xlarge, one Phi-4 Mini INT4 model, 16 threads and a 10-second p95 target;
-> only KleidiAI changes. At equal load, disabled breaches the target three
-> times at 12.66 seconds p95; enabled breaches none at 2.21. Five confirmations
-> per boundary put mixed capacity at 0.20 versus 0.60 requests per second,
-> with 2.5 to 3 times higher confirmed tested capacity across every traffic shape.
+> the versioned contract binds model, runtime, workload and machine identities,
+> while the treatment overlay toggles KleidiAI. This equal-load panel is visibly
+> labeled as a supporting EXP-2026-004 slice: disabled breaches the target three
+> times at 12.66 seconds p95; enabled breaches none at 2.21. More importantly,
+> five 500-second confirmations passed at 0.24 versus 0.56 requests per second.
+> Baseline failed all five at 0.28, proving at least twice the sustainable
+> capacity. The exact 2.5-times bracket is visibly blocked because 0.60 passed
+> one window by 72 milliseconds. ArmProof re-derives all 4,200 raw outcomes.
+> We keep the failure and release the lower bound.
 
 ### 1:25-2:08 - Prove It Is Optimization On Arm
 
-**Do:** Click **3. Release proof**. Point to the eight-claim ledger and the
+**Do:** Click **3. Release proof**. Point to the nine-claim sustained ledger and the
 **dashboard cannot approve itself** chain. Scroll once to the optimization path.
 
 **Say:**
@@ -82,23 +85,24 @@ p95 cells, 3.0x headline and the three traffic-mix rows.
 > identities, and only then decides. Phi-4 moved from BF16 to INT4, reducing
 > the artifact by 35.92 percent, peak PSS by 55.34 percent and time-weighted
 > PSS by 59.66 percent. Inside the identical INT4 deployment, KleidiAI delivers
-> 1.72 to 2.59 times direct execution speedup, and 68.35 percent of sampled
+> 1.72 to 2.59 times direct execution speedup, and 68.53 percent of sampled
 > cycles descend through the KleidiAI matmul callchain in the enabled profile,
 > versus none in the control. Quality changed by less than one percentage point,
-> schema validity stayed at 100 percent, and a fresh Graviton4 instance
-> confirmed every tested capacity-grid boundary.
+> schema validity stayed at 100 percent. Twenty long windows, process isolation
+> and zero lost profiler samples make the service claim auditable.
 
 ### 2:08-2:38 - Community Artifact
 
-**Do:** Scroll to **The same decision runs in pull requests**. Switch to the
+**Do:** Scroll to **The same fail-closed method runs in pull requests**. Switch to the
 terminal and press Enter on the prepared integrity-challenge command. Let the
 three concise lines print: PASS, TAMPER, BLOCK.
 
 **Say:**
 
-> ArmProof packages that method for other developers. Here all eight claims
-> pass from 282 verified files. Then the demo changes one digest in a temporary
-> ledger, and the same release gate blocks before policy evaluation. It ships
+> ArmProof packages that method for other developers. The sustained adapter just
+> evaluated nine claims from EXP009. This portable reference Action evaluates
+> eight claims from its own 282-file example. Then the demo changes one digest
+> in a temporary ledger and blocks before policy evaluation. It ships
 > as a zero-dependency Python CLI,
 > GitHub Action, public schemas, matched-treatment runner, offline report and
 > exact deployment manifest. Replace the adapter and workload to gate another
@@ -113,13 +117,13 @@ browser visible side by side.
 
 > SurgeDesk shows what Arm optimization changes for users. ArmProof proves why
 > it changed and lets the next Arm developer reuse the work. Same instance,
-> three times higher confirmed tested capacity, verified before merge.
+> at least twice the sustainable capacity, verified before merge.
 
 Stop recording immediately.
 
 ## Recording Rules
 
-- Click **Load verified experiment** during the video and call it an accepted
+- Click **Load verified experiment** during the video and call it a sustained
   evidence load, never a live benchmark.
 - Do not call recorded requests live inference.
 - Do not say Arm certified; say verified by ArmProof.

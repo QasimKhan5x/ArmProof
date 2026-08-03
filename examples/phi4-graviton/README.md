@@ -33,15 +33,14 @@ The server binds loopback by default and exposes `GET /health` and `POST
 `max_new_tokens`. Responses include queue and inference latency separately.
 
 `passing-deployment.json` records the exact artifact, runtime, hardware,
-service controls and accepted result from `EXP-2026-004`. The reusable systemd
+service controls and conservative sustained result from `EXP-2026-009`. The reusable systemd
 unit and environment template are under `deploy/`.
 
-Verify the relocated raw bundle before trusting the normalized result:
+Verify the immutable sustained audit before trusting the normalized result:
 
 ```bash
-armproof evidence-verify \
-  --checksums ops/evidence/EXP-2026-004/accepted/evidence/SHA256SUMS \
-  --root ops/evidence/EXP-2026-004/accepted/evidence
+shasum -a 256 ops/evidence/EXP-2026-009/evidence.tar.gz
+PYTHONPATH=src python3.12 -m unittest tests.evidence.test_sustained_audit -v
 ```
 
 The real Graviton service smoke, artifact identities, profiler callchains and

@@ -21,7 +21,7 @@ test("operator confirms and corrects recorded support routes", async ({ page }) 
   await page.goto(appUrl);
 
   await expect(page.getByRole("heading", { name: "Route an incoming request" })).toBeVisible();
-  await expect(page.locator("#demo-source")).toContainText("EXP-2026-004");
+  await expect(page.locator("#demo-source")).toContainText("EXP-2026-009");
   await expect(page.locator("#guard-accuracy")).toHaveText("86.75%");
   await expect(page.locator("#guard-gain")).toHaveText("+12.34 pp");
   await expect(page.locator("#schema-valid")).toHaveText("100%");
@@ -79,7 +79,7 @@ test("guided scenarios and URL-addressable keyboard tabs support a clean demo", 
   await expect(page.getByRole("tab", { name: "2. Arm result" })).toHaveAttribute("aria-selected", "true");
 
   await page.goto(`${appUrl}#proof`);
-  await expect(page.getByRole("heading", { name: "Approved for the measured Graviton deployment" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Approved at the conservative Graviton boundary" })).toBeVisible();
   await expect(page.getByRole("tab", { name: "3. Release proof" })).toHaveAttribute("aria-selected", "true");
 });
 
@@ -130,26 +130,32 @@ test("verified evidence load reveals the fixed-SLO Arm result", async ({ page })
   await page.goto(appUrl);
   await page.getByRole("tab", { name: "2. Arm result" }).click();
 
-  await expect(page.locator("#evidence-experiment-id")).toHaveText("EXP-2026-004");
-  await expect(page.locator("#evidence-checksum-status")).toHaveText("282 files · both SHA-256 ledgers verified");
-  await expect(page.locator("#evidence-comparison")).toContainText("Matched INT4 control");
+  await expect(page.locator("#evidence-experiment-id")).toHaveText("EXP-2026-009");
+  await expect(page.locator("#evidence-checksum-status")).toContainText("69 sustained + 282 supporting");
+  await expect(page.locator("#evidence-comparison")).toContainText(
+    "Contract-matched INT4 treatments",
+  );
   await expect(page.locator("#experiment-results")).toBeHidden();
 
   await page.getByRole("button", { name: "Load verified experiment" }).click();
   await expect(page.getByRole("button", { name: "Verified experiment loaded" })).toBeDisabled();
   await expect(page.locator("#experiment-results")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Same instance. 3× higher confirmed tested traffic." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Same instance. At least 2× sustainable capacity." })).toBeVisible();
+  await expect(page.locator("#original-gate-status")).toHaveText("BLOCKED");
+  await expect(page.locator("#corrected-claim-status")).toHaveText("PROVEN");
   await expect(page.locator("#baseline-status")).toHaveText("failed");
   await expect(page.locator("#optimized-status")).toHaveText("passed");
   await expect(page.locator("#baseline-completed")).toHaveText("8 / 8");
   await expect(page.locator("#optimized-completed")).toHaveText("8 / 8");
   await expect(page.locator("#baseline-rps")).toHaveText("0.267 r/s");
   await expect(page.locator("#optimized-rps")).toHaveText("0.267 r/s");
+  await expect(page.locator("#equal-load-source")).toHaveText("EXP-2026-004");
   await expect(page.locator("#baseline-request-strip .late")).toHaveCount(3);
   await expect(page.locator("#optimized-request-strip .late")).toHaveCount(0);
   await expect(page.locator("#baseline-p95")).toHaveText(/s$/);
-  await expect(page.locator("#replay-conclusion")).toContainText("3× higher confirmed tested mixed traffic");
-  await expect(page.locator("#mix-table tr")).toHaveCount(3);
+  await expect(page.locator("#replay-conclusion")).toContainText("at least 2.0×");
+  await expect(page.locator("#mix-table tr")).toHaveCount(1);
+  await expect(page.locator("#mix-table")).toContainText("3.28–3.31 s p95");
   expect(messages).toEqual([]);
   await page.screenshot({ path: "build/screenshots/surgedesk-surge.png", fullPage: true });
 });
@@ -157,9 +163,9 @@ test("verified evidence load reveals the fixed-SLO Arm result", async ({ page })
 test("proof view exposes the authoritative evidence chain", async ({ page }) => {
   await page.goto(`${appUrl}#proof`);
   await expect(page.getByRole("heading", { name: "The dashboard cannot approve itself" })).toBeVisible();
-  await expect(page.locator("#proof-evidence-count")).toHaveText("282 files verified");
-  await expect(page.locator("#proof-decision-detail")).toContainText("8 required claims");
-  await expect(page.locator("#proof-arm")).toContainText("68.35% of sampled cycles");
+  await expect(page.locator("#proof-evidence-count")).toHaveText("69 sustained + 282 supporting files");
+  await expect(page.locator("#proof-decision-detail")).toContainText("9 required claims");
+  await expect(page.locator("#proof-claims")).toContainText("68.53%");
   await expect(page.locator(".evidence-chain li")).toHaveCount(4);
 });
 
@@ -170,9 +176,10 @@ test("proof view exposes both the Arm result and quality boundary", async ({ pag
   await page.goto(appUrl);
   await page.getByRole("tab", { name: "3. Release proof" }).click();
 
-  await expect(page.getByRole("heading", { name: "Approved for the measured Graviton deployment" })).toBeVisible();
-  await expect(page.locator(".claims-table tbody tr")).toHaveCount(7);
-  await expect(page.locator("#proof-queue-quality")).toHaveText("86.75%");
+  await expect(page.getByRole("heading", { name: "Approved at the conservative Graviton boundary" })).toBeVisible();
+  await expect(page.locator(".claims-table tbody tr")).toHaveCount(9);
+  await expect(page.locator("#proof-claims")).toContainText("Sustained capacity lower bound");
+  await expect(page.locator("#proof-claims")).toContainText("Profiler sample integrity");
   await expect(page.locator("#absolute-accuracy")).toHaveText("46.49%");
   await expect(page.getByRole("heading", { name: "86.75% held-out queue accuracy" })).toBeVisible();
   await expect(page.locator(".stack-path li")).toHaveCount(5);

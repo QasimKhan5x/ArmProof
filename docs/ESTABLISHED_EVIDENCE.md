@@ -23,7 +23,7 @@ implementation. It is a routing summary, not a substitute for raw evidence.
 | Quality | INT4 versus BF16 | 20/24 versus 19/24 |
 | Parseability | both | 24/24 |
 | Arm attribution | enabled/disabled perf callchains | `kai_*` only when enabled |
-| Fixed-SLO capacity | KleidiAI enabled versus disabled | 3.0x short, 2.5x long, 3.0x mixed |
+| Sustained fixed-SLO capacity | KleidiAI enabled versus disabled, mixed traffic | at least 2.0x; 2.33x tested pass-point ratio |
 | Large-set quality | enabled versus disabled on 770 BANKING77 cases | -0.390 pp accuracy, -0.673 pp macro F1 |
 | Schema validity | both normalized treatments | 100% |
 | Clean reproduction | fresh `c8g.4xlarge` versus accepted result | 0% ratio difference in all mixes |
@@ -46,6 +46,12 @@ no-go under its original rules. A separately preregistered follow-up sampled
 `/proc/self/smaps_rollup` throughout inference and passed all nine gates. The
 follow-up does not rewrite the original result.
 
+Short capacity studies `EXP-2026-004` and `EXP-2026-005` reported 2.5x-3.0x
+tested grid ratios. The later 500-second audit `EXP-2026-009` supersedes those
+numbers for public sustained-capacity claims. Its exact 2.5x bracket gate was
+rejected, while five-of-five passes at 0.24 and 0.56 r/s plus five-of-five
+baseline failures at 0.28 r/s establish the conservative at-least-2.0x result.
+
 ## Current Evidence Location
 
 The imported size, memory and direct-speed evidence is under
@@ -54,6 +60,8 @@ The imported size, memory and direct-speed evidence is under
 `armproof evidence-verify` checks all of them after relocation. The independent
 reproduction is under `ops/evidence/EXP-2026-005/accepted/` with its comparison
 at `ops/evidence/EXP-2026-005/reproduction-comparison.json`.
+The decisive sustained archive, failed original gate and conservative derived
+claim are under `ops/evidence/EXP-2026-009/`.
 
 ## Not Yet Established
 

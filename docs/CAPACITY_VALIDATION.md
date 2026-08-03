@@ -2,7 +2,8 @@
 
 ## Status
 
-Completed by corrected experiment `EXP-2026-004` on 2026-07-31.
+Short-window gate completed by `EXP-2026-004` on 2026-07-31. Public sustained
+claim superseded by long-window audit `EXP-2026-009` on 2026-08-03.
 
 ## Question
 
@@ -43,7 +44,7 @@ not the Arm causal throughput comparison.
 - Complete raw bundle and terminated AWS resources.
 - Repetition validity and error rates satisfy the benchmark protocol.
 
-## Outcome
+## Short-Window Outcome
 
 - `PASS`: 3.0x short, 2.5x long and 3.0x mixed fixed-SLO capacity.
 - Quality: -0.390 pp accuracy and -0.673 pp macro F1; 100% schema validity.
@@ -55,6 +56,15 @@ not the Arm causal throughput comparison.
 
 `EXP-2026-003` remains inconclusive because its nominal and actual offered
 rates differed. Its raw results were not promoted into the accepted claim.
+
+## Decisive Sustained Outcome
+
+`EXP-2026-009` used isolated processes and five 500-second confirmations at
+every frozen pass/fail boundary. Disabled 0.24 r/s and enabled 0.56 r/s passed
+all five; disabled 0.28 r/s failed all five. The defensible public result is
+therefore at least 2.0x sustainable capacity with a 2.33x tested pass-point
+ratio. The preregistered exact 2.0x-2.5x bracket was rejected because enabled
+0.60 r/s passed one of five windows. No exact maximum-capacity estimate is made.
 
 ## Cost Boundary
 

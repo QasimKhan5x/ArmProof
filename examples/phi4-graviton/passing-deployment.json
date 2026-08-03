@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "status": "verified_by_armproof",
-  "experiment_id": "EXP-2026-004",
+  "experiment_id": "EXP-2026-009",
   "hardware": {
     "provider": "AWS",
     "instance_type": "c8g.4xlarge",
@@ -34,17 +34,18 @@
     }
   },
   "accepted_result": {
-    "minimum_fixed_slo_capacity_ratio": 2.5,
+    "minimum_fixed_slo_capacity_ratio": 2.0,
+    "tested_pass_point_ratio": 2.3333333333333335,
     "quality_accuracy_delta_pp": -0.38961038961038974,
     "quality_macro_f1_delta_pp": -0.6726444303255752,
     "schema_valid_rate": 1.0,
-    "arm_callchains": "kai_* observed only in enabled profile",
-    "clean_reproduction": "all three capacity ratios matched with 0% relative difference"
+    "arm_callchains": "68.53% enabled kai_* cycle share, 0% disabled, zero lost samples",
+    "claim_boundary": "at least 2.0x sustainable mixed capacity; no exact upper bound"
   },
   "evidence": {
-    "decision": "examples/armproof-reference/comparison.json",
-    "summary": "ops/evidence/EXP-2026-004/accepted/evidence/capacity/experiment/summary.json",
-    "checksums": "ops/evidence/EXP-2026-004/accepted/evidence/SHA256SUMS",
-    "reproduction": "ops/evidence/EXP-2026-005/reproduction-comparison.json"
+    "contract": "examples/armproof-reference/sustained-contract.json",
+    "summary": "ops/evidence/EXP-2026-009/RESULT.md",
+    "archive": "ops/evidence/EXP-2026-009/evidence.tar.gz",
+    "archive_sha256": "f22e647aabe40eefd2abc5548306f40e2a5558ce1a85bc31c18319e6e51d78da"
   }
 }

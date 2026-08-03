@@ -41,6 +41,50 @@ function formatMs(value) {
 }
 
 
+function formatP95Range(values) {
+  const low = Math.min(...values) / 1000;
+  const high = Math.max(...values) / 1000;
+  return `${low.toFixed(2)}–${high.toFixed(2)} s p95`;
+}
+
+
+function formatClaimValue(metric, value) {
+  if (["accuracy_delta_pp", "macro_f1_delta_pp"].includes(metric)) return `${value.toFixed(3)} pp`;
+  if (["schema_valid_rate", "enabled_kai_cycle_callchain_share"].includes(metric)) return `${(value * 100).toFixed(2)}%`;
+  if (metric === "minimum_capacity_ratio") return `${value.toFixed(1)}×`;
+  if (metric === "enabled_kai_callchains_observed") return value === 1 ? "Observed" : "Absent";
+  return Number.isInteger(value) ? value.toLocaleString() : value.toFixed(2);
+}
+
+
+function renderProofClaims() {
+  const tbody = elements["proof-claims"];
+  tbody.replaceChildren();
+  const operators = { gte: "≥", lte: "≤", gt: ">", lt: "<", eq: "=" };
+  data.proof.claims.forEach((claim) => {
+    const row = document.createElement("tr");
+    const values = [
+      claim.label,
+      formatClaimValue(claim.metric, claim.observed),
+      `${operators[claim.operator]} ${formatClaimValue(claim.metric, claim.threshold)}`,
+    ];
+    values.forEach((value) => {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.append(cell);
+    });
+    const status = document.createElement("td");
+    const mark = document.createElement("span");
+    mark.className = claim.status === "pass" ? "pass-label" : "fail-label";
+    mark.textContent = claim.status[0].toUpperCase() + claim.status.slice(1);
+    status.append(mark);
+    row.append(status);
+    tbody.append(row);
+  });
+  labelResponsiveTable(tbody.closest("table"));
+}
+
+
 function activateView(view, { focus = true, updateHash = true } = {}) {
   if (!(view in VIEW_TO_HASH)) return;
   document.querySelectorAll("[role=tab]").forEach((tab) => {
@@ -286,9 +330,9 @@ function renderMixTable() {
     const row = document.createElement("tr");
     [
       name[0].toUpperCase() + name.slice(1),
-      formatRps(mix.baseline_sustainable_rps),
-      formatRps(mix.optimized_sustainable_rps),
-      `${mix.ratio.toFixed(1)}×`,
+      `${formatRps(mix.baseline_sustainable_rps)} · ${formatP95Range(mix.baseline_pass_p95_ms)}`,
+      `${formatRps(mix.optimized_sustainable_rps)} · ${formatP95Range(mix.optimized_pass_p95_ms)}`,
+      `${mix.tested_pass_point_ratio.toFixed(2)}×`,
     ].forEach((value) => {
       const cell = document.createElement("td");
       cell.textContent = value;
@@ -307,9 +351,9 @@ function renderEvidenceSummary() {
     mixed.baseline_sustainable_rps,
     mixed.optimized_sustainable_rps,
   );
-  const ratios = mixes.map((mix) => mix.ratio);
-  setText("capacity-title", `Same instance. ${mixed.ratio.toFixed(0)}× higher confirmed tested traffic.`);
-  setText("headline-ratio", `${mixed.ratio.toFixed(1)}×`);
+  const minimumRatios = mixes.map((mix) => mix.minimum_capacity_ratio);
+  setText("capacity-title", "Same instance. At least 2× sustainable capacity.");
+  setText("headline-ratio", `≥${mixed.minimum_capacity_ratio.toFixed(1)}×`);
   setText("guard-accuracy", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
   setText("guard-gain", `+${data.quality.guard_queue_gain_pp.toFixed(2)} pp`);
   setText(
@@ -319,7 +363,7 @@ function renderEvidenceSummary() {
   setText("schema-valid", `${data.quality.schema_valid_percent.toFixed(0)}%`);
   setText(
     "confirmation-count",
-    `${mixed.confirmations_per_treatment} confirmations per treatment`,
+    `${mixed.confirmations_per_treatment} × ${mixed.confirmation_seconds}s per boundary`,
   );
   setText("experiment-slo", `p95 ≤ ${(data.capacity.slo_ms / 1000).toFixed(0)} seconds`);
   setText("baseline-capacity-rps", `${mixed.baseline_sustainable_rps.toFixed(2)} requests/s`);
@@ -328,6 +372,12 @@ function renderEvidenceSummary() {
   elements["optimized-capacity-bar"].style.width = `${(mixed.optimized_sustainable_rps / maxCapacity) * 100}%`;
   setText("baseline-boundary", formatRps(mixed.baseline_sustainable_rps));
   setText("optimized-boundary", formatRps(mixed.optimized_sustainable_rps));
+  setText("original-gate-status", data.provenance.original_gate_passed ? "PASSED" : "BLOCKED");
+  setText("corrected-claim-status", data.provenance.corrected_claim_passed ? "PROVEN" : "BLOCKED");
+  setText(
+    "audit-correction-copy",
+    `The original exact 2.5× bracket was rejected because ${mixed.optimized_probe_rps.toFixed(2)} r/s passed one of five windows. The unchanged raw rows still prove ${mixed.optimized_sustainable_rps.toFixed(2)} r/s passed all five while the baseline failed all five at ${mixed.baseline_fail_rps.toFixed(2)} r/s.`,
+  );
   setText(
     "reveal-cycle-share",
     `${data.proof.kleidiai_cycle_callchain_share_percent.toFixed(2)}%`,
@@ -338,30 +388,16 @@ function renderEvidenceSummary() {
   setText("reveal-optimized-rps", formatRps(mixed.optimized_sustainable_rps));
   setText(
     "conclusion-copy",
-    `KleidiAI sustained ${mixed.ratio.toFixed(0)}× higher confirmed tested mixed traffic under the same ${(data.capacity.slo_ms / 1000).toFixed(0)}-second p95 objective.`,
+    `Five ${mixed.confirmation_seconds}-second confirmations passed at ${mixed.optimized_sustainable_rps.toFixed(2)} r/s versus ${mixed.baseline_sustainable_rps.toFixed(2)} r/s. Since the baseline failed at ${mixed.baseline_fail_rps.toFixed(2)} r/s, the sustainable-capacity improvement is at least ${mixed.minimum_capacity_ratio.toFixed(1)}×.`,
   );
-  setText("proof-capacity", `Minimum ${Math.min(...ratios).toFixed(1)}×`);
-  setText("proof-quality", `${data.quality.accuracy_delta_pp.toFixed(3)} pp`);
-  setText("proof-macro-f1", `${data.quality.macro_f1_delta_pp.toFixed(3)} pp`);
-  setText("proof-queue-quality", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
-  setText("proof-schema", `${data.quality.schema_valid_percent.toFixed(0)}%`);
-  setText(
-    "proof-arm",
-    data.proof.kleidiai_enabled_callchains && !data.proof.kleidiai_disabled_callchains
-      ? `${data.proof.kleidiai_cycle_callchain_share_percent.toFixed(2)}% of sampled cycles`
-      : "Attribution unavailable",
-  );
-  setText(
-    "proof-reproduction",
-    `${data.proof.reproduction_max_relative_difference_percent.toFixed(0)}% ratio difference`,
-  );
+  renderProofClaims();
   setText(
     "proof-decision-detail",
     `${data.proof.verified_claims} required claims passed after raw evidence verification and derivation.`,
   );
   setText(
     "proof-evidence-count",
-    `${data.provenance.evidence.total_checksummed_files} files verified`,
+    `${data.provenance.evidence.sustained_checksummed_files} sustained + ${data.provenance.evidence.checksummed_files + data.provenance.evidence.reproduction_checksummed_files} supporting files`,
   );
   setText(
     "proof-derived-claims",
@@ -374,7 +410,7 @@ function renderEvidenceSummary() {
   );
   setText(
     "capacity-range",
-    `${Math.min(...ratios).toFixed(1)}–${Math.max(...ratios).toFixed(1)}× fixed-SLO service capacity`,
+    `≥${Math.min(...minimumRatios).toFixed(1)}× sustained; ${mixed.tested_pass_point_ratio.toFixed(2)}× pass-point ratio`,
   );
   setText("deployment-instance", data.proof.instance);
   setText("deployment-threads", data.proof.threads);
@@ -434,7 +470,7 @@ function loadVerifiedExperiment() {
   elements["load-experiment"].disabled = true;
   elements["load-experiment"].textContent = "Verified experiment loaded";
   elements["evidence-load-note"].textContent =
-    `Loaded ${data.provenance.evidence.total_checksummed_files} verified files across the primary and fresh-instance confirmation bundles; metrics recomputed from accepted evidence.`;
+    `Loaded the SHA-256 locked sustained audit plus the release and reproduction bundles (${data.provenance.evidence.total_checksummed_files} files); ${data.provenance.evidence.sustained_raw_confirmation_samples} raw requests were re-derived across ${data.provenance.evidence.sustained_raw_confirmation_files} long windows.`;
   elements["evidence-loader"].classList.add("loaded");
   elements["tab-surge"].classList.add("completed");
 }
@@ -493,19 +529,20 @@ async function main() {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     data = await response.json();
     workspace = createWorkspace(data);
-    setText("demo-source", `${data.provenance.experiment_id} · ${data.provenance.machine} · accepted evidence`);
+    setText("demo-source", `${data.provenance.experiment_id} · ${data.provenance.machine} · sustained audit`);
     setText("evidence-experiment-id", data.provenance.experiment_id);
     setText(
       "evidence-checksum-status",
-      `${data.provenance.evidence.total_checksummed_files} files · ${data.provenance.evidence.checksum_verified && data.provenance.evidence.reproduction_checksum_verified ? "both SHA-256 ledgers verified" : "verification failed"}`,
+      `${data.provenance.evidence.sustained_checksummed_files} sustained + ${data.provenance.evidence.checksummed_files + data.provenance.evidence.reproduction_checksummed_files} supporting · ${data.provenance.evidence.checksum_verified && data.provenance.evidence.reproduction_checksum_verified && data.provenance.evidence.sustained_archive_verified && data.provenance.evidence.sustained_internal_checksums_verified ? "all ledgers verified" : "verification failed"}`,
     );
     setText(
       "evidence-comparison",
       data.provenance.evidence.comparison === "matched_control"
-        ? "Matched INT4 control · only KleidiAI changes"
+        ? "Contract-matched INT4 treatments · KleidiAI overlay control differs"
         : "Comparison unavailable",
     );
     setText("experiment-machine", data.proof.instance);
+    setText("equal-load-source", data.replay.source_experiment_id);
     setText("absolute-accuracy", `${data.quality.optimized_accuracy_percent.toFixed(2)}%`);
     populateCases();
     renderWorkspace();

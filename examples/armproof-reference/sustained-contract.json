@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "phi4-graviton-kleidiai-sustained-release",
+  "treatments": [
+    {
+      "id": "kleidiai-disabled",
+      "command": ["python", "-m", "armproof.reference.phi4", "--backend", "ort-int4", "--model", "/opt/armproof/evidence/capacity/variants/disabled", "--label", "kleidiai-disabled", "--port", "8000", "--threads", "16", "--max-inflight", "1"],
+      "artifact_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
+      "runtime_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
+      "workload_sha256": "b9dcaf4f73abf4c686f64fb6182fae6acb62bb01710b9ff681a0f42d6bf75f92",
+      "environment_sha256": "61dd1bade37725e8520c61cfd8414e4c0f1a11663df12abcdceeef999c58bc06",
+      "environment": {"mlas.disable_kleidiai": "1", "intra_op_num_threads": "16"}
+    },
+    {
+      "id": "kleidiai-enabled",
+      "command": ["python", "-m", "armproof.reference.phi4", "--backend", "ort-int4", "--model", "/opt/armproof/evidence/capacity/variants/enabled", "--label", "kleidiai-enabled", "--port", "8001", "--threads", "16", "--max-inflight", "1"],
+      "artifact_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
+      "runtime_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
+      "workload_sha256": "b9dcaf4f73abf4c686f64fb6182fae6acb62bb01710b9ff681a0f42d6bf75f92",
+      "environment_sha256": "61dd1bade37725e8520c61cfd8414e4c0f1a11663df12abcdceeef999c58bc06",
+      "environment": {"mlas.disable_kleidiai": "0", "intra_op_num_threads": "16"}
+    }
+  ],
+  "claims": [
+    {
+      "id": "quality-accuracy",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-009-sustained",
+      "metric": "accuracy_delta_pp",
+      "operator": "gte",
+      "threshold": -1.0,
+      "required_evidence": ["quality_rows", "artifact_hashes", "arm_callchains"],
+      "required": true,
+      "depends_on": []
+    },
+    {
+      "id": "quality-macro-f1",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-009-sustained",
+      "metric": "macro_f1_delta_pp",
+      "operator": "gte",
+      "threshold": -1.0,
+      "required_evidence": ["quality_rows", "artifact_hashes", "arm_callchains"],
+      "required": true,
+      "depends_on": []
+    },
+    {
+      "id": "quality-schema",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-009-sustained",
+      "metric": "schema_valid_rate",
+      "operator": "gte",
+      "threshold": 0.99,
+      "required_evidence": ["quality_rows", "artifact_hashes", "arm_callchains"],
+      "required": true,
+      "depends_on": []
+    },
+    {
+      "id": "sustained-capacity-lower-bound",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-009-sustained",
+      "metric": "minimum_capacity_ratio",
+      "operator": "gte",
+      "threshold": 2.0,
+      "required_evidence": ["request_samples", "boundary_confirmations", "artifact_hashes", "arm_callchains"],
+      "required": true,
+      "depends_on": ["quality-accuracy", "quality-macro-f1", "quality-schema"]
+    },
+    {
+      "id": "sustained-window-count",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-009-sustained",
+      "metric": "raw_confirmation_files",
+      "operator": "gte",
+      "threshold": 20,
+      "required_evidence": ["request_samples", "boundary_confirmations", "artifact_hashes", "arm_callchains"],
+      "required": true,
+      "depends_on": []
+    },
+    {
+      "id": "sustained-request-count",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-009-sustained",
+      "metric": "raw_confirmation_samples",
+      "operator": "gte",
+      "threshold": 4200,
+      "required_evidence": ["request_samples", "boundary_confirmations", "artifact_hashes", "arm_callchains"],
+      "required": true,
+      "depends_on": []
+    },
+    {
+      "id": "arm-execution",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-009-sustained",
+      "metric": "enabled_kai_callchains_observed",
+      "operator": "eq",
+      "threshold": 1.0,
+      "required_evidence": ["arm_callchains", "artifact_hashes"],
+      "required": true,
+      "depends_on": []
+    },
+    {
+      "id": "arm-cycle-attribution",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-009-sustained",
+      "metric": "enabled_kai_cycle_callchain_share",
+      "operator": "gte",
+      "threshold": 0.5,
+      "required_evidence": ["arm_callchains", "artifact_hashes"],
+      "required": true,
+      "depends_on": ["arm-execution"]
+    },
+    {
+      "id": "perf-sample-integrity",
+      "causal_scope": "arm_acceleration",
+      "comparison_id": "exp-2026-009-sustained",
+      "metric": "lost_perf_samples",
+      "operator": "eq",
+      "threshold": 0.0,
+      "required_evidence": ["arm_callchains", "artifact_hashes"],
+      "required": true,
+      "depends_on": ["arm-execution"]
+    }
+  ]
+}

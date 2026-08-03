@@ -13,7 +13,7 @@ Target evidence:
 - 1.72x to 2.59x direct KleidiAI speedup;
 - fixed-SLO capacity result;
 - missing/swapped evidence rejection; and
-- fresh-instance confirmation of tested boundaries.
+- a separately labeled fresh-instance reproduction of the earlier short-window grid.
 - 86.75% held-out operational routing accuracy from a dependency-free guard.
 
 Do not attribute the whole BF16-to-INT4 transformation to KleidiAI.
@@ -57,8 +57,9 @@ The 90-second reveal is operational and causal:
 2. The two-stage route scores 86.75% held-out queue accuracy.
 3. At identical demand, disabled shows three late customers while enabled
    shows zero on the same Graviton4 machine.
-4. Sustainable mixed traffic rises from 0.20 to 0.60 requests/second.
-5. ArmProof reveals enabled-only `kai_*` execution and releases the exact
+4. ArmProof visibly rejects the initial exact 2.5x claim, then proves an
+   at-least-2.0x sustained lower bound from five 500-second confirmations.
+5. ArmProof reveals 68.53% enabled `kai_*` cycle attribution and releases the exact
    measured deployment through a reusable GitHub Action.
 
 The audience should understand the application within 10 seconds and the Arm
