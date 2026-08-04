@@ -1,29 +1,218 @@
-# Three-Minute Demo Script
+# Three-Minute Demo: Setup, Recording Script And Cleanup
 
-Target duration: **2:40-2:50**. Speak conversationally and leave a short pause
+Target duration: **2:50-2:58**. Speak conversationally and leave a short pause
 after each result. The script is short enough to accommodate clicks within the
 three-minute limit.
 
-## Prepare Before Recording
+Run every command from the repository root unless a step says **Graviton**.
+This is the only runbook needed to record the video.
 
-1. Follow [`LIVE_REQUEST_RUNBOOK.md`](LIVE_REQUEST_RUNBOOK.md) and leave both
-   prepared endpoints warm.
-2. Start SurgeDesk with `python3.12 scripts/serve_surgedesk.py --port 8765`.
-3. Open `http://127.0.0.1:8765/surgedesk/#triage` at 100% zoom and select
-   **Guard intervention**.
-4. Prepare two terminal tabs without executing their commands:
+## What Happens Live
 
-   ```bash
-   python3.12 scripts/demo_live_compare.py \
-     --baseline-endpoint http://127.0.0.1:18001/infer \
-     --optimized-endpoint http://127.0.0.1:18002/infer
+The terminal sends one banking request concurrently to two warm services on the
+same Graviton4 instance. Cores `0-7` run the KleidiAI-disabled control and cores
+`8-15` run the KleidiAI-enabled treatment. This request makes the optimization
+visible, while the capacity claim comes from the loaded `EXP-2026-009` audit:
+twenty 500-second confirmation windows and 4,200 recorded requests.
 
-   python3.12 scripts/demo_release_gate.py
-   ```
+## 1. Check The Local Demo
 
-5. Record the browser and terminal. Hide notifications and bookmarks.
+From the repository root, verify the comparison client and release-gate demo:
 
-## Exact Recording
+```bash
+PYTHONPATH=src python3.12 -m unittest \
+  tests.test_demo_live_compare tests.test_demo_release_gate -v
+python3.12 scripts/demo_release_gate.py
+```
+
+Expected final output:
+
+```text
+OK
+PASS    8/8 claims from 317 verified files
+TAMPER  replaced one digest in a temporary copy of the primary ledger
+BLOCK   release refused before policy evaluation: checksum mismatch
+```
+
+The unit test uses temporary local endpoints and validates orchestration only.
+
+## 2. Prepare The Graviton Host
+
+Use one Ubuntu 24.04 Arm64 `c8g.4xlarge` and record its public hostname and EC2
+instance ID. The instance needs the repository, the pinned Arm64 runtime bundle
+used by the experiments, and outbound access to Hugging Face. The runtime bundle
+is not committed because it contains 45 MB of built wheels.
+
+If both Graviton services are already prepared and warm, skip to step 4.
+
+On the **recording machine**, set these values and upload the bundle:
+
+```bash
+export GRAVITON_HOST=ubuntu@YOUR_GRAVITON_HOST
+export INSTANCE_ID=i-YOUR_INSTANCE_ID
+export RUNTIME_BUNDLE=/absolute/path/to/runtime-checkpoints.tar.gz
+
+test -f "$RUNTIME_BUNDLE"
+ssh "$GRAVITON_HOST" 'uname -m'
+scp "$RUNTIME_BUNDLE" "$GRAVITON_HOST:~/runtime-checkpoints.tar.gz"
+```
+
+Expected result: SSH prints `aarch64`, then `scp` reaches `100%` and returns to
+the prompt.
+
+On **Graviton**, install the pinned runtime and download the pinned model:
+
+```bash
+if [ -d ~/ArmProof/.git ]; then
+  git -C ~/ArmProof pull --ff-only
+else
+  git clone https://github.com/QasimKhan5x/ArmProof.git ~/ArmProof
+fi
+cd ~/ArmProof
+
+sudo apt-get update -qq
+sudo apt-get install -y -qq python3-venv curl
+python3.12 -m venv ~/armproof-venv
+~/armproof-venv/bin/pip install -q --upgrade pip
+~/armproof-venv/bin/pip install -q -r ops/aws/cap-001/requirements.txt
+
+mkdir -p ~/runtime-checkpoints ~/models
+tar -xzf ~/runtime-checkpoints.tar.gz -C ~/runtime-checkpoints
+(cd ~/runtime-checkpoints && sha256sum -c SHA256SUMS)
+~/armproof-venv/bin/pip install -q --force-reinstall --no-deps \
+  ~/runtime-checkpoints/onnxruntime-1.29.0-cp312-cp312-linux_aarch64.whl \
+  ~/runtime-checkpoints/onnxruntime_genai-0.15.0.dev0-cp312-cp312-linux_aarch64.whl
+
+~/armproof-venv/bin/hf download microsoft/Phi-4-mini-instruct-onnx \
+  --revision fc04c8f93df696602fd9f300a30d1bf2e3081347 \
+  --include 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/*' \
+  --local-dir ~/models/onnx-repo
+
+PYTHONPATH=src ~/armproof-venv/bin/python scripts/prepare_phi4_variants.py \
+  --source ~/models/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4 \
+  --output-root ~/models/armproof-variants \
+  --threads 8
+```
+
+Expected results:
+
+- every line from `sha256sum` ends in `OK`;
+- the Hugging Face command finishes with files under `~/models/onnx-repo`;
+- variant preparation returns silently with exit code zero and creates
+  `kleidiai-disabled` and `kleidiai-enabled`.
+
+If `~/models/armproof-variants` already exists from a successful preparation,
+skip the final command rather than overwriting it.
+
+## 3. Start Both Graviton Services
+
+Open two SSH terminals. These commands load the model and then remain silent
+while serving requests; leave both terminals open.
+
+In **Graviton terminal A**, start the disabled control:
+
+```bash
+cd ~/ArmProof
+taskset -c 0-7 env OMP_NUM_THREADS=8 PYTHONPATH=src \
+  ~/armproof-venv/bin/python -m armproof.reference.phi4 \
+  --backend ort-int4 \
+  --model ~/models/armproof-variants/kleidiai-disabled \
+  --label ort-int4-kleidiai-disabled \
+  --port 8001 --threads 8 --max-inflight 1
+```
+
+In **Graviton terminal B**, start the enabled treatment:
+
+```bash
+cd ~/ArmProof
+taskset -c 8-15 env OMP_NUM_THREADS=8 PYTHONPATH=src \
+  ~/armproof-venv/bin/python -m armproof.reference.phi4 \
+  --backend ort-int4 \
+  --model ~/models/armproof-variants/kleidiai-enabled \
+  --label ort-int4-kleidiai-enabled \
+  --port 8002 --threads 8 --max-inflight 1
+```
+
+## 4. Open The Tunnel And Verify Both Services
+
+In a third terminal on the **recording machine**, open the SSH tunnel and leave
+it running:
+
+```bash
+ssh -N \
+  -L 18001:127.0.0.1:8001 \
+  -L 18002:127.0.0.1:8002 \
+  "$GRAVITON_HOST"
+```
+
+The tunnel prints nothing when healthy. In a fourth local terminal, verify the
+two backend labels:
+
+```bash
+curl -s http://127.0.0.1:18001/health
+echo
+curl -s http://127.0.0.1:18002/health
+echo
+```
+
+Expected output:
+
+```json
+{"ready":true,"backend":"ort-int4-kleidiai-disabled"}
+{"ready":true,"backend":"ort-int4-kleidiai-enabled"}
+```
+
+## 5. Warm The Endpoints And Start SurgeDesk
+
+Run the comparison once before recording:
+
+```bash
+python3.12 scripts/demo_live_compare.py \
+  --baseline-endpoint http://127.0.0.1:18001/infer \
+  --optimized-endpoint http://127.0.0.1:18002/infer
+```
+
+The times and ratio vary, and the two backend rows may appear in either order,
+but both labels and the final capacity line must match:
+
+```text
+LIVE ILLUSTRATION - NOT CAPACITY EVIDENCE
+Same request: i have not received my card
+  KleidiAI enabled    <time> s  backend=ort-int4-kleidiai-enabled
+  KleidiAI disabled   <time> s  backend=ort-int4-kleidiai-disabled
+Illustrative request ratio: <ratio>x
+Capacity claim: use EXP-2026-009 sustained evidence (>=2.0x).
+```
+
+Do not record if either label is missing or swapped. Start the local UI in a
+fifth terminal:
+
+```bash
+python3.12 scripts/serve_surgedesk.py --port 8765
+```
+
+Expected output:
+
+```text
+SurgeDesk: http://127.0.0.1:8765/surgedesk/
+Live inference: disabled
+```
+
+The disabled message is correct: the video uses the two live endpoints in the
+terminal and SHA-256-locked evidence in the browser.
+
+## 6. Stage The Recording
+
+1. Open `http://127.0.0.1:8765/surgedesk/#triage` at 100% zoom.
+2. Select **Guard intervention** and leave the page at the first viewport.
+3. Clear the terminal used for the warm-up and paste, without running, the
+   `demo_live_compare.py` command from step 5.
+4. In another clear terminal, paste `python3.12 scripts/demo_release_gate.py`
+   without running it.
+5. Arrange the browser and terminal so switching between them takes one click.
+6. Hide notifications and bookmarks, then start recording.
+
+## 7. Record The Video
 
 ### 0:00-0:15 - Hook
 
@@ -123,3 +312,47 @@ Stop recording immediately.
 - Keep BF16-to-INT4 size and memory gains separate from KleidiAI gains.
 - Keep the queue guard separate from the Arm optimization.
 - Use no copyrighted music and publish the final video without sign-in.
+
+## 8. Stop Services And Terminate AWS
+
+After recording:
+
+1. Press `Ctrl-C` in both Graviton service terminals, the SSH tunnel terminal
+   and the local SurgeDesk terminal.
+2. Terminate the instance from the recording machine:
+
+   ```bash
+   aws ec2 terminate-instances \
+     --region us-east-1 \
+     --instance-ids "$INSTANCE_ID" \
+     --query 'TerminatingInstances[0].[InstanceId,CurrentState.Name]' \
+     --output text
+
+   aws ec2 wait instance-terminated \
+     --region us-east-1 \
+     --instance-ids "$INSTANCE_ID"
+   ```
+
+   Expected first output:
+
+   ```text
+   i-YOUR_INSTANCE_ID    shutting-down
+   ```
+
+3. Confirm that no running ArmProof instance remains:
+
+   ```bash
+   aws ec2 describe-instances \
+     --region us-east-1 \
+     --filters \
+       'Name=tag:Project,Values=ArmProof' \
+       'Name=instance-state-name,Values=pending,running,stopping,stopped' \
+     --query 'Reservations[].Instances[].[InstanceId,State.Name]' \
+     --output text
+   ```
+
+   Expected output: empty.
+
+If either live endpoint returns the wrong label, fails, or produces an ambiguous
+result, fix the endpoint setup before recording. Never substitute synthetic
+terminal output.
