@@ -168,7 +168,7 @@
     "model": "Phi-4 Mini",
     "original_gate_passed": false,
     "release_experiment_id": "EXP-2026-004",
-    "release_url": "https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.5.0",
+    "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.5.1",
     "report_path": "../report/index.html",
     "runtime": "ONNX Runtime GenAI INT4 + KleidiAI"
   },

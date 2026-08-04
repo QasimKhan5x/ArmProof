@@ -8,13 +8,13 @@
 
 **Track:** Cloud AI
 
-**Repository:** https://github.com/QasimKhan5x/VerifyLane
+**Repository:** https://github.com/QasimKhan5x/ArmProof
 
-**Try it:** https://qasimkhan5x.github.io/VerifyLane/surgedesk/
+**Try it:** https://qasimkhan5x.github.io/ArmProof/surgedesk/
 
-**Technical proof:** https://qasimkhan5x.github.io/VerifyLane/report/
+**Technical proof:** https://qasimkhan5x.github.io/ArmProof/report/
 
-**Release:** https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.5.0
+**Release:** https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.5.1
 
 **Video:** ADD THE PUBLIC YOUTUBE OR VIMEO URL AFTER RECORDING
 
@@ -244,8 +244,8 @@ implementation is inspectable and available for another Arm developer to adopt.
 ## Setup And Validation
 
 ```bash
-git clone https://github.com/QasimKhan5x/VerifyLane.git
-cd VerifyLane
+git clone https://github.com/QasimKhan5x/ArmProof.git
+cd ArmProof
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -e .
 make check

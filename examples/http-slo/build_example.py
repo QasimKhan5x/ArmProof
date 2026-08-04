@@ -193,7 +193,7 @@ def build(output: Path) -> Path:
         "name: ArmProof\non: [push, pull_request]\njobs:\n"
         "  verify:\n    runs-on: ubuntu-latest\n    steps:\n"
         "      - uses: actions/checkout@v4\n"
-        "      - uses: QasimKhan5x/VerifyLane@v0.5.0\n"
+        "      - uses: QasimKhan5x/ArmProof@v0.5.1\n"
         "        with:\n          config: armproof.json\n",
         encoding="utf-8",
     )

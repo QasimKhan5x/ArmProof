@@ -44,7 +44,7 @@ class CiCommandTests(unittest.TestCase):
             workflow = (output / ".github/workflows/armproof.yml").read_text(
                 encoding="utf-8"
             )
-            self.assertIn("QasimKhan5x/VerifyLane@v0.5.0", workflow)
+            self.assertIn("QasimKhan5x/ArmProof@v0.5.1", workflow)
 
             with redirect_stderr(io.StringIO()) as stderr:
                 self.assertEqual(main(["ci", str(output / "armproof.json")]), 1)

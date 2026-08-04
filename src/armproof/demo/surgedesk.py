@@ -365,6 +365,6 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             "runtime": "ONNX Runtime GenAI INT4 + KleidiAI",
             "machine": "AWS Graviton4 c8g.4xlarge",
             "report_path": "../report/index.html",
-            "release_url": "https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.5.0",
+            "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.5.1",
         },
     }

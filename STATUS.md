@@ -66,7 +66,7 @@ executed end to end. A separate llama.cpp/Qwen2.5 0.5B Q4_0 bridge completed a
 real local Arm64 inference smoke, proving protocol portability without
 publishing an unmeasured performance claim.
 
-Version `v0.5.0` is the intended release for the completed evidence, live-demo
+Version `v0.5.1` is the intended release for the completed evidence, live-demo
 and adoption paths.
 Native Arm64, x86 and report-browser CI cover the Action, decision and offline
 report. The complete

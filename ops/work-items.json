@@ -315,7 +315,7 @@
       "deliverables": ["Tagged release", "Demo video", "Submission copy", "Public evidence bundle"],
       "verification": ["Demo uses real recorded evidence", "Every numerical claim links to a bundle", "Installation and validation steps work from the release"],
       "evidence": [
-        "https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.1.0",
+        "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.1.0",
         "GitHub CI 30684464229 passed on native Arm64, x86 and report-browser jobs",
         "GitHub example Action 30684494688 passed and uploaded the offline report",
         "Clean virtual-environment install and fail-closed armproof init dry run passed 2026-08-04",

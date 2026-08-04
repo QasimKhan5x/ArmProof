@@ -19,7 +19,7 @@
 ## Owner Actions
 
 - [ ] Confirm the GitHub repository About section shows the MIT license.
-- [ ] Confirm https://qasimkhan5x.github.io/VerifyLane/surgedesk/ works in a
+- [ ] Confirm https://qasimkhan5x.github.io/ArmProof/surgedesk/ works in a
   logged-out browser.
 - [ ] Record the video from [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md).
 - [ ] Upload it publicly to YouTube or Vimeo with embedding enabled.

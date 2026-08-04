@@ -6,7 +6,7 @@ the product demo are checked into the public repository.
 
 ## 60-Second Path
 
-1. Open https://qasimkhan5x.github.io/VerifyLane/surgedesk/#triage.
+1. Open https://qasimkhan5x.github.io/ArmProof/surgedesk/#triage.
 2. Choose **Guard intervention**, load the suggestion and inspect the direct
    LLM queue versus the guarded queue.
 3. Open **Arm result**, inspect the sustained experiment identity and checksum
@@ -26,8 +26,8 @@ model inference.
 Prerequisite: Python 3.12.
 
 ```bash
-git clone https://github.com/QasimKhan5x/VerifyLane.git
-cd VerifyLane
+git clone https://github.com/QasimKhan5x/ArmProof.git
+cd ArmProof
 python3.12 scripts/build_surgedesk_demo.py --verify
 python3.12 scripts/serve_surgedesk.py --port 8765
 ```

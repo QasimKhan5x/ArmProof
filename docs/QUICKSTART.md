@@ -55,7 +55,7 @@ Create an `armproof.json` matching
 [`schemas/ci-config.schema.json`](../schemas/ci-config.schema.json), then add:
 
 ```yaml
-- uses: QasimKhan5x/VerifyLane@v0.5.0
+- uses: QasimKhan5x/ArmProof@v0.5.1
   with:
     config: armproof.json
     output: build/armproof-report
@@ -72,7 +72,7 @@ GitHub build provenance:
 
 ```bash
 gh attestation verify armproof-evidence.tar.gz \
-  -R QasimKhan5x/VerifyLane
+  -R QasimKhan5x/ArmProof
 sha256sum -c armproof-evidence.tar.gz.sha256
 ```
 
