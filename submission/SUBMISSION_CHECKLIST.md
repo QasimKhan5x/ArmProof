@@ -15,10 +15,12 @@
 - [x] Public GitHub Pages workflow and judge URLs.
 - [x] Devpost image selection and captions.
 - [x] Under-three-minute recording script.
+- [x] GitHub detects the root license as MIT.
+- [x] Challenge-period creation and meaningful-update statement is explicit in
+  the README and Devpost copy.
 
 ## Owner Actions
 
-- [ ] Confirm the GitHub repository About section shows the MIT license.
 - [ ] Confirm https://qasimkhan5x.github.io/ArmProof/surgedesk/ works in a
   logged-out browser.
 - [ ] Record the video from [`DEMO_SCRIPT.md`](DEMO_SCRIPT.md).
@@ -27,8 +29,6 @@
 - [ ] Upload the four images in [`ASSET_CHECKLIST.md`](ASSET_CHECKLIST.md).
 - [ ] Paste the submission text and select **Cloud AI**.
 - [ ] Add only actual team members and confirm the authorized representative.
-- [ ] Confirm the project was built or significantly updated during the
-  submission period.
 - [ ] Test every Devpost link while logged out.
 - [ ] Submit before August 14, 2026 at 4:00 PM PDT.
 - [ ] Reopen the submitted project and verify formatting, video playback and

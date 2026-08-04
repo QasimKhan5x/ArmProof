@@ -1,5 +1,23 @@
 # SurgeDesk + ArmProof
 
+## Hackathon Submission Facts
+
+- **Challenge track:** Cloud AI.
+- **What was built:** SurgeDesk, a human-confirmed banking-support inference
+  application, and ArmProof, its reusable fail-closed optimization release gate.
+- **Arm target:** CPU-only AWS Graviton4 (`c8g.4xlarge`) using Arm KleidiAI
+  through ONNX Runtime GenAI.
+- **Optimization work:** BF16-to-INT4 migration plus a matched INT4
+  KleidiAI-disabled/enabled control, measured for artifact size, memory,
+  direct inference speed, fixed-SLO capacity, quality and executed Arm
+  callchains.
+- **Challenge-period confirmation:** the submitted ArmProof and SurgeDesk work
+  was created and meaningfully developed from July 29 through August 4, 2026,
+  within the [official June 10 through August 14, 2026 submission period](https://arm-ai-optimization-challenge.devpost.com/rules).
+  The public Git history preserves the implementation, evidence and release dates.
+- **Judge access:** source, raw evidence, setup instructions, tests, screenshots,
+  live demo and technical report are public from this repository.
+
 SurgeDesk is a human-confirmed banking-support triage application that shows
 what a measured Arm optimization changes in a real cloud workflow. During a
 recorded support surge, the same Phi-4 Mini INT4 service on the same AWS

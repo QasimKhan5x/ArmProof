@@ -26,6 +26,12 @@ Playwright
 improving inference server performance; understanding Arm-specific guidance;
 finding compatible cloud hardware.
 
+**Challenge-period confirmation:** SurgeDesk and ArmProof were created and
+meaningfully developed from July 29 through August 4, 2026, within the
+[official June 10 through August 14, 2026 submission period](https://arm-ai-optimization-challenge.devpost.com/rules).
+The public repository history records the implementation, Graviton experiments,
+evidence integration and releases completed during that period.
+
 ## Short Description
 
 SurgeDesk is a human-confirmed banking-support triage application backed by a
