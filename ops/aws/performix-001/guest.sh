@@ -92,9 +92,7 @@ MODEL_SOURCE="$MODELS/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4
 export PYTHONPATH="$WORK/src"
 "$ROOT/venv/bin/python" scripts/prepare_phi4_variants.py \
   --source "$MODEL_SOURCE" --output-root "$ROOT/variants" --threads 16
-"$ROOT/venv/bin/python" -c \
-  'import json,sys; from dataclasses import asdict; from pathlib import Path; from armproof.evidence.identity import fingerprint_path; print(json.dumps({"source": asdict(fingerprint_path(Path(sys.argv[1]))), "disabled": asdict(fingerprint_path(Path(sys.argv[2]))), "enabled": asdict(fingerprint_path(Path(sys.argv[3])))}, indent=2, sort_keys=True))' \
-  "$MODEL_SOURCE" "$ROOT/variants/kleidiai-disabled" "$ROOT/variants/kleidiai-enabled" \
+"$ROOT/venv/bin/python" scripts/fingerprint_artifact.py "$MODEL_SOURCE" \
   > "$RESULTS/artifact-identities.json"
 sha256sum data/banking77/generated/traffic-mixed.jsonl > "$RESULTS/workload.sha256"
 

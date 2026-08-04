@@ -59,7 +59,7 @@ def main() -> int:
         experiment_token=EXPERIMENT_TOKEN,
         project=root,
         output_dir=root / "ops/evidence/EXP-2026-013",
-        guest_template=root / "ops/aws/performix-001/guest.sh",
+        guest_template=root / "ops/aws/performix-003/guest.sh",
         immutable_assets=assets,
         poll_seconds=15,
     )
