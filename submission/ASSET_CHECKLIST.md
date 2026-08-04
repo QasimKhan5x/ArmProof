@@ -6,7 +6,8 @@ Upload these in order after they are copied into `submission/assets/`:
    at-least-2x sustained result, rejected overclaim and fixed-SLO comparison.
 2. `02-triage-guard.png` - shows the real application and the queue guard
    correcting an LLM route.
-3. `03-release-proof.png` - shows the sustained claim ledger and Arm
+3. `03-release-proof.png` - shows the core Arm Performix experiment, sustained
+   claim ledger and Arm
    optimization path.
 4. `04-mobile-proof.png` - optional; demonstrates responsive product quality.
 

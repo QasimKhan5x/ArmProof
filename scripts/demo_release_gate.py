@@ -40,6 +40,19 @@ def _config(root: Path, checksum_ledger: Path) -> Path:
                 "root": str(reproduction),
                 "checksums": str(reproduction / "SHA256SUMS"),
             },
+            "performix": {
+                "archive": str(
+                    ROOT / "ops/evidence/EXP-2026-010/evidence.tar.gz"
+                ),
+                "archive_sha256": (
+                    "28d411e40de38f3ad4a455bbfa09524dee8b44d6e44eb4d3b599e01635789148"
+                ),
+                "experiment_id": "EXP-2026-010",
+                "disabled_run_id": "cbb01b949717",
+                "enabled_run_id": "2bf254d4391b",
+                "linux_perf_kai_cycle_share": 0.6853,
+                "maximum_share_difference": 0.05,
+            },
         },
         "deployment_summary": str(
             ROOT / "examples/armproof-reference/deployment-summary.json"
@@ -65,6 +78,7 @@ def demonstrate() -> int:
         checked = (
             receipt["checksums"]["checked"]
             + receipt["reproduction_checksums"]["checked"]
+            + receipt["performix"]["internal_checksums"]["checked"]
         )
         decision = json.loads(
             (temporary / "valid-report/decision.json").read_text(encoding="utf-8")

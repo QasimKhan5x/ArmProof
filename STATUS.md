@@ -26,6 +26,9 @@ The decisive sustained audit ran on AWS Graviton4 `c8g.4xlarge`:
   12.34 percentage points from direct LLM intent-to-queue mapping.
 - Arm attribution: 68.53% of sampled cycles reached the enabled KleidiAI I8MM
   callchain, versus 0% disabled, with zero lost samples.
+- Arm Performix 1.20 independently measured 67.02% `kai_*` function samples
+  enabled versus 0% disabled. The 1.51 pp difference from Linux perf is inside
+  the frozen 5 pp agreement limit.
 - Whole deployment: 35.92% less disk, 55.34% lower peak PSS and 59.66% lower
   time-weighted PSS than the BF16 reference.
 - Earlier short-window evidence reproduced on a fresh instance but is retained
@@ -42,39 +45,35 @@ Completed: guarded AWS lifecycle, reference service, fixed-SLO harness, policy
 engine, pass/fail/unknown fixtures, single-config CLI, reusable GitHub Action,
 responsive offline report, integrity verifier and pinned deployment artifact.
 
-The reference release path verifies 282 files across the primary and
-fresh-instance confirmation bundles, re-derives capacity and quality, binds model,
+The reference release path verifies 317 files across the primary,
+fresh-instance and native Arm Performix bundles, re-derives capacity, quality
+and matched Code Hotspots attribution, binds model,
 runtime, workload, environment and treatment identities to the contract, and
 only then evaluates eight required claims. Caller-authored normalized
 comparisons are rejected by `armproof ci`. The report emits a verification
 receipt, and the safe tamper challenge proves one changed ledger digest blocks
 before policy evaluation.
 
-The SurgeDesk workflow now includes a held-out two-stage queue guard, human
-confirm/correct state machine, equal-load customer-outcome replay, sustained
-capacity lower bound, visible rejected overclaim, release-proof view,
-executable adoption path and optional live Graviton gateway. A matched-request
-demo races two prepared, core-isolated Graviton endpoints while explicitly
-separating that live illustration from the sustained capacity evidence.
-Recorded mode refuses to present edited text as inference; live mode remains
-disabled unless a trusted endpoint is configured.
+SurgeDesk includes a held-out queue guard, human confirmation, equal-load
+replay, sustained lower bound, rejected overclaim, release proof and optional
+live gateway. Recorded mode rejects edited text rather than presenting it as
+inference.
 
-`armproof init` now scaffolds a runtime-neutral HTTP evidence project and
-deliberately fails closed until real evidence is supplied. Its documented
-clean-venv installation, generated files and missing-evidence failure were
-executed end to end. A separate llama.cpp/Qwen2.5 0.5B Q4_0 bridge completed a
-real local Arm64 inference smoke, proving protocol portability without
-publishing an unmeasured performance claim.
+`armproof init` scaffolds a runtime-neutral HTTP evidence project and fails
+closed until real evidence is supplied. A llama.cpp/Qwen2.5 0.5B Q4_0 bridge
+completed a local Arm64 compatibility smoke without a performance claim.
 
-Version `v0.5.1` is the intended release for the completed evidence, live-demo
-and adoption paths.
+The c8g.4xlarge virtual PMU exposed two counters. Performix CPU
+Microarchitecture and Instruction Mix each require at least three, so those
+readiness failures remain public and unavailable rather than passing.
+
+Version `v0.6.0` is the Performix-integrated release candidate pending tag and
+remote CI.
 Native Arm64, x86 and report-browser CI cover the Action, decision and offline
-report. The complete
-Devpost copy, judge guide, technical evidence map, media set, final checklist
-and under-three-minute recording script are under `submission/`. Remaining
-owner work is recording/uploading the video and pasting the prepared entry
-into Devpost. The secondary measurement-overhead claim remains unpublished
-until it has a matched baseline.
+report. Submission copy and the under-three-minute script are under
+`submission/`. Remaining owner work is recording/uploading the video and
+pasting the prepared entry into Devpost. Measurement overhead remains
+unpublished until it has a matched baseline.
 
 ## Verified Commands
 
@@ -95,5 +94,5 @@ python3.12 scripts/demo_live_compare.py --help
 - Accepted performance claims are scoped to the pinned Phi-4 Mini workload,
   runtime and `c8g.4xlarge`; they are not universal model claims.
 - Project source is MIT licensed; BANKING77 is attributed under CC-BY-4.0.
-- Estimated cumulative AWS evidence cost is USD 10.7878 and inventory is empty.
+- Estimated cumulative AWS evidence cost is USD 10.9399 and inventory is empty.
 - ArmProof means "verified against the declared contract," not Arm certified.

@@ -27,6 +27,7 @@ and the accepted
 | Time-weighted PSS | INT4 versus BF16 | 59.66% lower | [`summary.json`](../ops/evidence/result-first/EXP-2026-002/summary.json) |
 | Direct Arm speed | KleidiAI enabled versus disabled, same INT4 runtime | 1.72x-2.59x | [`summary.json`](../ops/evidence/result-first/EXP-2026-002/summary.json) |
 | Arm execution | Enabled and disabled perf callchains | 68.53% enabled `kai_*` cycle share, 0% disabled, zero lost samples | SHA-256 locked [`EXP-2026-009 archive`](../ops/evidence/EXP-2026-009/evidence.tar.gz) |
+| Independent Arm execution | Matched Arm Performix 1.20 Code Hotspots native exports | 67.02% enabled `kai_*` function-sample share, 0% disabled; 1.51 pp from Linux perf | SHA-256 locked [`EXP-2026-010 archive`](../ops/evidence/EXP-2026-010/evidence.tar.gz) and [`performix.py`](../src/armproof/evidence/performix.py) |
 | Sustained fixed-SLO capacity | Enabled versus disabled, 4,200 raw requests across twenty 500-second windows | At least 2.0x sustainable capacity; 2.33x tested pass-point ratio | [`EXP-2026-009 result`](../ops/evidence/EXP-2026-009/RESULT.md) and immutable archive |
 | Original exact bracket | Enabled 0.60 r/s failure probe | Rejected: one of five windows passed by 72 ms | Preserved in the same archive; no exact bracket emitted |
 | Large-set quality | Enabled versus disabled, 770 requests | -0.390 pp accuracy; -0.673 pp macro F1 | Quality rows in the SHA-256 locked [`EXP-2026-009 archive`](../ops/evidence/EXP-2026-009/evidence.tar.gz) |
@@ -61,8 +62,8 @@ python3.12 -m venv .venv
 .venv/bin/armproof ci examples/armproof-reference/armproof.json
 ```
 
-Expected exit code: `0`. The command verifies 282 files, re-derives capacity
-and quality, binds treatment identities to the contract, checks reproduction,
+Expected exit code: `0`. The command verifies 317 files, re-derives capacity,
+quality and native Performix attribution, binds treatment identities to the contract, checks reproduction,
 and then regenerates `verification.json`, `comparison.json`, `decision.json`
 and the offline report. A supplied normalized comparison is not accepted.
 This is ArmProof's reusable eight-claim reference workflow; it is separately
@@ -102,3 +103,9 @@ The accepted short-window and reproduction bundles each contain 141 checksummed 
 files. Empty, changed, duplicate, missing or out-of-root ledger entries fail.
 The ledgers prove repository consistency after capture, not independent
 attestation of who produced the original measurements.
+
+The expected Performix archive digest is
+`28d411e40de38f3ad4a455bbfa09524dee8b44d6e44eb4d3b599e01635789148`.
+Its 35-entry guest ledger binds the native exports, run metadata, target facts
+and readiness records. See [`docs/PERFORMIX.md`](../docs/PERFORMIX.md) for the
+matched experiment and the two-counter cloud PMU limitation.

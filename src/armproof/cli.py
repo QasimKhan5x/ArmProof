@@ -231,6 +231,7 @@ def _run_ci(args: argparse.Namespace) -> int:
                         }
                         if verified.reproduction_checksums is not None else None
                     ),
+                    "performix": dict(verified.performix) if verified.performix else None,
                 },
                 indent=2,
                 sort_keys=True,

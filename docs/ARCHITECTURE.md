@@ -64,12 +64,23 @@ closed-loop smoke, fixed-rate SLO and saturation discovery.
 - Process collector: lifecycle, exit status and logs.
 - Memory collector: timestamped RSS/PSS from `smaps_rollup`.
 - Performance collector: request latency, accepted throughput and errors.
-- Arm collector: bounded `perf`/Performix capture and normalized `kai_*`
-  execution status.
+- Arm collector: two-layer attribution. Linux `perf` supplies an independent
+  cycle-callchain record; Arm Performix supplies matched native Code Hotspots,
+  plus capability-gated CPU Microarchitecture and Instruction Mix readiness
+  results. The normalizer binds
+  recipe, command, target, treatment and raw-export hashes before deriving
+  `kai_*` execution status.
 - Environment collector: CPU, ISA, OS, runtime and artifact identity.
 
 Profiler collection is separate from normal load measurement so profiling
 overhead does not contaminate the primary performance result.
+
+For the Phi-4 reference adapter, both profiler layers are required. Performix
+is not a report importer or optional visualization: contradictory, missing or
+unmatched runs make the Arm-specific release claim unknown and fail the gate.
+The adapter verifies the outer archive digest and 35-file guest ledger, reads
+the native Code Hotspots ZIPs, checks matched commands and CPU identity, and
+recomputes the positive/negative `kai_*` sample attribution on every CI run.
 
 ### Quality Evaluator
 

@@ -4,11 +4,16 @@
 
 - Target additional spend: USD 2-4.
 - Hard project ceiling: USD 15 total across all feasibility and product runs.
-- Prior feasibility spend carried into every plan: approximately USD 1.43.
+- Prior spend carried into the Performix plan: USD 10.7878.
 - Primary instance: one `c8g.4xlarge` in `us-east-1`.
 - Capacity run: 60-90 minutes expected, two-hour hard stop.
 - Final reproduction: one additional bounded session.
-- Actual accepted cumulative evidence cost after reproduction: USD 3.8689.
+- Current cumulative evidence estimate before EXP-2026-010: USD 10.7878.
+- EXP-2026-010 ceiling: 150 minutes on one `c8g.4xlarge`, at most about
+  USD 1.61 compute plus bounded storage, keeping the project below USD 15.
+- Actual Performix sessions: USD 0.0740 for EXP-2026-010 and USD 0.0781 for
+  EXP-2026-011. Current cumulative estimate: USD 10.9399. Both instances were
+  terminated and the final inventory is empty.
 
 Prices must be refreshed before launch and recorded in the spend ledger.
 

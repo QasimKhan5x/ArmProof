@@ -2,7 +2,7 @@
   "schema_version": "2.0.0",
   "updated_at": "2026-08-04",
   "spec_gate": {
-    "version": "1.1.0",
+    "version": "1.2.0",
     "status": "approved",
     "work_item": "CTX-001"
   },
@@ -305,12 +305,24 @@
       ]
     },
     {
+      "id": "PERF-001",
+      "phase": 4,
+      "priority": 12,
+      "title": "Capture matched Arm Performix causal evidence",
+      "status": "completed",
+      "dependencies": ["CAP-001", "AWS-001"],
+      "context": ["docs/BENCHMARK_PROTOCOL.md", "docs/ARCHITECTURE.md", "docs/REQUIREMENTS.md"],
+      "deliverables": ["Preregistered matched profile experiment", "Native Performix exports", "Fail-closed normalized attribution", "Judge-facing optimization narrative"],
+      "verification": ["Code Hotspots observes kai_* only when KleidiAI is enabled", "Recipe, workload, target and command identities match", "Native exports and internal checksums verify", "Contradiction with Linux perf blocks release", "Unsupported PMU recipes remain explicitly unavailable", "AWS cleanup and spend remain below the project ceiling"],
+      "evidence": ["ops/experiments/EXP-2026-010.json", "ops/evidence/EXP-2026-010/evidence.tar.gz", "src/armproof/evidence/performix.py", "tests/evidence/test_performix.py", "docs/PERFORMIX.md", "ops/evidence/EXP-2026-011/RESULT.md"]
+    },
+    {
       "id": "SHIP-001",
       "phase": 4,
       "priority": 12,
       "title": "Prepare release and hackathon submission",
       "status": "in_progress",
-      "dependencies": ["REPRO-001", "DEMOAPP-001"],
+      "dependencies": ["REPRO-001", "DEMOAPP-001", "PERF-001"],
       "context": ["docs/DEMO_AND_SUBMISSION.md", "docs/JUDGING_STRATEGY.md", "docs/SOURCES.md"],
       "deliverables": ["Tagged release", "Demo video", "Submission copy", "Public evidence bundle"],
       "verification": ["Demo uses real recorded evidence", "Every numerical claim links to a bundle", "Installation and validation steps work from the release"],
@@ -320,7 +332,8 @@
         "GitHub example Action 30684494688 passed and uploaded the offline report",
         "Clean virtual-environment install and fail-closed armproof init dry run passed 2026-08-04",
         "examples/llama-cpp-http-slo real Arm64 Qwen2.5 smoke receipt",
-        "124 Python tests and 11 Playwright workflows passed 2026-08-04"
+        "132 Python tests and 11 Playwright workflows passed 2026-08-04",
+        "Matched Arm Performix native exports are mandatory in reference CI"
       ]
     }
   ]

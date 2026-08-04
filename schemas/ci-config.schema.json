@@ -13,7 +13,7 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["adapter", "root", "checksums", "workload_manifest", "reproduction"],
+          "required": ["adapter", "root", "checksums", "workload_manifest", "reproduction", "performix"],
           "properties": {
             "adapter": {"const": "kleidiai-capacity-v1"},
             "root": {"type": "string", "minLength": 1},
@@ -26,6 +26,20 @@
               "properties": {
                 "root": {"type": "string", "minLength": 1},
                 "checksums": {"type": "string", "minLength": 1}
+              }
+            },
+            "performix": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["archive", "archive_sha256", "experiment_id", "disabled_run_id", "enabled_run_id", "linux_perf_kai_cycle_share", "maximum_share_difference"],
+              "properties": {
+                "archive": {"type": "string", "minLength": 1},
+                "archive_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "experiment_id": {"type": "string", "minLength": 1},
+                "disabled_run_id": {"type": "string", "minLength": 1},
+                "enabled_run_id": {"type": "string", "minLength": 1},
+                "linux_perf_kai_cycle_share": {"type": "number", "minimum": 0, "maximum": 1},
+                "maximum_share_difference": {"type": "number", "minimum": 0, "maximum": 1}
               }
             }
           }

@@ -49,6 +49,9 @@ the same p95 SLO. Use short, long and mixed prompt traffic.
 - Report p50, p95, p99, accepted RPS and error rate.
 - Sample RSS/PSS throughout load and quality execution.
 - Run profiler attribution separately from primary load measurements.
+- For the reference release, capture matched Arm Performix profiles for both
+  treatments with identical recipes, workload, duration and target. Only the
+  documented KleidiAI control may differ.
 - Record throttling, interruption, timeout and partial-run status.
 - Never drop a sample solely because it is unfavorable.
 
@@ -77,10 +80,29 @@ recorded experiment attempt.
 
 ## Arm Attribution
 
-Accepted enabled evidence must contain executed `kai_*` callchains. The matched
-disabled control must contain none. Exact microkernel identity is reported only
-when directly observable; family-level evidence must not be relabeled as an
-exact kernel.
+Accepted enabled evidence must contain executed `kai_*` callchains and the
+matched disabled control must contain none. The reference release requires two
+independent profiler layers:
+
+1. Linux `perf` preserves the already accepted cycle-share attribution.
+2. Arm Performix Code Hotspots repeats the positive/negative callchain test,
+   derives measured `kai_*` function-sample shares from native exports, and
+   must independently agree with Linux `perf` within the preregistered five
+   percentage-point tolerance.
+
+CPU Microarchitecture and Instruction Mix are capability-gated because they
+require at least three exposed PMU counters. On the measured `c8g.4xlarge`,
+Performix reported two; those recipes are explicitly unavailable and their
+readiness failures are preserved. They are not silently treated as passing or
+made prerequisites for a claim they cannot measure. System Utilization is not
+part of the accepted causal claim.
+
+Performix runs must be exported in their native format with run IDs, recipe
+versions, commands, target facts and SHA-256 hashes. If Performix is unavailable,
+the reference Arm attribution remains `unknown`, not `pass`. If Performix and
+Linux `perf` disagree, publication stops pending a new preregistered experiment.
+Exact microkernel identity is reported only when directly observable;
+family-level evidence must not be relabeled as an exact kernel.
 
 ## Overhead
 
@@ -91,5 +113,6 @@ must be labeled as intrusive.
 ## Evidence Bundle
 
 Every accepted run stores contract, environment, hashes, commands, logs, raw
-request samples, memory samples, quality rows, profiler output, normalized
-evidence, claim ledger, spend record and cleanup record.
+request samples, memory samples, quality rows, Linux profiler output, native
+Performix exports, normalized profiler evidence, claim ledger, spend record and
+cleanup record.

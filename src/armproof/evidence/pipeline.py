@@ -33,6 +33,7 @@ class VerifiedEvidence:
     summary: Mapping[str, Any]
     checksums: ChecksumResult
     reproduction_checksums: ChecksumResult | None
+    performix: Mapping[str, Any] | None = None
     adapter: str = ADAPTER_ID
 
 

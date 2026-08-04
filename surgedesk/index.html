@@ -291,6 +291,23 @@
           <span>PASS</span>
         </header>
 
+        <section class="proof-section performix-proof" aria-labelledby="performix-title">
+          <div class="section-heading">
+            <div><p class="eyebrow">Core causal experiment</p><h2 id="performix-title">Arm Performix measured the optimized path executing</h2></div>
+            <span id="performix-version" class="source-chip">Arm Performix</span>
+          </div>
+          <dl class="performix-measures">
+            <div><dt>KleidiAI disabled</dt><dd id="performix-disabled-share">—</dd><small>measured <code>kai_*</code> function samples</small></div>
+            <div class="performix-treatment"><dt>KleidiAI enabled</dt><dd id="performix-enabled-share">—</dd><small id="performix-sample-count">measured function samples</small></div>
+            <div><dt>Independent agreement</dt><dd id="performix-agreement">—</dd><small id="performix-linux-share">versus Linux perf</small></div>
+          </dl>
+          <div class="kernel-proof">
+            <span>Observed Neoverse kernel</span>
+            <code id="performix-kernel">—</code>
+          </div>
+          <p id="performix-capability-note" class="capability-note"></p>
+        </section>
+
         <section class="proof-section" aria-labelledby="claims-title">
           <div class="section-heading">
             <div><p class="eyebrow">Causal claim ledger</p><h2 id="claims-title">What the release gate established</h2></div>
@@ -310,7 +327,7 @@
             <span id="proof-evidence-count" class="source-chip">Verifying evidence...</span>
           </div>
           <ol class="evidence-chain">
-            <li><span>1</span><div><strong>Verify</strong><small>Check the sustained archive, its 69-file ledger and frozen workload; keep the 282-file reference history separate.</small></div></li>
+            <li><span>1</span><div><strong>Verify</strong><small>Check the 69-file sustained audit, 282-file release history and 35-file native Performix bundle.</small></div></li>
             <li><span>2</span><div><strong>Derive</strong><small>Recompute sustained capacity and quality metrics from request and quality rows.</small></div></li>
             <li><span>3</span><div><strong>Bind</strong><small>Match model, runtime, workload, environment and treatment identities to the contract.</small></div></li>
             <li><span>4</span><div><strong>Decide</strong><small id="proof-derived-claims">Evaluate the contract; missing or inconsistent evidence blocks release.</small></div></li>
@@ -354,7 +371,7 @@
             <h2 id="release-title">The same fail-closed method runs in pull requests</h2>
             <p>The reusable Action evaluates versioned contracts and blocks tampered files, identity swaps, quality regressions and absent Arm callchains. The EXP009 sustained adapter ships in this repository.</p>
           </div>
-          <pre><code>- uses: QasimKhan5x/ArmProof@v0.5.1
+          <pre><code>- uses: QasimKhan5x/ArmProof@v0.6.0
   with:
     config: armproof.json</code></pre>
           <a class="primary-link" href="https://github.com/QasimKhan5x/ArmProof">View source and evidence</a>
@@ -368,7 +385,7 @@
           <ol class="reuse-steps">
             <li><span>1</span><div><strong>Generate the starter</strong><code>armproof init --endpoint http://127.0.0.1:8000/infer --output my-arm-service</code></div><button class="copy-button" type="button" data-copy="armproof init --endpoint http://127.0.0.1:8000/infer --output my-arm-service">Copy</button></li>
             <li><span>2</span><div><strong>Collect real evidence</strong><code>cat my-arm-service/ADOPTION_CHECKLIST.md</code></div><button class="copy-button" type="button" data-copy="cat my-arm-service/ADOPTION_CHECKLIST.md">Copy</button></li>
-            <li><span>3</span><div><strong>Add the portable gate</strong><code>uses: QasimKhan5x/ArmProof@v0.5.1</code></div><button class="copy-button" type="button" data-copy="uses: QasimKhan5x/ArmProof@v0.5.1">Copy</button></li>
+            <li><span>3</span><div><strong>Add the portable gate</strong><code>uses: QasimKhan5x/ArmProof@v0.6.0</code></div><button class="copy-button" type="button" data-copy="uses: QasimKhan5x/ArmProof@v0.6.0">Copy</button></li>
           </ol>
           <p id="copy-status" class="copy-status" role="status" aria-live="polite"></p>
         </section>

@@ -2,7 +2,7 @@
 
 Status: **APPROVED**
 
-Version: **1.1.0**
+Version: **1.2.0**
 
 Approved by: Qasim Khan
 
@@ -70,7 +70,8 @@ but it must not publish an unmeasured optimization or capacity claim.
 1. Validate the versioned ArmProof config before evaluating evidence.
 2. Fingerprint model, runtime, workload, environment and commands.
 3. Run baseline and treatments under declared controls.
-4. Collect output, quality, latency, throughput, PSS and Arm execution data.
+4. Collect output, quality, latency, throughput, PSS and matched Arm Performix
+   profiles for the control and optimized treatments.
 5. Normalize raw measurements without deleting unfavorable samples.
 6. Evaluate claims using explicit causal scopes.
 7. Fail closed for missing, mismatched or unavailable required evidence.
@@ -124,6 +125,9 @@ generation run on any GitHub runner.
 - Every displayed claim resolves to raw, hashed evidence.
 - Removing or swapping required evidence makes the decision fail.
 - Disabling KleidiAI removes `kai_*` attribution and fails the Arm contract.
+- Removing either matched Performix export, changing its workload identity, or
+  contradicting the accepted Linux profiler attribution fails the reference
+  Arm contract.
 - The report and GitHub Check agree with the machine-readable decision.
 
 ### Cloud Gate

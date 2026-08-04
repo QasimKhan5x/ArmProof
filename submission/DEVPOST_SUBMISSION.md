@@ -14,13 +14,13 @@
 
 **Technical report:** https://qasimkhan5x.github.io/ArmProof/report/
 
-**Release:** https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.5.1
+**Release:** https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.6.0
 
 **Video:** ADD THE PUBLIC YOUTUBE OR VIMEO URL AFTER RECORDING
 
-**Built with:** AWS Graviton4, Arm KleidiAI, ONNX Runtime GenAI, Phi-4 Mini,
-Python 3.12, Linux perf, GitHub Actions, BANKING77, JavaScript, HTML, CSS and
-Playwright.
+**Built with:** AWS Graviton4, Arm KleidiAI, Arm Performix, ONNX Runtime GenAI,
+Phi-4 Mini, Python 3.12, Linux perf, GitHub Actions, BANKING77, JavaScript,
+HTML, CSS and Playwright.
 
 **Challenge-period confirmation:** SurgeDesk and ArmProof were created and
 meaningfully developed from July 29 through August 4, 2026, within the
@@ -108,7 +108,8 @@ ArmProof verifies the evidence before approving an optimized deployment. It:
 - recalculates the results from the raw request records;
 - confirms the model, runtime, workload and server configuration;
 - checks that model quality stayed within the declared limit;
-- checks profiler evidence showing that Arm KleidiAI code executed; and
+- checks matched Linux perf and native Arm Performix evidence showing that
+  Arm KleidiAI code executed; and
 - returns pass, fail or unknown for every required claim.
 
 Missing proof does not count as success. A failed or unknown required check
@@ -141,10 +142,17 @@ threads, workload, Graviton4 instance and response-time target. The only
 intended difference was whether Arm KleidiAI was enabled.
 
 Across four model-input shapes, enabling KleidiAI made execution 1.72 to 2.59
-times faster. Linux profiling also showed that 68.53% of sampled CPU cycles in
-the optimized run passed through the KleidiAI matrix-multiplication code. The
-same code was absent from the control profile. This proves that the service
-did more than merely run on Arm: it executed the Arm-optimized path.
+times faster. Linux profiling showed that 68.53% of sampled CPU cycles in the
+optimized run passed through KleidiAI matrix-multiplication code, versus 0% in
+the control.
+
+We then repeated the positive/negative test with Arm Performix 1.20 Code
+Hotspots. From its native profile exports, ArmProof measured 67.02% of
+function samples in `kai_*` code when KleidiAI was enabled and 0% when it was
+disabled. Performix also exposed the Arm I8MM matrix-kernel family that ran.
+Its result was only 1.51 percentage points from the separate Linux perf result.
+These tools count different things, so we do not present the percentages as
+identical metrics; they independently agree that the optimized Arm path ran.
 
 ### 3. More Useful Server Capacity
 
@@ -172,11 +180,14 @@ the lower bound supported by every test.
 5. We tested both versions on the same 770 BANKING77 quality examples. Accuracy
    changed by less than one percentage point, and every response followed the
    required JSON format.
-6. We recorded Linux profiler data in separate runs so profiling overhead
-   could not distort the main traffic result.
-7. We stored raw evidence with SHA-256 checksums, which work like fingerprints
+6. We recorded matched Linux perf and native Arm Performix profiles in
+   separate runs so profiling overhead could not distort the traffic result.
+7. ArmProof checks the Performix archive, opens both native Code Hotspots
+   exports and recalculates the `kai_*` sample shares during every reference CI
+   run. Missing or contradictory profiles block the release.
+8. We stored raw evidence with SHA-256 checksums, which work like fingerprints
    for files. Changing one file changes its fingerprint and blocks approval.
-8. We built SurgeDesk and the GitHub Action on the same ArmProof verification
+9. We built SurgeDesk and the GitHub Action on the same ArmProof verification
    engine, so the application cannot approve itself by editing displayed data.
 
 ## Challenges We Faced
@@ -196,7 +207,11 @@ also required quality to pass before a speed claim could pass.
 
 Finally, installing KleidiAI was not enough to prove it caused the gain. We
 required profiler records from both configurations: positive evidence in the
-optimized version and negative evidence in the control.
+optimized version and negative evidence in the control. Arm Performix's CPU
+Microarchitecture and Instruction Mix recipes require at least three exposed
+hardware counters, while this cloud VM exposed two. We preserved those
+readiness failures instead of claiming those reports. Code Hotspots was
+supported and completed successfully for the matched causal comparison.
 
 ## Accomplishments
 
@@ -207,8 +222,10 @@ optimized version and negative evidence in the control.
   INT4 migration.
 - Less than one percentage point of model-quality change and 100% structurally
   valid output across 770 test messages.
-- Direct profiler evidence that KleidiAI executed in the optimized service and
-  did not execute in the control.
+- Independent Linux perf and Arm Performix evidence that KleidiAI executed in
+  the optimized service and did not execute in the control.
+- A release-blocking native Performix importer with archive, checksum,
+  treatment, target and contradiction checks.
 - A deliberate rejection of our original, stronger 2.5x claim.
 - A reusable Python command-line tool, GitHub Action, public data formats,
   benchmark templates, deployment recipe and offline report.
@@ -248,7 +265,8 @@ The repository includes:
 - matched baseline and optimized deployment templates;
 - public evidence and decision formats;
 - file-integrity verification;
-- Arm execution checks using profiler data;
+- Arm execution checks using native Linux perf and Arm Performix data;
+- a plain-English Performix tutorial and reusable native-export validator;
 - examples of pass, fail and missing evidence;
 - a GitHub Action and offline report;
 - a pinned Graviton deployment recipe;
@@ -278,7 +296,6 @@ developer prove their own work.
 
 - Turn the llama.cpp compatibility example into a fully measured adapter.
 - Add vLLM and more ONNX Runtime examples.
-- Add optional import from Arm Performix profiling reports.
 - Validate the same workflow on Google Axion and Microsoft Cobalt.
 - Add ready-made templates for text generation, vision and speech services.
 

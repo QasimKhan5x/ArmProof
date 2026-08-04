@@ -88,6 +88,15 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertFalse(proof["kleidiai_disabled_callchains"])
         self.assertAlmostEqual(proof["kleidiai_cycle_callchain_share_percent"], 68.53)
         self.assertEqual(proof["instance"], "c8g.4xlarge")
+        performix = proof["performix"]
+        self.assertEqual(performix["engine_version"], "1.20.0")
+        self.assertEqual(performix["cpu"], "Neoverse-V2")
+        self.assertEqual(performix["disabled_kai_sample_share_percent"], 0.0)
+        self.assertAlmostEqual(
+            performix["enabled_kai_sample_share_percent"], 67.0158291205
+        )
+        self.assertAlmostEqual(performix["absolute_share_difference_pp"], 1.5141708795)
+        self.assertIn("neon_i8mm", performix["kernel_family"])
 
     def test_demo_identifies_a_verified_matched_control_bundle(self) -> None:
         evidence = self.payload["provenance"]["evidence"]
@@ -101,7 +110,13 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertEqual(evidence["sustained_raw_confirmation_files"], 20)
         self.assertEqual(evidence["sustained_raw_confirmation_samples"], 4200)
         self.assertTrue(evidence["sustained_matched_control_verified"])
-        self.assertEqual(evidence["total_checksummed_files"], 351)
+        self.assertTrue(evidence["performix_archive_verified"])
+        self.assertTrue(evidence["performix_internal_checksums_verified"])
+        self.assertGreater(evidence["performix_checksummed_files"], 20)
+        self.assertEqual(
+            evidence["total_checksummed_files"],
+            351 + evidence["performix_checksummed_files"],
+        )
         self.assertEqual(evidence["comparison"], "matched_control")
         self.assertEqual(evidence["only_changed_control"], "mlas.disable_kleidiai")
 

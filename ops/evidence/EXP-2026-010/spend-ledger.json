@@ -1,0 +1,16 @@
+{
+  "cleanup_complete": true,
+  "cleanup_errors": [],
+  "error": null,
+  "estimated_cumulative_cost_usd": 10.8618,
+  "estimated_session_cost_usd": 0.074,
+  "experiment_id": "EXP-2026-010",
+  "instance_id": "i-0d499ef0fd8299919",
+  "instance_type": "c8g.4xlarge",
+  "maximum_projected_total_usd": 12.3997,
+  "maximum_runtime_minutes": 150,
+  "prior_spend_usd": 10.7878,
+  "recorded_at": "2026-08-04T11:34:53.871139+00:00",
+  "region": "us-east-1",
+  "terminated": true
+}

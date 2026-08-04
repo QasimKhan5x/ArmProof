@@ -20,6 +20,10 @@ from armproof.evidence.pipeline import (
     _samples,
     verify_and_derive,
 )
+from armproof.evidence.performix import (
+    PERFORMIX_CONFIG_FIELDS,
+    verify_performix_archive,
+)
 from armproof.policy.statistics import estimate_capacity_bracket
 from armproof.workload import SloPolicy, summarize_samples
 
@@ -59,18 +63,45 @@ class KleidiAICapacityAdapter:
     def verify(
         self, contract: Contract, config: Mapping[str, Any], base: Path
     ) -> VerifiedEvidence:
-        fields = {"adapter", "root", "checksums", "workload_manifest", "reproduction"}
+        fields = {
+            "adapter", "root", "checksums", "workload_manifest", "reproduction",
+            "performix",
+        }
         _exact_config(config, fields, self.adapter_id)
         reproduction = config.get("reproduction")
         if not isinstance(reproduction, Mapping) or set(reproduction) != {"root", "checksums"}:
             raise ValueError("reference adapter reproduction requires root and checksums")
-        return verify_and_derive(
+        performix = config.get("performix")
+        if not isinstance(performix, Mapping) or set(performix) != PERFORMIX_CONFIG_FIELDS:
+            raise ValueError(
+                "reference adapter performix requires exactly "
+                f"{sorted(PERFORMIX_CONFIG_FIELDS)}"
+            )
+        verified = verify_and_derive(
             contract,
             _path(base, config["root"], "root"),
             _path(base, config["checksums"], "checksums"),
             _path(base, config["workload_manifest"], "workload_manifest"),
             _path(base, reproduction["root"], "reproduction.root"),
             _path(base, reproduction["checksums"], "reproduction.checksums"),
+        )
+        profile = verify_performix_archive(
+            _path(base, performix["archive"], "performix.archive"),
+            expected_archive_sha256=str(performix["archive_sha256"]),
+            expected_experiment_id=str(performix["experiment_id"]),
+            disabled_run_id=str(performix["disabled_run_id"]),
+            enabled_run_id=str(performix["enabled_run_id"]),
+            linux_perf_share=float(performix["linux_perf_kai_cycle_share"]),
+            maximum_share_difference=float(performix["maximum_share_difference"]),
+        )
+        summary = {**dict(verified.summary), "performix": profile}
+        return VerifiedEvidence(
+            comparison=verified.comparison,
+            summary=MappingProxyType(summary),
+            checksums=verified.checksums,
+            reproduction_checksums=verified.reproduction_checksums,
+            performix=MappingProxyType(profile),
+            adapter=verified.adapter,
         )
 
 

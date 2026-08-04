@@ -23,7 +23,7 @@ Gate: fixture-to-decision-to-report works end to end.
 
 - Implement common HTTP service adapters.
 - Implement workload replay, PSS sampling and quality plugins.
-- Add bounded `perf`/Performix attribution.
+- Add bounded Linux perf and matched Arm Performix attribution.
 - Measure ArmProof overhead.
 
 Gate: local/Arm smoke tests prove lifecycle and negative behavior.
@@ -52,6 +52,9 @@ Gate: one YAML and one command produce an understandable decision.
 - Devpost submission with claim-to-evidence mapping.
 
 Gate: every public claim resolves to immutable evidence.
+
+Completed reference evidence includes matched native Arm Performix Code
+Hotspots exports as a release-blocking input, not a future report integration.
 
 ## Deferred
 

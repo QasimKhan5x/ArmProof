@@ -13,9 +13,10 @@ the product demo are checked into the public repository.
    status, then click **Load verified experiment**. The page shows why the
    original exact 2.5x gate was blocked and derives the conservative at-least-2x
    capacity result from five 500-second confirmations per boundary.
-4. Open **Release proof**. Inspect the claim ledger, optimization path, exact
-   deployment and reusable GitHub Action. This view evaluates nine sustained
-   claims, including zero lost profiler samples.
+4. Open **Release proof**. Inspect the core Arm Performix causal experiment,
+   claim ledger, optimization path, exact deployment and reusable GitHub
+   Action. This view shows 0% versus 67.02% measured `kai_*` function samples
+   and its independent agreement with Linux perf.
 
 The public page is an evidence-backed application, not a live AWS dependency.
 Recorded output is labeled. Edited text is rejected rather than presented as
@@ -45,9 +46,11 @@ python3.12 -m venv .venv
 Expected behavior:
 
 - exit `0`;
-- 282 files across the reference release bundles verify, and the product also
+- 317 files across the reference capacity, reproduction and native Performix
+  bundles verify, and the product also
   binds the 69-file sustained audit through its immutable archive digest;
-- eight required claims pass from a comparison derived by the adapter;
+- eight required claims and the mandatory matched Performix attribution pass
+  from evidence derived by the adapter;
 - an offline report and machine-readable decision are written; and
 - the reference passing deployment remains linked to that reference decision.
 
@@ -58,7 +61,8 @@ python3.12 scripts/demo_release_gate.py
 ```
 
 The script alters only a temporary copy of one ledger digest. Expected output
-is a valid eight-claim pass followed by a checksum block before policy runs.
+is a valid eight-claim plus Performix pass followed by a checksum block before
+policy runs.
 
 Scaffold a new endpoint without generating synthetic passing evidence:
 

@@ -23,6 +23,7 @@ implementation. It is a routing summary, not a substitute for raw evidence.
 | Quality | INT4 versus BF16 | 20/24 versus 19/24 |
 | Parseability | both | 24/24 |
 | Arm attribution | enabled/disabled perf callchains | `kai_*` only when enabled |
+| Independent Arm Performix attribution | matched Code Hotspots, enabled versus disabled | 67.02% versus 0% measured `kai_*` function-sample share; 1.51 pp from Linux perf |
 | Sustained fixed-SLO capacity | KleidiAI enabled versus disabled, mixed traffic | at least 2.0x; 2.33x tested pass-point ratio |
 | Large-set quality | enabled versus disabled on 770 BANKING77 cases | -0.390 pp accuracy, -0.673 pp macro F1 |
 | Schema validity | both normalized treatments | 100% |
@@ -62,9 +63,14 @@ reproduction is under `ops/evidence/EXP-2026-005/accepted/` with its comparison
 at `ops/evidence/EXP-2026-005/reproduction-comparison.json`.
 The decisive sustained archive, failed original gate and conservative derived
 claim are under `ops/evidence/EXP-2026-009/`.
+The immutable native Arm Performix exports and 35-entry guest ledger are under
+`ops/evidence/EXP-2026-010/`. The reference `armproof ci` command verifies and
+re-derives them; it does not trust the checked-in normalized JSON.
 
 ## Not Yet Established
 
 - ArmProof measurement overhead.
+- Performix CPU Microarchitecture and Instruction Mix on this VM. Both require
+  three PMU counters, while the virtual Graviton PMU exposed two.
 
 No document or report may present those as completed.

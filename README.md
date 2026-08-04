@@ -10,7 +10,7 @@
 - **Optimization work:** BF16-to-INT4 migration plus a matched INT4
   KleidiAI-disabled/enabled control, measured for artifact size, memory,
   direct inference speed, fixed-SLO capacity, quality and executed Arm
-  callchains.
+  callchains using both Linux perf and native Arm Performix Code Hotspots.
 - **Challenge-period confirmation:** the submitted ArmProof and SurgeDesk work
   was created and meaningfully developed from July 29 through August 4, 2026,
   within the [official June 10 through August 14, 2026 submission period](https://arm-ai-optimization-challenge.devpost.com/rules).
@@ -49,6 +49,9 @@ GenAI with KleidiAI on AWS Graviton4. Existing experiments have already shown:
   the identical INT4 model and runtime;
 - 20/24 versus 19/24 quality results; and
 - `kai_*` callchains only in the enabled treatment.
+- Arm Performix independently measured 67.02% `kai_*` function samples in the
+  enabled treatment and 0% disabled, within 1.51 percentage points of the
+  Linux perf attribution.
 
 Short discovery runs initially suggested 2.5x-3.0x capacity. The decisive
 long-window audit correctly rejected that exact bracket: `0.60 r/s` passed one
@@ -69,7 +72,8 @@ Open `http://127.0.0.1:8765/surgedesk/`. The three-step judge path is:
 1. Use **Guard intervention** and **Human correction** to inspect both sides of
    the human-confirmed BANKING77 routing boundary.
 2. Inspect the equal-load customer outcome, then reveal the long-window lower bound.
-3. Inspect the Arm execution, quality, reproduction and deployment proof.
+3. Inspect the matched Arm Performix execution, quality, reproduction and
+   deployment proof.
 
 Each view has a stable URL: `#triage`, `#surge`, and `#proof`. The tabs support
 Left/Right Arrow navigation, and every evidence table becomes a labeled card
@@ -91,7 +95,7 @@ SURGEDESK_INFERENCE_ENDPOINT=http://127.0.0.1:8000/infer \
 optimization PR + contract + raw evidence
               |
               v
-verify two SHA-256 ledgers, sustained archive and workload identity
+verify two SHA-256 ledgers, sustained archive, native Performix archive and workload identity
               |
               v
 re-derive raw request metrics + bind treatment identities
@@ -112,7 +116,8 @@ python3.12 -m venv .venv
 .venv/bin/armproof ci examples/armproof-reference/armproof.json
 ```
 
-The reference command verifies 282 files across the primary and reproduction bundles,
+The reference command verifies 317 files across the primary, reproduction and
+native Arm Performix bundles,
 derives the normalized comparison from request and quality evidence, binds it
 to the declared identities, and writes `decision.json`, `verification.json`
 and an offline report. Exit `0` approves, exit `2` blocks on a failed or
@@ -124,13 +129,14 @@ Demonstrate the trust boundary without altering repository evidence:
 python3.12 scripts/demo_release_gate.py
 ```
 
-It first passes all eight claims, then changes one digest in a temporary ledger
+It first passes all eight claims and the mandatory Performix attribution, then
+changes one digest in a temporary ledger
 and shows the release blocked before policy evaluation.
 
 Use the same config in GitHub Actions:
 
 ```yaml
-- uses: QasimKhan5x/ArmProof@v0.5.1
+- uses: QasimKhan5x/ArmProof@v0.6.0
   with:
     config: armproof.json
     output: build/armproof-report
@@ -172,6 +178,10 @@ PYTHONPATH=src python3.12 -m armproof.cli ci \
 The primary and fresh-instance confirmation bundles each contain 141 checksummed files
 and verify after relocation. Browser tests cover the complete SurgeDesk workflow plus ArmProof
 report layouts down to 320 pixels.
+
+The reference gate also verifies a SHA-256 locked 35-file Arm Performix bundle,
+recomputes matched Code Hotspots attribution from its native ZIP exports and
+blocks if either run is missing, mismatched or contradicts Linux perf.
 
 SurgeDesk additionally verifies the SHA-256 locked `EXP-2026-009` sustained
 archive and derives the conservative public capacity claim from its recorded

@@ -20,6 +20,8 @@ Status values: `established`, `pending`, `unavailable`, `rejected`.
 | C-14 | Queue guard achieves 86.75% held-out operational accuracy | INV-03, FR-17 | `src/armproof/demo/queue_guard.py`, `tests/surgedesk/test_queue_guard.py`, reference contract claim `quality-operational-queue` | established |
 | C-15 | Live mode cannot masquerade as recorded evidence | FR-18, NFR-08, NFR-09 | `scripts/serve_surgedesk.py`, `tests/surgedesk/test_live.py`, `tests/ui/surgedesk.spec.mjs` | established |
 | C-16 | Five long-window confirmations establish at least 2.0x sustainable mixed capacity while the original exact bracket remains rejected | FR-04, FR-05, INV-04 | `ops/evidence/EXP-2026-009/evidence.tar.gz`, `ops/evidence/EXP-2026-009/RESULT.md`, `tests/evidence/test_sustained_audit.py` | established |
+| C-17 | Matched Arm Performix Code Hotspots independently confirms 67.02% enabled `kai_*` function samples versus 0% disabled and agrees with Linux perf within 1.51 pp | INV-01, FR-07, FR-19 | `ops/evidence/EXP-2026-010/evidence.tar.gz`, `src/armproof/evidence/performix.py`, `tests/evidence/test_performix.py` | established |
+| C-18 | Performix CPU Microarchitecture and Instruction Mix are unavailable on this c8g.4xlarge because the virtual PMU exposes two counters and both recipes require at least three | FR-19 | readiness failures in `ops/evidence/EXP-2026-010/` and `ops/evidence/EXP-2026-011/` | unavailable |
 
 The 24-item result supports only the BF16-to-INT4 feasibility comparison. The
 matched KleidiAI control uses the frozen 770-case evaluation for its accepted

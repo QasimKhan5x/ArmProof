@@ -46,7 +46,11 @@ for (const viewport of [
     await expect(page.locator('#min-ratio')).toHaveText('2.5x');
     await expect(page.locator('#reproduction-note')).toContainText('0% relative difference');
     await page.getByRole('tab', { name: 'Evidence & provenance' }).click();
-    await expect(page.locator('#verification-detail')).toContainText('282 files verified');
+    await expect(page.locator('#verification-detail')).toContainText('317 files verified');
+    await expect(page.locator('#performix-section')).toBeVisible();
+    await expect(page.locator('#performix-disabled')).toContainText('0%');
+    await expect(page.locator('#performix-enabled')).toContainText('67.02%');
+    await expect(page.locator('#performix-crosscheck')).toContainText('1.51 pp');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
     expect(await page.evaluate(() => [...document.querySelectorAll('body *')].filter(element => element.scrollWidth > element.clientWidth + 1).map(element => element.className))).toEqual([]);
     await mkdir('build/screenshots', { recursive: true });

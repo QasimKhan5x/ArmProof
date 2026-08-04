@@ -397,7 +397,7 @@ function renderEvidenceSummary() {
   );
   setText(
     "proof-evidence-count",
-    `${data.provenance.evidence.sustained_checksummed_files} sustained + ${data.provenance.evidence.checksummed_files + data.provenance.evidence.reproduction_checksummed_files} supporting files`,
+    `${data.provenance.evidence.sustained_checksummed_files} sustained + ${data.provenance.evidence.checksummed_files + data.provenance.evidence.reproduction_checksummed_files + data.provenance.evidence.performix_checksummed_files} release files`,
   );
   setText(
     "proof-derived-claims",
@@ -414,6 +414,15 @@ function renderEvidenceSummary() {
   );
   setText("deployment-instance", data.proof.instance);
   setText("deployment-threads", data.proof.threads);
+  const performix = data.proof.performix;
+  setText("performix-version", `Arm Performix ${performix.engine_version} · ${performix.cpu}`);
+  setText("performix-disabled-share", `${performix.disabled_kai_sample_share_percent.toFixed(0)}%`);
+  setText("performix-enabled-share", `${performix.enabled_kai_sample_share_percent.toFixed(2)}%`);
+  setText("performix-sample-count", `${performix.enabled_function_samples.toLocaleString()} measured function samples`);
+  setText("performix-agreement", `${performix.absolute_share_difference_pp.toFixed(2)} pp apart`);
+  setText("performix-linux-share", `Performix sample share vs ${performix.linux_perf_cycle_share_percent.toFixed(2)}% Linux perf cycle share`);
+  setText("performix-kernel", performix.kernel_family);
+  setText("performix-capability-note", performix.pmu_capability_note);
   setText("queue-accuracy", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
   setText("queue-gain", `+${data.quality.guard_queue_gain_pp.toFixed(2)} percentage points`);
 }

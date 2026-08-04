@@ -14,6 +14,8 @@ execution evidence.
 - Is only the KleidiAI control different?
 - Does enabled evidence contain executed `kai_*` callchains while disabled
   evidence does not?
+- Do matched Arm Performix profiles independently confirm the executed path
+  and characterize the CPU and system behavior on the same Graviton target?
 
 ### INV-02: Honest Causal Scope
 
@@ -80,6 +82,10 @@ reproduced.
   least 85% accuracy.
 - **FR-18 Live demonstration:** optionally route bounded text through the
   trusted `/infer` contract; remain explicitly recorded-only when unavailable.
+- **FR-19 Performix attribution:** collect and export matched Arm Performix
+  runs for the reference control and optimized treatments, preserve their raw
+  exports and run metadata, and fail closed when either side is absent,
+  unmatched or contradicts the accepted attribution.
 
 ## Non-Functional Requirements
 
@@ -127,3 +133,6 @@ Before marking the product complete, answer with evidence:
 10. Are 86.75% queue accuracy and 46.49% intent accuracy clearly distinguished?
 11. Can the live control appear when no endpoint is configured or silently
     fall back to recorded output?
+12. Can the reference Arm claim pass if one Performix export is missing, the
+    two runs use different recipes/workloads, or Performix contradicts the
+    Linux `perf` callchains?

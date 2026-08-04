@@ -25,7 +25,8 @@ python3.12 -m pip install .
 armproof ci examples/armproof-reference/armproof.json
 ```
 
-The command verifies and derives from 282 checksum-bound files, then writes a
+The command verifies and derives from 317 checksum-bound files: 282 capacity
+and reproduction files plus the 35-file native Arm Performix bundle. It then writes a
 machine-readable decision, a verification receipt and an offline `index.html`.
 Exit `0` means all required claims passed, `2` means at least one required
 claim failed or is unknown, and `1` means the inputs could not be evaluated.
@@ -55,7 +56,7 @@ Create an `armproof.json` matching
 [`schemas/ci-config.schema.json`](../schemas/ci-config.schema.json), then add:
 
 ```yaml
-- uses: QasimKhan5x/ArmProof@v0.5.1
+- uses: QasimKhan5x/ArmProof@v0.6.0
   with:
     config: armproof.json
     output: build/armproof-report

@@ -9,6 +9,15 @@
     "reproduction": {
       "root": "../../ops/evidence/EXP-2026-005/accepted/evidence",
       "checksums": "../../ops/evidence/EXP-2026-005/accepted/evidence/SHA256SUMS"
+    },
+    "performix": {
+      "archive": "../../ops/evidence/EXP-2026-010/evidence.tar.gz",
+      "archive_sha256": "28d411e40de38f3ad4a455bbfa09524dee8b44d6e44eb4d3b599e01635789148",
+      "experiment_id": "EXP-2026-010",
+      "disabled_run_id": "cbb01b949717",
+      "enabled_run_id": "2bf254d4391b",
+      "linux_perf_kai_cycle_share": 0.6853,
+      "maximum_share_difference": 0.05
     }
   },
   "deployment_summary": "deployment-summary.json",

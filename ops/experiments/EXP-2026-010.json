@@ -1,0 +1,62 @@
+{
+  "schema_version": "2.0.0",
+  "experiment_id": "EXP-2026-010",
+  "status": "preregistered",
+  "hypothesis": "On one AWS Graviton4 c8g.4xlarge, matched Arm Performix profiles will independently observe KleidiAI kai_* execution only in the enabled Phi-4 Mini INT4 treatment and will produce renderable CPU, instruction and system characterizations without contradicting the accepted Linux perf attribution.",
+  "causal_scope": "arm_acceleration",
+  "treatments": [
+    {
+      "id": "kleidiai-disabled",
+      "artifact_ref": "microsoft/Phi-4-mini-instruct-onnx@fc04c8f93df696602fd9f300a30d1bf2e3081347#cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4 plus generated disabled overlay",
+      "runtime_ref": "examples/phi4-graviton/runtime-lock.json",
+      "command_ref": "python scripts/profile_ort.py --model /opt/armproof/variants/disabled --workload data/banking77/generated/traffic-mixed.jsonl --repetitions 3",
+      "environment_overrides": {
+        "mlas.disable_kleidiai": "1",
+        "OMP_NUM_THREADS": "16",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores"
+      }
+    },
+    {
+      "id": "kleidiai-enabled",
+      "artifact_ref": "microsoft/Phi-4-mini-instruct-onnx@fc04c8f93df696602fd9f300a30d1bf2e3081347#cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4 plus generated enabled overlay",
+      "runtime_ref": "examples/phi4-graviton/runtime-lock.json",
+      "command_ref": "python scripts/profile_ort.py --model /opt/armproof/variants/enabled --workload data/banking77/generated/traffic-mixed.jsonl --repetitions 3",
+      "environment_overrides": {
+        "mlas.disable_kleidiai": "0",
+        "OMP_NUM_THREADS": "16",
+        "OMP_PROC_BIND": "close",
+        "OMP_PLACES": "cores"
+      }
+    }
+  ],
+  "workload_ref": "data/banking77/generated/traffic-mixed.jsonl",
+  "quality_ref": "EXP-2026-009 accepted 770-item non-inferiority result; this experiment changes no model outputs or serving claim",
+  "primary_metric": "matched Performix Code Hotspots positive/negative kai_* execution attribution",
+  "secondary_metrics": [
+    "CPU Microarchitecture export availability",
+    "Instruction Mix export availability",
+    "System Utilization export availability",
+    "agreement with EXP-2026-009 Linux perf attribution"
+  ],
+  "acceptance": {
+    "required_recipes": "code_hotspots,cpu_microarchitecture,instruction_mix,system_utilization",
+    "enabled_kai_callchains_required": true,
+    "disabled_kai_callchains_allowed": false,
+    "matched_target_required": true,
+    "matched_commands_except_overlay_required": true,
+    "native_exports_required": true,
+    "renderable_runs_required": true,
+    "linux_perf_contradiction_allowed": false,
+    "maximum_project_cumulative_cost_usd": 15.0
+  },
+  "environment_ref": "AWS Graviton4 c8g.4xlarge, Ubuntu 24.04 Arm64, CPU-only, pinned runtime lock",
+  "repetitions": 3,
+  "randomization": "Treatments alternate by recipe; the first treatment is disabled for odd recipes and enabled for even recipes.",
+  "warmup_policy": "One unprofiled profile_ort.py pass per treatment before all measured recipes.",
+  "profiler_ref": "Arm Performix 1.20.0 Code Hotspots, CPU Microarchitecture, Instruction Mix and System Utilization recipes at default normal sampling",
+  "maximum_runtime_minutes": 150,
+  "maximum_cost_usd": 1.61,
+  "evidence_path": "ops/evidence/EXP-2026-010",
+  "notes": "This is required causal evidence for the reference Arm release. It does not replace or rerun the sustained fixed-SLO throughput experiment. Any missing required recipe, mismatched run, failed export or contradiction stops the Arm-specific submission claim. Thresholds were frozen before provisioning paid resources."
+}

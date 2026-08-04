@@ -73,21 +73,22 @@ to the blocked claim, proven lower bound and equal-load outcomes.
 > blocked because 0.60 passed one window by 72 milliseconds. All 4,200 request
 > outcomes remain in the audit.
 
-### 1:35-2:08 - Prove Arm Caused It
+### 1:35-2:15 - Prove Arm Caused It
 
-**Do:** Open **3. Release proof** and point to the claim ledger and optimization
-path.
+**Do:** Open **3. Release proof**. Point first to **Core causal experiment**,
+then the claim ledger and optimization path.
 
 **Say:**
 
-> ArmProof verifies checksums, derives metrics from raw rows, binds treatment
-> identities, then evaluates nine claims. INT4 reduced artifact size by 35.92
-> percent and peak memory by 55.34 percent. Inside the identical INT4 runtime,
-> KleidiAI produced 1.72 to 2.59-times direct speedup. Perf attributed 68.53
-> percent of enabled cycles to its matrix callchain and zero in the control.
-> Quality moved less than one point and schema validity remained 100 percent.
+> This is the causal proof. With KleidiAI disabled, Arm Performix measured zero
+> samples in Arm's optimized code. Enabled, it measured 67.02 percent and named
+> the Neoverse I8MM matrix kernel. That independently agrees within 1.51 points
+> with Linux perf's 68.53-percent cycle attribution. ArmProof derives these
+> values from the native profiles during CI and blocks if either profile is
+> missing or contradictory. Separately, INT4 cut artifact size by 35.92 percent
+> and peak memory by 55.34 percent, while quality stayed within one point.
 
-### 2:08-2:38 - Reusable Developer Artifact
+### 2:15-2:42 - Reusable Developer Artifact
 
 **Do:** Run `demo_release_gate.py`. Point to `PASS`, `TAMPER`, `BLOCK`, then
 show the `armproof init` command in the adoption panel or README.
@@ -95,12 +96,12 @@ show the `armproof init` command in the adoption panel or README.
 **Say:**
 
 > This is reusable software, not just our report. ArmProof ships a CLI, GitHub
-> Action, schemas, fixed-SLO adapter and deployment recipe. One digest change
-> blocks before policy evaluation. A new developer can scaffold the same
-> fail-closed workflow with armproof init; the generated project refuses to
-> pass until real evidence replaces its templates.
+> Action, evidence adapters and deployment recipe. One digest change blocks
+> before policy evaluation. A developer can scaffold the same fail-closed
+> workflow with armproof init; it refuses to pass until real evidence replaces
+> the templates.
 
-### 2:38-2:50 - Close
+### 2:42-2:54 - Close
 
 **Say:**
 

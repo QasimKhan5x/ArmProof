@@ -17,6 +17,8 @@ measurements override planning prose when they conflict.
 - [KleidiAI repository](https://github.com/ARM-software/kleidiai)
 - [ONNX Runtime GenAI repository](https://github.com/microsoft/onnxruntime-genai)
 - [Arm Performix practical analysis](https://community.arm.com/arm-community-blogs/b/servers-and-cloud-computing-blog/posts/arm-performix-practical-performance-analysis-for-arm-based-servers)
+- [Arm Performix product page](https://developer.arm.com/servers-and-cloud-computing/arm-performix)
+- [Install Arm Performix](https://learn.arm.com/install-guides/performix/)
 - [Vociply Performix case study](https://developer.arm.com/community/arm-community-blogs/b/servers-and-cloud-computing-blog/posts/40-faster-image-classification-on-aws-graviton-how-vociply-used-arm-perfomix-to-cut-costs-29)
 
 ## Product And Benchmark Context

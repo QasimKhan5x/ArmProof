@@ -265,6 +265,19 @@ code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .stack-path li > span { display: grid; flex: 0 0 24px; height: 24px; place-items: center; color: #fff; background: var(--teal-dark); border-radius: 50%; font-size: 11px; font-weight: 850; }
 .stack-path strong, .stack-path small { display: block; overflow-wrap: anywhere; }
 .stack-path small { margin-top: 4px; color: var(--muted); line-height: 1.35; }
+.performix-proof { border-top: 4px solid var(--teal-dark); }
+.performix-measures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; border: 1px solid var(--line); }
+.performix-measures > div { min-width: 0; padding: 16px; background: var(--surface-soft); }
+.performix-measures > div + div { border-left: 1px solid var(--line); }
+.performix-measures dt { color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.performix-measures dd { margin: 3px 0 0; font-size: 26px; font-weight: 900; }
+.performix-measures small { display: block; color: var(--muted); line-height: 1.35; }
+.performix-measures .performix-treatment { color: #fff; background: var(--teal-dark); }
+.performix-measures .performix-treatment dt, .performix-measures .performix-treatment small { color: #c9dedf; }
+.kernel-proof { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-top: 0; }
+.kernel-proof span { color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.kernel-proof code { overflow-wrap: anywhere; color: var(--teal-dark); font-size: 11px; }
+.capability-note { margin: 12px 0 0; padding-left: 12px; border-left: 3px solid var(--amber); color: var(--muted); font-size: 12px; }
 .proof-columns { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 16px; }
 .quality-boundary { border-left: 4px solid var(--amber); }
 .quality-boundary p:last-child { margin: 8px 0 0; }
@@ -306,6 +319,9 @@ code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
   .evidence-chain li:nth-child(3) { border-top: 1px solid var(--line); border-left: 0; }
   .evidence-chain li:nth-child(4) { border-top: 1px solid var(--line); }
   .proof-columns { grid-template-columns: 1fr; }
+  .performix-measures { grid-template-columns: 1fr; }
+  .performix-measures > div + div { border-left: 0; border-top: 1px solid var(--line); }
+  .kernel-proof { grid-template-columns: 1fr; }
   .release-gate { grid-template-columns: 1fr; }
   .reuse-steps { grid-template-columns: 1fr; }
   .reuse-steps li + li { border-top: 1px solid var(--line); border-left: 0; }

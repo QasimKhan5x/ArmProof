@@ -74,6 +74,14 @@
   - Verify: 85% queue gate, generated-data drift, logic, live-mode browser and
     320-pixel layout tests.
 
+- [x] **PERF-001: Capture matched Arm Performix causal evidence**
+  - Acceptance: native matched control/treatment Code Hotspots exports
+    independently confirm enabled-only KleidiAI execution and become required
+    reference release evidence.
+  - Verify: recipe/workload/target identity checks, contradiction and tamper
+    tests, 35-file ledger, spend record and empty AWS inventory. Unsupported
+    three-counter recipes remain explicitly unavailable.
+
 - [ ] **SHIP-001: Harden and submit**
   - Acceptance: public artifacts, demo, licenses, scans and Devpost mapping.
   - Verify: every submission claim resolves to traceability evidence.

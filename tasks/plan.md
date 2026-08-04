@@ -37,6 +37,9 @@ graph TD
   ACTION --> REPRO
   DEPLOY --> REPRO
   REPRO --> DEMO[DEMOAPP-001]
+  CAP --> PERF[PERF-001]
+  AWS --> PERF
+  PERF --> SHIP
   DEMO --> SHIP[SHIP-001]
 ```
 
@@ -96,6 +99,7 @@ decision.
 ## Phase 5: Reproduction And Submission
 
 - Clean-room Graviton replay.
+- Matched Arm Performix causal characterization and native export validation.
 - Evidence-backed SurgeDesk application workflow.
 - Security, licensing, accessibility and secret checks.
 - Demo, offline fallback and Devpost traceability.

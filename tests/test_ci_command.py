@@ -44,7 +44,7 @@ class CiCommandTests(unittest.TestCase):
             workflow = (output / ".github/workflows/armproof.yml").read_text(
                 encoding="utf-8"
             )
-            self.assertIn("QasimKhan5x/ArmProof@v0.5.1", workflow)
+            self.assertIn("QasimKhan5x/ArmProof@v0.6.0", workflow)
 
             with redirect_stderr(io.StringIO()) as stderr:
                 self.assertEqual(main(["ci", str(output / "armproof.json")]), 1)
@@ -108,7 +108,86 @@ class CiCommandTests(unittest.TestCase):
             self.assertEqual(receipt["checksums"]["checked"], 141)
             self.assertEqual(receipt["reproduction_checksums"]["checked"], 141)
             self.assertEqual(receipt["comparison_source"], "derived_from_raw_evidence")
+            self.assertTrue(receipt["performix"]["passed"])
+            self.assertEqual(
+                receipt["performix"]["evidence_source"],
+                "native_arm_performix_code_hotspots_exports",
+            )
+            self.assertEqual(receipt["performix"]["disabled"]["kai_sample_share"], 0.0)
+            self.assertAlmostEqual(
+                receipt["performix"]["enabled"]["kai_sample_share"],
+                0.6701582912047462,
+            )
+            self.assertGreater(receipt["performix"]["internal_checksums"]["checked"], 20)
             self.assertTrue((output / "deployment-summary.json").is_file())
+
+    def test_reference_ci_rejects_missing_or_tampered_performix_evidence(self) -> None:
+        reference = json.loads(
+            (ROOT / "examples/armproof-reference/armproof.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            missing = json.loads(json.dumps(reference))
+            for field in ("contract", "deployment_summary"):
+                missing[field] = str(
+                    (ROOT / "examples/armproof-reference" / missing[field]).resolve()
+                )
+            for field in ("root", "checksums", "workload_manifest"):
+                missing["evidence"][field] = str(
+                    (
+                        ROOT
+                        / "examples/armproof-reference"
+                        / missing["evidence"][field]
+                    ).resolve()
+                )
+            for field in ("root", "checksums"):
+                missing["evidence"]["reproduction"][field] = str(
+                    (
+                        ROOT
+                        / "examples/armproof-reference"
+                        / missing["evidence"]["reproduction"][field]
+                    ).resolve()
+                )
+            del missing["evidence"]["performix"]
+            missing_path = root / "missing.json"
+            missing_path.write_text(json.dumps(missing), encoding="utf-8")
+            with redirect_stderr(io.StringIO()) as stderr:
+                self.assertEqual(main(["ci", str(missing_path)]), 1)
+            self.assertIn("performix", stderr.getvalue())
+
+            tampered = json.loads(json.dumps(reference))
+            for field in ("contract", "deployment_summary"):
+                tampered[field] = str(
+                    (ROOT / "examples/armproof-reference" / tampered[field]).resolve()
+                )
+            evidence = tampered["evidence"]
+            for field in ("root", "checksums", "workload_manifest"):
+                evidence[field] = str(
+                    (ROOT / "examples/armproof-reference" / evidence[field]).resolve()
+                )
+            for field in ("root", "checksums"):
+                evidence["reproduction"][field] = str(
+                    (
+                        ROOT
+                        / "examples/armproof-reference"
+                        / evidence["reproduction"][field]
+                    ).resolve()
+                )
+            evidence["performix"]["archive"] = str(
+                (
+                    ROOT
+                    / "examples/armproof-reference"
+                    / evidence["performix"]["archive"]
+                ).resolve()
+            )
+            evidence["performix"]["archive_sha256"] = "0" * 64
+            tampered_path = root / "tampered.json"
+            tampered_path.write_text(json.dumps(tampered), encoding="utf-8")
+            with redirect_stderr(io.StringIO()) as stderr:
+                self.assertEqual(main(["ci", str(tampered_path)]), 1)
+            self.assertIn("Performix archive SHA-256 mismatch", stderr.getvalue())
 
     def test_ci_rejects_checksum_tampering(self) -> None:
         reference = ROOT / "ops/evidence/EXP-2026-004/accepted/evidence"
@@ -215,6 +294,19 @@ class CiCommandTests(unittest.TestCase):
                                 or ROOT
                                 / "ops/evidence/EXP-2026-005/accepted/evidence/SHA256SUMS"
                             ),
+                        },
+                        "performix": {
+                            "archive": str(
+                                ROOT / "ops/evidence/EXP-2026-010/evidence.tar.gz"
+                            ),
+                            "archive_sha256": (
+                                "28d411e40de38f3ad4a455bbfa09524dee8b44d6e44eb4d3b599e01635789148"
+                            ),
+                            "experiment_id": "EXP-2026-010",
+                            "disabled_run_id": "cbb01b949717",
+                            "enabled_run_id": "2bf254d4391b",
+                            "linux_perf_kai_cycle_share": 0.6853,
+                            "maximum_share_difference": 0.05,
                         },
                     },
                     "deployment_summary": str(

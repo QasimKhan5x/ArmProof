@@ -35,7 +35,8 @@ Direct links are available at `#triage`, `#surge`, and `#proof`.
    and `2.21s` p95. The separate sustained audit passes five 500-second windows
    at 0.24 versus 0.56 r/s, proving at least 2.0x capacity. It also shows why
    the original exact 2.5x bracket was rejected.
-3. **Release proof:** inspect the nine-claim sustained ledger, authoritative
+3. **Release proof:** inspect the matched Arm Performix causal experiment,
+   nine-claim sustained ledger, authoritative
    verify-derive-bind-decide path, executed Arm path, quality boundary, exact
    deployment and reusable GitHub Action.
 

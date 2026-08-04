@@ -1,0 +1,48 @@
+{
+  "schema_version": "2.0.0",
+  "experiment_id": "EXP-2026-011",
+  "status": "preregistered",
+  "hypothesis": "On one AWS Graviton4 c8g.4xlarge, the cloud-compatible Arm Performix recipe set will independently observe kai_* execution only in the enabled Phi-4 Mini INT4 treatment, expose the Arm instruction mix, and characterize system utilization without contradicting EXP-2026-009 Linux perf attribution.",
+  "causal_scope": "arm_acceleration",
+  "treatments": [
+    {
+      "id": "kleidiai-disabled",
+      "artifact_ref": "microsoft/Phi-4-mini-instruct-onnx@fc04c8f93df696602fd9f300a30d1bf2e3081347 plus disabled overlay",
+      "runtime_ref": "examples/phi4-graviton/runtime-lock.json",
+      "command_ref": "python scripts/profile_ort.py --model /opt/armproof/variants/kleidiai-disabled --workload data/banking77/generated/traffic-mixed.jsonl --repetitions 3",
+      "environment_overrides": {"mlas.disable_kleidiai": "1", "OMP_NUM_THREADS": "16", "OMP_PROC_BIND": "close", "OMP_PLACES": "cores"}
+    },
+    {
+      "id": "kleidiai-enabled",
+      "artifact_ref": "microsoft/Phi-4-mini-instruct-onnx@fc04c8f93df696602fd9f300a30d1bf2e3081347 plus enabled overlay",
+      "runtime_ref": "examples/phi4-graviton/runtime-lock.json",
+      "command_ref": "python scripts/profile_ort.py --model /opt/armproof/variants/kleidiai-enabled --workload data/banking77/generated/traffic-mixed.jsonl --repetitions 3",
+      "environment_overrides": {"mlas.disable_kleidiai": "0", "OMP_NUM_THREADS": "16", "OMP_PROC_BIND": "close", "OMP_PLACES": "cores"}
+    }
+  ],
+  "workload_ref": "data/banking77/generated/traffic-mixed.jsonl",
+  "quality_ref": "EXP-2026-009 accepted 770-item non-inferiority result",
+  "primary_metric": "matched Performix Code Hotspots positive/negative kai_* sample attribution",
+  "secondary_metrics": ["Instruction Mix exports", "System Utilization exports", "agreement with EXP-2026-009 Linux perf attribution", "CPU Microarchitecture readiness result"],
+  "acceptance": {
+    "required_recipes": "code_hotspots,instruction_mix,system_utilization",
+    "enabled_kai_callchains_required": true,
+    "disabled_kai_callchains_allowed": false,
+    "maximum_absolute_kai_share_difference_from_linux_perf_pp": 5.0,
+    "matched_target_required": true,
+    "matched_commands_except_overlay_required": true,
+    "native_exports_required": true,
+    "renderable_runs_required": true,
+    "cpu_microarchitecture_status": "capability-gated; preserve readiness failure when fewer than three PMU counters are exposed",
+    "maximum_project_cumulative_cost_usd": 15.0
+  },
+  "environment_ref": "AWS Graviton4 c8g.4xlarge, Ubuntu 24.04 Arm64, CPU-only, pinned runtime lock",
+  "repetitions": 3,
+  "randomization": "Treatments alternate by recipe.",
+  "warmup_policy": "One unprofiled pass per treatment before profiling.",
+  "profiler_ref": "Arm Performix 1.20.0 Code Hotspots, dynamic Instruction Mix and System Utilization at normal/default sampling",
+  "maximum_runtime_minutes": 120,
+  "maximum_cost_usd": 1.30,
+  "evidence_path": "ops/evidence/EXP-2026-011",
+  "notes": "Corrective follow-up to EXP-2026-010. That run independently established the central 67.02% enabled versus 0% disabled Code Hotspots result, but its frozen all-recipe gate failed because virtual Graviton exposes two PMU counters and CPU Microarchitecture requires three. This follow-up freezes the documented cloud-compatible recipe set before launch; the unsupported readiness result remains evidence, not a hidden omission."
+}

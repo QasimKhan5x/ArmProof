@@ -163,9 +163,14 @@ test("verified evidence load reveals the fixed-SLO Arm result", async ({ page })
 test("proof view exposes the authoritative evidence chain", async ({ page }) => {
   await page.goto(`${appUrl}#proof`);
   await expect(page.getByRole("heading", { name: "The dashboard cannot approve itself" })).toBeVisible();
-  await expect(page.locator("#proof-evidence-count")).toHaveText("69 sustained + 282 supporting files");
+  await expect(page.locator("#proof-evidence-count")).toHaveText("69 sustained + 317 release files");
   await expect(page.locator("#proof-decision-detail")).toContainText("9 required claims");
   await expect(page.locator("#proof-claims")).toContainText("68.53%");
+  await expect(page.getByRole("heading", { name: "Arm Performix measured the optimized path executing" })).toBeVisible();
+  await expect(page.locator("#performix-disabled-share")).toHaveText("0%");
+  await expect(page.locator("#performix-enabled-share")).toHaveText("67.02%");
+  await expect(page.locator("#performix-agreement")).toHaveText("1.51 pp apart");
+  await expect(page.locator("#performix-kernel")).toContainText("neon_i8mm");
   await expect(page.locator(".evidence-chain li")).toHaveCount(4);
   await expect(page.getByRole("heading", { name: "Scaffold another Arm AI service" })).toBeVisible();
   await expect(page.locator(".reuse-steps")).toContainText("armproof init");

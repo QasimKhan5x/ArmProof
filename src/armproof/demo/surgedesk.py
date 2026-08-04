@@ -12,6 +12,7 @@ from armproof.contracts import parse_contract
 from armproof.demo.queue_guard import QueueGuard, queue_for_intent
 from armproof.evidence import comparison_to_dict, verify_and_derive
 from armproof.evidence.sustained_audit import derive_sustained_audit
+from armproof.evidence.performix import verify_performix_archive
 from armproof.policy import decision_to_dict
 
 
@@ -141,6 +142,19 @@ def _queue_guard(root: Path) -> tuple[QueueGuard, list[dict[str, str]]]:
 
 
 def build_surgedesk_payload(root: Path) -> dict[str, Any]:
+    reference_config = _load_json(
+        root / "examples/armproof-reference/armproof.json"
+    )
+    performix_config = reference_config["evidence"]["performix"]
+    performix = verify_performix_archive(
+        root / "examples/armproof-reference" / performix_config["archive"],
+        expected_archive_sha256=performix_config["archive_sha256"],
+        expected_experiment_id=performix_config["experiment_id"],
+        disabled_run_id=performix_config["disabled_run_id"],
+        enabled_run_id=performix_config["enabled_run_id"],
+        linux_perf_share=performix_config["linux_perf_kai_cycle_share"],
+        maximum_share_difference=performix_config["maximum_share_difference"],
+    )
     accepted_evidence = root / "ops/evidence/EXP-2026-004/accepted/evidence"
     sustained_contract = parse_contract(
         _load_json(root / "examples/armproof-reference/sustained-contract.json")
@@ -328,6 +342,38 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             "direct_speedup_max": max(deployment["kleidiai_shape_gains"]),
             "reproduction_max_relative_difference_percent": observed_reproduction_difference * 100,
             "reproduction_experiment_id": "EXP-2026-005",
+            "performix": {
+                "experiment_id": performix["experiment_id"],
+                "engine_version": performix["enabled"]["engine_version"],
+                "cpu": performix["enabled"]["cpu_names"][0],
+                "disabled_kai_sample_share_percent": (
+                    performix["disabled"]["kai_sample_share"] * 100
+                ),
+                "enabled_kai_sample_share_percent": (
+                    performix["enabled"]["kai_sample_share"] * 100
+                ),
+                "linux_perf_cycle_share_percent": (
+                    performix["linux_perf_kai_cycle_share"] * 100
+                ),
+                "absolute_share_difference_pp": (
+                    performix["absolute_share_difference"] * 100
+                ),
+                "enabled_function_samples": performix["enabled"][
+                    "total_function_samples"
+                ],
+                "kernel_family": next(
+                    symbol
+                    for symbol in performix["enabled"]["kai_symbols"]
+                    if symbol.startswith("kai_kernel_matmul")
+                ),
+                "internal_checksummed_files": performix["internal_checksums"][
+                    "checked"
+                ],
+                "pmu_capability_note": (
+                    "The c8g.4xlarge virtual PMU exposed two counters; Performix "
+                    "CPU Microarchitecture and Instruction Mix require at least three."
+                ),
+            },
         },
         "provenance": {
             "experiment_id": sustained.experiment_id,
@@ -355,7 +401,14 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
                 "total_checksummed_files": (
                     checksum_result.checked + verified.reproduction_checksums.checked
                     + sustained.internal_checksummed_files
+                    + performix["internal_checksums"]["checked"]
                 ),
+                "performix_archive_verified": True,
+                "performix_archive_sha256": performix["archive_sha256"],
+                "performix_internal_checksums_verified": True,
+                "performix_checksummed_files": performix["internal_checksums"][
+                    "checked"
+                ],
                 "comparison": "matched_control",
                 "only_changed_control": sustained.only_changed_control,
             },
@@ -365,6 +418,6 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             "runtime": "ONNX Runtime GenAI INT4 + KleidiAI",
             "machine": "AWS Graviton4 c8g.4xlarge",
             "report_path": "../report/index.html",
-            "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.5.1",
+            "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.6.0",
         },
     }
