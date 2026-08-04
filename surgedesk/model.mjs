@@ -17,7 +17,6 @@ export function createWorkspace(data) {
   };
 }
 
-
 export function findRecordedCase(cases, text) {
   const normalized = text.trim();
   return cases.find((item) => item.source_text === normalized) ?? null;
@@ -61,47 +60,5 @@ export function resolveTicket(workspace, decision) {
     active: null,
     resolved: [ticket, ...workspace.resolved],
     queue_counts: queueCounts,
-  };
-}
-
-
-function percentile95(values) {
-  if (values.length === 0) return 0;
-  const sorted = [...values].sort((a, b) => a - b);
-  return sorted[Math.ceil(sorted.length * 0.95) - 1];
-}
-
-
-function snapshotRun(run, progress) {
-  const boundedProgress = Math.max(0, Math.min(1, progress));
-  const completed = Math.floor(run.events.length * boundedProgress);
-  const visibleEvents = run.events.slice(0, completed);
-  const p95 = boundedProgress === 1
-    ? run.p95_ms
-    : percentile95(visibleEvents.map((event) => event.latency_ms));
-  const breaches = visibleEvents.filter((event) => !event.within_slo).length;
-  let sloStatus = "running";
-  if (boundedProgress === 0) sloStatus = "waiting";
-  if (boundedProgress === 1) sloStatus = run.passed ? "passed" : "failed";
-  return {
-    completed,
-    total: run.events.length,
-    p95_ms: p95,
-    max_queue_ms: visibleEvents.length
-      ? Math.max(...visibleEvents.map((event) => event.queue_ms))
-      : 0,
-    breaches,
-    offered_rps: run.offered_rps,
-    slo_status: sloStatus,
-    events: visibleEvents,
-  };
-}
-
-
-export function buildReplaySnapshot(replay, progress) {
-  return {
-    baseline: snapshotRun(replay.baseline, progress),
-    optimized: snapshotRun(replay.optimized, progress),
-    progress: Math.max(0, Math.min(1, progress)),
   };
 }

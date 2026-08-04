@@ -3,7 +3,6 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
-  buildReplaySnapshot,
   createWorkspace,
   findRecordedCase,
   resolveTicket,
@@ -25,7 +24,6 @@ test("selecting a recorded request opens a pending human review", () => {
   assert.equal(selected.active.mode, "recorded_model_output");
   assert.equal(selected.resolved.length, 0);
 });
-
 
 test("confirming a suggestion routes the ticket and records human approval", () => {
   const selected = selectRecordedCase(createWorkspace(data), data.routing_cases[0]);
@@ -56,19 +54,4 @@ test("free-form text is not passed off as recorded model inference", () => {
     findRecordedCase(data.routing_cases, data.routing_cases[1].source_text)?.request_id,
     data.routing_cases[1].request_id,
   );
-});
-
-
-test("replay snapshot converges on raw evidence metrics", () => {
-  const first = buildReplaySnapshot(data.replay, 0);
-  const final = buildReplaySnapshot(data.replay, 1);
-
-  assert.equal(first.baseline.completed, 0);
-  assert.equal(first.optimized.completed, 0);
-  assert.equal(final.baseline.completed, 8);
-  assert.equal(final.optimized.completed, 8);
-  assert.equal(final.baseline.p95_ms, data.replay.baseline.p95_ms);
-  assert.equal(final.optimized.p95_ms, data.replay.optimized.p95_ms);
-  assert.equal(final.baseline.slo_status, "failed");
-  assert.equal(final.optimized.slo_status, "passed");
 });

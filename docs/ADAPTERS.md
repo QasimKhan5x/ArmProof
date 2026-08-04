@@ -10,20 +10,50 @@ an adapter cannot bypass the contract.
 
 The complete Phi-4 Mini reference workflow. It validates matched KleidiAI
 controls, BANKING77 quality, three traffic shapes, Arm callchains and a second
-Graviton run.
+Graviton run. Its Performix evidence must carry runtime, model, workload and
+environment bindings that match the normalized comparison.
+
+### `kleidiai-sustained-v1`
+
+The release adapter used by the current reference project. It verifies the
+immutable sustained-capacity and Performix archives, re-derives every capacity
+and quality metric from 4,200 request outcomes, and binds the observed Neoverse
+kernel path to the same model, runtime, workload, machine and thread count.
 
 ### `http-slo-v1`
 
-A runtime-neutral fixed-SLO adapter for bounded HTTP inference services. Its
-protocol identifies baseline and optimized treatments, at least three raw JSONL
-files for every passing and failing boundary, measurement requirements, and
-baseline/optimized profiler files. Every referenced file must remain inside the
-evidence root and appear in its verified SHA-256 ledger.
+A runtime-neutral fixed-SLO adapter for bounded HTTP classification services.
+Its protocol identifies baseline and optimized treatments, at least three
+independent raw JSONL files for every passing and failing boundary,
+measurement requirements, and baseline/optimized profiler files. Every
+referenced file must remain inside the evidence root and appear in its verified
+SHA-256 ledger. Reused paths, duplicate file contents, unordered timestamps,
+and request schedules that disagree with the declared measurement duration are
+rejected.
 
-The protocol also points to a checksummed identity manifest. ArmProof derives
-the observed artifact, runtime, workload, environment and control identities
-from that manifest and then matches them against the contract. An adapter cannot
-make evidence pass by copying the contract's expected identities.
+The identity manifest names source files for the artifact, runtime, workload,
+and environment. ArmProof hashes those files itself, then compares the derived
+digests and observed treatment controls with the contract. The workload
+manifest must also contain the hashes ArmProof derives from the consumed
+capacity and quality workloads.
+
+Both profiler inputs are parser-ready Linux `perf report --stdio` exports with
+the event, sample count, lost-sample count, and symbol table used for
+attribution. A separate profile manifest binds each consumed report digest to
+the treatment command, artifact, runtime, workload, environment and control.
+The baseline must show no accelerated Arm symbols while the treatment must show
+the declared path. The adapter rejects a missing profile, lost samples,
+unparseable events, a positive baseline, or a negative treatment.
+
+The built-in quality profile binds an exact-label classification workload to
+raw baseline and treatment HTTP response samples. ArmProof parses the model
+outputs and re-derives accuracy, macro F1, schema validity, and output
+agreement. Three required quality claims must be
+present, and the capacity claim must depend on them. Other output types use an
+external evidence adapter rather than pretending classification metrics apply.
+The generic contract must require a capacity gain above 1.0x, at least 95%
+schema-valid output, and no more than five percentage points of accuracy or
+macro-F1 regression.
 
 It emits a tested pass-point ratio and an identifiable capacity interval:
 
@@ -44,8 +74,15 @@ The tested ratio is never relabeled as an exact maximum-capacity estimate.
 ```
 
 [`examples/http-slo/`](../examples/http-slo/) is a complete executable adoption
-kit. It generates raw rows, observed identities, profiler inputs, the checksum
-ledger, contract, config, report and a GitHub Action template in one command.
+kit. It generates raw capacity and quality-response rows, identity sources,
+parser-ready profiler exports, the checksum ledger, contract, config, report, and a GitHub Action
+template in one command.
+
+The adapter verifies integrity and internal consistency after collection. It
+consumes the checksum-bound text export rather than claiming to validate an
+unused binary `perf.data` file. It does not remotely attest that an evidence
+producer ran the command honestly; use a trusted Arm evidence runner and
+publication attestation for that boundary.
 
 ## External Adapters
 

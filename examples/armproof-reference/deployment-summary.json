@@ -14,7 +14,10 @@
     {"id": "EXP-2026-002", "status": "passed", "note": "PSS, size, speed and Arm attribution"},
     {"id": "EXP-2026-003", "status": "inconclusive", "note": "Offered-load accounting defect preserved"},
     {"id": "EXP-2026-004", "status": "passed", "note": "Corrected fixed-SLO capacity gate"},
-    {"id": "EXP-2026-005", "status": "passed", "note": "Fresh instance confirmed every tested capacity-grid boundary"}
+    {"id": "EXP-2026-005", "status": "passed", "note": "Fresh instance confirmed every tested capacity-grid boundary"},
+    {"id": "EXP-2026-009", "status": "failed", "note": "Original exact bracket rejected; a separate conservative >=2.0x lower bound was established"},
+    {"id": "EXP-2026-010", "status": "failed", "note": "All-recipe Performix gate rejected; the completed Code Hotspots pair supports only its narrower attribution claim"},
+    {"id": "EXP-2026-011", "status": "failed", "note": "Counter-heavy cloud recipe set rejected on the two-counter virtual PMU"}
   ],
   "reproduction": {
     "experiment_id": "EXP-2026-005",

@@ -32,8 +32,85 @@
         "optimized_probe_passes": 1,
         "optimized_probe_rps": 0.6,
         "optimized_sustainable_rps": 0.56,
-        "preregistered_upper_ratio": 2.5,
-        "tested_pass_point_ratio": 2.3333333333333335
+        "tested_pass_point_ratio": 2.3333333333333335,
+        "trial_matrix": [
+          {
+            "boundary": "Known sustainable",
+            "outcomes": [
+              "pass",
+              "pass",
+              "pass",
+              "pass",
+              "pass"
+            ],
+            "p95_ms": [
+              8331.46282,
+              8241.560369,
+              8428.073218,
+              8362.083283,
+              8292.810668
+            ],
+            "rate_rps": 0.24,
+            "treatment": "KleidiAI disabled"
+          },
+          {
+            "boundary": "First failing probe",
+            "outcomes": [
+              "fail",
+              "fail",
+              "fail",
+              "fail",
+              "fail"
+            ],
+            "p95_ms": [
+              58960.120524,
+              58187.366381,
+              59287.382817,
+              59048.016977,
+              58659.50801
+            ],
+            "rate_rps": 0.28,
+            "treatment": "KleidiAI disabled"
+          },
+          {
+            "boundary": "Known sustainable",
+            "outcomes": [
+              "pass",
+              "pass",
+              "pass",
+              "pass",
+              "pass"
+            ],
+            "p95_ms": [
+              3295.10353,
+              3279.866876,
+              3293.478156,
+              3305.65856,
+              3292.177148
+            ],
+            "rate_rps": 0.56,
+            "treatment": "KleidiAI enabled"
+          },
+          {
+            "boundary": "Next probe",
+            "outcomes": [
+              "fail",
+              "pass",
+              "fail",
+              "fail",
+              "fail"
+            ],
+            "p95_ms": [
+              10338.03675,
+              9927.676582,
+              10137.207889,
+              13130.901494,
+              11224.422493
+            ],
+            "rate_rps": 0.6,
+            "treatment": "KleidiAI enabled"
+          }
+        ]
       }
     },
     "slo_ms": 10000
@@ -44,6 +121,7 @@
     "name": "SurgeDesk"
   },
   "proof": {
+    "adapter_id": "kleidiai-sustained-v1",
     "artifact_reduction_percent": 35.91724249132322,
     "claims": [
       {
@@ -137,6 +215,10 @@
     "kleidiai_cycle_callchain_share_percent": 68.53,
     "kleidiai_disabled_callchains": false,
     "kleidiai_enabled_callchains": true,
+    "migration_bf16_quality_correct": 19,
+    "migration_int4_quality_correct": 20,
+    "migration_quality_delta_pp": 4.166666666666666,
+    "migration_quality_total": 24,
     "peak_pss_reduction_percent": 55.336785335288766,
     "performix": {
       "absolute_share_difference_pp": 1.5141708795253783,
@@ -149,7 +231,8 @@
       "internal_checksummed_files": 35,
       "kernel_family": "kai_kernel_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_opt32_neon_i8mm",
       "linux_perf_cycle_share_percent": 68.53,
-      "pmu_capability_note": "The c8g.4xlarge virtual PMU exposed two counters; Performix CPU Microarchitecture and Instruction Mix require at least three."
+      "pmu_capability_note": "Code Hotspots was available on the c8g.4xlarge virtual PMU; counter-heavy recipes were capability-gated and excluded.",
+      "scope_note": "ArmProof re-derived this matched Code Hotspots pair from native Performix exports and cross-checked it against Linux perf."
     },
     "reproduction_experiment_id": "EXP-2026-005",
     "reproduction_max_relative_difference_percent": 0.0,
@@ -159,11 +242,10 @@
   },
   "provenance": {
     "claim_boundary": {
-      "preregistered_upper_formula": "0.60 / 0.24",
-      "preregistered_upper_ratio": 2.5,
       "released_lower_formula": "0.56 / 0.28",
       "released_lower_ratio": 2.0
     },
+    "contract_sha256": "3dea0ec2062275181902907d011d27d2b83b11b3ea2e9f8ed5cbce38ede9ff0c",
     "corrected_claim_passed": true,
     "dataset": "BANKING77",
     "dataset_license": "CC-BY-4.0",
@@ -193,9 +275,9 @@
     "model_id": "microsoft/Phi-4-mini-instruct-onnx",
     "optimization": "KleidiAI disabled -> enabled",
     "original_gate_passed": false,
-    "release_action": "QasimKhan5x/ArmProof@v0.6.0",
+    "release_action": "QasimKhan5x/ArmProof@v0.7.0",
     "release_experiment_id": "EXP-2026-004",
-    "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.6.0",
+    "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.7.0",
     "report_path": "../report/index.html",
     "runtime": "ONNX Runtime GenAI INT4"
   },
@@ -217,171 +299,6 @@
     "macro_f1_delta_pp": -0.6726444303255752,
     "optimized_accuracy_percent": 46.493506493506494,
     "schema_valid_percent": 100.0
-  },
-  "replay": {
-    "baseline": {
-      "events": [
-        {
-          "latency_ms": 7832.594935,
-          "queue_ms": 0.002502,
-          "request_id": "banking77-mixed-0000",
-          "sequence": 1,
-          "source_text": "I need my PIN",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 5093.50011,
-          "queue_ms": 19.868036,
-          "request_id": "banking77-mixed-0001",
-          "sequence": 2,
-          "source_text": "How can I stop fraud on my account right now?",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 9142.238452,
-          "queue_ms": 970.765958,
-          "request_id": "banking77-mixed-0002",
-          "sequence": 3,
-          "source_text": "My card broke.",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 10012.396456,
-          "queue_ms": 98.782325,
-          "request_id": "banking77-mixed-0003",
-          "sequence": 4,
-          "source_text": "Where can my card be delivered?",
-          "status_code": 200,
-          "within_slo": false
-        },
-        {
-          "latency_ms": 10453.839863,
-          "queue_ms": 890.941968,
-          "request_id": "banking77-mixed-0004",
-          "sequence": 5,
-          "source_text": "do i need a pin",
-          "status_code": 200,
-          "within_slo": false
-        },
-        {
-          "latency_ms": 7542.231489,
-          "queue_ms": 98.015746,
-          "request_id": "banking77-mixed-0005",
-          "sequence": 6,
-          "source_text": "Do you do SWIFT transfers?",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 12655.188093,
-          "queue_ms": 5837.944068,
-          "request_id": "banking77-mixed-0006",
-          "sequence": 7,
-          "source_text": "my phone is gone",
-          "status_code": 200,
-          "within_slo": false
-        },
-        {
-          "latency_ms": 5049.643977,
-          "queue_ms": 0.002454,
-          "request_id": "banking77-mixed-0007",
-          "sequence": 8,
-          "source_text": "I would like to verify the source of my money",
-          "status_code": 200,
-          "within_slo": true
-        }
-      ],
-      "label": "KleidiAI disabled",
-      "offered_rps": 0.26666666666666666,
-      "p95_ms": 12655.188093,
-      "passed": false
-    },
-    "comparison": "equal_offered_load",
-    "note": "Supporting 30-second raw slice at identical demand; the EXP-2026-009 sustained boundaries are reported separately.",
-    "optimized": {
-      "events": [
-        {
-          "latency_ms": 1476.559061,
-          "queue_ms": 0.002307,
-          "request_id": "banking77-mixed-0000",
-          "sequence": 1,
-          "source_text": "I need my PIN",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 2173.60357,
-          "queue_ms": 0.003061,
-          "request_id": "banking77-mixed-0001",
-          "sequence": 2,
-          "source_text": "How can I stop fraud on my account right now?",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 1473.331268,
-          "queue_ms": 0.003093,
-          "request_id": "banking77-mixed-0002",
-          "sequence": 3,
-          "source_text": "My card broke.",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 2167.150958,
-          "queue_ms": 0.003566,
-          "request_id": "banking77-mixed-0003",
-          "sequence": 4,
-          "source_text": "Where can my card be delivered?",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 1507.577054,
-          "queue_ms": 0.002889,
-          "request_id": "banking77-mixed-0004",
-          "sequence": 5,
-          "source_text": "do i need a pin",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 2206.691927,
-          "queue_ms": 0.002928,
-          "request_id": "banking77-mixed-0005",
-          "sequence": 6,
-          "source_text": "Do you do SWIFT transfers?",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 1437.819499,
-          "queue_ms": 0.003177,
-          "request_id": "banking77-mixed-0006",
-          "sequence": 7,
-          "source_text": "my phone is gone",
-          "status_code": 200,
-          "within_slo": true
-        },
-        {
-          "latency_ms": 2197.257456,
-          "queue_ms": 0.003213,
-          "request_id": "banking77-mixed-0007",
-          "sequence": 8,
-          "source_text": "I would like to verify the source of my money",
-          "status_code": 200,
-          "within_slo": true
-        }
-      ],
-      "label": "KleidiAI enabled",
-      "offered_rps": 0.26666666666666666,
-      "p95_ms": 2206.691927,
-      "passed": true
-    },
-    "source_experiment_id": "EXP-2026-004"
   },
   "routing_cases": [
     {

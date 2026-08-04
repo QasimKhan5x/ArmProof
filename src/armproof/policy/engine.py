@@ -44,12 +44,23 @@ def _arm_controls_match(comparison: Comparison) -> bool:
     )
     baseline_controls = dict(baseline.controls)
     treatment_controls = dict(treatment.controls)
-    baseline_enabled = baseline_controls.pop("kleidiai.enabled", None)
-    treatment_enabled = treatment_controls.pop("kleidiai.enabled", None)
+    control_keys = (
+        "armproof.arm_acceleration_enabled",
+        "kleidiai.enabled",
+    )
+    selected = [
+        key for key in control_keys
+        if key in baseline_controls or key in treatment_controls
+    ]
+    if len(selected) != 1:
+        return False
+    control = selected[0]
+    baseline_enabled = baseline_controls.pop(control, None)
+    treatment_enabled = treatment_controls.pop(control, None)
     return (
         identities_match
-        and baseline_enabled is False
-        and treatment_enabled is True
+        and baseline_enabled in (False, "false", "0")
+        and treatment_enabled in (True, "true", "1")
         and baseline_controls == treatment_controls
     )
 

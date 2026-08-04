@@ -1,15 +1,11 @@
 {
   "schema_version": "1.0.0",
-  "contract": "contract.json",
+  "contract": "sustained-contract.json",
   "evidence": {
-    "adapter": "kleidiai-capacity-v1",
-    "root": "../../ops/evidence/EXP-2026-004/accepted/evidence",
-    "checksums": "../../ops/evidence/EXP-2026-004/accepted/evidence/SHA256SUMS",
+    "adapter": "kleidiai-sustained-v1",
+    "archive": "../../ops/evidence/EXP-2026-009/evidence.tar.gz",
+    "archive_sha256": "f22e647aabe40eefd2abc5548306f40e2a5558ce1a85bc31c18319e6e51d78da",
     "workload_manifest": "../../data/banking77/generated/manifest.json",
-    "reproduction": {
-      "root": "../../ops/evidence/EXP-2026-005/accepted/evidence",
-      "checksums": "../../ops/evidence/EXP-2026-005/accepted/evidence/SHA256SUMS"
-    },
     "performix": {
       "archive": "../../ops/evidence/EXP-2026-010/evidence.tar.gz",
       "archive_sha256": "28d411e40de38f3ad4a455bbfa09524dee8b44d6e44eb4d3b599e01635789148",

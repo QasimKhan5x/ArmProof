@@ -1,5 +1,4 @@
 import {
-  buildReplaySnapshot,
   createWorkspace,
   findRecordedCase,
   resolveTicket,
@@ -14,6 +13,9 @@ const elements = Object.fromEntries(
 let data;
 let workspace;
 let inferenceMode = "recorded";
+let matchedSurgeAvailable = false;
+let auditAvailable = false;
+let proofState = "recorded";
 
 const VIEW_TO_HASH = {
   workspace: "triage",
@@ -30,21 +32,9 @@ function setText(id, value) {
 }
 
 
-function formatRps(value) {
-  return `${value.toFixed(3)} r/s`;
-}
-
-
 function formatMs(value) {
   if (!value) return "—";
   return value >= 1000 ? `${(value / 1000).toFixed(2)} s` : `${Math.round(value)} ms`;
-}
-
-
-function formatP95Range(values) {
-  const low = Math.min(...values) / 1000;
-  const high = Math.max(...values) / 1000;
-  return `${low.toFixed(2)}–${high.toFixed(2)} s p95`;
 }
 
 
@@ -75,13 +65,58 @@ function renderProofClaims() {
     });
     const status = document.createElement("td");
     const mark = document.createElement("span");
-    mark.className = claim.status === "pass" ? "pass-label" : "fail-label";
-    mark.textContent = claim.status[0].toUpperCase() + claim.status.slice(1);
+    if (proofState === "recorded" && claim.status === "pass") {
+      mark.className = "recorded-label";
+      mark.textContent = "Recorded pass";
+    } else if (proofState === "failed") {
+      mark.className = "unknown-label";
+      mark.textContent = "Not reverified";
+    } else {
+      mark.className = claim.status === "pass" ? "pass-label" : "fail-label";
+      mark.textContent = claim.status[0].toUpperCase() + claim.status.slice(1);
+    }
     status.append(mark);
     row.append(status);
     tbody.append(row);
   });
   labelResponsiveTable(tbody.closest("table"));
+}
+
+
+function renderProofDecision(state, detail = "") {
+  proofState = state;
+  const header = elements["proof-decision-title"].closest(".proof-decision");
+  const mark = header.querySelector(".decision-mark");
+  header.classList.toggle("failed", state === "failed");
+  if (state === "fresh") {
+    setText("proof-decision-source", "Verified during this session");
+    setText("proof-decision-title", "Fresh audit approved the conservative Graviton boundary");
+    setText("proof-decision-detail", detail);
+    setText("proof-decision-status", "VERIFIED NOW");
+    setText(
+      "environment-label",
+      `${inferenceMode === "live" ? "Live matched Arm64 endpoint" : "Recorded inference"} · fresh audit`,
+    );
+    mark.textContent = "✓";
+  } else if (state === "failed") {
+    setText("proof-decision-source", "Current ArmProof audit");
+    setText("proof-decision-title", "Fresh audit blocked the release");
+    setText("proof-decision-detail", detail);
+    setText("proof-decision-status", "BLOCKED");
+    setText("environment-label", "Current evidence audit blocked");
+    mark.textContent = "×";
+  } else {
+    setText("proof-decision-source", "Checked-in ArmProof receipt");
+    setText("proof-decision-title", "Checked-in conservative release receipt");
+    setText(
+      "proof-decision-detail",
+      `${data.proof.verified_claims} required claims passed when this recorded receipt was generated. `
+      + "Run the measured experiment audit to recompute the decision in this session.",
+    );
+    setText("proof-decision-status", "RECORDED PASS");
+    mark.textContent = "✓";
+  }
+  renderProofClaims();
 }
 
 
@@ -229,7 +264,7 @@ async function routeSelectedMessage(event) {
   event.preventDefault();
   if (inferenceMode === "live") {
     elements["route-request"].disabled = true;
-    elements["route-request"].textContent = "Routing on Graviton…";
+    elements["route-request"].textContent = "Routing on Arm64…";
     try {
       const response = await fetch("/api/route", {
         method: "POST",
@@ -269,18 +304,18 @@ function setInferenceMode(mode) {
   const live = mode === "live";
   elements["sample-select"].disabled = live;
   elements["scenario-picker"].hidden = live;
-  setText("environment-label", live ? "Live Graviton endpoint" : "Recorded Graviton evidence");
+  setText("environment-label", live ? "Live matched Arm64 endpoint" : "Recorded Graviton evidence");
   elements["workspace-mode"].textContent = live
-    ? "Live Graviton inference"
+    ? "Live matched Arm64 inference"
     : `${data.provenance.dataset} recorded output`;
   elements["intake-note"].textContent = live
-    ? "This message is sent through the configured Graviton inference endpoint and local queue guard."
-    : "Select an evidence-backed request to replay its recorded model output.";
+    ? "This message is sent through the identity-checked Arm64 inference endpoint and local queue guard."
+    : "Select an evidence-backed request to load its recorded model output.";
   elements["route-request"].textContent = live ? "Run live route" : "Load model suggestion";
   elements["customer-message"].readOnly = false;
   if (live) {
     elements["customer-message"].value = "";
-    elements["customer-message"].placeholder = "Enter a support request for the live Graviton service";
+    elements["customer-message"].placeholder = "Enter a support request for the live Arm64 service";
     elements["customer-message"].focus();
   } else {
     elements["customer-message"].placeholder = "";
@@ -297,12 +332,47 @@ async function configureLiveMode() {
     const response = await fetch("./live-status.json", { cache: "no-store" });
     if (!response.ok) return;
     const status = await response.json();
-    if (!status.live_available) return;
-    elements["live-mode"].disabled = false;
-    elements["live-mode-hint"].textContent = "Connected to the configured Arm inference endpoint.";
-    elements["live-mode-label"].classList.add("available");
+    if (status.live_available) {
+      elements["live-mode"].disabled = false;
+      elements["live-mode-hint"].textContent = "Connected to the configured Arm inference endpoint.";
+      elements["live-mode-label"].classList.add("available");
+    }
+    matchedSurgeAvailable = Boolean(status.matched_surge_available);
+    auditAvailable = Boolean(status.audit_available);
+    elements["tamper-check"].disabled = !auditAvailable;
+    if (status.lanes) {
+      setText("baseline-live-cores", `Cores ${status.lanes.baseline.core_group}`);
+      setText("optimized-live-cores", `Cores ${status.lanes.optimized.core_group}`);
+    }
+    if (matchedSurgeAvailable && status.matched_identity) {
+      const identity = status.matched_identity;
+      setText(
+        "live-match-proof",
+        `Runtime-verified match: model ${identity.model_identity.slice(0, 12)}… · `
+        + `${identity.runtime} ${identity.runtime_version} · ${identity.threads_per_lane} threads per lane · `
+        + `${identity.architecture} · compared runtime control ${identity.changed_control}: `
+        + `${identity.baseline_control} → ${identity.optimized_control}.`,
+      );
+    } else {
+      setText(
+        "live-match-proof",
+        `Matched run unavailable: ${status.matched_status || "endpoint identity was not verified"}.`,
+      );
+    }
+    setText(
+      "surge-live-status",
+      matchedSurgeAvailable ? "Matched Arm endpoints connected" : "Matched endpoints not connected",
+    );
+    elements["run-live-surge"].disabled = !matchedSurgeAvailable;
+    if (!auditAvailable) {
+      elements["load-experiment"].textContent = "Open checked-in evidence";
+      elements["evidence-load-note"].textContent =
+        "This public page can inspect the repository receipt. Run the local demo to hash and re-derive the archive.";
+    }
   } catch {
     // Static hosting intentionally remains in recorded-evidence mode.
+    setText("surge-live-status", "Matched endpoints unavailable");
+    setText("live-match-proof", "Runtime identity probes are unavailable on this static page.");
   }
 }
 
@@ -350,206 +420,433 @@ function populateScenarios() {
 }
 
 
-function renderMixTable() {
-  elements["mix-table"].replaceChildren();
-  Object.entries(data.capacity.mixes).forEach(([name, mix]) => {
-    const row = document.createElement("tr");
-    [
-      name[0].toUpperCase() + name.slice(1),
-      `${formatRps(mix.baseline_sustainable_rps)} · ${formatP95Range(mix.baseline_pass_p95_ms)}`,
-      `${formatRps(mix.optimized_sustainable_rps)} · ${formatP95Range(mix.optimized_pass_p95_ms)}`,
-      `${mix.tested_pass_point_ratio.toFixed(2)}×`,
-    ].forEach((value) => {
-      const cell = document.createElement("td");
-      cell.textContent = value;
-      row.append(cell);
-    });
-    elements["mix-table"].append(row);
-  });
-  labelResponsiveTable(elements["mix-table"].closest("table"));
+async function loadVerifiedExperiment() {
+  if (!auditAvailable) {
+    elements["load-experiment"].disabled = true;
+    showRepositoryEvidence();
+    return;
+  }
+  const expected = data.provenance.evidence;
+  elements["load-experiment"].disabled = true;
+  elements["load-experiment"].textContent =
+    `Verifying ${expected.sustained_raw_confirmation_samples.toLocaleString()} outcomes…`;
+  elements["evidence-load-note"].textContent =
+    "Reading the archive, recomputing all long windows, and evaluating the contract.";
+  resetAuditProgress();
+  try {
+    const response = await fetch("/api/audit-stream", { method: "POST" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const receipt = await readAuditStream(response);
+    const valid =
+      receipt.passed
+      && receipt.experiment_id === data.provenance.experiment_id
+      && receipt.claims_verified === data.proof.verified_claims
+      && receipt.raw_request_outcomes === expected.sustained_raw_confirmation_samples
+      && receipt.confirmation_files === expected.sustained_raw_confirmation_files
+      && receipt.archive_sha256 === expected.sustained_archive_sha256
+      && receipt.matched_control;
+    if (!valid) throw new Error("audit receipt does not match the loaded release data");
+    renderAuditResult(receipt);
+    renderProofDecision(
+      "fresh",
+      `${receipt.claims_verified} required claims passed after ${receipt.raw_request_outcomes.toLocaleString()} outcomes were re-derived in ${receipt.elapsed_ms.toFixed(0)} ms.`,
+    );
+    setText(
+      "audit-archive-result",
+      `${receipt.archive_sha256.slice(0, 12)}… · ${receipt.elapsed_ms.toFixed(0)} ms total`,
+    );
+    setText(
+      "audit-request-result",
+      `${receipt.raw_request_outcomes.toLocaleString()} outcomes across ${receipt.confirmation_files} files`,
+    );
+    setText("audit-control-result", "Matched identities; declared treatment control verified");
+    setText("audit-claim-result", `${receipt.claims_verified}/${receipt.claims_verified} required claims passed`);
+    elements["experiment-results"].hidden = false;
+    elements["load-experiment"].textContent = "Measured experiment verified";
+    elements["evidence-load-note"].textContent =
+      `${receipt.adapter} recomputed the release decision from the immutable archive in ${receipt.elapsed_ms.toFixed(0)} ms.`;
+    elements["evidence-loader"].classList.add("loaded");
+    elements["tab-surge"].classList.add("completed");
+    elements["experiment-results"].scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (error) {
+    elements["load-experiment"].disabled = false;
+    elements["load-experiment"].textContent = "Retry measured experiment";
+    elements["evidence-load-note"].textContent = `Verification blocked: ${error.message}`;
+    elements["evidence-loader"].classList.add("failed");
+    renderProofDecision("failed", `The current audit did not approve: ${error.message}`);
+  }
 }
 
 
-function renderEvidenceSummary() {
-  const mixes = Object.values(data.capacity.mixes);
+function resetAuditProgress() {
+  elements["audit-progress"].hidden = false;
+  const rows = [...elements["audit-progress"].querySelectorAll("li")];
+  rows.forEach((row, index) => {
+    row.className = index === 0 ? "active" : "";
+    row.querySelector("small").textContent = "Waiting…";
+  });
+  elements["audit-archive-result"].textContent = "Hashing the archive…";
+}
+
+
+function updateAuditStage(stage, detail) {
+  const order = ["archive", "requests", "controls", "contract"];
+  const index = order.indexOf(stage);
+  if (index < 0) throw new Error(`unknown audit stage: ${stage}`);
+  const row = elements["audit-progress"].querySelector(`[data-audit-stage="${stage}"]`);
+  row.className = "complete";
+  if (stage === "archive") {
+    setText("audit-archive-result", `${detail.archive_sha256.slice(0, 12)}… · ${detail.checksummed_files} files`);
+  } else if (stage === "requests") {
+    setText("audit-request-result", `${detail.raw_request_outcomes.toLocaleString()} outcomes across ${detail.confirmation_files} files`);
+  } else if (stage === "controls") {
+    setText("audit-control-result", detail.matched_control ? `Matched; treatment control ${detail.only_changed_control} verified` : "Control mismatch");
+  } else {
+    setText("audit-claim-result", `${detail.claims_verified}/${detail.claims_verified} required claims passed`);
+  }
+  const next = elements["audit-progress"].querySelector(`[data-audit-stage="${order[index + 1]}"]`);
+  if (next) next.className = "active";
+}
+
+
+async function readAuditStream(response) {
+  if (!response.body) throw new Error("audit stream is unavailable");
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let receipt = null;
+  while (true) {
+    const { value, done } = await reader.read();
+    buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      const event = JSON.parse(line);
+      if (event.type === "stage") updateAuditStage(event.stage, event.detail);
+      if (event.type === "result") receipt = event.receipt;
+      if (event.type === "error") throw new Error(event.error);
+    }
+    if (done) break;
+  }
+  if (!receipt) throw new Error("audit finished without a result receipt");
+  return receipt;
+}
+
+
+function showRepositoryEvidence() {
   const mixed = data.capacity.mixes.mixed;
-  const maxCapacity = Math.max(
-    mixed.baseline_sustainable_rps,
-    mixed.optimized_sustainable_rps,
-  );
-  const minimumRatios = mixes.map((mix) => mix.minimum_capacity_ratio);
+  const evidence = data.provenance.evidence;
+  elements["audit-progress"].hidden = false;
+  elements["audit-progress"].querySelectorAll("li").forEach((row) => {
+    row.className = "complete";
+  });
+  renderAuditResult({
+    passed: data.proof.decision === "PASS",
+    claims_verified: data.proof.verified_claims,
+    capacity: {
+      trial_matrix: mixed.trial_matrix,
+      optimized_pass_rps: mixed.optimized_sustainable_rps,
+      baseline_fail_rps: mixed.baseline_fail_rps,
+      minimum_ratio: mixed.minimum_capacity_ratio,
+      confirmations: mixed.confirmations_per_treatment,
+      confirmation_seconds: mixed.confirmation_seconds,
+    },
+    original_gate: {
+      passed: data.provenance.original_gate_passed,
+      required_probe_failures: mixed.confirmations_per_treatment,
+      observed_probe_failures: mixed.optimized_probe_failures,
+      observed_probe_passes: mixed.optimized_probe_passes,
+      probe_rps: mixed.optimized_probe_rps,
+      exact_lower_ratio: mixed.minimum_capacity_ratio,
+      exact_upper_ratio: mixed.optimized_probe_rps / mixed.baseline_sustainable_rps,
+    },
+    arm: {
+      performix_disabled_sample_share_percent: data.proof.performix.disabled_kai_sample_share_percent,
+      performix_enabled_sample_share_percent: data.proof.performix.enabled_kai_sample_share_percent,
+      linux_perf_cycle_share_percent: data.proof.kleidiai_cycle_callchain_share_percent,
+      kernel: data.proof.performix.kernel_family,
+    },
+  });
+  setText("audit-archive-result", `${evidence.sustained_archive_sha256.slice(0, 12)}… · repository receipt`);
+  setText("audit-request-result", `${evidence.sustained_raw_confirmation_samples.toLocaleString()} recorded outcomes across ${evidence.sustained_raw_confirmation_files} files`);
+  setText("audit-control-result", "Matched identities; declared treatment control verified");
+  setText("audit-claim-result", `${data.proof.verified_claims}/${data.proof.verified_claims} claims in the checked-in decision`);
+  elements["experiment-results"].hidden = false;
+  elements["load-experiment"].textContent = "Repository evidence opened";
+  elements["evidence-load-note"].textContent =
+    "GitHub Pages loaded the checked-in audit receipt. The local runbook recomputes the archive during the demo.";
+  elements["evidence-loader"].classList.add("loaded");
+  renderProofDecision("recorded");
+}
+
+
+function renderTrialMatrix(trials) {
+  const body = elements["trial-matrix-body"];
+  body.replaceChildren();
+  trials.forEach((trial) => {
+    const row = document.createElement("tr");
+    const treatment = document.createElement("td");
+    treatment.textContent = trial.treatment;
+    const rate = document.createElement("td");
+    rate.textContent = `${trial.rate_rps.toFixed(2)} r/s`;
+    row.append(treatment, rate);
+    trial.outcomes.forEach((outcome, index) => {
+      const cell = document.createElement("td");
+      const mark = document.createElement("span");
+      mark.className = `trial-outcome ${outcome}`;
+      mark.textContent = outcome === "pass" ? "Pass" : "Fail";
+      mark.title = `${formatMs(trial.p95_ms[index])} p95`;
+      cell.append(mark);
+      row.append(cell);
+    });
+    const interpretation = document.createElement("td");
+    const passCount = trial.outcomes.filter((outcome) => outcome === "pass").length;
+    interpretation.textContent = `${passCount}/5 passed · ${trial.boundary}`;
+    row.append(interpretation);
+    body.append(row);
+  });
+  labelResponsiveTable(body.closest("table"));
+}
+
+
+function renderAuditResult(receipt) {
+  const capacity = receipt.capacity;
+  const arm = receipt.arm;
+  const originalGate = receipt.original_gate;
   setText(
-    "capacity-title",
-    `Same instance. At least ${mixed.minimum_capacity_ratio.toFixed(1)}× sustainable capacity.`,
+    "confirmation-count",
+    `${capacity.confirmations} trials × 4 boundaries × ${capacity.confirmation_seconds}s`,
   );
-  setText("headline-ratio", `≥${mixed.minimum_capacity_ratio.toFixed(1)}×`);
+  setText("equation-treatment", `${capacity.optimized_pass_rps.toFixed(2)} r/s optimized pass`);
+  setText("equation-baseline", `${capacity.baseline_fail_rps.toFixed(2)} r/s baseline fail`);
+  setText("headline-ratio", `≥${capacity.minimum_ratio.toFixed(2)}×`);
+  setText("original-gate-status", originalGate.passed ? "PASSED" : "REJECTED");
+  setText(
+    "original-gate-explanation",
+    `The exact ${originalGate.exact_lower_ratio.toFixed(1)}×–${originalGate.exact_upper_ratio.toFixed(1)}× bracket required all `
+    + `${originalGate.required_probe_failures} optimized windows at ${originalGate.probe_rps.toFixed(2)} r/s to fail. `
+    + `${originalGate.observed_probe_passes} passed, so that preregistered claim was rejected. `
+    + "The release below evaluates a separate, narrower lower-bound claim supported by every confirmation window.",
+  );
+  setText(
+    "capacity-explanation",
+    `KleidiAI enabled passed all five windows at ${capacity.optimized_pass_rps.toFixed(2)} r/s. `
+    + `KleidiAI disabled failed all five at ${capacity.baseline_fail_rps.toFixed(2)} r/s. `
+    + "Using the failing baseline probe makes the published ratio a lower bound.",
+  );
+  setText("reveal-disabled-sample-share", `${arm.performix_disabled_sample_share_percent.toFixed(0)}%`);
+  setText("reveal-enabled-sample-share", `${arm.performix_enabled_sample_share_percent.toFixed(2)}%`);
+  setText("reveal-cycle-share", `${arm.linux_perf_cycle_share_percent.toFixed(2)}%`);
+  setText("reveal-kernel", arm.kernel);
+  setText("surge-release-decision", receipt.passed ? "PASS" : "BLOCK");
+  setText(
+    "conclusion-copy",
+    `${receipt.claims_verified} required claims passed: capacity, quality, evidence volume, matched Arm execution, and profiler integrity.`,
+  );
+  renderTrialMatrix(capacity.trial_matrix);
+}
+
+
+function initializeLiveSlots() {
+  ["baseline", "optimized"].forEach((lane) => {
+    const container = elements[`${lane}-live-slots`];
+    container.replaceChildren();
+    for (let sequence = 1; sequence <= 3; sequence += 1) {
+      const tile = document.createElement("div");
+      tile.className = "live-request waiting";
+      tile.dataset.sequence = String(sequence);
+      const number = document.createElement("span");
+      number.textContent = `Request ${sequence}`;
+      const result = document.createElement("strong");
+      result.textContent = "Waiting";
+      const detail = document.createElement("small");
+      detail.textContent = "—";
+      tile.append(number, result, detail);
+      container.append(tile);
+    }
+  });
+}
+
+
+function updateLiveTile(lane, result) {
+  const tile = elements[`${lane}-live-slots`].querySelector(
+    `[data-sequence="${result.sequence}"]`,
+  );
+  tile.className = "live-request complete";
+  tile.querySelector("strong").textContent = formatMs(result.gateway_latency_ms);
+  tile.querySelector("small").textContent =
+    `${result.backend} · ${result.core_group} · ${result.suggested_label}`;
+  tile.title = `${result.request_id} started ${result.gateway_started_at}`;
+}
+
+
+function updateLiveFailure(lane, sequence, message) {
+  const tile = elements[`${lane}-live-slots`].querySelector(
+    `[data-sequence="${sequence}"]`,
+  );
+  tile.className = "live-request failed";
+  tile.querySelector("strong").textContent = "Failed";
+  tile.querySelector("small").textContent = message;
+}
+
+
+async function runLiveMiniSurge(event) {
+  event.preventDefault();
+  if (!matchedSurgeAvailable) return;
+  const text = elements["surge-message"].value.trim();
+  if (!text) return;
+  initializeLiveSlots();
+  elements["live-surge-result"].hidden = true;
+  elements["run-live-surge"].disabled = true;
+  elements["run-live-surge"].textContent = "Sending six live requests…";
+  setText("baseline-live-summary", "Three requests in flight");
+  setText("optimized-live-summary", "Three requests in flight");
+  const runId = crypto.randomUUID().replaceAll("-", "").slice(0, 12);
+  const started = performance.now();
+  const outcomes = { baseline: [], optimized: [] };
+  const tasks = ["baseline", "optimized"].flatMap((lane) =>
+    [1, 2, 3].map(async (sequence) => {
+      const response = await fetch(`/api/surge/${lane}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, run_id: runId, sequence }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw Object.assign(new Error(result.error || `HTTP ${response.status}`), { lane, sequence });
+      outcomes[lane].push(result);
+      updateLiveTile(lane, result);
+    }),
+  );
+  const settled = await Promise.allSettled(tasks);
+  settled.filter((result) => result.status === "rejected").forEach((result) => {
+    updateLiveFailure(result.reason.lane, result.reason.sequence, result.reason.message);
+  });
+  const elapsed = performance.now() - started;
+  ["baseline", "optimized"].forEach((lane) => {
+    const rows = outcomes[lane];
+    setText(
+      `${lane}-live-summary`,
+      `${rows.length}/3 completed${rows.length === 3 ? " · runtime identity verified" : ""}`,
+    );
+  });
+  const complete = outcomes.baseline.length === 3 && outcomes.optimized.length === 3;
+  if (complete) {
+    elements["live-surge-result"].textContent =
+      `Live run ${runId}: all six matched requests completed in ${formatMs(elapsed)}. `
+      + "Per-request latency is shown above; capacity is evaluated by the long-window audit below.";
+  } else {
+    elements["live-surge-result"].textContent =
+      `Live run ${runId} finished with ${settled.filter((result) => result.status === "rejected").length} failed gateway calls.`;
+  }
+  elements["live-surge-result"].hidden = false;
+  elements["run-live-surge"].disabled = false;
+  elements["run-live-surge"].textContent = "Run matched request check again";
+}
+
+
+async function previewScaffold() {
+  elements["preview-scaffold"].disabled = true;
+  elements["preview-scaffold"].textContent = "Generating…";
+  try {
+    const response = await fetch("/api/scaffold-preview", { method: "POST" });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+    elements["scaffold-preview"].textContent =
+      `$ ${payload.command}\n\n${payload.files.map((file) => `created  ${file}`).join("\n")}\n\nBLOCK until evidence exists\nNext: ${payload.next}`;
+    elements["scaffold-preview"].hidden = false;
+    elements["preview-scaffold"].textContent = "Preview ready";
+  } catch (error) {
+    elements["scaffold-preview"].textContent = `Generation failed: ${error.message}`;
+    elements["scaffold-preview"].hidden = false;
+    elements["preview-scaffold"].disabled = false;
+    elements["preview-scaffold"].textContent = "Retry starter kit preview";
+  }
+}
+
+
+async function runTamperCheck() {
+  elements["tamper-check"].disabled = true;
+  elements["tamper-check"].textContent = "Changing a temporary copy…";
+  elements["tamper-result"].hidden = true;
+  try {
+    const response = await fetch("/api/tamper-check", { method: "POST" });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+    elements["tamper-result"].textContent =
+      `${payload.decision}  ${payload.reason}\n`
+      + `expected  ${payload.expected_sha256.slice(0, 16)}…\n`
+      + `observed  ${payload.observed_sha256.slice(0, 16)}…\n`
+      + `${payload.mutation} · ${payload.elapsed_ms.toFixed(0)} ms`;
+    elements["tamper-result"].hidden = false;
+    elements["tamper-check"].textContent = "Altered evidence blocked";
+  } catch (error) {
+    elements["tamper-result"].textContent = `Tamper test failed: ${error.message}`;
+    elements["tamper-result"].hidden = false;
+    elements["tamper-check"].disabled = false;
+    elements["tamper-check"].textContent = "Retry one-byte evidence test";
+  }
+}
+
+
+function renderRedesignEvidence() {
+  const mixed = data.capacity.mixes.mixed;
+  const proof = data.proof;
+  const evidence = data.provenance.evidence;
   setText("guard-accuracy", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
   setText("guard-evaluation-size", `Held out, ${data.quality.guard_evaluation_cases.toLocaleString()} requests`);
   setText("guard-gain", `+${data.quality.guard_queue_gain_pp.toFixed(2)} pp`);
-  setText(
-    "guard-split",
-    `${data.quality.guard_training_cases} train / ${data.quality.guard_evaluation_cases} held out`,
-  );
+  setText("guard-split", `${data.quality.guard_training_cases} train / ${data.quality.guard_evaluation_cases} held out`);
   setText("schema-valid", `${data.quality.schema_valid_percent.toFixed(0)}%`);
-  setText(
-    "confirmation-count",
-    `${mixed.confirmations_per_treatment} × ${mixed.confirmation_seconds}s per boundary`,
-  );
-  setText(
-    "mix-title",
-    `${mixed.confirmations_per_treatment} confirmations at every boundary`,
-  );
+  setText("evidence-experiment-id", data.provenance.experiment_id);
+  setText("evidence-checksum-status", `${evidence.sustained_checksummed_files} checksummed files · ${evidence.sustained_raw_confirmation_samples.toLocaleString()} outcomes`);
+  setText("evidence-comparison", "Matched INT4 treatments; one runtime flag differs");
+  setText("experiment-machine", proof.instance);
+  setText("experiment-model", `${data.provenance.model} INT4`);
   setText("experiment-slo", `p95 ≤ ${(data.capacity.slo_ms / 1000).toFixed(0)} seconds`);
-  setText("baseline-capacity-rps", `${mixed.baseline_sustainable_rps.toFixed(2)} requests/s`);
-  setText("optimized-capacity-rps", `${mixed.optimized_sustainable_rps.toFixed(2)} requests/s`);
-  elements["baseline-capacity-bar"].style.width = `${(mixed.baseline_sustainable_rps / maxCapacity) * 100}%`;
-  elements["optimized-capacity-bar"].style.width = `${(mixed.optimized_sustainable_rps / maxCapacity) * 100}%`;
-  setText("baseline-boundary", formatRps(mixed.baseline_sustainable_rps));
-  setText("optimized-boundary", formatRps(mixed.optimized_sustainable_rps));
-  setText("original-gate-status", data.provenance.original_gate_passed ? "PASSED" : "BLOCKED");
-  setText("corrected-claim-status", data.provenance.corrected_claim_passed ? "PROVEN" : "BLOCKED");
-  const boundary = data.provenance.claim_boundary;
+  setText("experiment-control", evidence.only_changed_control);
+  setText("arm-reveal-threads", proof.threads);
+  setText("arm-reveal-control", evidence.only_changed_control);
+  setText("proof-evidence-count", `${evidence.sustained_checksummed_files} sustained + ${evidence.performix_checksummed_files} Performix checksums`);
+  setText("proof-derived-claims", `${proof.verified_claims} contract claims evaluated from ${evidence.sustained_raw_confirmation_samples.toLocaleString()} request outcomes; missing inputs block release.`);
+  setText("artifact-reduction", `${proof.artifact_reduction_percent.toFixed(2)}% smaller`);
+  setText("memory-reduction", `${proof.peak_pss_reduction_percent.toFixed(2)}% lower peak PSS`);
   setText(
-    "original-gate-label",
-    `Preregistered upper-bound probe (${boundary.preregistered_upper_ratio.toFixed(2)}×)`,
+    "migration-quality",
+    `${proof.migration_quality_delta_pp >= 0 ? "+" : ""}${proof.migration_quality_delta_pp.toFixed(2)} pp (${proof.migration_int4_quality_correct}/${proof.migration_quality_total} vs ${proof.migration_bf16_quality_correct}/${proof.migration_quality_total})`,
   );
-  setText(
-    "original-gate-formula",
-    `${boundary.preregistered_upper_formula.replace(" / ", " r/s ÷ ")} r/s = ${boundary.preregistered_upper_ratio.toFixed(2)}×`,
-  );
-  setText(
-    "corrected-claim-label",
-    `Released sustained lower bound (≥${boundary.released_lower_ratio.toFixed(2)}×)`,
-  );
-  setText(
-    "corrected-claim-formula",
-    `${boundary.released_lower_formula.replace(" / ", " r/s ÷ ")} r/s = ${boundary.released_lower_ratio.toFixed(2)}×`,
-  );
-  setText(
-    "audit-correction-copy",
-    `The preregistered ${mixed.optimized_probe_rps.toFixed(2)} r/s failure probe passed ${mixed.optimized_probe_passes} of ${mixed.confirmations_per_treatment} windows, so it cannot define a sustainable boundary. The released lower bound uses the optimized rate that passed every window (${mixed.optimized_sustainable_rps.toFixed(2)} r/s) and the baseline rate that failed every window (${mixed.baseline_fail_rps.toFixed(2)} r/s).`,
-  );
-  setText(
-    "reveal-disabled-cycle-share",
-    `${data.proof.performix.disabled_kai_sample_share_percent.toFixed(2)}%`,
-  );
-  setText(
-    "reveal-cycle-share",
-    `${data.proof.kleidiai_cycle_callchain_share_percent.toFixed(2)}%`,
-  );
-  setText("reveal-baseline-p95", formatMs(data.replay.baseline.p95_ms));
-  setText("reveal-optimized-p95", formatMs(data.replay.optimized.p95_ms));
-  setText("reveal-baseline-rps", formatRps(mixed.baseline_sustainable_rps));
-  setText("reveal-optimized-rps", formatRps(mixed.optimized_sustainable_rps));
-  setText(
-    "conclusion-copy",
-    `${mixed.confirmations_per_treatment} ${mixed.confirmation_seconds}-second confirmations passed at ${mixed.optimized_sustainable_rps.toFixed(2)} r/s versus ${mixed.baseline_sustainable_rps.toFixed(2)} r/s. Since the baseline failed at ${mixed.baseline_fail_rps.toFixed(2)} r/s, the sustainable-capacity improvement is at least ${mixed.minimum_capacity_ratio.toFixed(1)}×.`,
-  );
-  renderProofClaims();
-  setText(
-    "proof-decision-detail",
-    `${data.proof.verified_claims} required claims passed after raw evidence verification and derivation.`,
-  );
-  setText(
-    "proof-evidence-count",
-    `${data.provenance.evidence.sustained_checksummed_files} sustained + ${data.provenance.evidence.checksummed_files + data.provenance.evidence.reproduction_checksummed_files + data.provenance.evidence.performix_checksummed_files} release files`,
-  );
-  setText(
-    "proof-derived-claims",
-    `${data.proof.verified_claims} contract claims evaluated from derived evidence; missing or inconsistent inputs block release.`,
-  );
-  setText("artifact-reduction", `${data.proof.artifact_reduction_percent.toFixed(2)}% smaller deployment artifact`);
-  setText(
-    "direct-speedup",
-    `${data.proof.direct_speedup_min.toFixed(2)}–${data.proof.direct_speedup_max.toFixed(2)}× direct execution speedup`,
-  );
-  setText(
-    "capacity-range",
-    `≥${Math.min(...minimumRatios).toFixed(1)}× sustained; ${mixed.tested_pass_point_ratio.toFixed(2)}× pass-point ratio`,
-  );
-  setText("deployment-instance", data.proof.instance);
-  setText("deployment-threads", data.proof.threads);
+  setText("capacity-range", `≥${mixed.minimum_capacity_ratio.toFixed(2)}× sustainable capacity under the fixed SLO`);
+  setText("deployment-instance", proof.instance);
+  setText("deployment-threads", proof.threads);
   setText("deployment-runtime", data.provenance.runtime);
   setText("deployment-optimization", data.provenance.optimization);
-  setText("experiment-model", `${data.provenance.model} INT4`);
-  setText("experiment-control", data.provenance.optimization);
-  setText("arm-reveal-threads", data.proof.threads);
-  setText("arm-reveal-control", data.provenance.evidence.only_changed_control);
   setText("stack-model", data.provenance.model);
   setText("stack-runtime", data.provenance.runtime);
   setText("stack-machine", data.provenance.machine.split(" / ")[0].replace("AWS ", ""));
   setText("intent-count", data.quality.intent_count);
-  setText("release-adapter-id", data.provenance.experiment_id);
+  setText("release-adapter-id", proof.adapter_id);
   setText("release-action", data.provenance.release_action);
+  setText("release-contract-sha", data.provenance.contract_sha256);
   elements["release-link"].href = data.provenance.release_url;
-  const performix = data.proof.performix;
+  const performix = proof.performix;
   setText("performix-version", `Arm Performix ${performix.engine_version} · ${performix.cpu}`);
   setText("performix-disabled-share", `${performix.disabled_kai_sample_share_percent.toFixed(0)}%`);
   setText("performix-enabled-share", `${performix.enabled_kai_sample_share_percent.toFixed(2)}%`);
   setText("performix-sample-count", `${performix.enabled_function_samples.toLocaleString()} measured function samples`);
-  setText("performix-agreement", `${performix.absolute_share_difference_pp.toFixed(2)} pp apart`);
-  setText("performix-linux-share", `Performix sample share vs ${performix.linux_perf_cycle_share_percent.toFixed(2)}% Linux perf cycle share`);
+  setText("performix-linux-share", `${performix.linux_perf_cycle_share_percent.toFixed(2)}%`);
   setText("performix-kernel", performix.kernel_family);
+  setText("performix-scope-note", performix.scope_note);
   setText("performix-capability-note", performix.pmu_capability_note);
   setText("queue-accuracy", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
   setText("queue-gain", `+${data.quality.guard_queue_gain_pp.toFixed(2)} percentage points`);
-}
-
-
-function renderRun(name, snapshot) {
-  setText(`${name}-completed`, `${snapshot.completed} / ${snapshot.total}`);
-  setText(`${name}-p95`, formatMs(snapshot.p95_ms));
-  setText(`${name}-breaches`, snapshot.breaches);
-  setText(`${name}-rps`, formatRps(snapshot.offered_rps));
-  elements[`${name}-progress`].style.width = `${(snapshot.completed / snapshot.total) * 100}%`;
-  elements[`${name}-status`].className = `run-status ${snapshot.slo_status}`;
-  setText(`${name}-status`, snapshot.slo_status);
-  const requestStrip = elements[`${name}-request-strip`];
-  requestStrip.replaceChildren();
-  snapshot.events.forEach((event) => {
-    const tile = document.createElement("span");
-    tile.className = `request-tile ${event.within_slo ? "within-slo" : "late"}`;
-    const request = document.createElement("span");
-    request.className = "request-copy";
-    request.textContent = event.source_text;
-    const outcome = document.createElement("strong");
-    outcome.className = "request-outcome";
-    outcome.textContent = `${formatMs(event.latency_ms)} · ${event.within_slo ? "on time" : "missed SLO"}`;
-    tile.append(request, outcome);
-    tile.title = `Request ${event.sequence}: ${formatMs(event.latency_ms)}`;
-    tile.setAttribute(
-      "aria-label",
-      `Request ${event.sequence}, ${formatMs(event.latency_ms)}, ${event.within_slo ? "within SLO" : "SLO breach"}`,
-    );
-    requestStrip.append(tile);
-  });
-  const latest = snapshot.events.at(-1);
+  setText("absolute-accuracy", `${data.quality.optimized_accuracy_percent.toFixed(2)}%`);
+  setText("reuse-action", `uses: ${data.provenance.release_action}`);
+  elements["reuse-action-copy"].dataset.copy = `uses: ${data.provenance.release_action}`;
   setText(
-    `${name}-event`,
-    latest
-      ? `#${String(latest.sequence).padStart(2, "0")} ${formatMs(latest.latency_ms)} · ${latest.source_text}`
-      : "Accepted run not loaded.",
+    "evidence-chain-counts",
+    `Verify ${evidence.sustained_checksummed_files} sustained and ${evidence.performix_checksummed_files} Performix checksummed evidence files.`,
   );
-}
-
-
-function renderReplay(progress) {
-  const snapshot = buildReplaySnapshot(data.replay, progress);
-  renderRun("baseline", snapshot.baseline);
-  renderRun("optimized", snapshot.optimized);
-  elements["replay-conclusion"].hidden = progress < 1;
-}
-
-
-function loadVerifiedExperiment() {
-  renderReplay(1);
-  elements["experiment-results"].hidden = false;
-  elements["load-experiment"].disabled = true;
-  elements["load-experiment"].textContent = "Verified experiment loaded";
-  elements["evidence-load-note"].textContent =
-    `Loaded the SHA-256 locked sustained audit plus the release and reproduction bundles (${data.provenance.evidence.total_checksummed_files} files); ${data.provenance.evidence.sustained_raw_confirmation_samples} raw requests were re-derived across ${data.provenance.evidence.sustained_raw_confirmation_files} long windows.`;
-  elements["evidence-loader"].classList.add("loaded");
-  elements["tab-surge"].classList.add("completed");
+  initializeLiveSlots();
 }
 
 
@@ -580,6 +877,9 @@ function bindInteractions() {
   elements["confirm-route"].addEventListener("click", () => review("confirm"));
   elements["correct-route"].addEventListener("click", () => review("correct"));
   elements["load-experiment"].addEventListener("click", loadVerifiedExperiment);
+  elements["surge-form"].addEventListener("submit", runLiveMiniSurge);
+  elements["preview-scaffold"].addEventListener("click", previewScaffold);
+  elements["tamper-check"].addEventListener("click", runTamperCheck);
   document.querySelectorAll('input[name="inference-mode"]').forEach((radio) => {
     radio.addEventListener("change", () => setInferenceMode(radio.value));
   });
@@ -607,42 +907,14 @@ async function main() {
     data = await response.json();
     workspace = createWorkspace(data);
     setText("demo-source", `${data.provenance.experiment_id} · ${data.provenance.machine} · sustained audit`);
-    setText("evidence-experiment-id", data.provenance.experiment_id);
-    setText(
-      "evidence-checksum-status",
-      `${data.provenance.evidence.sustained_checksummed_files} sustained + ${data.provenance.evidence.checksummed_files + data.provenance.evidence.reproduction_checksummed_files} supporting · ${data.provenance.evidence.checksum_verified && data.provenance.evidence.reproduction_checksum_verified && data.provenance.evidence.sustained_archive_verified && data.provenance.evidence.sustained_internal_checksums_verified ? "all ledgers verified" : "verification failed"}`,
-    );
-    setText(
-      "evidence-comparison",
-      data.provenance.evidence.comparison === "matched_control"
-        ? "Contract-matched INT4 treatments · KleidiAI overlay control differs"
-        : "Comparison unavailable",
-    );
-    setText("experiment-machine", data.proof.instance);
-    setText("equal-load-source", data.replay.source_experiment_id);
-    setText("absolute-accuracy", `${data.quality.optimized_accuracy_percent.toFixed(2)}%`);
     setText("workspace-mode", `${data.provenance.dataset} recorded output`);
     setText("rail-model", data.provenance.model);
     setText("intent-model-label", `${data.provenance.model} intent`);
-    setText("reuse-action", `uses: ${data.provenance.release_action}`);
-    elements["reuse-action-copy"].dataset.copy = `uses: ${data.provenance.release_action}`;
-    setText(
-      "proof-decision-title",
-      data.proof.decision === "PASS"
-        ? "Approved at the conservative Graviton boundary"
-        : "Blocked at the conservative Graviton boundary",
-    );
-    setText("proof-decision-status", data.proof.decision);
-    setText(
-      "evidence-chain-counts",
-      `Check the ${data.provenance.evidence.sustained_checksummed_files}-file sustained audit, ${data.provenance.evidence.checksummed_files + data.provenance.evidence.reproduction_checksummed_files}-file release history and ${data.provenance.evidence.performix_checksummed_files}-file native Performix bundle.`,
-    );
     populateCases();
     populateScenarios();
     renderWorkspace();
-    renderMixTable();
-    renderEvidenceSummary();
-    renderReplay(0);
+    renderRedesignEvidence();
+    renderProofDecision("recorded");
     bindInteractions();
     document.querySelectorAll("table[data-mobile-cards]").forEach(labelResponsiveTable);
     const initialView = HASH_TO_VIEW[location.hash.slice(1)] ?? "workspace";

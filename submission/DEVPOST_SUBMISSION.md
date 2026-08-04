@@ -14,7 +14,7 @@
 
 **Technical report:** https://qasimkhan5x.github.io/ArmProof/report/
 
-**Release:** https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.6.0
+**Release:** https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.7.0
 
 **Video:** ADD THE PUBLIC YOUTUBE OR VIMEO URL AFTER RECORDING
 
@@ -94,8 +94,8 @@ web application:
   five tests.
 
 This proves that the optimized service supports at least twice the sustainable
-traffic: 0.56 is twice 0.28. The two passing points are 2.33 times apart, but
-we do not claim that 2.33x is the exact maximum capacity.
+traffic: 0.56 is twice 0.28. We use the control's failing boundary in the
+equation so the published number remains a lower bound.
 
 Each long test ran for 500 seconds. In total, ArmProof checks 4,200 recorded
 request results across 20 long test windows.
@@ -106,7 +106,8 @@ ArmProof verifies the evidence before approving an optimized deployment. It:
 
 - checks that benchmark files have not been changed;
 - recalculates the results from the raw request records;
-- confirms the model, runtime, workload and server configuration;
+- checks the recorded model, runtime, workload and server identities against
+  the release contract;
 - checks that model quality stayed within the declared limit;
 - checks matched Linux perf and native Arm Performix evidence showing that
   Arm KleidiAI code executed; and
@@ -115,6 +116,8 @@ ArmProof verifies the evidence before approving an optimized deployment. It:
 Missing proof does not count as success. A failed or unknown required check
 blocks the release. ArmProof produces a machine-readable decision, a visual
 offline report, a pinned deployment recipe and a GitHub pull-request check.
+The demo also changes one byte in a temporary archive copy and shows the same
+integrity boundary block the release before any metric is calculated.
 
 ## What We Optimized
 
@@ -150,9 +153,9 @@ We then repeated the positive/negative test with Arm Performix 1.20 Code
 Hotspots. From its native profile exports, ArmProof measured 67.02% of
 function samples in `kai_*` code when KleidiAI was enabled and 0% when it was
 disabled. Performix also exposed the Arm I8MM matrix-kernel family that ran.
-Its result was only 1.51 percentage points from the separate Linux perf result.
-These tools count different things, so we do not present the percentages as
-identical metrics; they independently agree that the optimized Arm path ran.
+These tools count different things: Performix reports function samples, while
+Linux perf reports cycle attribution. Together they show the optimized Arm
+path executing from two independent profiler views.
 
 ### 3. More Useful Server Capacity
 
@@ -164,10 +167,12 @@ The optimized service passed every 0.56-request-per-second test. The control
 failed every 0.28-request-per-second test. This establishes the conservative
 "at least 2x" capacity result on the same server.
 
-We originally hoped to claim an exact 2.5x improvement. The long test did not
-support that statement because one higher-load run narrowly passed. ArmProof
-rejected the exact 2.5x claim, kept the failed result visible and released only
-the lower bound supported by every test.
+The next optimized probe, at 0.60 requests per second, passed only one of five
+windows. The interface shows that mixed row alongside the three stable
+boundaries and derives only the lower bound supported by every test.
+The preregistered exact 2.0x-2.5x bracket therefore failed and remains marked
+rejected. ArmProof releases a separately versioned, narrower claim: the
+evidence proves a lower bound of at least 2.0x, not an exact capacity interval.
 
 ## How We Built It
 
@@ -216,7 +221,6 @@ supported and completed successfully for the matched causal comparison.
 ## Accomplishments
 
 - At least 2x higher sustainable AI traffic on the same Graviton4 server.
-- A 2.33x difference between the two rates that passed every long test.
 - 1.72x to 2.59x faster execution with KleidiAI across four input shapes.
 - 35.92% smaller model files and more than 55% lower peak memory after the
   INT4 migration.
@@ -226,7 +230,7 @@ supported and completed successfully for the matched causal comparison.
   the optimized service and did not execute in the control.
 - A release-blocking native Performix importer with archive, checksum,
   treatment, target and contradiction checks.
-- A deliberate rejection of our original, stronger 2.5x claim.
+- A complete trial matrix that keeps mixed and failed boundary results visible.
 - A reusable Python command-line tool, GitHub Action, public data formats,
   benchmark templates, deployment recipe and offline report.
 - Automated testing on native Arm64, x86 and desktop/mobile browsers.
@@ -269,6 +273,8 @@ The repository includes:
 - a plain-English Performix tutorial and reusable native-export validator;
 - examples of pass, fail and missing evidence;
 - a GitHub Action and offline report;
+- a contract-digest input so branch-protected workflows can detect a pull
+  request that quietly weakens the quality or capacity policy;
 - a pinned Graviton deployment recipe;
 - a one-command adoption scaffold; and
 - a tested llama.cpp bridge.

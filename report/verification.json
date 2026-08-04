@@ -1,7 +1,7 @@
 {
-  "adapter": "kleidiai-capacity-v1",
+  "adapter": "kleidiai-sustained-v1",
   "checksums": {
-    "checked": 141,
+    "checked": 69,
     "mismatched": [],
     "missing": [],
     "passed": true
@@ -43,6 +43,26 @@
     },
     "evidence_source": "native_arm_performix_code_hotspots_exports",
     "experiment_id": "EXP-2026-010",
+    "identity_binding": {
+      "environment_ref": "AWS Graviton4 c8g.4xlarge, Ubuntu 24.04 Arm64, CPU-only, pinned runtime lock",
+      "machine": {
+        "architecture": "aarch64",
+        "bios_model_name": "AWS Graviton4 AWS Graviton4 CPU @ 2.8GHz",
+        "bios_vendor_id": "AWS",
+        "cpu_count": 16,
+        "model_name": "Neoverse-V2",
+        "vendor_id": "ARM"
+      },
+      "matched_environment": {
+        "OMP_NUM_THREADS": "16",
+        "OMP_PLACES": "cores",
+        "OMP_PROC_BIND": "close"
+      },
+      "model_ref": "microsoft/Phi-4-mini-instruct-onnx@fc04c8f93df696602fd9f300a30d1bf2e3081347#cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4",
+      "runtime_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
+      "uname": "Linux ip-172-31-35-11 6.17.0-1019-aws #19~24.04.1-Ubuntu SMP Tue Jun 23 18:34:05 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux",
+      "workload_ref": "data/banking77/generated/traffic-mixed.jsonl"
+    },
     "internal_checksums": {
       "checked": 35,
       "passed": true
@@ -52,11 +72,6 @@
     "passed": true,
     "schema_version": "1.0.0"
   },
-  "reproduction_checksums": {
-    "checked": 141,
-    "mismatched": [],
-    "missing": [],
-    "passed": true
-  },
+  "reproduction_checksums": null,
   "schema_version": "1.0.0"
 }

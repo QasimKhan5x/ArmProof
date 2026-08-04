@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import sys
@@ -98,6 +99,7 @@ def build_parser() -> argparse.ArgumentParser:
     ci = subparsers.add_parser("ci", help="evaluate and report from one ArmProof config")
     ci.add_argument("config", type=Path)
     ci.add_argument("--output", type=Path)
+    ci.add_argument("--contract-sha256")
     return parser
 
 
@@ -185,6 +187,15 @@ def _run_ci(args: argparse.Namespace) -> int:
             raise ValueError("config evidence must declare an adapter")
         base = args.config.resolve().parent
         contract_path = base / config["contract"]
+        if args.contract_sha256 is not None:
+            expected_contract_sha256 = args.contract_sha256
+            if (
+                len(expected_contract_sha256) != 64
+                or any(char not in "0123456789abcdef" for char in expected_contract_sha256)
+                or hashlib.sha256(contract_path.read_bytes()).hexdigest()
+                != expected_contract_sha256
+            ):
+                raise ValueError("contract SHA-256 does not match the protected policy digest")
         contract = parse_contract(_json_object(contract_path))
         verified = get_evidence_adapter(adapter_id).verify(
             contract, evidence_config, base

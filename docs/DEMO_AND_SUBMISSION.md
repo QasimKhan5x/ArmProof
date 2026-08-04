@@ -25,7 +25,7 @@ Graviton benchmark live.
 ## Submission Claim Rules
 
 - Every number names its comparison and environment.
-- Label endpoint output live only when a trusted Graviton endpoint is active.
+- Label endpoint output live only when the gateway has verified the Arm64 runtime identity.
 - Say "verified by ArmProof," never "Arm certified."
 - Queue quality is 86.75%; 77-intent quality is 46.49%; human confirmation is
   mandatory and visible.

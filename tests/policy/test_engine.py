@@ -55,6 +55,33 @@ class PolicyEngineTests(unittest.TestCase):
         self.assertEqual(decision.claims[0].status.value, "pass")
         self.assertEqual(decision.claims[0].reason_code, "threshold_met")
 
+    def test_runtime_neutral_arm_control_is_supported(self) -> None:
+        baseline = identity(False)
+        treatment = identity(True)
+        observed = comparison(
+            baseline=TreatmentIdentity(
+                **{
+                    **baseline.__dict__,
+                    "controls": {
+                        "armproof.arm_acceleration_enabled": False,
+                        "threads": 16,
+                        "extra": "same",
+                    },
+                }
+            ),
+            treatment=TreatmentIdentity(
+                **{
+                    **treatment.__dict__,
+                    "controls": {
+                        "armproof.arm_acceleration_enabled": True,
+                        "threads": 16,
+                        "extra": "same",
+                    },
+                }
+            ),
+        )
+        self.assertTrue(evaluate_claims([claim()], [observed]).passed)
+
     def test_missing_attribution_is_unknown_and_fails_contract(self) -> None:
         observed = comparison(arm_path_treatment_observed=None)
         decision = evaluate_claims([claim()], [observed])

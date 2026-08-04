@@ -12,6 +12,9 @@ inputs:
     description: Directory for decision JSON and the offline evidence report
     required: false
     default: armproof-report
+  contract-sha256:
+    description: Protected SHA-256 of the preregistered claim contract
+    required: true
 
 outputs:
   decision:
@@ -34,10 +37,12 @@ runs:
       env:
         ARMPROOF_CONFIG: ${{ inputs.config }}
         ARMPROOF_OUTPUT: ${{ inputs.output }}
+        ARMPROOF_CONTRACT_SHA256: ${{ inputs.contract-sha256 }}
       run: |
         mkdir -p "$ARMPROOF_OUTPUT"
         set +e
-        armproof ci "$ARMPROOF_CONFIG" --output "$ARMPROOF_OUTPUT"
+        armproof ci "$ARMPROOF_CONFIG" --output "$ARMPROOF_OUTPUT" \
+          --contract-sha256 "$ARMPROOF_CONTRACT_SHA256"
         gate_status=$?
         set -e
 

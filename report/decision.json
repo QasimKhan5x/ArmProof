@@ -22,18 +22,25 @@
       "threshold": 0.99
     },
     {
-      "claim_id": "quality-operational-queue",
-      "observed": 0.8675324675324675,
+      "claim_id": "sustained-capacity-lower-bound",
+      "observed": 2.0,
       "reason_code": "threshold_met",
       "status": "pass",
-      "threshold": 0.85
+      "threshold": 2.0
     },
     {
-      "claim_id": "cloud-capacity",
-      "observed": 2.5,
+      "claim_id": "sustained-window-count",
+      "observed": 20.0,
       "reason_code": "threshold_met",
       "status": "pass",
-      "threshold": 1.5
+      "threshold": 20.0
+    },
+    {
+      "claim_id": "sustained-request-count",
+      "observed": 4200.0,
+      "reason_code": "threshold_met",
+      "status": "pass",
+      "threshold": 4200.0
     },
     {
       "claim_id": "arm-execution",
@@ -44,17 +51,17 @@
     },
     {
       "claim_id": "arm-cycle-attribution",
-      "observed": 0.6835,
+      "observed": 0.6853,
       "reason_code": "threshold_met",
       "status": "pass",
       "threshold": 0.5
     },
     {
-      "claim_id": "fresh-instance-confirmation",
+      "claim_id": "perf-sample-integrity",
       "observed": 0.0,
       "reason_code": "threshold_met",
       "status": "pass",
-      "threshold": 0.1
+      "threshold": 0.0
     }
   ],
   "passed": true,

@@ -20,11 +20,10 @@
 
 SurgeDesk is a human-confirmed banking-support triage application that shows
 what a measured Arm optimization changes in a real cloud workflow. During a
-recorded support surge, the same Phi-4 Mini INT4 service on the same AWS
+measured support workload, the same Phi-4 Mini INT4 service on the same AWS
 Graviton4 instance sustains **at least 2x more mixed traffic** with KleidiAI
 enabled while remaining under its 10-second p95 objective. The tested passing
-points are `0.24` versus `0.56 r/s`, a 2.33x ratio, across five 500-second
-confirmations per boundary.
+and failing boundaries come from five 500-second confirmations per rate.
 
 A dependency-free queue guard raises held-out five-destination routing accuracy from
 74.42% for direct LLM mapping to **86.75%** while retaining Phi-4 Mini for the
@@ -38,7 +37,7 @@ that the change:
 - preserves the workload's declared quality contract;
 - improves its declared cloud-serving objective;
 - executes the required Arm acceleration path; and
-- can be reproduced from pinned artifacts and commands.
+- can be recomputed from pinned evidence, artifacts and commands.
 
 The reference path migrates Phi-4 Mini from PyTorch BF16 to INT4 ONNX Runtime
 GenAI with KleidiAI on AWS Graviton4. Existing experiments have already shown:
@@ -49,16 +48,16 @@ GenAI with KleidiAI on AWS Graviton4. Existing experiments have already shown:
   the identical INT4 model and runtime;
 - 20/24 versus 19/24 quality results; and
 - `kai_*` callchains only in the enabled treatment.
-- Arm Performix independently measured 67.02% `kai_*` function samples in the
-  enabled treatment and 0% disabled, within 1.51 percentage points of the
-  Linux perf attribution.
+- Arm Performix measured 67.02% `kai_*` function samples in the enabled
+  treatment and 0% disabled. Linux perf separately attributed 68.53% of cycles
+  to the KleidiAI callchain.
 
-Short discovery runs initially suggested 2.5x-3.0x capacity. The decisive
-long-window audit correctly rejected that exact bracket: `0.60 r/s` passed one
-of five optimized windows. It still established the conservative result used
-publicly: baseline `0.24 r/s` and optimized `0.56 r/s` passed all five windows,
-while baseline `0.28 r/s` failed all five. Therefore the sustainable-capacity
-improvement is at least `0.56 / 0.28 = 2.0x`; it is not labeled an exact maximum.
+The long-window audit exposes every boundary result. The preregistered exact
+`2.0x-2.5x` bracket was rejected because the optimized `0.60 r/s` probe passed
+one of five windows. The optimized service passed all five windows at `0.56 r/s`, while the
+baseline failed all five at `0.28 r/s`. Therefore the sustainable-capacity
+improvement supports a separate, narrower claim of at least
+`0.56 / 0.28 = 2.0x`.
 
 ## Run The Product Demo
 
@@ -69,11 +68,11 @@ python3.12 scripts/serve_surgedesk.py --port 8765
 
 Open `http://127.0.0.1:8765/surgedesk/`. The three-step judge path is:
 
-1. Use **Guard intervention** and **Human correction** to inspect both sides of
-   the human-confirmed BANKING77 routing boundary.
-2. Inspect the equal-load customer outcome, then reveal the long-window lower bound.
-3. Inspect the matched Arm Performix execution, quality, reproduction and
-   deployment proof.
+1. Send a support request through the human-confirmed triage workflow.
+2. Hand the deployment to the capacity audit and check two matched live Arm
+   lanes without treating the short request check as a benchmark.
+3. Re-verify the 4,200 sustained outcomes, inspect all twenty long windows, and
+   open the Arm execution proof.
 
 Each view has a stable URL: `#triage`, `#surge`, and `#proof`. The tabs support
 Left/Right Arrow navigation, and every evidence table becomes a labeled card
@@ -85,8 +84,9 @@ visible product requirement. To record a real Graviton request, tunnel the
 measured service locally and start the gateway with:
 
 ```bash
-SURGEDESK_INFERENCE_ENDPOINT=http://127.0.0.1:8000/infer \
-  python3.12 scripts/serve_surgedesk.py --port 8765
+python3.12 scripts/serve_surgedesk.py --port 8765 \
+  --baseline-endpoint http://127.0.0.1:18001/infer \
+  --optimized-endpoint http://127.0.0.1:18002/infer
 ```
 
 ## Product Workflow
@@ -116,9 +116,8 @@ python3.12 -m venv .venv
 .venv/bin/armproof ci examples/armproof-reference/armproof.json
 ```
 
-The reference command verifies 317 files across the primary, reproduction and
-native Arm Performix bundles,
-derives the normalized comparison from request and quality evidence, binds it
+The reference command verifies 69 checksummed files in the sustained archive
+and 35 in the native Arm Performix bundle, re-derives 4,200 request outcomes, binds them
 to the declared identities, and writes `decision.json`, `verification.json`
 and an offline report. Exit `0` approves, exit `2` blocks on a failed or
 unknown required claim, and exit `1` identifies invalid evidence.
@@ -129,22 +128,25 @@ Demonstrate the trust boundary without altering repository evidence:
 python3.12 scripts/demo_release_gate.py
 ```
 
-It first passes all eight claims and the mandatory Performix attribution, then
-changes one digest in a temporary ledger
-and shows the release blocked before policy evaluation.
+It passes all nine claims from the sustained archive, then alters a temporary
+archive copy and shows the release blocked before metric derivation.
 
 Use the same config in GitHub Actions:
 
 ```yaml
-- uses: QasimKhan5x/ArmProof@v0.6.0
+- uses: QasimKhan5x/ArmProof@v0.7.0
   with:
     config: armproof.json
     output: build/armproof-report
+    contract-sha256: 3dea0ec2062275181902907d011d27d2b83b11b3ea2e9f8ed5cbce38ede9ff0c
 ```
+
+Protect the workflow and contract with `CODEOWNERS` and branch rules. The
+Action checks the preregistered contract digest before it reads any evidence.
 
 ## Scaffold Another Arm Service
 
-Create a runtime-neutral, fail-closed starter for any bounded HTTP inference
+Create a runtime-neutral, fail-closed starter for a bounded HTTP classification
 endpoint:
 
 ```bash
@@ -157,7 +159,9 @@ cd my-arm-service
 ```
 
 The command creates a versioned contract, workload template, identity sources,
-collection plan, adoption checklist, `armproof.json` and GitHub workflow. It
+collection plan, adoption checklist, `armproof.json` and GitHub workflow. Its
+built-in quality profile uses exact-label classification; other tasks can add
+an evidence adapter through the documented plugin interface. It
 does **not** generate passing evidence. `armproof ci armproof.json` fails closed
 until real request rows, profiler output, observed identities and a SHA-256
 ledger replace the templates. The complete executable evidence shape is in
@@ -175,19 +179,19 @@ PYTHONPATH=src python3.12 -m armproof.cli ci \
   examples/armproof-reference/armproof.json
 ```
 
-The primary and fresh-instance confirmation bundles each contain 141 checksummed files
-and verify after relocation. Browser tests cover the complete SurgeDesk workflow plus ArmProof
-report layouts down to 320 pixels.
+The canonical sustained bundle contains 69 checksummed files and the native
+Performix bundle contains 35. Both verify after relocation. Browser tests cover
+the complete SurgeDesk workflow plus ArmProof report layouts down to 320 pixels.
 
-The reference gate also verifies a SHA-256 locked 35-file Arm Performix bundle,
+The reference gate also verifies a SHA-256 locked Arm Performix bundle with 35 checksummed files,
 recomputes matched Code Hotspots attribution from its native ZIP exports and
 blocks if either run is missing, mismatched or contradicts Linux perf.
 
-SurgeDesk additionally verifies the SHA-256 locked `EXP-2026-009` sustained
-archive and derives the conservative public capacity claim from its recorded
-confirmation rows. The failed original 2.5x bracket remains visible in the app.
+SurgeDesk verifies the SHA-256 locked `EXP-2026-009` sustained archive and
+derives the conservative public capacity claim from its recorded confirmation
+rows. Its trial matrix shows every passing, failing, and mixed boundary result.
 
-For a runtime-neutral starting point, the executable
+For a runtime-neutral HTTP-classification starting point, the executable
 [`examples/http-slo/`](examples/http-slo/) kit generates a complete raw-evidence
 layout, observed identities, contract, report and Action template. External
 adapters are discovered through Python entry points and listed by
@@ -220,4 +224,8 @@ ArmProof is not an Arm certification authority and its repository checksum
 ledgers are integrity controls, not independent attestation of the evidence
 producer. It evaluates a declared contract for a pinned model, workload,
 runtime and machine. User-facing copy must say "verified by ArmProof," never
-"Arm certified."
+"Arm certified." The 4.9 GB reference model is not stored in Git; the sustained
+archive preserves the model digest computed by the evidence producer, while
+the live service hashes its local model files at startup. ArmProof detects
+later evidence changes and inconsistent identities but does not remotely
+attest the original AWS host.

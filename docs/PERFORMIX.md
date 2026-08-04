@@ -74,3 +74,8 @@ and supplies the execution attribution required by the release contract.
 No additional AWS run is needed to validate the checked-in evidence. The two
 Performix sessions cost an estimated USD 0.1521 combined, and both final AWS
 inventories were empty.
+`EXP-2026-010` originally required a broader set of Performix recipes and was
+rejected when the VM exposed too few PMU counters for all of them. ArmProof does
+not relabel that experiment as accepted. The release gate consumes only the
+completed, matched Code Hotspots control/treatment pair for the narrower claim
+that the optimized service executed the KleidiAI path.

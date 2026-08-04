@@ -44,11 +44,12 @@ class CiCommandTests(unittest.TestCase):
             workflow = (output / ".github/workflows/armproof.yml").read_text(
                 encoding="utf-8"
             )
-            self.assertIn("QasimKhan5x/ArmProof@v0.6.0", workflow)
+            self.assertIn("QasimKhan5x/ArmProof@v0.7.0", workflow)
 
             with redirect_stderr(io.StringIO()) as stderr:
                 self.assertEqual(main(["ci", str(output / "armproof.json")]), 1)
-            self.assertIn("evidence", stderr.getvalue())
+            self.assertIn("No measured evidence found", stderr.getvalue())
+            self.assertIn("ADOPTION_CHECKLIST.md", stderr.getvalue())
 
     def test_init_refuses_to_overwrite_an_existing_directory(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -101,18 +102,15 @@ class CiCommandTests(unittest.TestCase):
                 (output / "comparison.json").read_text(encoding="utf-8")
             )
             self.assertEqual(comparison["baseline"]["treatment_id"], "kleidiai-disabled")
-            self.assertEqual(comparison["metrics"]["minimum_capacity_ratio"], 2.5)
+            self.assertEqual(comparison["metrics"]["minimum_capacity_ratio"], 2.0)
             receipt = json.loads(
                 (output / "verification.json").read_text(encoding="utf-8")
             )
-            self.assertEqual(receipt["checksums"]["checked"], 141)
-            self.assertEqual(receipt["reproduction_checksums"]["checked"], 141)
+            self.assertEqual(receipt["checksums"]["checked"], 69)
+            self.assertIsNone(receipt["reproduction_checksums"])
             self.assertEqual(receipt["comparison_source"], "derived_from_raw_evidence")
             self.assertTrue(receipt["performix"]["passed"])
-            self.assertEqual(
-                receipt["performix"]["evidence_source"],
-                "native_arm_performix_code_hotspots_exports",
-            )
+            self.assertEqual(receipt["performix"]["evidence_source"], "native_arm_performix_code_hotspots_exports")
             self.assertEqual(receipt["performix"]["disabled"]["kai_sample_share"], 0.0)
             self.assertAlmostEqual(
                 receipt["performix"]["enabled"]["kai_sample_share"],
@@ -134,20 +132,12 @@ class CiCommandTests(unittest.TestCase):
                 missing[field] = str(
                     (ROOT / "examples/armproof-reference" / missing[field]).resolve()
                 )
-            for field in ("root", "checksums", "workload_manifest"):
+            for field in ("archive", "workload_manifest"):
                 missing["evidence"][field] = str(
                     (
                         ROOT
                         / "examples/armproof-reference"
                         / missing["evidence"][field]
-                    ).resolve()
-                )
-            for field in ("root", "checksums"):
-                missing["evidence"]["reproduction"][field] = str(
-                    (
-                        ROOT
-                        / "examples/armproof-reference"
-                        / missing["evidence"]["reproduction"][field]
                     ).resolve()
                 )
             del missing["evidence"]["performix"]
@@ -163,17 +153,9 @@ class CiCommandTests(unittest.TestCase):
                     (ROOT / "examples/armproof-reference" / tampered[field]).resolve()
                 )
             evidence = tampered["evidence"]
-            for field in ("root", "checksums", "workload_manifest"):
+            for field in ("archive", "workload_manifest"):
                 evidence[field] = str(
                     (ROOT / "examples/armproof-reference" / evidence[field]).resolve()
-                )
-            for field in ("root", "checksums"):
-                evidence["reproduction"][field] = str(
-                    (
-                        ROOT
-                        / "examples/armproof-reference"
-                        / evidence["reproduction"][field]
-                    ).resolve()
                 )
             evidence["performix"]["archive"] = str(
                 (
@@ -188,6 +170,15 @@ class CiCommandTests(unittest.TestCase):
             with redirect_stderr(io.StringIO()) as stderr:
                 self.assertEqual(main(["ci", str(tampered_path)]), 1)
             self.assertIn("Performix archive SHA-256 mismatch", stderr.getvalue())
+
+    def test_ci_rejects_a_changed_preregistered_contract_digest(self) -> None:
+        config = ROOT / "examples/armproof-reference/armproof.json"
+        with redirect_stderr(io.StringIO()) as stderr:
+            status = main([
+                "ci", str(config), "--contract-sha256", "0" * 64,
+            ])
+        self.assertEqual(status, 1)
+        self.assertIn("protected policy digest", stderr.getvalue())
 
     def test_ci_rejects_checksum_tampering(self) -> None:
         reference = ROOT / "ops/evidence/EXP-2026-004/accepted/evidence"
@@ -242,7 +233,7 @@ class CiCommandTests(unittest.TestCase):
             config = self._write_config(root)
             payload = json.loads(config.read_text(encoding="utf-8"))
             payload["comparisons"] = [
-                str(ROOT / "examples/armproof-reference/comparison.json")
+                str(ROOT / "examples/fixture-pass/comparison.json")
             ]
             config.write_text(json.dumps(payload), encoding="utf-8")
             with redirect_stderr(io.StringIO()):

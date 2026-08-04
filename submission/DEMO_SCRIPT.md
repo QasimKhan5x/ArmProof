@@ -1,66 +1,60 @@
-# Three-Minute Demo: Setup, Recording Script And Cleanup
+# SurgeDesk Three-Minute Demo
 
-Target duration: **2:50-2:58**. Speak conversationally and leave a short pause
-after each result. The script is short enough to accommodate clicks within the
-three-minute limit.
+This is the complete setup, recording, and cleanup runbook. The video stays in
+one browser window. Its two live moments are six matched Graviton requests and
+a fresh ArmProof audit of the sustained evidence archive.
 
-Run every command from the repository root unless a step says **Graviton**.
-This is the only runbook needed to record the video.
+Target recording length: **2:45 to 2:58**.
 
-## What Happens Live
+## 1. Validate The Repository
 
-The terminal sends one banking request concurrently to two warm services on the
-same Graviton4 instance. Cores `0-7` run the KleidiAI-disabled control and cores
-`8-15` run the KleidiAI-enabled treatment. This request makes the optimization
-visible, while the capacity claim comes from the loaded `EXP-2026-009` audit:
-twenty 500-second confirmation windows and 4,200 recorded requests.
-
-## 1. Check The Local Demo
-
-From the repository root, verify the comparison client and release-gate demo:
+Run from the repository root on the recording Mac:
 
 ```bash
-PYTHONPATH=src python3.12 -m unittest \
-  tests.test_demo_live_compare tests.test_demo_release_gate -v
-python3.12 scripts/demo_release_gate.py
+PYTHONPATH=src python3.12 -m unittest discover -s tests
+npm run test:logic
 ```
 
-Expected final output:
+Expected ending:
 
 ```text
 OK
-PASS    8/8 claims from 317 verified files
-TAMPER  replaced one digest in a temporary copy of the primary ledger
-BLOCK   release refused before policy evaluation: checksum mismatch
+# pass 4
+# fail 0
 ```
 
-The unit test uses temporary local endpoints and validates orchestration only.
-
-## 2. Prepare The Graviton Host
-
-Use one Ubuntu 24.04 Arm64 `c8g.4xlarge` and record its public hostname and EC2
-instance ID. The instance needs the repository, the pinned Arm64 runtime bundle
-used by the experiments, and outbound access to Hugging Face. The runtime bundle
-is not committed because it contains 45 MB of built wheels.
-
-If both Graviton services are already prepared and warm, skip to step 4.
-
-On the **recording machine**, set these values and upload the bundle:
+The canonical release check should report the same result shown in SurgeDesk:
 
 ```bash
-export GRAVITON_HOST=ubuntu@YOUR_GRAVITON_HOST
+python3.12 scripts/demo_release_gate.py
+```
+
+Expected output:
+
+```text
+PASS    9/9 claims from 4,200 raw request outcomes
+RELEASE at least 2.00x sustainable capacity
+BLOCK   altered archive refused before derivation
+```
+
+## 2. Prepare One Graviton4 Instance
+
+Use an Ubuntu 24.04 Arm64 `c8g.4xlarge` in `us-east-1`. Set the values returned
+by EC2, then upload the pinned runtime bundle already present beside this repo:
+
+```bash
+export GRAVITON_HOST=ubuntu@YOUR_PUBLIC_DNS_NAME
 export INSTANCE_ID=i-YOUR_INSTANCE_ID
-export RUNTIME_BUNDLE=/absolute/path/to/runtime-checkpoints.tar.gz
+export RUNTIME_BUNDLE="$(cd .. && pwd)/result-first-bakeoff/evidence/checkpoints/runtime-checkpoints.tar.gz"
 
 test -f "$RUNTIME_BUNDLE"
 ssh "$GRAVITON_HOST" 'uname -m'
 scp "$RUNTIME_BUNDLE" "$GRAVITON_HOST:~/runtime-checkpoints.tar.gz"
 ```
 
-Expected result: SSH prints `aarch64`, then `scp` reaches `100%` and returns to
-the prompt.
+Expected: `uname -m` prints `aarch64` and `scp` reaches `100%`.
 
-On **Graviton**, install the pinned runtime and download the pinned model:
+On the Graviton host:
 
 ```bash
 if [ -d ~/ArmProof/.git ]; then
@@ -94,22 +88,15 @@ PYTHONPATH=src ~/armproof-venv/bin/python scripts/prepare_phi4_variants.py \
   --threads 8
 ```
 
-Expected results:
+Expected: every `sha256sum` row ends in `OK`, and
+`~/models/armproof-variants` contains `kleidiai-disabled` and
+`kleidiai-enabled`.
 
-- every line from `sha256sum` ends in `OK`;
-- the Hugging Face command finishes with files under `~/models/onnx-repo`;
-- variant preparation returns silently with exit code zero and creates
-  `kleidiai-disabled` and `kleidiai-enabled`.
+## 3. Start The Matched Services
 
-If `~/models/armproof-variants` already exists from a successful preparation,
-skip the final command rather than overwriting it.
+Open two SSH terminals and leave both commands running.
 
-## 3. Start Both Graviton Services
-
-Open two SSH terminals. These commands load the model and then remain silent
-while serving requests; leave both terminals open.
-
-In **Graviton terminal A**, start the disabled control:
+Graviton terminal A, cores `0-7`:
 
 ```bash
 cd ~/ArmProof
@@ -117,11 +104,11 @@ taskset -c 0-7 env OMP_NUM_THREADS=8 PYTHONPATH=src \
   ~/armproof-venv/bin/python -m armproof.reference.phi4 \
   --backend ort-int4 \
   --model ~/models/armproof-variants/kleidiai-disabled \
-  --label ort-int4-kleidiai-disabled \
+  --label kleidiai-disabled \
   --port 8001 --threads 8 --max-inflight 1
 ```
 
-In **Graviton terminal B**, start the enabled treatment:
+Graviton terminal B, cores `8-15`:
 
 ```bash
 cd ~/ArmProof
@@ -129,14 +116,13 @@ taskset -c 8-15 env OMP_NUM_THREADS=8 PYTHONPATH=src \
   ~/armproof-venv/bin/python -m armproof.reference.phi4 \
   --backend ort-int4 \
   --model ~/models/armproof-variants/kleidiai-enabled \
-  --label ort-int4-kleidiai-enabled \
+  --label kleidiai-enabled \
   --port 8002 --threads 8 --max-inflight 1
 ```
 
-## 4. Open The Tunnel And Verify Both Services
+## 4. Connect The Browser
 
-In a third terminal on the **recording machine**, open the SSH tunnel and leave
-it running:
+Open an SSH tunnel on the recording Mac and leave it running:
 
 ```bash
 ssh -N \
@@ -145,26 +131,23 @@ ssh -N \
   "$GRAVITON_HOST"
 ```
 
-The tunnel prints nothing when healthy. In a fourth local terminal, verify the
-two backend labels:
+In another local terminal, inspect both runtime identities:
 
 ```bash
-curl -s http://127.0.0.1:18001/health
-echo
-curl -s http://127.0.0.1:18002/health
-echo
+curl -s http://127.0.0.1:18001/health | jq '{backend,architecture,cpu_affinity,runtime,runtime_version,model_identity,optimization_control,threads}'
+curl -s http://127.0.0.1:18002/health | jq '{backend,architecture,cpu_affinity,runtime,runtime_version,model_identity,optimization_control,threads}'
 ```
 
-Expected output:
+Expected: both rows show the same 64-character `model_identity`, runtime
+version, and eight threads. Their affinity lists are disjoint, and the only
+configuration difference is the declared control:
 
 ```json
-{"ready":true,"backend":"ort-int4-kleidiai-disabled"}
-{"ready":true,"backend":"ort-int4-kleidiai-enabled"}
+{"backend":"kleidiai-disabled","architecture":"aarch64","cpu_affinity":[0,1,2,3,4,5,6,7],"runtime":"onnxruntime-genai","model_identity":"<same digest>","optimization_control":{"mlas.disable_kleidiai":"1"},"threads":8}
+{"backend":"kleidiai-enabled","architecture":"aarch64","cpu_affinity":[8,9,10,11,12,13,14,15],"runtime":"onnxruntime-genai","model_identity":"<same digest>","optimization_control":{"mlas.disable_kleidiai":"0"},"threads":8}
 ```
 
-## 5. Warm The Endpoints And Start SurgeDesk
-
-Run the comparison once before recording:
+Warm both models once:
 
 ```bash
 python3.12 scripts/demo_live_compare.py \
@@ -172,192 +155,160 @@ python3.12 scripts/demo_live_compare.py \
   --optimized-endpoint http://127.0.0.1:18002/infer
 ```
 
-The times and ratio vary, and the two backend rows may appear in either order,
-but both labels and the final capacity line must match:
+Both backend names must appear. The individual latency ratio can vary because
+this is one warm-up request.
 
-```text
-LIVE ILLUSTRATION - NOT CAPACITY EVIDENCE
-Same request: i have not received my card
-  KleidiAI enabled    <time> s  backend=ort-int4-kleidiai-enabled
-  KleidiAI disabled   <time> s  backend=ort-int4-kleidiai-disabled
-Illustrative request ratio: <ratio>x
-Capacity claim: use EXP-2026-009 sustained evidence (>=2.0x).
-```
-
-Do not record if either label is missing or swapped. Start the local UI in a
-fifth terminal:
+Start the demo gateway:
 
 ```bash
-python3.12 scripts/serve_surgedesk.py --port 8765
+python3.12 scripts/serve_surgedesk.py \
+  --port 8765 \
+  --baseline-endpoint http://127.0.0.1:18001/infer \
+  --optimized-endpoint http://127.0.0.1:18002/infer
 ```
 
-Expected output:
+Expected:
 
 ```text
 SurgeDesk: http://127.0.0.1:8765/surgedesk/
-Live inference: disabled
+Live route: configured; enabled after runtime identity probe
+Matched request check: configured; enabled after matched identity probes
 ```
 
-The disabled message is correct: the video uses the two live endpoints in the
-terminal and SHA-256-locked evidence in the browser.
+Open [http://127.0.0.1:8765/surgedesk/](http://127.0.0.1:8765/surgedesk/).
+At 100% zoom, confirm that **Live matched Arm64 endpoint** is selectable and the
+capacity tab says **Matched Arm endpoints connected**.
 
-## 6. Stage The Recording
+## 5. Stage The Browser
 
-1. Open `http://127.0.0.1:8765/surgedesk/#triage` at 100% zoom.
-2. Select **Guard intervention** and leave the page at the first viewport.
-3. Clear the terminal used for the warm-up and paste, without running, the
-   `demo_live_compare.py` command from step 5.
-4. In another clear terminal, paste `python3.12 scripts/demo_release_gate.py`
-   without running it.
-5. Arrange the browser and terminal so switching between them takes one click.
-6. Hide notifications and bookmarks, then start recording.
+1. Open **1. Support workflow** and select **Live matched Arm64 endpoint**.
+2. Enter: `My card was stolen and I need it frozen now`.
+3. Leave the request unsubmitted.
+4. Close unrelated tabs, hide notifications, and start recording.
 
-## 7. Record The Video
+## 6. Record The Video
 
-### 0:00-0:15 - Hook
+### 0:00-0:12
 
-**Show:** SurgeDesk first viewport.
+**Show:** The live request ready in SurgeDesk.
 
 **Say:**
 
-> SurgeDesk runs a Phi-4 Mini INT4 banking-support service on Graviton4.
-> Enabling Arm KleidiAI lets the same server handle at least twice the traffic,
-> and I will show the workflow, benchmark and release evidence behind that
-> result.
+> SurgeDesk is a banking-support triage service running Phi-4 Mini INT4 on one
+> Graviton4 server. I’ll route one live request, then show exactly why the
+> optimized service was approved for more traffic.
 
-### 0:15-0:35 - Live Illustration
+### 0:12-0:32
 
-**Do:** Run `demo_live_compare.py`. Let the enabled completion print first.
-
-**Say:**
-
-> Here, the same customer message goes to two live endpoints with identical
-> model and runtime settings. KleidiAI is the only change, and the optimized
-> endpoint finishes first; the sustained benchmark will show whether that lead
-> holds under traffic.
-
-### 0:35-0:55 - User Workflow
-
-**Do:** Return to SurgeDesk, click **Load model suggestion**, point to the two
-queues, then click **Confirm route**.
+**Do:** Click **Run live route**. When the suggestion appears, point briefly to
+the live backend and queue, then click **Confirm route** and **Open platform
+capacity audit**.
 
 **Say:**
 
-> The model initially sends this missing-card case to security, but the routing
-> guard corrects it to cards and payments. Across 770 unseen messages, the guard
-> raises accuracy by 12.34 points before the agent reviews and confirms the
-> suggestion.
+> The model proposes the issue and procedure, a small routing guard chooses the
+> security queue, and the support agent confirms the action. Now I’m handing the
+> deployment question to the platform engineer.
 
-### 0:55-1:42 - Sustained Arm Result
+### 0:32-0:55
 
-**Do:** Open **2. Arm result**, click **Load verified experiment**, then point
-to the blocked claim, proven lower bound and equal-load outcomes.
-
-**Say:**
-
-> The benchmark measures how many banking messages one server can process while
-> keeping p95 response time under ten seconds with no errors. At each traffic
-> rate, we ran five 500-second trials. The baseline passed all five at 0.24
-> requests per second but failed all five at 0.28, while the optimized service
-> passed all five at 0.56. Since the baseline cannot sustain 0.28 while the
-> optimized service sustains 0.56, the capacity gain is at least two times.
->
-> The original test plan included a 0.60-request-per-second probe for the optimized
-> service and a 0.24 passing point for the baseline. Dividing those rates gives the
-> 2.5-times upper-bound estimate shown here. ArmProof then reprocessed all 4,200
-> request records and found that the 0.60 probe passed one of its five long windows,
-> so it was not a consistent failure boundary and could not support that estimate.
-> The released claim uses two boundaries that agreed in every run: the optimized
-> service passed five out of five windows at 0.56, while the baseline failed five
-> out of five at 0.28. Dividing 0.56 by 0.28 establishes at least twice the
-> sustainable capacity.
-
-### 1:42-2:20 - Prove Arm Caused It
-
-**Do:** Open **3. Release proof**. Point first to **Core causal experiment**,
-then the claim ledger and optimization path.
+**Do:** On **2. Capacity audit**, leave the same customer message in place and
+click **Run matched request check**. Let all six tiles finish.
 
 **Say:**
 
-> To check that the gain came from Arm-optimized execution, Performix profiled
-> otherwise identical enabled and disabled runs. It found zero KleidiAI samples
-> when disabled, compared with 67.02 percent in the Neoverse I8MM matrix kernel
-> when enabled. Linux perf independently attributed 68.53 percent of CPU cycles
-> to the same call chain, and ArmProof validates both profiles during CI.
-> Separately, INT4 reduced model size by 35.92 percent and peak memory by 55.34
-> percent while accuracy remained within one point.
+> Each service hashed its local model files at startup. The gateway has matched
+> those hashes, the ONNX Runtime version and eight threads per lane, while
+> keeping their CPU affinities disjoint. It checks the identity again on every
+> response. This short request check proves the live setup. The long audit below
+> carries the capacity claim.
 
-### 2:20-2:46 - Reusable Developer Artifact
+### 0:55-1:35
 
-**Do:** Run `demo_release_gate.py`. Point to `PASS`, `TAMPER`, `BLOCK`, then
-show the `armproof init` command in the adoption panel or README.
+**Do:** Click **Verify measured experiment**. Wait for the audit to finish,
+then point to the four completed checks, the trial rows and the equation.
 
 **Say:**
 
-> ArmProof first validates eight claims from 317 request logs, summaries and
-> profiler files. I then replace one SHA-256 fingerprint in the experiment
-> ledger. Because it no longer matches the recorded evidence, ArmProof blocks
-> the release instead of trusting the metrics. Developers can add the same check
-> to another Arm AI project through the CLI, GitHub Action and armproof init.
+> The original experiment tried to establish an exact two-to-two-point-five
+> times capacity bracket. That required all five optimized runs at 0.60 requests
+> per second to fail. One passed, so the preregistered bracket was rejected.
+> These twenty 500-second windows took nearly three hours; what ran just now was
+> the audit. It checked the archive and recomputed all 4,200 outcomes. Every
+> control run failed at 0.28, and every optimized run passed at 0.56. ArmProof
+> therefore evaluates a different, narrower claim: 0.56 divided by the failing
+> 0.28 baseline proves at least twice the sustainable traffic.
 
-### 2:46-2:56 - Close
+### 1:35-1:58
+
+**Do:** Point to **Causal Arm evidence**, then open **3. Release gate** and stop
+on the Performix panel.
 
 **Say:**
 
-> Twice the AI traffic, on the same Graviton server, with evidence checked
-> before release.
+> The capacity test changed one declared runtime control. Arm Performix found
+> no KleidiAI function samples in the control and 67.02 percent in the treatment,
+> including the Neoverse I8MM kernel. Linux perf independently measured 68.53
+> percent of cycles in that call chain.
 
-Stop recording immediately.
+### 1:58-2:22
 
-## Recording Rules
+**Do:** Scroll to **The same fail-closed method runs in pull requests** and
+click **Test a one-byte evidence change**.
 
-- Call the live race an illustrative request, never capacity proof.
-- Call the loaded audit sustained evidence, never a live benchmark.
-- Do not call recorded requests live inference or ArmProof Arm-certified.
-- Keep BF16-to-INT4 size and memory gains separate from KleidiAI gains.
-- Keep the queue guard separate from the Arm optimization.
-- Use no copyrighted music and publish the final video without sign-in.
+**Say:**
 
-## 8. Stop Services And Terminate AWS
+> I’ll change one byte in a temporary copy of the evidence bundle. The digest no
+> longer matches, so ArmProof stops before calculating any metric and blocks the
+> release. The same check runs as a GitHub Action on an optimization pull request.
 
-After recording:
+### 2:22-2:43
 
-1. Press `Ctrl-C` in both Graviton service terminals, the SSH tunnel terminal
-   and the local SurgeDesk terminal.
-2. Terminate the instance from the recording machine:
+**Do:** Scroll to **Adoption path** and click **Generate a starter kit preview**.
 
-   ```bash
-   aws ec2 terminate-instances \
-     --region us-east-1 \
-     --instance-ids "$INSTANCE_ID" \
-     --query 'TerminatingInstances[0].[InstanceId,CurrentState.Name]' \
-     --output text
+**Say:**
 
-   aws ec2 wait instance-terminated \
-     --region us-east-1 \
-     --instance-ids "$INSTANCE_ID"
-   ```
+> Another Arm developer can generate the same contract, evidence layout,
+> profiler manifest and pull-request check for a bounded HTTP classification
+> service. The new gate starts blocked and opens only after real measurements
+> satisfy the project’s own thresholds.
 
-   Expected first output:
+### 2:43-2:52
 
-   ```text
-   i-YOUR_INSTANCE_ID    shutting-down
-   ```
+**Say:**
 
-3. Confirm that no running ArmProof instance remains:
+> SurgeDesk shows the user outcome. ArmProof makes the Arm optimization
+> reviewable, reproducible and safe to release.
 
-   ```bash
-   aws ec2 describe-instances \
-     --region us-east-1 \
-     --filters \
-       'Name=tag:Project,Values=ArmProof' \
-       'Name=instance-state-name,Values=pending,running,stopping,stopped' \
-     --query 'Reservations[].Instances[].[InstanceId,State.Name]' \
-     --output text
-   ```
+Stop recording.
 
-   Expected output: empty.
+## 7. Accuracy Rules
 
-If either live endpoint returns the wrong label, fails, or produces an ambiguous
-result, fix the endpoint setup before recording. Never substitute synthetic
-terminal output.
+- The live tiles illustrate one short request burst. The sustained audit proves
+  capacity.
+- The loaded archive contains recorded measurement evidence; the verification
+  itself runs during the video.
+- The BF16-to-INT4 footprint gains and the KleidiAI capacity gain have separate
+  causal scopes.
+- The queue guard improves application routing and is separate from the Arm
+  optimization.
+- ArmProof verifies the submitted contract and evidence. It does not represent
+  official Arm certification.
+
+## 8. Stop AWS
+
+Press `Ctrl-C` in the two service terminals, tunnel, and local gateway. Then:
+
+```bash
+aws ec2 terminate-instances \
+  --region us-east-1 \
+  --instance-ids "$INSTANCE_ID" \
+  --query 'TerminatingInstances[0].[InstanceId,CurrentState.Name]' \
+  --output text
+
+aws ec2 wait instance-terminated \
+  --region us-east-1 \
+  --instance-ids "$INSTANCE_ID"
+```
+
+Expected first output: the instance ID followed by `shutting-down`.

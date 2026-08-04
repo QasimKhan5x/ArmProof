@@ -20,8 +20,8 @@ Do not attribute the whole BF16-to-INT4 transformation to KleidiAI.
 
 ## UX And Developer Experience: 15
 
-SurgeDesk first makes the value tangible: a support operator can confirm or
-correct a route, watch the same queue under a measured surge and inspect why
+SurgeDesk first makes the value tangible: a support operator can confirm a live
+route, watch matched requests complete on two core groups and inspect why
 the optimized deployment holds its SLO. The recurring developer workflow is a
 PR merge decision. A developer supplies one contract file and receives a
 GitHub Check, explanation, report and deployable configuration.
@@ -42,9 +42,9 @@ Community artifacts are the contract schema, matched-control runner,
 fail-closed claim ledger, quality interface, KleidiAI detector, GitHub Action,
 report, deployment template and reference recipe.
 
-The reference application and evidence-derived demo generator are also
-reusable learning artifacts: they show how to turn raw fixed-SLO measurements
-into an honest product demonstration without inventing live inference.
+The reference application, sustained adapter and evidence-derived demo
+generator are reusable learning artifacts: they show how to connect live
+behavior to raw fixed-SLO measurements without confusing the two.
 
 The contribution is not another general benchmark. It makes Arm optimization
 claims enforceable in a workflow maintainers already use.
@@ -55,10 +55,9 @@ The 90-second reveal is operational and causal:
 
 1. A stolen-card request reaches a human-confirmed support queue.
 2. The two-stage route scores 86.75% held-out queue accuracy.
-3. At identical demand, disabled shows three late customers while enabled
-   shows zero on the same Graviton4 machine.
-4. ArmProof visibly rejects the initial exact 2.5x claim, then proves an
-   at-least-2.0x sustained lower bound from five 500-second confirmations.
+3. Six live tiles expose the matched backend, core group and request latency.
+4. ArmProof re-derives 4,200 outcomes, exposes all twenty long windows, and
+   proves an at-least-2.0x sustained lower bound from stable boundaries.
 5. ArmProof reveals 68.53% enabled `kai_*` cycle attribution and releases the exact
    measured deployment through a reusable GitHub Action.
 

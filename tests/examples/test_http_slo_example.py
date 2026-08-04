@@ -31,7 +31,7 @@ class HttpSloExampleTests(unittest.TestCase):
                 (output / "report/decision.json").read_text(encoding="utf-8")
             )
             self.assertTrue(decision["passed"])
-            self.assertEqual(len(decision["claims"]), 2)
+            self.assertEqual(len(decision["claims"]), 5)
             self.assertTrue((output / ".github/workflows/armproof.yml").is_file())
 
 

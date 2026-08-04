@@ -21,7 +21,7 @@ Success means a maintainer can answer, before merge:
 2. Did it improve fixed-instance cloud-serving capacity or latency?
 3. Did the required Arm acceleration path execute?
 4. Which gains are attributable to that Arm path?
-5. Can the result and deployment be reproduced?
+5. Can the decision and passing deployment be reproduced from pinned evidence?
 
 ## Primary User And Job
 
@@ -35,11 +35,11 @@ capacity gain without violating the quality contract.
 
 ## Reference Application
 
-SurgeDesk must present one continuous workflow: human-confirm a recorded
-BANKING77 route, replay raw same-instance baseline/treatment surge events, and
-open the ArmProof release decision. All visible measurements must derive from
-accepted evidence. Edited free-form text must never be represented as live or
-recorded model inference.
+SurgeDesk must present one continuous workflow: human-confirm a banking route,
+send a short matched burst to identity-checked Arm64 treatments, re-verify the sustained
+archive, and open the ArmProof release decision. Every capacity result must
+derive from the canonical EXP009 archive. Edited free-form text must never be
+represented as recorded model inference.
 
 The routing path is two-stage: Phi-4 Mini proposes a fine-grained intent and a
 dependency-free queue guard assigns the operational queue. The guard trains on
@@ -109,7 +109,7 @@ generation run on any GitHub runner.
 
 - Unit tests: schemas, normalization, statistics, policy and reason codes.
 - Contract tests: valid and invalid evidence/contract fixtures.
-- Integration tests: process lifecycle, PSS sampling, traffic replay and
+- Integration tests: process lifecycle, PSS sampling, live matched requests and
   profiler parsing.
 - Negative tests: missing evidence, swapped artifacts, disabled KleidiAI and
   revision mismatch.
@@ -132,13 +132,15 @@ generation run on any GitHub runner.
 
 ### Cloud Gate
 
-- Minimum: at least 1.5x sustainable throughput at the same p95 SLO in two of
-  three traffic mixes.
-- Preferred headline: at least 1.7x.
+- The canonical release result is at least 2.0x sustainable mixed-traffic
+  capacity at the same 10-second p95 SLO, established from five 500-second
+  confirmations at each stable pass/fail boundary.
 - Quality loss is no more than one percentage point under the frozen task
   metric, with at least 99% schema-valid outputs.
-- ArmProof measurement overhead is below 5% outside explicit profiler runs.
-- A fresh-instance confirmation matches tested capacity-grid boundaries within 10%.
+- Matched Performix and Linux `perf` evidence independently observe the enabled
+  Arm path, while the control remains negative.
+- Policy and report generation stay out of the serving measurement path;
+  profiler runs are separate and never used as capacity samples.
 
 ### Community And Submission
 
@@ -152,8 +154,8 @@ generation run on any GitHub runner.
   one command and receives explicit fail-closed next steps rather than
   synthetic passing evidence.
 - The quality boundary and human-confirmation requirement remain visible.
-- Equal-load latency evidence and confirmed capacity evidence remain visually
-  and verbally distinct.
+- The short matched request burst and confirmed capacity evidence remain
+  visually and verbally distinct.
 
 ## Boundaries
 

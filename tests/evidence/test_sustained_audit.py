@@ -67,6 +67,14 @@ class SustainedAuditTests(unittest.TestCase):
         self.assertEqual(result.baseline_failures_at_fail_probe, 5)
         self.assertEqual(result.treatment_passes, 5)
         self.assertEqual(result.treatment_failures_at_fail_probe, 4)
+        self.assertEqual(result.baseline_pass_trial_passed, (True,) * 5)
+        self.assertEqual(result.baseline_fail_probe_trial_passed, (False,) * 5)
+        self.assertEqual(result.treatment_pass_trial_passed, (True,) * 5)
+        self.assertEqual(
+            result.treatment_fail_probe_trial_passed,
+            (False, True, False, False, False),
+        )
+        self.assertEqual(len(result.baseline_fail_probe_p95_ms), 5)
         self.assertTrue(result.raw_samples_rederived)
         self.assertEqual(result.raw_confirmation_files, 20)
         self.assertEqual(result.raw_confirmation_samples, 4200)

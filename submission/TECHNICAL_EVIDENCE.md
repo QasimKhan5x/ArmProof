@@ -28,12 +28,17 @@ and the accepted
 | Direct Arm speed | KleidiAI enabled versus disabled, same INT4 runtime | 1.72x-2.59x | [`summary.json`](../ops/evidence/result-first/EXP-2026-002/summary.json) |
 | Arm execution | Enabled and disabled perf callchains | 68.53% enabled `kai_*` cycle share, 0% disabled, zero lost samples | SHA-256 locked [`EXP-2026-009 archive`](../ops/evidence/EXP-2026-009/evidence.tar.gz) |
 | Independent Arm execution | Matched Arm Performix 1.20 Code Hotspots native exports | 67.02% enabled `kai_*` function-sample share, 0% disabled; 1.51 pp from Linux perf | SHA-256 locked [`EXP-2026-010 archive`](../ops/evidence/EXP-2026-010/evidence.tar.gz) and [`performix.py`](../src/armproof/evidence/performix.py) |
-| Sustained fixed-SLO capacity | Enabled versus disabled, 4,200 raw requests across twenty 500-second windows | At least 2.0x sustainable capacity; 2.33x tested pass-point ratio | [`EXP-2026-009 result`](../ops/evidence/EXP-2026-009/RESULT.md) and immutable archive |
+| Sustained fixed-SLO capacity | Enabled versus disabled, 4,200 raw requests across twenty 500-second windows | At least 2.0x sustainable capacity | [`EXP-2026-009 result`](../ops/evidence/EXP-2026-009/RESULT.md) and immutable archive |
 | Original exact bracket | Enabled 0.60 r/s failure probe | Rejected: one of five windows passed by 72 ms | Preserved in the same archive; no exact bracket emitted |
 | Large-set quality | Enabled versus disabled, 770 requests | -0.390 pp accuracy; -0.673 pp macro F1 | Quality rows in the SHA-256 locked [`EXP-2026-009 archive`](../ops/evidence/EXP-2026-009/evidence.tar.gz) |
 | Schema validity | Both normalized treatments | 100% | Re-derived from the same quality rows |
 | Short-window reproduction | Fresh c8g.4xlarge versus earlier accepted grid | 0% difference for all mixes | [`reproduction-comparison.json`](../ops/evidence/EXP-2026-005/reproduction-comparison.json) |
-| Operational routing | Queue guard on disjoint holdout | 86.75%, +12.34 pp | [`comparison.json`](../examples/armproof-reference/comparison.json) |
+| Operational routing | Queue guard on disjoint holdout | 86.75%, +12.34 pp | [`data.json`](../surgedesk/data.json) |
+
+The broader `EXP-2026-010` multi-recipe gate was rejected because the VM did
+not expose enough PMU counters for every planned recipe. The release uses only
+its completed matched Code Hotspots pair for the narrower execution-attribution
+claim; it does not present the broader experiment as accepted.
 
 ## Causal Boundaries
 
@@ -53,6 +58,13 @@ and the accepted
   checked session configs, per-response backend labels and perf callchains,
   not from an argv-attestation claim.
 - ArmProof means verified against the declared contract, not Arm certified.
+- The 4.9 GB model is not copied into Git. EXP009 records the model digest
+  computed during evidence collection; the live service independently hashes
+  its local files at startup. Repository checksums protect the captured record
+  after collection but are not remote attestation of the original AWS host.
+- The native Performix archive carries the same runtime-lock digest as EXP009,
+  and its workload, model revision, matched environment and control records are
+  checked before its attribution can support the release.
 
 ## Reproduce The Portable Reference Action
 
@@ -62,12 +74,13 @@ python3.12 -m venv .venv
 .venv/bin/armproof ci examples/armproof-reference/armproof.json
 ```
 
-Expected exit code: `0`. The command verifies 317 files, re-derives capacity,
-quality and native Performix attribution, binds treatment identities to the contract, checks reproduction,
+Expected exit code: `0`. The command verifies 69 checksummed files in the
+sustained archive and 35 in the Performix bundle, re-derives 4,200 request outcomes, quality and
+native Performix attribution, binds treatment identities to the contract,
 and then regenerates `verification.json`, `comparison.json`, `decision.json`
 and the offline report. A supplied normalized comparison is not accepted.
-This is ArmProof's reusable eight-claim reference workflow; it is separately
-labeled from the nine-claim EXP009 sustained adapter used by SurgeDesk.
+This is ArmProof's reusable nine-claim EXP009 sustained workflow and the same
+adapter used by SurgeDesk.
 
 Test integrity and fail-closed behavior:
 
@@ -90,17 +103,12 @@ Expected exit code for both fixtures: `2`.
 ```bash
 shasum -a 256 ops/evidence/EXP-2026-009/evidence.tar.gz
 PYTHONPATH=src python3.12 -m unittest tests.evidence.test_sustained_audit -v
-
-armproof evidence-verify \
-  --checksums ops/evidence/EXP-2026-004/accepted/evidence/SHA256SUMS \
-  --root ops/evidence/EXP-2026-004/accepted/evidence
 ```
 
 The expected sustained archive digest is
 `f22e647aabe40eefd2abc5548306f40e2a5558ce1a85bc31c18319e6e51d78da`.
 The archive contains a 69-entry guest ledger and the long-window raw rows.
-The accepted short-window and reproduction bundles each contain 141 checksummed guest
-files. Empty, changed, duplicate, missing or out-of-root ledger entries fail.
+Empty, changed, duplicate, missing or out-of-root ledger entries fail.
 The ledgers prove repository consistency after capture, not independent
 attestation of who produced the original measurements.
 

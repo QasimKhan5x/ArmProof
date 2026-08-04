@@ -12,8 +12,9 @@ class DemoReleaseGateTests(unittest.TestCase):
         with redirect_stdout(io.StringIO()) as output:
             self.assertEqual(demonstrate(), 0)
         rendered = output.getvalue()
-        self.assertIn("PASS    8/8 claims from 317 verified files", rendered)
-        self.assertIn("BLOCK   release refused", rendered)
+        self.assertIn("PASS    9/9 claims from 4,200 raw request outcomes", rendered)
+        self.assertIn("RELEASE at least 2.00x sustainable capacity", rendered)
+        self.assertIn("BLOCK   altered archive refused before derivation", rendered)
 
 
 if __name__ == "__main__":

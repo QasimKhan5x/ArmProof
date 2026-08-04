@@ -23,15 +23,16 @@ missing-attribution fixtures are under `examples/fixture-*`.
 ## Evidence Integrity
 
 ```bash
-PYTHONPATH=src python3.12 -m armproof.cli evidence-verify \
-  --checksums ops/evidence/EXP-2026-004/accepted/evidence/SHA256SUMS \
-  --root ops/evidence/EXP-2026-004/accepted/evidence
+shasum -a 256 ops/evidence/EXP-2026-009/evidence.tar.gz
+shasum -a 256 ops/evidence/EXP-2026-010/evidence.tar.gz
+PYTHONPATH=src python3.12 -m armproof.cli ci \
+  examples/armproof-reference/armproof.json
 ```
 
-The accepted and fresh-instance confirmation bundles each verify 141 files with no
-missing or mismatched entries. `armproof ci` verifies both, derives capacity
-and quality, binds identities to the contract, then evaluates policy. Run the
-safe integrity demonstration with:
+The sustained archive contains 69 checksummed files and the native Performix
+archive contains 35. `armproof ci` verifies both, derives capacity, quality and
+Arm attribution, binds identities to the contract, then evaluates policy. Run
+the safe integrity demonstration with:
 
 ```bash
 python3.12 scripts/demo_release_gate.py

@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 from urllib.parse import urlparse
 
+from armproof import __version__
+
 
 def _write_json(path: Path, payload: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -50,35 +52,59 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
         + "\n",
         encoding="utf-8",
     )
+    quality_workload = output / "quality.jsonl"
+    quality_workload.write_text(
+        json.dumps(
+            {
+                "request_id": "quality-001",
+                "payload": {
+                    "request_id": "quality-001",
+                    "prompt": "Replace this with a labeled quality request",
+                    "max_new_tokens": 32,
+                },
+                "expected_intent": "replace_intent",
+                "source_text": "Replace this text",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
     sources = output / "identity-sources"
     sources.mkdir(exist_ok=True)
     source_contents = {
         "artifact.ref": "replace with the deployed model artifact identity\n",
         "runtime.lock": "replace with pinned runtime and dependency revisions\n",
-        "baseline-environment.json": '{"optimization":"disabled"}\n',
-        "treatment-environment.json": '{"optimization":"enabled"}\n',
+        "environment.json": '{"machine":"replace-with-arm-machine"}\n',
     }
     for name, content in source_contents.items():
         (sources / name).write_text(content, encoding="utf-8")
 
+    workload_manifest = sources / "workload-manifest.json"
+    _write_json(workload_manifest, {
+        "capacity_workload_sha256": _sha256(workload),
+        "quality_workload_sha256": _sha256(quality_workload),
+    })
     common = {
         "artifact_sha256": _sha256(sources / "artifact.ref"),
         "runtime_sha256": _sha256(sources / "runtime.lock"),
-        "workload_sha256": _sha256(workload),
+        "workload_sha256": _sha256(workload_manifest),
+        "environment_sha256": _sha256(sources / "environment.json"),
     }
     treatments = []
-    for treatment_id, environment_file, state in (
-        ("baseline", "baseline-environment.json", "disabled"),
-        ("optimized", "treatment-environment.json", "enabled"),
+    for treatment_id, enabled in (
+        ("baseline", "false"),
+        ("optimized", "true"),
     ):
         treatments.append(
             {
                 "id": treatment_id,
                 "command": ["replace-with-service-command", "--endpoint", endpoint],
                 **common,
-                "environment_sha256": _sha256(sources / environment_file),
-                "environment": {"optimization": state},
+                "environment": {
+                    "armproof.arm_acceleration_enabled": enabled,
+                },
             }
         )
     _write_json(
@@ -90,7 +116,7 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
             "claims": [
                 {
                     "id": "capacity-lower-bound",
-                    "causal_scope": "cloud_capacity",
+                    "causal_scope": "arm_acceleration",
                     "comparison_id": "replace-http-slo-comparison",
                     "metric": "capacity_ratio_lower_bound",
                     "operator": "gte",
@@ -100,16 +126,51 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
                         "boundary_confirmations",
                     ],
                     "required": True,
-                    "depends_on": [],
+                    "depends_on": [
+                        "quality-accuracy", "quality-macro-f1", "quality-schema"
+                    ],
                 },
                 {
                     "id": "arm-path",
-                    "causal_scope": "cloud_capacity",
+                    "causal_scope": "arm_acceleration",
                     "comparison_id": "replace-http-slo-comparison",
                     "metric": "arm_path_treatment_observed",
                     "operator": "eq",
                     "threshold": 1.0,
                     "required_evidence": ["arm_callchains"],
+                    "required": True,
+                    "depends_on": [],
+                },
+                {
+                    "id": "quality-accuracy",
+                    "causal_scope": "arm_acceleration",
+                    "comparison_id": "replace-http-slo-comparison",
+                    "metric": "accuracy_delta_pp",
+                    "operator": "gte",
+                    "threshold": -1.0,
+                    "required_evidence": ["quality_rows", "workload_manifest"],
+                    "required": True,
+                    "depends_on": [],
+                },
+                {
+                    "id": "quality-macro-f1",
+                    "causal_scope": "arm_acceleration",
+                    "comparison_id": "replace-http-slo-comparison",
+                    "metric": "macro_f1_delta_pp",
+                    "operator": "gte",
+                    "threshold": -1.0,
+                    "required_evidence": ["quality_rows", "workload_manifest"],
+                    "required": True,
+                    "depends_on": [],
+                },
+                {
+                    "id": "quality-schema",
+                    "causal_scope": "arm_acceleration",
+                    "comparison_id": "replace-http-slo-comparison",
+                    "metric": "schema_valid_rate",
+                    "operator": "gte",
+                    "threshold": 0.99,
+                    "required_evidence": ["quality_rows", "workload_manifest"],
                     "required": True,
                     "depends_on": [],
                 },
@@ -140,10 +201,13 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
             "baseline_treatment_id": "baseline",
             "treatment_treatment_id": "optimized",
             "minimum_boundary_confirmations": 3,
+            "minimum_requests_per_confirmation": 2,
+            "request_schedule_tolerance_percent": 5,
             "required_outputs": [
-                "raw passing and failing request rows for both treatments",
+                "distinct cadence-valid passing and failing request rows for both treatments",
                 "observed identity manifest",
-                "baseline and treatment profiler outputs",
+                "baseline and treatment parser-ready perf reports plus profile manifest",
+                "baseline and treatment raw quality response samples",
                 "protocol.json and SHA256SUMS",
             ],
         },
@@ -154,9 +218,10 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
     workflow.write_text(
         "name: ArmProof\non: [push, pull_request]\njobs:\n"
         "  verify:\n    runs-on: ubuntu-latest\n    steps:\n"
-        "      - uses: actions/checkout@v4\n"
-        "      - uses: QasimKhan5x/ArmProof@v0.6.0\n"
-        "        with:\n          config: armproof.json\n",
+        "      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7\n"
+        f"      - uses: QasimKhan5x/ArmProof@v{__version__}\n"
+        "        with:\n          config: armproof.json\n"
+        f"          contract-sha256: {_sha256(output / 'contract.json')}\n",
         encoding="utf-8",
     )
     (output / "ADOPTION_CHECKLIST.md").write_text(
@@ -165,8 +230,12 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
         "- [ ] Pin model, runtime, environment and service commands.\n"
         "- [ ] Set a service-level objective and claim threshold before testing.\n"
         "- [ ] Collect at least three passing and failing boundary confirmations.\n"
+        "- [ ] Keep confirmation files distinct and preserve open-loop timestamps.\n"
         "- [ ] Capture positive and negative Arm execution profiles separately.\n"
+        "- [ ] Bind parser-ready profiler reports to the treatment identities.\n"
+        "- [ ] Collect raw HTTP quality responses from the same labeled dataset.\n"
         "- [ ] Build `evidence/SHA256SUMS` after collection.\n"
+        "- [ ] After editing `contract.json`, update `contract-sha256` in the workflow.\n"
         "- [ ] Run `armproof ci armproof.json`; missing evidence must block.\n",
         encoding="utf-8",
     )
@@ -188,6 +257,7 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
             "contract.json",
             "collection-plan.json",
             "workload.jsonl",
+            "quality.jsonl",
             "ADOPTION_CHECKLIST.md",
             "README.md",
             ".github/workflows/armproof.yml",

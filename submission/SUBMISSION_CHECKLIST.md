@@ -45,5 +45,6 @@
 - [ ] Release Proof visibly shows matched Arm Performix 0% versus 67.02%
   attribution and the narration calls it core causal evidence.
 - [ ] The at-least-2x result is scoped to the pinned Graviton4 deployment and SLO.
-- [ ] The 2.33x number is labeled a tested pass-point ratio, not exact capacity.
-- [ ] The rejected original 2.5x bracket remains visible.
+- [ ] All four sustained boundaries and their twenty trial outcomes are visible.
+- [ ] The demo uses the local audit endpoint so archive verification happens
+  during recording.

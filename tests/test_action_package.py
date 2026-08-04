@@ -14,6 +14,8 @@ class ActionPackageTests(unittest.TestCase):
         action = (ROOT / "action.yml").read_text(encoding="utf-8")
         self.assertIn("using: composite", action)
         self.assertIn('armproof ci "$ARMPROOF_CONFIG"', action)
+        self.assertIn('--contract-sha256 "$ARMPROOF_CONTRACT_SHA256"', action)
+        self.assertIn("required: true", action)
         self.assertIn('exit "$gate_status"', action)
         self.assertIn("$GITHUB_ACTION_PATH", action)
         self.assertNotIn("pull_request_target", action)

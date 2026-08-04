@@ -67,12 +67,13 @@ upstream dataset's attribution terms must remain explicit.
 
 - Status: accepted on 2026-08-03.
 - Decision: the judge-facing capacity claim is at least 2.0x sustained mixed
-  traffic, with 2.33x labeled only as the tested pass-point ratio. Preserve and
-  display the rejected original 2.5x exact-bracket gate.
+  traffic. Display all four tested boundaries and twenty outcomes; derive the
+  lower bound from the optimized passing boundary and baseline failing boundary.
 - Reason: EXP-2026-009 confirmed disabled 0.24 r/s and enabled 0.56 r/s in all
   five 500-second windows and baseline failure at 0.28 r/s, but enabled 0.60
   r/s passed one window. The lower bound is fully supported; an exact bracket
-  is not. This is the product's fail-closed behavior operating on itself.
+  is not. The unstable probe remains visible in the trial matrix without being
+  turned into a separate headline.
 
 ## ADR-010: Permit One Non-Claiming llama.cpp Adoption Example
 

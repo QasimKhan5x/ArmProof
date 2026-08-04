@@ -8,7 +8,7 @@ import tarfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any
+from typing import Any, Callable
 
 from armproof.contracts import Contract, validate_comparison_identities
 from armproof.domain import CausalScope, Comparison, Decision, TreatmentIdentity
@@ -37,7 +37,12 @@ class SustainedAudit:
     baseline_failures_at_fail_probe: int
     treatment_passes: int
     treatment_failures_at_fail_probe: int
+    baseline_pass_trial_passed: tuple[bool, ...]
+    baseline_fail_probe_trial_passed: tuple[bool, ...]
+    treatment_pass_trial_passed: tuple[bool, ...]
+    treatment_fail_probe_trial_passed: tuple[bool, ...]
     baseline_pass_p95_ms: tuple[float, ...]
+    baseline_fail_probe_p95_ms: tuple[float, ...]
     treatment_pass_p95_ms: tuple[float, ...]
     treatment_fail_probe_p95_ms: tuple[float, ...]
     quality_passed: bool
@@ -316,6 +321,7 @@ def derive_sustained_audit(
     expected_sha256: str,
     contract: Contract,
     workload_manifest: Path,
+    on_stage: Callable[[str, dict[str, Any]], None] | None = None,
 ) -> SustainedAudit:
     """Verify an immutable archive and derive a bounded, non-exact capacity claim."""
 
@@ -326,6 +332,11 @@ def derive_sustained_audit(
     quality_labels, traffic_ids = _verify_workloads(workload_manifest)
     with tarfile.open(archive_path, "r:gz") as archive:
         internal_check_count = _verify_internal_checksums(archive)
+        if on_stage is not None:
+            on_stage("archive", {
+                "archive_sha256": observed_sha256,
+                "checksummed_files": internal_check_count,
+            })
         experiment = _json(archive, "evidence/experiment.json")
         protocol = _json(archive, "evidence/protocol.json")
         summary = _json(archive, "evidence/capacity/experiment/summary.json")
@@ -335,6 +346,11 @@ def derive_sustained_audit(
         confirmations, raw_file_count, raw_sample_count = _rederive_confirmations(
             archive, confirmations, protocol, traffic_ids
         )
+        if on_stage is not None:
+            on_stage("requests", {
+                "raw_request_outcomes": raw_sample_count,
+                "confirmation_files": raw_file_count,
+            })
         disabled_perf = parse_perf_attribution(
             _text(archive, "evidence/perf-disabled.txt"), r"^kai_run_matmul"
         )
@@ -342,6 +358,11 @@ def derive_sustained_audit(
             _text(archive, "evidence/perf-enabled.txt"), r"^kai_run_matmul"
         )
         matched_control = _verify_matched_control(archive)
+        if on_stage is not None:
+            on_stage("controls", {
+                "matched_control": matched_control,
+                "only_changed_control": "mlas.disable_kleidiai",
+            })
         disabled_config = _json(
             archive, "evidence/capacity/variants/disabled/genai_config.json"
         )
@@ -607,8 +628,23 @@ def derive_sustained_audit(
         baseline_failures_at_fail_probe=baseline_failures,
         treatment_passes=treatment_passes,
         treatment_failures_at_fail_probe=treatment_failures,
+        baseline_pass_trial_passed=tuple(
+            bool(row["pass"]["passed"]) for row in baseline
+        ),
+        baseline_fail_probe_trial_passed=tuple(
+            bool(row["fail"]["passed"]) for row in baseline
+        ),
+        treatment_pass_trial_passed=tuple(
+            bool(row["pass"]["passed"]) for row in treatment
+        ),
+        treatment_fail_probe_trial_passed=tuple(
+            bool(row["fail"]["passed"]) for row in treatment
+        ),
         baseline_pass_p95_ms=tuple(
             float(row["pass"]["summary"]["p95_ms"]) for row in baseline
+        ),
+        baseline_fail_probe_p95_ms=tuple(
+            float(row["fail"]["summary"]["p95_ms"]) for row in baseline
         ),
         treatment_pass_p95_ms=tuple(
             float(row["pass"]["summary"]["p95_ms"]) for row in treatment

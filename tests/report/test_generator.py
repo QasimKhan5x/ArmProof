@@ -37,7 +37,7 @@ class ReportGeneratorTests(unittest.TestCase):
                 decision, summary, output, deployment_summary_path=deployment
             )
             rendered = index.read_text()
-            self.assertIn("Arm-native capacity", rendered)
+            self.assertIn("Measured capacity", rendered)
             self.assertNotIn("</script><script>", rendered)
             self.assertEqual(json.loads((output / "decision.json").read_text())["passed"], True)
             self.assertTrue((output / "data.json").is_file())

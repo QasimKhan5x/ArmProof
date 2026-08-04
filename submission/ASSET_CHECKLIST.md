@@ -3,7 +3,7 @@
 Upload these in order after they are copied into `submission/assets/`:
 
 1. `01-surge-capacity.png` - use as the cover image. It communicates the
-   at-least-2x sustained result, rejected overclaim and fixed-SLO comparison.
+   at-least-2x sustained result, complete trial matrix and fixed-SLO comparison.
 2. `02-triage-guard.png` - shows the real application and the queue guard
    correcting an LLM route.
 3. `03-release-proof.png` - shows the core Arm Performix experiment, sustained
@@ -13,15 +13,14 @@ Upload these in order after they are copied into `submission/assets/`:
 
 Suggested captions:
 
-- **Same Graviton4 instance, at least 2x sustainable mixed traffic.** Five
-  500-second confirmations establish every displayed pass/fail outcome; the
-  original exact 2.5x gate remains visibly blocked.
-- **A real support workflow, not a benchmark-only UI.** The two-stage route
+- **Same Graviton4 instance, at least 2x sustainable mixed traffic.** Twenty
+  500-second windows expose every passing, failing and mixed boundary outcome.
+- **A real support workflow.** The two-stage route
   reaches 86.75% held-out operational queue accuracy and remains
   human-confirmed.
-- **The dashboard cannot approve itself.** ArmProof verifies the release
-  evidence and SHA-256 locked sustained archive, derives
-  metrics, binds identities and evaluates nine sustained claims before deployment.
+- **The release decision comes from ArmProof.** The current audit verifies the
+  SHA-256 locked evidence, derives metrics, binds identities, and evaluates nine
+  claims before the UI changes from **Recorded pass** to **Verified now**.
 - **Judgeable on any screen.** SurgeDesk and the offline evidence report are
   tested down to 320 pixels.
 

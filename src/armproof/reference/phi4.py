@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import importlib.metadata
 import json
 import os
+import platform
 import shutil
 import threading
 import time
@@ -13,13 +16,13 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Protocol
 
-
 CHAT = "<|user|>{}<|end|><|assistant|>"
 MAX_BODY_BYTES = 1024 * 1024
 
 
 class Backend(Protocol):
     label: str
+    health_metadata: dict[str, Any]
 
     def generate(self, prompt: str, max_new_tokens: int) -> dict[str, Any]: ...
 
@@ -51,14 +54,86 @@ def create_ort_variant(source: Path, destination: Path, enabled: bool, threads: 
     return destination
 
 
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _model_item_fingerprint(path: Path) -> dict[str, Any]:
+    if path.is_file():
+        return {
+            "kind": "file",
+            "bytes": path.stat().st_size,
+            "files": 1,
+            "sha256": _sha256_file(path),
+        }
+    if not path.is_dir():
+        raise FileNotFoundError(path)
+    digest = hashlib.sha256(b"armproof-model-directory-v1\0")
+    total_bytes = 0
+    file_count = 0
+    for item in sorted(candidate for candidate in path.rglob("*") if candidate.is_file()):
+        relative = item.relative_to(path).as_posix().encode("utf-8")
+        size = item.stat().st_size
+        digest.update(len(relative).to_bytes(8, "big"))
+        digest.update(relative)
+        digest.update(size.to_bytes(8, "big"))
+        digest.update(bytes.fromhex(_sha256_file(item)))
+        total_bytes += size
+        file_count += 1
+    return {
+        "kind": "directory",
+        "bytes": total_bytes,
+        "files": file_count,
+        "sha256": digest.hexdigest(),
+    }
+
+
+def _ort_model_identity(model_path: Path) -> tuple[str, str, int]:
+    """Identify matched variants while excluding only the declared control."""
+    config_path = model_path / "genai_config.json"
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    normalized = json.loads(json.dumps(config))
+    options = normalized["model"]["decoder"]["session_options"]
+    control = str(options.pop("mlas.disable_kleidiai"))
+    threads = int(options["intra_op_num_threads"])
+    files = []
+    for path in sorted(model_path.iterdir(), key=lambda item: item.name):
+        if path.name == "genai_config.json":
+            continue
+        resolved = path.resolve()
+        fingerprint = _model_item_fingerprint(resolved)
+        files.append({
+            "name": path.name,
+            **fingerprint,
+        })
+    payload = json.dumps(
+        {"config_without_control": normalized, "model_files": files},
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest(), control, threads
+
+
 class OrtInt4Backend:
     def __init__(self, model_path: Path, label: str) -> None:
         import onnxruntime_genai as og
 
+        model_identity, control, threads = _ort_model_identity(model_path)
         self.og = og
         self.model = og.Model(str(model_path))
         self.tokenizer = og.Tokenizer(self.model)
         self.label = label
+        self.health_metadata = {
+            "runtime": "onnxruntime-genai",
+            "runtime_version": importlib.metadata.version("onnxruntime-genai"),
+            "model_identity": model_identity,
+            "optimization_control": {"mlas.disable_kleidiai": control},
+            "threads": threads,
+        }
 
     def generate(self, prompt: str, max_new_tokens: int) -> dict[str, Any]:
         tokens = self.tokenizer.encode(CHAT.format(prompt))
@@ -94,6 +169,11 @@ class PytorchBf16Backend:
             model_path,
             dtype=torch.bfloat16,
         ).eval()
+        self.health_metadata = {
+            "runtime": "pytorch",
+            "runtime_version": importlib.metadata.version("torch"),
+            "threads": threads,
+        }
 
     def generate(self, prompt: str, max_new_tokens: int) -> dict[str, Any]:
         inputs = self.tokenizer.apply_chat_template(
@@ -154,7 +234,17 @@ def handler_for(backend: Backend, max_inflight: int) -> type[BaseHTTPRequestHand
             if self.path != "/health":
                 self._json(HTTPStatus.NOT_FOUND, {"error": "not_found"})
                 return
-            self._json(HTTPStatus.OK, {"ready": True, "backend": backend.label})
+            affinity = sorted(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else []
+            self._json(
+                HTTPStatus.OK,
+                {
+                    "ready": True,
+                    "backend": backend.label,
+                    "cpu_affinity": affinity,
+                    "architecture": platform.machine().lower(),
+                    **backend.health_metadata,
+                },
+            )
 
         def do_POST(self) -> None:
             if self.path != "/infer":
@@ -190,6 +280,14 @@ def handler_for(backend: Backend, max_inflight: int) -> type[BaseHTTPRequestHand
                     "queue_ms": (started - queued) / 1_000_000,
                     "inference_ms": (finished - started) / 1_000_000,
                     "backend": backend.label,
+                    "runtime_identity": {
+                        "cpu_affinity": (
+                            sorted(os.sched_getaffinity(0))
+                            if hasattr(os, "sched_getaffinity") else []
+                        ),
+                        "architecture": platform.machine().lower(),
+                        **backend.health_metadata,
+                    },
                 },
             )
 

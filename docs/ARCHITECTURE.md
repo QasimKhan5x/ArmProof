@@ -16,7 +16,7 @@ KleidiAI evidence adapter
      |-- re-derive fixed-SLO boundaries from request JSONL
      |-- re-derive quality from row-level evidence
      |-- validate positive/negative Arm callchains
-     `-- compare fresh-instance confirmation
+     `-- cross-check Linux perf with matched Arm Performix attribution
      |
      v
 contract identity binding
@@ -78,9 +78,11 @@ overhead does not contaminate the primary performance result.
 For the Phi-4 reference adapter, both profiler layers are required. Performix
 is not a report importer or optional visualization: contradictory, missing or
 unmatched runs make the Arm-specific release claim unknown and fail the gate.
-The adapter verifies the outer archive digest and 35-file guest ledger, reads
+The adapter verifies the outer archive digest and 35-entry guest checksum ledger, reads
 the native Code Hotspots ZIPs, checks matched commands and CPU identity, and
 recomputes the positive/negative `kai_*` sample attribution on every CI run.
+Its runtime-lock digest, model revision, workload reference and matched
+environment are also bound to the sustained release comparison.
 
 ### Quality Evaluator
 
@@ -106,8 +108,8 @@ metric, threshold, evidence IDs and status: `pass`, `fail`, `unknown` or
 verifies both evidence ledgers, re-derives metrics with the selected adapter,
 binds observed identities to the contract, and only then evaluates policy.
 Its `verification.json` receipt records the adapter, derivation source and both
-ledger results. Invalid checksums, swapped identities, inconsistent summaries
-and failed reproduction stop before a release decision is emitted.
+ledger results. Invalid checksums, swapped identities, inconsistent summaries,
+and required identity mismatches stop before a release decision is emitted.
 
 ### Presenters
 

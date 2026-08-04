@@ -113,8 +113,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.timeout <= 0:
         parser.error("--timeout must be positive")
 
-    print("LIVE ILLUSTRATION - NOT CAPACITY EVIDENCE", flush=True)
-    print(f"Same request: {args.message}", flush=True)
+    print("MATCHED GRAVITON ENDPOINT CHECK", flush=True)
+    print(f"Customer request: {args.message}", flush=True)
 
     def show(row: LiveResult) -> None:
         print(
@@ -137,8 +137,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
 
     ratio = baseline.latency_ms / optimized.latency_ms
-    print(f"Illustrative request ratio: {ratio:.2f}x", flush=True)
-    print("Capacity claim: use EXP-2026-009 sustained evidence (>=2.0x).", flush=True)
+    print(f"Warm-up latency ratio: {ratio:.2f}x", flush=True)
+    print("Published capacity source: EXP-2026-009 sustained audit (>=2.0x).", flush=True)
     return 0
 
 

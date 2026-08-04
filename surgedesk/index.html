@@ -26,9 +26,9 @@
 
   <nav class="view-tabs" aria-label="SurgeDesk views">
     <div role="tablist" aria-label="Demo workflow">
-      <button id="tab-workspace" role="tab" aria-selected="true" aria-controls="view-workspace" data-view="workspace">1. Triage</button>
-      <button id="tab-surge" role="tab" aria-selected="false" aria-controls="view-surge" data-view="surge">2. Arm result</button>
-      <button id="tab-proof" role="tab" aria-selected="false" aria-controls="view-proof" data-view="proof">3. Release proof</button>
+      <button id="tab-workspace" role="tab" aria-selected="true" aria-controls="view-workspace" data-view="workspace">1. Support workflow</button>
+      <button id="tab-surge" role="tab" aria-selected="false" aria-controls="view-surge" data-view="surge">2. Capacity audit</button>
+      <button id="tab-proof" role="tab" aria-selected="false" aria-controls="view-proof" data-view="proof">3. Release gate</button>
     </div>
     <p id="demo-source">Loading accepted evidence…</p>
   </nav>
@@ -70,7 +70,7 @@
             <fieldset class="mode-control">
               <legend>Inference mode</legend>
               <label><input type="radio" name="inference-mode" value="recorded" checked> Recorded evidence</label>
-              <label id="live-mode-label"><input id="live-mode" type="radio" name="inference-mode" value="live" disabled> Live Graviton endpoint</label>
+              <label id="live-mode-label"><input id="live-mode" type="radio" name="inference-mode" value="live" disabled> Live matched Arm64 endpoint</label>
               <span id="live-mode-hint">Start the demo gateway with an endpoint to enable live mode.</span>
             </fieldset>
             <div id="scenario-picker" class="scenario-picker">
@@ -82,7 +82,7 @@
             <label for="customer-message">Message</label>
             <textarea id="customer-message" name="message" rows="4" spellcheck="false"></textarea>
             <div class="form-actions">
-              <p id="intake-note">Select an evidence-backed request to replay its recorded model output.</p>
+              <p id="intake-note">Select an evidence-backed request to load its recorded model output.</p>
               <button id="route-request" class="primary-button" type="submit">Load model suggestion</button>
             </div>
           </form>
@@ -112,7 +112,7 @@
 
           <div id="review-complete" class="workflow-handoff" role="status" hidden>
             <div><strong id="review-complete-title">Ticket routed</strong><span>Decision recorded in the audit trail.</span></div>
-            <button class="secondary-button" type="button" data-go-surge>Continue to Arm result</button>
+            <button class="secondary-button" type="button" data-go-surge>Open platform capacity audit</button>
           </div>
 
           <section class="recent-section" aria-labelledby="recent-title">
@@ -140,24 +140,56 @@
       <div class="view-inner">
         <header class="page-heading">
           <div>
-            <p class="eyebrow">Fixed-SLO experiment</p>
-            <h1>What happens when support demand surges?</h1>
-            <p>Load the checksum-bound audit, then inspect equal-load outcomes and the conservative capacity claim.</p>
+            <p class="eyebrow">Platform engineering audit</p>
+            <h1>Can this optimized service safely handle more traffic?</h1>
+            <p>First confirm that the two live Arm lanes are matched. Then re-derive the release claim from the long capacity experiment.</p>
           </div>
         </header>
+
+        <section class="live-surge" aria-labelledby="live-surge-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Live matched request check</p>
+              <h2 id="live-surge-title">Same model and runtime. One Arm control changed.</h2>
+            </div>
+            <span id="surge-live-status" class="source-chip">Checking endpoints…</span>
+          </div>
+          <p id="live-match-proof" class="identity-proof">Waiting for runtime identity and CPU-affinity probes.</p>
+          <form id="surge-form" class="surge-form">
+            <label for="surge-message">Customer message</label>
+            <div>
+              <input id="surge-message" value="My card was stolen and I need it frozen now" maxlength="4000">
+              <button id="run-live-surge" class="primary-button" type="submit" disabled>Run matched request check</button>
+            </div>
+          </form>
+          <p class="experiment-note">This short run illustrates request behavior; the capacity claim comes from the long-window audit below.</p>
+          <div class="live-lanes">
+            <article class="live-lane baseline-live" aria-labelledby="baseline-live-title">
+              <header><div><p class="eyebrow">Control</p><h3 id="baseline-live-title">KleidiAI disabled</h3></div><span id="baseline-live-cores">Cores —</span></header>
+              <div id="baseline-live-slots" class="live-request-slots" aria-live="polite"></div>
+              <p id="baseline-live-summary" class="lane-summary">Waiting for a live run.</p>
+            </article>
+            <article class="live-lane optimized-live" aria-labelledby="optimized-live-title">
+              <header><div><p class="eyebrow">Treatment</p><h3 id="optimized-live-title">KleidiAI enabled</h3></div><span id="optimized-live-cores">Cores —</span></header>
+              <div id="optimized-live-slots" class="live-request-slots" aria-live="polite"></div>
+              <p id="optimized-live-summary" class="lane-summary">Waiting for a live run.</p>
+            </article>
+          </div>
+          <div id="live-surge-result" class="live-surge-result" role="status" hidden></div>
+        </section>
 
         <section id="evidence-loader" class="evidence-loader" aria-labelledby="evidence-loader-title">
           <div class="evidence-seal" aria-hidden="true">✓</div>
           <div class="evidence-identity">
-            <p class="eyebrow">Sustained evidence audit</p>
-            <h2 id="evidence-loader-title"><span id="evidence-experiment-id">—</span> is ready</h2>
-            <p id="evidence-load-note" aria-live="polite">The view is generated from a SHA-256 locked archive of long-window request events. It does not simulate a benchmark.</p>
+            <p class="eyebrow">Canonical release audit</p>
+            <h2 id="evidence-loader-title">Verify <span id="evidence-experiment-id">—</span> from raw outcomes</h2>
+            <p id="evidence-load-note" aria-live="polite">ArmProof will hash the archive, recompute every long window, bind both treatments, and evaluate the release contract now.</p>
           </div>
           <dl class="evidence-facts">
-            <div><dt>Integrity</dt><dd id="evidence-checksum-status">Verifying…</dd></div>
-            <div><dt>Comparison</dt><dd id="evidence-comparison">Matched control</dd></div>
+            <div><dt>Evidence</dt><dd id="evidence-checksum-status">—</dd></div>
+            <div><dt>Control</dt><dd id="evidence-comparison">—</dd></div>
           </dl>
-          <button id="load-experiment" class="primary-button replay-button" type="button">Load verified experiment</button>
+          <button id="load-experiment" class="primary-button replay-button" type="button">Verify measured experiment</button>
         </section>
 
         <div class="experiment-strip" aria-label="Experiment controls">
@@ -167,110 +199,67 @@
           <div><span>Only changed control</span><strong id="experiment-control">—</strong></div>
         </div>
 
+        <ol id="audit-progress" class="audit-progress" aria-label="Evidence verification stages" hidden>
+          <li data-audit-stage="archive"><span>1</span><div><strong>Archive verified</strong><small id="audit-archive-result">Waiting…</small></div></li>
+          <li data-audit-stage="requests"><span>2</span><div><strong>Requests re-derived</strong><small id="audit-request-result">Waiting…</small></div></li>
+          <li data-audit-stage="controls"><span>3</span><div><strong>Treatments matched</strong><small id="audit-control-result">Waiting…</small></div></li>
+          <li data-audit-stage="contract"><span>4</span><div><strong>Contract evaluated</strong><small id="audit-claim-result">Waiting…</small></div></li>
+        </ol>
+
         <div id="experiment-results" class="experiment-results" hidden>
-        <section class="arm-reveal" aria-labelledby="arm-reveal-title">
-          <div>
-            <p class="eyebrow">One controlled Arm change</p>
-            <h2 id="arm-reveal-title">Arm-optimized matrix kernels changed the service outcome</h2>
-            <p>The contract binds the same model source, runtime lock, workload, machine identity and <span id="arm-reveal-threads">—</span>-thread setting. Its treatment overlay changes <code id="arm-reveal-control">—</code>.</p>
-          </div>
-          <dl>
-            <div><dt>KleidiAI cycle share</dt><dd><span id="reveal-disabled-cycle-share">—</span> → <strong id="reveal-cycle-share">—</strong></dd></div>
-            <div><dt>Equal-load p95</dt><dd><span id="reveal-baseline-p95">—</span> → <strong id="reveal-optimized-p95">—</strong></dd></div>
-            <div><dt>Confirmed tested traffic</dt><dd><span id="reveal-baseline-rps">—</span> → <strong id="reveal-optimized-rps">—</strong></dd></div>
-          </dl>
-        </section>
-        <section class="audit-correction" aria-labelledby="audit-correction-title">
-          <div>
-            <p class="eyebrow">Fail-closed claim correction</p>
-            <h2 id="audit-correction-title">The longer test rejected the prettier number</h2>
-            <p id="audit-correction-copy">Loading the sustained boundary decision…</p>
-          </div>
-          <dl>
-            <div><dt id="original-gate-label">Preregistered upper-bound probe</dt><dd id="original-gate-status">—</dd><small id="original-gate-formula">—</small></div>
-            <div><dt id="corrected-claim-label">Released sustained lower bound</dt><dd id="corrected-claim-status">—</dd><small id="corrected-claim-formula">—</small></div>
-          </dl>
-        </section>
-        <section class="capacity-reveal" aria-labelledby="capacity-title">
-          <header class="section-heading">
+          <section class="trial-matrix-section" aria-labelledby="trial-matrix-title">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Twenty long confirmation windows</p>
+                <h2 id="trial-matrix-title">Every tested boundary, including the rejected exact-bracket probe</h2>
+              </div>
+              <span id="confirmation-count" class="source-chip">—</span>
+            </div>
+            <div class="table-wrap">
+              <table class="trial-matrix" data-mobile-cards>
+                <thead><tr><th>Treatment</th><th>Tested rate</th><th>Trial 1</th><th>Trial 2</th><th>Trial 3</th><th>Trial 4</th><th>Trial 5</th><th>Interpretation</th></tr></thead>
+                <tbody id="trial-matrix-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="original-gate-disclosure" aria-labelledby="original-gate-title">
             <div>
-              <p class="eyebrow">Conservative sustained lower bound</p>
-              <h2 id="capacity-title">Same instance. Measured capacity.</h2>
+              <p class="eyebrow">Original preregistered decision</p>
+              <h2 id="original-gate-title">Exact capacity bracket: <strong id="original-gate-status">—</strong></h2>
             </div>
-            <strong id="headline-ratio" class="headline-ratio">—</strong>
-          </header>
-          <div class="capacity-bars">
-            <div class="capacity-row baseline-capacity">
-              <div class="bar-label"><strong>KleidiAI disabled</strong><span id="baseline-capacity-rps">—</span></div>
-              <div class="bar-track"><span id="baseline-capacity-bar"></span></div>
-            </div>
-            <div class="capacity-row optimized-capacity">
-              <div class="bar-label"><strong>KleidiAI enabled</strong><span id="optimized-capacity-rps">—</span></div>
-              <div class="bar-track"><span id="optimized-capacity-bar"></span></div>
-            </div>
-          </div>
-        </section>
+            <p id="original-gate-explanation">—</p>
+          </section>
 
-        <p class="source-chip">Supporting equal-load slice: <span id="equal-load-source">—</span></p>
-        <div class="run-comparison">
-          <article class="run-panel baseline-run" aria-labelledby="baseline-title">
-            <header>
-              <div><p class="eyebrow">Control</p><h2 id="baseline-title">KleidiAI disabled</h2></div>
-              <span id="baseline-status" class="run-status waiting">Waiting</span>
-            </header>
-            <div class="run-progress"><span id="baseline-progress"></span></div>
-            <div class="request-lane">
-              <div><strong>Same customer requests</strong><span>Actual wait outcome</span></div>
-              <div id="baseline-request-strip" class="request-strip" aria-label="Baseline customer request outcomes"></div>
+          <section class="capacity-equation" aria-labelledby="capacity-title">
+            <div>
+              <p class="eyebrow">Released sustainable-capacity lower bound</p>
+              <h2 id="capacity-title">The claim follows from the visible boundaries</h2>
+              <p id="capacity-explanation">—</p>
             </div>
-            <dl class="metric-grid">
-              <div><dt>Offered load</dt><dd id="baseline-rps">—</dd></div>
-              <div><dt>Completed</dt><dd id="baseline-completed">—</dd></div>
-              <div><dt>Observed p95</dt><dd id="baseline-p95">—</dd></div>
-              <div><dt>SLO breaches</dt><dd id="baseline-breaches">—</dd></div>
+            <div class="equation" aria-label="Capacity lower-bound equation">
+              <span id="equation-treatment">—</span><i>÷</i><span id="equation-baseline">—</span><i>=</i><strong id="headline-ratio">—</strong>
+            </div>
+          </section>
+
+          <section class="arm-reveal" aria-labelledby="arm-reveal-title">
+            <div>
+              <p class="eyebrow">Causal Arm evidence</p>
+              <h2 id="arm-reveal-title">The matched treatment executed the Neoverse I8MM path</h2>
+              <p>The archive records the same model digest, runtime, workload, machine, and <span id="arm-reveal-threads">—</span>-thread setting. The declared treatment change is <code id="arm-reveal-control">—</code>.</p>
+            </div>
+            <dl>
+              <div><dt>Performix function samples</dt><dd><span id="reveal-disabled-sample-share">—</span> → <strong id="reveal-enabled-sample-share">—</strong></dd></div>
+              <div><dt>Linux perf cycle attribution</dt><dd><strong id="reveal-cycle-share">—</strong></dd></div>
+              <div><dt>Observed kernel</dt><dd><code id="reveal-kernel">—</code></dd></div>
             </dl>
-            <p id="baseline-event" class="event-line">Accepted run not loaded.</p>
-          </article>
+          </section>
 
-          <article class="run-panel optimized-run" aria-labelledby="optimized-title">
-            <header>
-              <div><p class="eyebrow">Treatment</p><h2 id="optimized-title">KleidiAI enabled</h2></div>
-              <span id="optimized-status" class="run-status waiting">Waiting</span>
-            </header>
-            <div class="run-progress"><span id="optimized-progress"></span></div>
-            <div class="request-lane">
-              <div><strong>Same customer requests</strong><span>Actual wait outcome</span></div>
-              <div id="optimized-request-strip" class="request-strip" aria-label="Optimized customer request outcomes"></div>
-            </div>
-            <dl class="metric-grid">
-              <div><dt>Offered load</dt><dd id="optimized-rps">—</dd></div>
-              <div><dt>Completed</dt><dd id="optimized-completed">—</dd></div>
-              <div><dt>Observed p95</dt><dd id="optimized-p95">—</dd></div>
-              <div><dt>SLO breaches</dt><dd id="optimized-breaches">—</dd></div>
-            </dl>
-            <p id="optimized-event" class="event-line">Accepted run not loaded.</p>
-          </article>
-        </div>
-
-        <div id="replay-conclusion" class="conclusion-band" hidden>
-          <div><span>Baseline boundary</span><strong id="baseline-boundary">—</strong></div>
-          <div><span>Optimized boundary</span><strong id="optimized-boundary">—</strong></div>
-          <p id="conclusion-copy"></p>
-          <button class="secondary-button" type="button" data-go-proof>Inspect why the result is trusted</button>
-        </div>
-
-        <section class="mix-table-section" aria-labelledby="mix-title">
-          <div class="section-heading compact-heading">
-            <div><p class="eyebrow">Long-window evidence</p><h2 id="mix-title">Confirmations at every boundary</h2></div>
-            <span id="confirmation-count" class="source-chip">—</span>
+          <div class="conclusion-band">
+            <div><span>Release decision</span><strong id="surge-release-decision">—</strong></div>
+            <p id="conclusion-copy">—</p>
+            <button class="secondary-button" type="button" data-go-proof>Open the complete release proof</button>
           </div>
-          <div class="table-wrap">
-            <table data-mobile-cards>
-              <thead><tr><th>Traffic mix</th><th>Baseline pass</th><th>Optimized pass</th><th>Pass-point ratio</th></tr></thead>
-              <tbody id="mix-table"></tbody>
-            </table>
-          </div>
-        </section>
         </div>
       </div>
     </section>
@@ -280,33 +269,34 @@
         <header class="proof-decision">
           <div class="decision-mark" aria-hidden="true">✓</div>
           <div>
-            <p class="eyebrow">ArmProof release decision</p>
+            <p id="proof-decision-source" class="eyebrow">Checked-in ArmProof receipt</p>
             <h1 id="proof-decision-title">Evaluating the conservative Graviton boundary</h1>
-            <p id="proof-decision-detail">Every required claim passed against checksum-bound evidence.</p>
+            <p id="proof-decision-detail">Loading the repository decision receipt.</p>
           </div>
           <span id="proof-decision-status">—</span>
         </header>
 
         <section class="proof-section performix-proof" aria-labelledby="performix-title">
           <div class="section-heading">
-            <div><p class="eyebrow">Core causal experiment</p><h2 id="performix-title">Arm Performix measured the optimized path executing</h2></div>
+            <div><p class="eyebrow">Core causal experiment</p><h2 id="performix-title">Arm Performix and Linux perf observed the optimized path</h2></div>
             <span id="performix-version" class="source-chip">Arm Performix</span>
           </div>
           <dl class="performix-measures">
             <div><dt>KleidiAI disabled</dt><dd id="performix-disabled-share">—</dd><small>measured <code>kai_*</code> function samples</small></div>
             <div class="performix-treatment"><dt>KleidiAI enabled</dt><dd id="performix-enabled-share">—</dd><small id="performix-sample-count">measured function samples</small></div>
-            <div><dt>Independent agreement</dt><dd id="performix-agreement">—</dd><small id="performix-linux-share">versus Linux perf</small></div>
+            <div><dt>Linux perf</dt><dd id="performix-linux-share">—</dd><small>cycle attribution to the KleidiAI callchain</small></div>
           </dl>
           <div class="kernel-proof">
             <span>Observed Neoverse kernel</span>
             <code id="performix-kernel">—</code>
           </div>
+          <p id="performix-scope-note" class="capability-note"></p>
           <p id="performix-capability-note" class="capability-note"></p>
         </section>
 
         <section class="proof-section" aria-labelledby="claims-title">
           <div class="section-heading">
-            <div><p class="eyebrow">Causal claim ledger</p><h2 id="claims-title">What the release gate established</h2></div>
+            <div><p class="eyebrow">Causal claim ledger</p><h2 id="claims-title">Claims in this release receipt</h2></div>
             <a class="text-link" href="https://github.com/QasimKhan5x/ArmProof/blob/main/submission/TECHNICAL_EVIDENCE.md">Open technical evidence</a>
           </div>
           <div class="table-wrap">
@@ -319,7 +309,7 @@
 
         <section class="proof-section" aria-labelledby="evidence-chain-title">
           <div class="section-heading compact-heading">
-            <div><p class="eyebrow">Authoritative evidence path</p><h2 id="evidence-chain-title">The dashboard cannot approve itself</h2></div>
+            <div><p class="eyebrow">Authoritative evidence path</p><h2 id="evidence-chain-title">How the release decision is produced</h2></div>
             <span id="proof-evidence-count" class="source-chip">Verifying evidence...</span>
           </div>
           <ol class="evidence-chain">
@@ -332,15 +322,27 @@
 
         <section class="proof-section" aria-labelledby="stack-title">
           <div class="section-heading compact-heading">
-            <div><p class="eyebrow">Arm optimization path</p><h2 id="stack-title">From model migration to executed kernels</h2></div>
+            <div><p class="eyebrow">Arm optimization path</p><h2 id="stack-title">One matched control from service to kernel</h2></div>
           </div>
-          <ol class="stack-path">
-            <li><span>1</span><div><strong id="stack-model">—</strong><small>Cloud support classification workload</small></div></li>
-            <li><span>2</span><div><strong>INT4 ONNX</strong><small id="artifact-reduction">—</small></div></li>
-            <li><span>3</span><div><strong id="stack-runtime">—</strong><small>Identical runtime and model in both treatments</small></div></li>
-            <li><span>4</span><div><strong>KleidiAI</strong><small id="direct-speedup">—</small></div></li>
-            <li><span>5</span><div><strong id="stack-machine">—</strong><small id="capacity-range">—</small></div></li>
+          <ol class="stack-path arm-stack-path">
+            <li><span>1</span><div><strong id="stack-model">—</strong><small>Same INT4 model and BANKING77 workload</small></div></li>
+            <li><span>2</span><div><strong id="stack-runtime">—</strong><small>Same runtime lock, instance, threads, and SLO</small></div></li>
+            <li><span>3</span><div><strong>Enable KleidiAI</strong><small>Change only <code>mlas.disable_kleidiai</code></small></div></li>
+            <li><span>4</span><div><strong id="stack-machine">—</strong><small id="capacity-range">—</small></div></li>
           </ol>
+        </section>
+
+        <section class="proof-section migration-proof" aria-labelledby="migration-title">
+          <div>
+            <p class="eyebrow">Separate deployment migration</p>
+            <h2 id="migration-title">BF16 to INT4 reduces the deployment footprint</h2>
+            <p>These whole-deployment gains are useful, but they are not attributed to the KleidiAI switch above.</p>
+          </div>
+          <dl>
+            <div><dt>Artifact size</dt><dd id="artifact-reduction">—</dd></div>
+            <div><dt>Peak process memory</dt><dd id="memory-reduction">—</dd></div>
+            <div><dt>Quality change</dt><dd id="migration-quality">—</dd></div>
+          </dl>
         </section>
 
         <div class="proof-columns">
@@ -369,8 +371,13 @@
           </div>
           <pre><code>- uses: <span id="release-action">—</span>
   with:
-    config: armproof.json</code></pre>
-          <a id="release-link" class="primary-link" href="https://github.com/QasimKhan5x/ArmProof">View source and evidence</a>
+    config: armproof.json
+    contract-sha256: <span id="release-contract-sha">—</span></code></pre>
+          <div class="release-actions">
+            <button id="tamper-check" class="primary-button" type="button" disabled>Test a one-byte evidence change</button>
+            <a id="release-link" class="primary-link" href="https://github.com/QasimKhan5x/ArmProof">View source and evidence</a>
+          </div>
+          <pre id="tamper-result" class="tamper-result" role="status" aria-live="polite" hidden></pre>
         </section>
 
         <section class="proof-section reuse-walkthrough" aria-labelledby="reuse-title">
@@ -383,6 +390,8 @@
             <li><span>2</span><div><strong>Collect real evidence</strong><code>cat my-arm-service/ADOPTION_CHECKLIST.md</code></div><button class="copy-button" type="button" data-copy="cat my-arm-service/ADOPTION_CHECKLIST.md">Copy</button></li>
             <li><span>3</span><div><strong>Add the portable gate</strong><code id="reuse-action">uses: —</code></div><button id="reuse-action-copy" class="copy-button" type="button" data-copy="">Copy</button></li>
           </ol>
+          <button id="preview-scaffold" class="secondary-button" type="button">Generate a starter kit preview</button>
+          <pre id="scaffold-preview" class="scaffold-preview" aria-live="polite" hidden></pre>
           <p id="copy-status" class="copy-status" role="status" aria-live="polite"></p>
         </section>
       </div>

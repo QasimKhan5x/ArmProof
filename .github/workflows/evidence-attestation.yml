@@ -14,29 +14,33 @@ jobs:
   attest-evidence:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
       - name: Derive and evaluate the release decision
         run: |
           python -m pip install .
-          armproof ci examples/armproof-reference/armproof.json --output build/armproof-report
+          armproof ci examples/armproof-reference/armproof.json \
+            --output build/armproof-report \
+            --contract-sha256 3dea0ec2062275181902907d011d27d2b83b11b3ea2e9f8ed5cbce38ede9ff0c
       - name: Assemble immutable publication bundle
         run: |
           tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner \
             -czf build/armproof-evidence.tar.gz \
-            ops/evidence/EXP-2026-004/accepted/evidence \
-            ops/evidence/EXP-2026-005/accepted/evidence \
+            ops/evidence/EXP-2026-009/evidence.tar.gz \
+            ops/evidence/EXP-2026-010/evidence.tar.gz \
+            data/banking77/generated \
+            data/banking77/source \
             examples/armproof-reference \
             build/armproof-report
           (cd build && sha256sum armproof-evidence.tar.gz > armproof-evidence.tar.gz.sha256)
       - name: Attest bundle provenance
-        uses: actions/attest@v4
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
         with:
           subject-path: build/armproof-evidence.tar.gz
       - name: Upload attested evidence
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: armproof-attested-evidence
           path: |

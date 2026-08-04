@@ -2,8 +2,9 @@
 
 ## Run SurgeDesk
 
-The application demo is static, but its cases and measurements are generated
-from accepted, checksummed experiment files:
+The application works from accepted, checksummed experiment files without
+cloud access. Its local gateway streams a fresh archive derivation, and optional
+live endpoints add real matched Arm64 requests:
 
 ```bash
 python3.12 scripts/build_surgedesk_demo.py --verify
@@ -11,7 +12,7 @@ python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
 Open `http://127.0.0.1:8765/surgedesk/#triage`. Choose **Guard intervention**
-or **Human correction**, then continue through Arm result and Release proof.
+or **Human correction**, then continue through Capacity audit and Release gate.
 The views are directly addressable as `#triage`, `#surge`, and `#proof`. See
 [`SURGEDESK_DEMO.md`](SURGEDESK_DEMO.md) for provenance and narration.
 
@@ -25,8 +26,8 @@ python3.12 -m pip install .
 armproof ci examples/armproof-reference/armproof.json
 ```
 
-The command verifies and derives from 317 checksum-bound files: 282 capacity
-and reproduction files plus the 35-file native Arm Performix bundle. It then writes a
+The command verifies and derives from 69 checksummed files in the sustained
+archive and 35 in the native Arm Performix bundle. It re-derives 4,200 request outcomes, then writes a
 machine-readable decision, a verification receipt and an offline `index.html`.
 Exit `0` means all required claims passed, `2` means at least one required
 claim failed or is unknown, and `1` means the inputs could not be evaluated.
@@ -56,13 +57,14 @@ Create an `armproof.json` matching
 [`schemas/ci-config.schema.json`](../schemas/ci-config.schema.json), then add:
 
 ```yaml
-- uses: QasimKhan5x/ArmProof@v0.6.0
+- uses: QasimKhan5x/ArmProof@v0.7.0
   with:
     config: armproof.json
     output: build/armproof-report
+    contract-sha256: 3dea0ec2062275181902907d011d27d2b83b11b3ea2e9f8ed5cbce38ede9ff0c
 
 - if: always()
-  uses: actions/upload-artifact@v4
+  uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
   with:
     name: armproof-report
     path: build/armproof-report

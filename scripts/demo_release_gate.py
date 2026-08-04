@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Demonstrate that ArmProof passes verified evidence and blocks tampering."""
+"""Run the same sustained release decision used by SurgeDesk and CI."""
 
 from __future__ import annotations
 
@@ -25,21 +25,17 @@ def _run(config: Path, output: Path) -> tuple[int, str]:
     return status, stderr.getvalue().strip()
 
 
-def _config(root: Path, checksum_ledger: Path) -> Path:
-    primary = ROOT / "ops/evidence/EXP-2026-004/accepted/evidence"
-    reproduction = ROOT / "ops/evidence/EXP-2026-005/accepted/evidence"
+def _config(root: Path, archive: Path) -> Path:
     payload = {
         "schema_version": "1.0.0",
-        "contract": str(ROOT / "examples/armproof-reference/contract.json"),
+        "contract": str(ROOT / "examples/armproof-reference/sustained-contract.json"),
         "evidence": {
-            "adapter": "kleidiai-capacity-v1",
-            "root": str(primary),
-            "checksums": str(checksum_ledger),
+            "adapter": "kleidiai-sustained-v1",
+            "archive": str(archive),
+            "archive_sha256": (
+                "f22e647aabe40eefd2abc5548306f40e2a5558ce1a85bc31c18319e6e51d78da"
+            ),
             "workload_manifest": str(ROOT / "data/banking77/generated/manifest.json"),
-            "reproduction": {
-                "root": str(reproduction),
-                "checksums": str(reproduction / "SHA256SUMS"),
-            },
             "performix": {
                 "archive": str(
                     ROOT / "ops/evidence/EXP-2026-010/evidence.tar.gz"
@@ -64,43 +60,39 @@ def _config(root: Path, checksum_ledger: Path) -> Path:
 
 
 def demonstrate() -> int:
-    primary = ROOT / "ops/evidence/EXP-2026-004/accepted/evidence"
+    archive = ROOT / "ops/evidence/EXP-2026-009/evidence.tar.gz"
     with tempfile.TemporaryDirectory() as directory:
         temporary = Path(directory)
-        valid_config = _config(temporary, primary / "SHA256SUMS")
+        valid_config = _config(temporary, archive)
         valid_status, valid_error = _run(valid_config, temporary / "valid-report")
         if valid_status != 0:
             print(f"UNEXPECTED FAILURE: {valid_error}", file=sys.stderr)
             return 1
-        receipt = json.loads(
-            (temporary / "valid-report/verification.json").read_text(encoding="utf-8")
-        )
-        checked = (
-            receipt["checksums"]["checked"]
-            + receipt["reproduction_checksums"]["checked"]
-            + receipt["performix"]["internal_checksums"]["checked"]
-        )
         decision = json.loads(
             (temporary / "valid-report/decision.json").read_text(encoding="utf-8")
         )
         claim_count = len(decision["claims"])
+        comparison = json.loads(
+            (temporary / "valid-report/comparison.json").read_text(encoding="utf-8")
+        )
+        print(f"PASS    {claim_count}/{claim_count} claims from 4,200 raw request outcomes")
         print(
-            f"PASS    {claim_count}/{claim_count} claims from {checked} verified files"
+            "RELEASE at least "
+            f"{comparison['metrics']['minimum_capacity_ratio']:.2f}x sustainable capacity"
         )
 
-        lines = (primary / "SHA256SUMS").read_text(encoding="utf-8").splitlines()
-        lines[0] = f"{'0' * 64}  {lines[0].split(maxsplit=1)[1]}"
-        tampered_ledger = temporary / "TAMPERED-SHA256SUMS"
-        tampered_ledger.write_text("\n".join(lines) + "\n", encoding="utf-8")
-        tampered_config = _config(temporary, tampered_ledger)
+        tampered_archive = temporary / "altered-evidence.tar.gz"
+        payload = bytearray(archive.read_bytes())
+        payload[-1] ^= 1
+        tampered_archive.write_bytes(payload)
+        tampered_config = _config(temporary, tampered_archive)
         tampered_status, tampered_error = _run(
             tampered_config, temporary / "tampered-report"
         )
-        if tampered_status != 1 or "checksum verification failed" not in tampered_error:
+        if tampered_status != 1 or "digest" not in tampered_error:
             print("UNEXPECTED RESULT: tampered evidence was not blocked", file=sys.stderr)
             return 1
-        print("TAMPER  replaced one digest in a temporary copy of the primary ledger")
-        print("BLOCK   release refused before policy evaluation: checksum mismatch")
+        print("BLOCK   altered archive refused before derivation")
     return 0
 
 

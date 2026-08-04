@@ -40,13 +40,17 @@ for (const viewport of [
     });
     await page.setViewportSize(viewport);
     await page.goto(reportUrl);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Arm-native capacity, proven before merge.');
-    await expect(page.locator('.mix')).toHaveCount(3);
-    await expect(page.locator('.claim')).toHaveCount(8);
-    await expect(page.locator('#min-ratio')).toHaveText('2.5x');
-    await expect(page.locator('#reproduction-note')).toContainText('0% relative difference');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Measured capacity, verified before merge.');
+    await expect(page.locator('.mix')).toHaveCount(1);
+    await expect(page.locator('.claim')).toHaveCount(9);
+    await expect(page.locator('#min-ratio')).toHaveText('2.0x');
+    await expect(page.locator('#capacity-description')).toContainText('Conservative lower bound');
+    await expect(page.locator('.bar-row').nth(0)).toContainText('Baseline fail');
+    await expect(page.locator('.bar-row').nth(1)).toContainText('Optimized pass');
+    await expect(page.locator('#reproduction-note')).toBeHidden();
     await page.getByRole('tab', { name: 'Evidence & provenance' }).click();
-    await expect(page.locator('#verification-detail')).toContainText('317 files verified');
+    await expect(page.locator('#verification-detail')).toContainText('104 files verified');
+    await expect(page.locator('#verification-detail')).toContainText('sustained and native Arm Performix bundles');
     await expect(page.locator('#performix-section')).toBeVisible();
     await expect(page.locator('#performix-disabled')).toContainText('0%');
     await expect(page.locator('#performix-enabled')).toContainText('67.02%');
@@ -57,6 +61,9 @@ for (const viewport of [
     await page.screenshot({ path: `build/screenshots/report-${viewport.name}-overview.png`, fullPage: true });
     await page.getByRole('tab', { name: 'Evidence & provenance' }).click();
     await expect(page.getByRole('heading', { name: 'Evidence history' })).toBeVisible();
+    await expect(page.locator('#history')).toContainText('EXP-2026-009');
+    await expect(page.locator('#history')).toContainText('Original exact bracket rejected');
+    await expect(page.locator('#history')).toContainText('EXP-2026-010');
     await expect(page.locator('#provenance tr')).toHaveCount(4);
     expect(messages).toEqual([]);
     if (viewport.name === 'desktop') {

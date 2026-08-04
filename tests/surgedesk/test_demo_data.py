@@ -21,9 +21,13 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertEqual(mixed["optimized_sustainable_rps"], 0.56)
         self.assertAlmostEqual(mixed["tested_pass_point_ratio"], 2.3333333333)
         self.assertEqual(mixed["minimum_capacity_ratio"], 2.0)
-        self.assertEqual(mixed["preregistered_upper_ratio"], 2.5)
         self.assertEqual(mixed["optimized_probe_passes"], 1)
         self.assertEqual(mixed["confirmation_seconds"], 500)
+        self.assertEqual(len(mixed["trial_matrix"]), 4)
+        self.assertEqual(
+            mixed["trial_matrix"][3]["outcomes"],
+            ["fail", "pass", "fail", "fail", "fail"],
+        )
         self.assertEqual(self.payload["provenance"]["experiment_id"], "EXP-2026-009")
         self.assertFalse(self.payload["provenance"]["original_gate_passed"])
         self.assertTrue(self.payload["provenance"]["corrected_claim_passed"])
@@ -55,10 +59,8 @@ class SurgeDeskPayloadTests(unittest.TestCase):
             {"straight-through", "guard-intervention", "human-correction"},
         )
 
-    def test_displayed_claim_boundaries_include_evidence_formulas(self) -> None:
+    def test_displayed_claim_boundary_is_the_conservative_formula(self) -> None:
         boundary = self.payload["provenance"]["claim_boundary"]
-        self.assertEqual(boundary["preregistered_upper_ratio"], 2.5)
-        self.assertEqual(boundary["preregistered_upper_formula"], "0.60 / 0.24")
         self.assertEqual(boundary["released_lower_ratio"], 2.0)
         self.assertEqual(boundary["released_lower_formula"], "0.56 / 0.28")
 
@@ -81,17 +83,6 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         for literal in forbidden:
             self.assertNotIn(literal, html)
             self.assertNotIn(literal, javascript)
-
-    def test_replay_uses_raw_confirmation_samples(self) -> None:
-        replay = self.payload["replay"]
-        self.assertEqual(replay["source_experiment_id"], "EXP-2026-004")
-        self.assertEqual(replay["baseline"]["offered_rps"], 0.26666666666666666)
-        self.assertEqual(replay["optimized"]["offered_rps"], 0.26666666666666666)
-        self.assertGreater(replay["baseline"]["p95_ms"], 10_000)
-        self.assertLess(replay["optimized"]["p95_ms"], 10_000)
-        self.assertEqual(len(replay["baseline"]["events"]), 8)
-        self.assertEqual(len(replay["optimized"]["events"]), 8)
-        self.assertTrue(all(event["latency_ms"] > 0 for event in replay["baseline"]["events"]))
 
     def test_reproduction_and_arm_attribution_are_explicit(self) -> None:
         proof = self.payload["proof"]

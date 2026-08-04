@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from armproof.reference.phi4 import create_ort_variant, validate_request
+from armproof.reference.phi4 import _ort_model_identity, create_ort_variant, validate_request
 
 
 class Phi4ReferenceTests(unittest.TestCase):
@@ -30,6 +30,14 @@ class Phi4ReferenceTests(unittest.TestCase):
             disabled_options.pop("mlas.disable_kleidiai")
             self.assertEqual(enabled_config, disabled_config)
             self.assertTrue((enabled / "model.onnx").is_symlink())
+            enabled_identity, enabled_control, enabled_threads = _ort_model_identity(enabled)
+            disabled_identity, disabled_control, disabled_threads = _ort_model_identity(disabled)
+            self.assertEqual(enabled_identity, disabled_identity)
+            self.assertEqual((enabled_control, disabled_control), ("0", "1"))
+            self.assertEqual((enabled_threads, disabled_threads), (16, 16))
+            (source / "model.onnx").write_bytes(b"changed-model")
+            changed_identity, _, _ = _ort_model_identity(enabled)
+            self.assertNotEqual(changed_identity, enabled_identity)
 
     def test_request_contract_is_bounded(self) -> None:
         self.assertEqual(validate_request({"request_id": "r", "prompt": "p"}), ("r", "p", 64))

@@ -7,16 +7,17 @@ the product demo are checked into the public repository.
 ## 60-Second Path
 
 1. Open https://qasimkhan5x.github.io/ArmProof/surgedesk/#triage.
-2. Choose **Guard intervention**, load the suggestion and inspect the direct
-   LLM queue versus the guarded queue.
-3. Open **Arm result**, inspect the sustained experiment identity and checksum
-   status, then click **Load verified experiment**. The page shows why the
-   original exact 2.5x gate was blocked and derives the conservative at-least-2x
-   capacity result from five 500-second confirmations per boundary.
-4. Open **Release proof**. Inspect the core Arm Performix causal experiment,
+2. Load a support request, inspect the model and guarded queues, and confirm the
+   route.
+3. Open **Capacity audit** and click **Verify measured experiment**. GitHub Pages
+   opens the checked-in audit receipt; the local runbook performs a fresh
+   archive derivation. The four-row trial matrix exposes every result and
+   derives the at-least-2x lower bound from boundaries that agreed in all five
+   500-second trials.
+4. Open **Release gate**. Inspect the core Arm Performix causal experiment,
    claim ledger, optimization path, exact deployment and reusable GitHub
    Action. This view shows 0% versus 67.02% measured `kai_*` function samples
-   and its independent agreement with Linux perf.
+   while Linux perf separately shows 68.53% cycle attribution.
 
 The public page is an evidence-backed application, not a live AWS dependency.
 Recorded output is labeled. Edited text is rejected rather than presented as
@@ -46,11 +47,8 @@ python3.12 -m venv .venv
 Expected behavior:
 
 - exit `0`;
-- 317 files across the reference capacity, reproduction and native Performix
-  bundles verify, and the product also
-  binds the 69-file sustained audit through its immutable archive digest;
-- eight required claims and the mandatory matched Performix attribution pass
-  from evidence derived by the adapter;
+- all 69 sustained and 35 native Performix checksummed evidence files verify;
+- 4,200 raw request outcomes are re-derived and nine required claims pass;
 - an offline report and machine-readable decision are written; and
 - the reference passing deployment remains linked to that reference decision.
 
@@ -60,11 +58,12 @@ To see a release blocked:
 python3.12 scripts/demo_release_gate.py
 ```
 
-The script alters only a temporary copy of one ledger digest. Expected output
-is a valid eight-claim plus Performix pass followed by a checksum block before
-policy runs.
+The script alters only a temporary archive copy. Expected output is a valid
+nine-claim pass followed by a digest block before metric derivation.
+The same one-byte check is available as a button in the local Release gate
+view, so judges can inspect the block without leaving the application.
 
-Scaffold a new endpoint without generating synthetic passing evidence:
+Scaffold a new HTTP classification endpoint without generating passing evidence:
 
 ```bash
 armproof init \

@@ -57,11 +57,36 @@
         },
         {
           "type": "object",
+          "additionalProperties": false,
+          "required": ["adapter", "archive", "archive_sha256", "workload_manifest", "performix"],
+          "properties": {
+            "adapter": {"const": "kleidiai-sustained-v1"},
+            "archive": {"type": "string", "minLength": 1},
+            "archive_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "workload_manifest": {"type": "string", "minLength": 1},
+            "performix": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["archive", "archive_sha256", "experiment_id", "disabled_run_id", "enabled_run_id", "linux_perf_kai_cycle_share", "maximum_share_difference"],
+              "properties": {
+                "archive": {"type": "string", "minLength": 1},
+                "archive_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "experiment_id": {"type": "string", "minLength": 1},
+                "disabled_run_id": {"type": "string", "minLength": 1},
+                "enabled_run_id": {"type": "string", "minLength": 1},
+                "linux_perf_kai_cycle_share": {"type": "number", "minimum": 0, "maximum": 1},
+                "maximum_share_difference": {"type": "number", "minimum": 0, "maximum": 1}
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
           "required": ["adapter"],
           "properties": {
             "adapter": {
               "type": "string",
-              "pattern": "^(?!(kleidiai-capacity-v1|http-slo-v1)$).+"
+              "pattern": "^(?!(kleidiai-capacity-v1|kleidiai-sustained-v1|http-slo-v1)$).+"
             }
           }
         }

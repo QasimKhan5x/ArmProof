@@ -8,7 +8,7 @@ import json
 import math
 import re
 from collections import defaultdict
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Mapping
@@ -167,8 +167,14 @@ def _derive_capacity(
                     if minimum_requests is None
                     else min(minimum_requests, observed_minimum)
                 )
-                pass_summary = summarize_samples(pass_rows, float(seconds))
-                fail_summary = summarize_samples(fail_rows, float(seconds))
+                pass_summary = summarize_samples(
+                    [replace(row, started_ns=row.scheduled_ns) for row in pass_rows],
+                    float(seconds),
+                )
+                fail_summary = summarize_samples(
+                    [replace(row, started_ns=row.scheduled_ns) for row in fail_rows],
+                    float(seconds),
+                )
                 pass_offered = len(pass_rows) / float(seconds)
                 fail_offered = len(fail_rows) / float(seconds)
                 if not _passes(pass_summary, pass_offered, policy):

@@ -9,21 +9,24 @@ reproducibility claims are supported by matched evidence.
 ## Application Showcase
 
 SurgeDesk makes that infrastructure legible through a realistic banking
-support workflow. An operator reviews recorded Phi-4 Mini routing suggestions,
-then inspects recorded BANKING77 traffic. With the model, runtime, machine and
+support workflow. An operator reviews Phi-4 Mini routing suggestions, sends a
+matched live request check, and then hands the deployment to the platform
+engineer's sustained BANKING77 audit. With
+the model, runtime, machine and
 SLO fixed, enabling KleidiAI raises the five-of-five passing point from 0.24 to
 0.56 requests/second; baseline 0.28 fails five of five, proving at least 2.0x
-more sustainable capacity. ArmProof also shows why an earlier exact 2.5x claim
-was rejected and provides the conservative passing deployment.
+more sustainable capacity. The complete trial matrix keeps the unstable 0.60
+r/s probe visible while the release uses only boundaries that agreed in every
+window.
 
 For product quality, Phi-4 supplies a detailed intent while a tiny local queue
 guard maps the request into one of five operational queues. On a disjoint
 770-request holdout this raises queue accuracy from 74.42% to 86.75%, while a
 human remains the final decision maker.
 
-SurgeDesk is not a second benchmark dashboard. It is the application whose
-customer queue benefits from the optimization; ArmProof is the reusable
-developer artifact that prevents unsupported optimization claims.
+SurgeDesk is the application whose customer queue benefits from the
+optimization. ArmProof is the reusable developer artifact that prevents
+unsupported optimization claims.
 
 ## User And Painful Moment
 

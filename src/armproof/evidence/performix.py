@@ -250,6 +250,29 @@ def _verify_internal_ledger(
     return checked
 
 
+def _parse_lscpu(text: str) -> dict[str, Any]:
+    fields = {}
+    for line in text.splitlines():
+        if ":" in line:
+            name, value = line.split(":", 1)
+            fields[name.strip()] = value.strip()
+    try:
+        cpu_count = int(fields["CPU(s)"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError("Performix lscpu capture lacks a valid CPU count") from exc
+    machine = {
+        "architecture": fields.get("Architecture"),
+        "cpu_count": cpu_count,
+        "vendor_id": fields.get("Vendor ID"),
+        "bios_vendor_id": fields.get("BIOS Vendor ID"),
+        "model_name": fields.get("Model name"),
+        "bios_model_name": fields.get("BIOS Model name"),
+    }
+    if machine["architecture"] not in {"aarch64", "arm64"}:
+        raise ValueError("Performix machine capture is not Arm64")
+    return machine
+
+
 def verify_performix_archive(
     archive_path: Path,
     *,
@@ -273,6 +296,7 @@ def verify_performix_archive(
         raise ValueError("Performix experiment and run IDs must be non-empty")
     if disabled_run_id == enabled_run_id:
         raise ValueError("Performix disabled and enabled run IDs must differ")
+    identity_binding: dict[str, Any] | None = None
     try:
         with tarfile.open(archive_path, "r:gz") as archive:
             members = _archive_members(archive)
@@ -292,6 +316,87 @@ def verify_performix_archive(
                 members,
                 f"evidence/performix/exports/{enabled_run_id}.zip",
             )
+            runtime_member = members.get("evidence/runtime-lock.json")
+            if runtime_member is not None:
+                runtime_bytes = _member_bytes(
+                    archive, members, "evidence/runtime-lock.json"
+                )
+                runtime = json.loads(runtime_bytes)
+                lscpu = _parse_lscpu(
+                    _member_bytes(archive, members, "evidence/lscpu.txt").decode("utf-8")
+                )
+                uname = _member_bytes(
+                    archive, members, "evidence/uname.txt"
+                ).decode("utf-8").strip()
+                if "aarch64" not in uname and "arm64" not in uname:
+                    raise ValueError("Performix uname capture is not Arm64")
+                treatments = experiment.get("treatments")
+                if not isinstance(treatments, list) or len(treatments) != 2:
+                    raise ValueError("Performix experiment lacks matched treatments")
+                treatment_index = {
+                    row.get("id"): row for row in treatments if isinstance(row, dict)
+                }
+                if set(treatment_index) != {"kleidiai-disabled", "kleidiai-enabled"}:
+                    raise ValueError("Performix experiment treatment identities are invalid")
+                disabled_row = treatment_index["kleidiai-disabled"]
+                enabled_row = treatment_index["kleidiai-enabled"]
+                for field in ("artifact_ref", "runtime_ref", "command_ref", "environment_overrides"):
+                    if field not in disabled_row or field not in enabled_row:
+                        raise ValueError(f"Performix experiment is missing {field}")
+                normalized_artifacts = {
+                    str(disabled_row["artifact_ref"]).replace(
+                        "disabled overlay", "TREATMENT overlay"
+                    ),
+                    str(enabled_row["artifact_ref"]).replace(
+                        "enabled overlay", "TREATMENT overlay"
+                    ),
+                }
+                if len(normalized_artifacts) != 1 or (
+                    disabled_row["runtime_ref"] != enabled_row["runtime_ref"]
+                ):
+                    raise ValueError("Performix model or runtime declarations do not match")
+                model = runtime.get("model_int4")
+                if not isinstance(model, dict):
+                    raise ValueError("Performix runtime lock lacks the INT4 model identity")
+                expected_model_ref = (
+                    f"{model.get('id')}@{model.get('revision')}#{model.get('path')}"
+                )
+                if not next(iter(normalized_artifacts)).startswith(expected_model_ref):
+                    raise ValueError("Performix model declaration contradicts its runtime lock")
+                workload_ref = experiment.get("workload_ref")
+                environment_ref = experiment.get("environment_ref")
+                if not isinstance(workload_ref, str) or not workload_ref or not isinstance(
+                    environment_ref, str
+                ) or not environment_ref:
+                    raise ValueError("Performix experiment workload or environment is missing")
+                if any(
+                    workload_ref not in str(row["command_ref"])
+                    for row in (disabled_row, enabled_row)
+                ):
+                    raise ValueError("Performix commands do not use the declared workload")
+                disabled_environment = disabled_row["environment_overrides"]
+                enabled_environment = enabled_row["environment_overrides"]
+                if not isinstance(disabled_environment, dict) or not isinstance(
+                    enabled_environment, dict
+                ):
+                    raise ValueError("Performix treatment environments are invalid")
+                disabled_control = disabled_environment.pop("mlas.disable_kleidiai", None)
+                enabled_control = enabled_environment.pop("mlas.disable_kleidiai", None)
+                if (
+                    disabled_control != "1"
+                    or enabled_control != "0"
+                    or disabled_environment != enabled_environment
+                ):
+                    raise ValueError("Performix environments differ beyond the Arm control")
+                identity_binding = {
+                    "runtime_sha256": _sha256_bytes(runtime_bytes),
+                    "model_ref": expected_model_ref,
+                    "workload_ref": workload_ref,
+                    "environment_ref": environment_ref,
+                    "matched_environment": disabled_environment,
+                    "machine": lscpu,
+                    "uname": uname,
+                }
     except (json.JSONDecodeError, tarfile.TarError, UnicodeDecodeError) as exc:
         raise ValueError("malformed Performix evidence archive") from exc
     with tempfile.TemporaryDirectory() as directory:
@@ -315,5 +420,6 @@ def verify_performix_archive(
         "experiment_id": expected_experiment_id,
         "archive_sha256": observed_archive_sha256,
         "internal_checksums": {"passed": True, "checked": checked},
+        "identity_binding": identity_binding,
         "evidence_source": "native_arm_performix_code_hotspots_exports",
     }
