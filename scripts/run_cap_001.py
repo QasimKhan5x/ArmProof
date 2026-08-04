@@ -17,7 +17,7 @@ from armproof.adapters.http_service import (
     ServiceSpec,
 )
 from armproof.collectors.memory import parse_smaps_rollup
-from armproof.evidence.identity import fingerprint_path
+from armproof.artifacts import fingerprint_path
 from armproof.experiments import (
     CapacityProtocol,
     FixedBoundary,

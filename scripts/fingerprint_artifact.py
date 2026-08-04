@@ -8,7 +8,7 @@ import sys
 from dataclasses import asdict
 from pathlib import Path
 
-from armproof.evidence.identity import fingerprint_path
+from armproof.artifacts import fingerprint_path
 
 
 def main() -> None:

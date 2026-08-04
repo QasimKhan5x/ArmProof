@@ -16,6 +16,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any, Protocol
 
+from armproof.artifacts import fingerprint_path
+
 CHAT = "<|user|>{}<|end|><|assistant|>"
 MAX_BODY_BYTES = 1024 * 1024
 
@@ -38,6 +40,7 @@ def create_ort_variant(source: Path, destination: Path, enabled: bool, threads: 
         raise FileNotFoundError(config_path)
     destination.mkdir(parents=True)
     try:
+        source_identity = fingerprint_path(source)
         for item in source.iterdir():
             target = destination / item.name
             if item.name == "genai_config.json":
@@ -48,6 +51,20 @@ def create_ort_variant(source: Path, destination: Path, enabled: bool, threads: 
                 target.write_text(json.dumps(config, indent=2, sort_keys=True) + "\n")
             else:
                 target.symlink_to(item.resolve())
+        (destination / "armproof_source_identity.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "source_artifact_sha256": source_identity.sha256,
+                    "source_path": str(source.resolve()),
+                    "source_files": source_identity.files,
+                    "source_bytes": source_identity.bytes,
+                },
+                indent=2,
+                sort_keys=True,
+            ) + "\n",
+            encoding="utf-8",
+        )
     except Exception:
         shutil.rmtree(destination)
         raise
@@ -92,7 +109,7 @@ def _model_item_fingerprint(path: Path) -> dict[str, Any]:
     }
 
 
-def _ort_model_identity(model_path: Path) -> tuple[str, str, int]:
+def _ort_model_identity(model_path: Path) -> tuple[str, str, str, int]:
     """Identify matched variants while excluding only the declared control."""
     config_path = model_path / "genai_config.json"
     config = json.loads(config_path.read_text(encoding="utf-8"))
@@ -100,9 +117,25 @@ def _ort_model_identity(model_path: Path) -> tuple[str, str, int]:
     options = normalized["model"]["decoder"]["session_options"]
     control = str(options.pop("mlas.disable_kleidiai"))
     threads = int(options["intra_op_num_threads"])
+    source_identity = json.loads(
+        (model_path / "armproof_source_identity.json").read_text(encoding="utf-8")
+    )
+    source_artifact_sha256 = source_identity.get("source_artifact_sha256")
+    if (
+        not isinstance(source_artifact_sha256, str)
+        or len(source_artifact_sha256) != 64
+        or any(character not in "0123456789abcdef" for character in source_artifact_sha256)
+    ):
+        raise ValueError("variant source artifact identity is invalid")
+    source_path = source_identity.get("source_path")
+    if (
+        not isinstance(source_path, str)
+        or fingerprint_path(Path(source_path)).sha256 != source_artifact_sha256
+    ):
+        raise ValueError("variant source artifact no longer matches its identity")
     files = []
     for path in sorted(model_path.iterdir(), key=lambda item: item.name):
-        if path.name == "genai_config.json":
+        if path.name in {"genai_config.json", "armproof_source_identity.json"}:
             continue
         resolved = path.resolve()
         fingerprint = _model_item_fingerprint(resolved)
@@ -115,14 +148,14 @@ def _ort_model_identity(model_path: Path) -> tuple[str, str, int]:
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
-    return hashlib.sha256(payload).hexdigest(), control, threads
+    return hashlib.sha256(payload).hexdigest(), source_artifact_sha256, control, threads
 
 
 class OrtInt4Backend:
     def __init__(self, model_path: Path, label: str) -> None:
         import onnxruntime_genai as og
 
-        model_identity, control, threads = _ort_model_identity(model_path)
+        model_identity, source_artifact_sha256, control, threads = _ort_model_identity(model_path)
         self.og = og
         self.model = og.Model(str(model_path))
         self.tokenizer = og.Tokenizer(self.model)
@@ -131,6 +164,7 @@ class OrtInt4Backend:
             "runtime": "onnxruntime-genai",
             "runtime_version": importlib.metadata.version("onnxruntime-genai"),
             "model_identity": model_identity,
+            "source_artifact_sha256": source_artifact_sha256,
             "optimization_control": {"mlas.disable_kleidiai": control},
             "threads": threads,
         }
