@@ -46,6 +46,7 @@ trap upload_results EXIT
 shutdown -h +145
 curl -fsSL "$PROJECT_BUNDLE_URL" -o /tmp/project.tar.gz
 echo "$PROJECT_BUNDLE_SHA256  /tmp/project.tar.gz" | sha256sum -c -
+printf '%s  /tmp/project.tar.gz\n' "$PROJECT_BUNDLE_SHA256" > "$RESULTS/project-bundle.sha256"
 tar -xzf /tmp/project.tar.gz -C "$WORK"
 cd "$WORK"
 
@@ -91,6 +92,11 @@ MODEL_SOURCE="$MODELS/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4
 export PYTHONPATH="$WORK/src"
 "$ROOT/venv/bin/python" scripts/prepare_phi4_variants.py \
   --source "$MODEL_SOURCE" --output-root "$ROOT/variants" --threads 16
+"$ROOT/venv/bin/python" -c \
+  'import json,sys; from dataclasses import asdict; from pathlib import Path; from armproof.evidence.identity import fingerprint_path; print(json.dumps({"source": asdict(fingerprint_path(Path(sys.argv[1]))), "disabled": asdict(fingerprint_path(Path(sys.argv[2]))), "enabled": asdict(fingerprint_path(Path(sys.argv[3])))}, indent=2, sort_keys=True))' \
+  "$MODEL_SOURCE" "$ROOT/variants/kleidiai-disabled" "$ROOT/variants/kleidiai-enabled" \
+  > "$RESULTS/artifact-identities.json"
+sha256sum data/banking77/generated/traffic-mixed.jsonl > "$RESULTS/workload.sha256"
 
 export OMP_NUM_THREADS=16
 export OMP_PROC_BIND=close

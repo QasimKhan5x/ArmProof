@@ -16,6 +16,7 @@ from armproof.evidence.performix import (
     compare_code_hotspots,
     extract_run_id,
     verify_performix_archive,
+    verify_performix_execution_archive,
 )
 
 
@@ -150,8 +151,25 @@ class PerformixExportTests(unittest.TestCase):
             (evidence / "experiment.json").write_text(
                 json.dumps({"experiment_id": "EXP-TEST"}), encoding="utf-8"
             )
+            artifact_sha256 = "a" * 64
+            workload_sha256 = "b" * 64
+            (evidence / "artifact-identities.json").write_text(
+                json.dumps({"source": {"sha256": artifact_sha256}}),
+                encoding="utf-8",
+            )
+            (evidence / "workload.sha256").write_text(
+                f"{workload_sha256}  data/workload.jsonl\n", encoding="utf-8"
+            )
+            (evidence / "performix/run-ids.tsv").write_text(
+                "code_hotspots\tdisabled\tdisabled\n"
+                "code_hotspots\tenabled\tenabled\n",
+                encoding="utf-8",
+            )
             bound = [
                 evidence / "experiment.json",
+                evidence / "artifact-identities.json",
+                evidence / "workload.sha256",
+                evidence / "performix/run-ids.tsv",
                 exports / "disabled.zip",
                 exports / "enabled.zip",
             ]
@@ -177,7 +195,62 @@ class PerformixExportTests(unittest.TestCase):
                 maximum_share_difference=0.05,
             )
             self.assertTrue(result["passed"])
-            self.assertEqual(result["internal_checksums"]["checked"], 3)
+            self.assertEqual(result["internal_checksums"]["checked"], 6)
+            execution = verify_performix_execution_archive(
+                archive_path,
+                expected_archive_sha256=digest,
+                expected_experiment_id="EXP-TEST",
+                disabled_run_id="disabled",
+                enabled_run_id="enabled",
+                minimum_enabled_share=0.5,
+                minimum_total_samples=100,
+                expected_experiment={"experiment_id": "EXP-TEST"},
+                expected_artifact_sha256=artifact_sha256,
+                expected_workload_sha256=workload_sha256,
+            )
+            self.assertTrue(execution["passed"])
+            self.assertNotIn("absolute_share_difference", execution)
+            with self.assertRaisesRegex(ValueError, "model bytes"):
+                verify_performix_execution_archive(
+                    archive_path,
+                    expected_archive_sha256=digest,
+                    expected_experiment_id="EXP-TEST",
+                    disabled_run_id="disabled",
+                    enabled_run_id="enabled",
+                    minimum_enabled_share=0.5,
+                    minimum_total_samples=100,
+                    expected_experiment={"experiment_id": "EXP-TEST"},
+                    expected_artifact_sha256="c" * 64,
+                    expected_workload_sha256=workload_sha256,
+                )
+            with self.assertRaisesRegex(ValueError, "workload bytes"):
+                verify_performix_execution_archive(
+                    archive_path,
+                    expected_archive_sha256=digest,
+                    expected_experiment_id="EXP-TEST",
+                    disabled_run_id="disabled",
+                    enabled_run_id="enabled",
+                    minimum_enabled_share=0.5,
+                    minimum_total_samples=100,
+                    expected_experiment={"experiment_id": "EXP-TEST"},
+                    expected_artifact_sha256=artifact_sha256,
+                    expected_workload_sha256="d" * 64,
+                )
+            with self.assertRaisesRegex(ValueError, "committed preregistration"):
+                verify_performix_execution_archive(
+                    archive_path,
+                    expected_archive_sha256=digest,
+                    expected_experiment_id="EXP-TEST",
+                    disabled_run_id="disabled",
+                    enabled_run_id="enabled",
+                    minimum_enabled_share=0.5,
+                    minimum_total_samples=100,
+                    expected_experiment={
+                        "experiment_id": "EXP-TEST", "acceptance": {"lowered": True}
+                    },
+                    expected_artifact_sha256=artifact_sha256,
+                    expected_workload_sha256=workload_sha256,
+                )
             with self.assertRaisesRegex(ValueError, "SHA-256 mismatch"):
                 verify_performix_archive(
                     archive_path,

@@ -295,8 +295,9 @@ def _require_aws_graviton_binding(binding: Mapping[str, Any]) -> None:
     if (
         not isinstance(machine, Mapping)
         or machine.get("bios_vendor_id") != "AWS"
-        or "AWS Graviton" not in str(machine.get("bios_model_name"))
-        or not str(machine.get("model_name", "")).startswith("Neoverse-")
+        or "AWS Graviton4" not in str(machine.get("bios_model_name"))
+        or machine.get("model_name") != "Neoverse-V2"
+        or machine.get("cpu_count") != 16
     ):
         raise ValueError("Performix machine is not an observed AWS Graviton host")
 
@@ -958,6 +959,10 @@ class KleidiAIConfirmedAdapter:
                 acceptance["minimum_total_function_samples_per_treatment"]
             ),
             expected_experiment=performix_preregistration,
+            expected_artifact_sha256=next(iter(declared_artifacts)),
+            expected_workload_sha256=_sha256(
+                _path(base, config["workload"], "workload")
+            ),
         )
         declared_treatments = {
             row["id"]: row for row in performix_preregistration["treatments"]

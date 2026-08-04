@@ -13,7 +13,7 @@ import zipfile
 from dataclasses import asdict, dataclass
 from collections.abc import Iterator
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 
 PERFORMIX_CONFIG_FIELDS = {
@@ -316,17 +316,18 @@ def _parse_lscpu(text: str) -> dict[str, Any]:
     return machine
 
 
-def verify_performix_archive(
+def _load_verified_performix_archive(
     archive_path: Path,
     *,
     expected_archive_sha256: str,
     expected_experiment_id: str,
     disabled_run_id: str,
     enabled_run_id: str,
-    linux_perf_share: float,
-    maximum_share_difference: float,
-) -> dict[str, Any]:
-    """Verify one immutable archive and derive its matched Code Hotspots result."""
+    expected_experiment: Mapping[str, Any] | None = None,
+    expected_artifact_sha256: str | None = None,
+    expected_workload_sha256: str | None = None,
+) -> tuple[bytes, bytes, int, dict[str, Any] | None, str]:
+    """Verify immutable archive provenance before interpreting profiler exports."""
     if (
         len(expected_archive_sha256) != 64
         or any(char not in "0123456789abcdef" for char in expected_archive_sha256)
@@ -349,6 +350,61 @@ def verify_performix_archive(
             )
             if experiment.get("experiment_id") != expected_experiment_id:
                 raise ValueError("Performix archive experiment ID mismatch")
+            if expected_experiment is not None and experiment != dict(expected_experiment):
+                raise ValueError(
+                    "Performix archive differs from its committed preregistration"
+                )
+            if expected_experiment is not None:
+                if (
+                    expected_artifact_sha256 is None
+                    or expected_workload_sha256 is None
+                    or len(expected_artifact_sha256) != 64
+                    or len(expected_workload_sha256) != 64
+                ):
+                    raise ValueError(
+                        "Performix execution verification requires model and workload digests"
+                    )
+                artifact_identities = json.loads(
+                    _member_bytes(archive, members, "evidence/artifact-identities.json")
+                )
+                source_identity = artifact_identities.get("source")
+                if (
+                    not isinstance(source_identity, dict)
+                    or source_identity.get("sha256") != expected_artifact_sha256
+                ):
+                    raise ValueError(
+                        "Performix model bytes differ from the release artifact"
+                    )
+                workload_line = _member_bytes(
+                    archive, members, "evidence/workload.sha256"
+                ).decode("utf-8").strip()
+                workload_parts = workload_line.split(maxsplit=1)
+                if (
+                    len(workload_parts) != 2
+                    or workload_parts[0] != expected_workload_sha256
+                ):
+                    raise ValueError(
+                        "Performix workload bytes differ from the capacity workload"
+                    )
+                run_rows = [
+                    line.split("\t")
+                    for line in _member_bytes(
+                        archive, members, "evidence/performix/run-ids.tsv"
+                    ).decode("utf-8").splitlines()
+                    if line
+                ]
+                if any(len(row) != 3 for row in run_rows):
+                    raise ValueError("Performix run-ID map is malformed")
+                run_index = {
+                    (row[0], row[1]): row[2] for row in run_rows
+                }
+                if run_index != {
+                    ("code_hotspots", "disabled"): disabled_run_id,
+                    ("code_hotspots", "enabled"): enabled_run_id,
+                }:
+                    raise ValueError(
+                        "Performix run IDs do not match the captured treatment map"
+                    )
             disabled = _member_bytes(
                 archive,
                 members,
@@ -431,33 +487,151 @@ def verify_performix_archive(
                     or disabled_environment != enabled_environment
                 ):
                     raise ValueError("Performix environments differ beyond the Arm control")
+                if expected_experiment is not None:
+                    captured_configs = {
+                        lane: json.loads(_member_bytes(
+                            archive, members, f"evidence/{lane}-genai-config.json"
+                        ))
+                        for lane in ("disabled", "enabled")
+                    }
+                    captured_sessions = {
+                        lane: captured_configs[lane]["model"]["decoder"][
+                            "session_options"
+                        ]
+                        for lane in captured_configs
+                    }
+                    if (
+                        captured_sessions["disabled"].get("mlas.disable_kleidiai") != "1"
+                        or captured_sessions["enabled"].get("mlas.disable_kleidiai") != "0"
+                        or str(captured_sessions["disabled"].get("intra_op_num_threads")) != "16"
+                        or str(captured_sessions["enabled"].get("intra_op_num_threads")) != "16"
+                    ):
+                        raise ValueError("Performix captured treatment controls are invalid")
+                    captured_sessions["disabled"]["mlas.disable_kleidiai"] = "0"
+                    if captured_configs["disabled"] != captured_configs["enabled"]:
+                        raise ValueError(
+                            "Performix captured model configs differ beyond KleidiAI"
+                        )
                 identity_binding = {
                     "runtime_sha256": _sha256_bytes(runtime_bytes),
                     "model_ref": expected_model_ref,
+                    "model_sha256": expected_artifact_sha256,
                     "workload_ref": workload_ref,
+                    "workload_sha256": expected_workload_sha256,
                     "environment_ref": environment_ref,
                     "matched_environment": disabled_environment,
                     "machine": lscpu,
                     "uname": uname,
                 }
-    except (json.JSONDecodeError, tarfile.TarError, UnicodeDecodeError) as exc:
+    except (
+        json.JSONDecodeError, KeyError, TypeError, tarfile.TarError,
+        UnicodeDecodeError,
+    ) as exc:
         raise ValueError("malformed Performix evidence archive") from exc
+    return disabled, enabled, checked, identity_binding, observed_archive_sha256
+
+
+def _derive_verified_hotspots(
+    disabled: bytes,
+    enabled: bytes,
+    disabled_run_id: str,
+    enabled_run_id: str,
+    derive: Any,
+) -> dict[str, Any]:
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         disabled_path = root / "disabled.zip"
         enabled_path = root / "enabled.zip"
         disabled_path.write_bytes(disabled)
         enabled_path.write_bytes(enabled)
-        result = compare_code_hotspots(
-            disabled_path,
-            enabled_path,
-            linux_perf_share=linux_perf_share,
-            maximum_share_difference=maximum_share_difference,
-        )
+        result = derive(disabled_path, enabled_path)
     if result["disabled"]["run_id"] != disabled_run_id:
         raise ValueError("Performix disabled export run ID mismatch")
     if result["enabled"]["run_id"] != enabled_run_id:
         raise ValueError("Performix enabled export run ID mismatch")
+    return result
+
+
+def verify_performix_archive(
+    archive_path: Path,
+    *,
+    expected_archive_sha256: str,
+    expected_experiment_id: str,
+    disabled_run_id: str,
+    enabled_run_id: str,
+    linux_perf_share: float,
+    maximum_share_difference: float,
+) -> dict[str, Any]:
+    """Verify a legacy archive with its historical cross-profiler gate."""
+    disabled, enabled, checked, identity_binding, observed_archive_sha256 = (
+        _load_verified_performix_archive(
+            archive_path,
+            expected_archive_sha256=expected_archive_sha256,
+            expected_experiment_id=expected_experiment_id,
+            disabled_run_id=disabled_run_id,
+            enabled_run_id=enabled_run_id,
+        )
+    )
+    result = _derive_verified_hotspots(
+        disabled,
+        enabled,
+        disabled_run_id,
+        enabled_run_id,
+        lambda disabled_path, enabled_path: compare_code_hotspots(
+            disabled_path,
+            enabled_path,
+            linux_perf_share=linux_perf_share,
+            maximum_share_difference=maximum_share_difference,
+        ),
+    )
+    return {
+        **result,
+        "experiment_id": expected_experiment_id,
+        "archive_sha256": observed_archive_sha256,
+        "internal_checksums": {"passed": True, "checked": checked},
+        "identity_binding": identity_binding,
+        "evidence_source": "native_arm_performix_code_hotspots_exports",
+    }
+
+
+def verify_performix_execution_archive(
+    archive_path: Path,
+    *,
+    expected_archive_sha256: str,
+    expected_experiment_id: str,
+    disabled_run_id: str,
+    enabled_run_id: str,
+    minimum_enabled_share: float,
+    minimum_total_samples: int,
+    expected_experiment: Mapping[str, Any],
+    expected_artifact_sha256: str,
+    expected_workload_sha256: str,
+) -> dict[str, Any]:
+    """Verify preregistered Code Hotspots evidence without comparing unlike units."""
+    disabled, enabled, checked, identity_binding, observed_archive_sha256 = (
+        _load_verified_performix_archive(
+            archive_path,
+            expected_archive_sha256=expected_archive_sha256,
+            expected_experiment_id=expected_experiment_id,
+            disabled_run_id=disabled_run_id,
+            enabled_run_id=enabled_run_id,
+            expected_experiment=expected_experiment,
+            expected_artifact_sha256=expected_artifact_sha256,
+            expected_workload_sha256=expected_workload_sha256,
+        )
+    )
+    result = _derive_verified_hotspots(
+        disabled,
+        enabled,
+        disabled_run_id,
+        enabled_run_id,
+        lambda disabled_path, enabled_path: compare_code_hotspots_execution(
+            disabled_path,
+            enabled_path,
+            minimum_enabled_share=minimum_enabled_share,
+            minimum_total_samples=minimum_total_samples,
+        ),
+    )
     return {
         **result,
         "experiment_id": expected_experiment_id,
