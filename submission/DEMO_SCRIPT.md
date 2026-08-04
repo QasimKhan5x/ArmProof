@@ -58,23 +58,27 @@ queues, then click **Confirm route**.
 > 770 unseen messages, the guard raises accuracy by 12.34 points. The support
 > agent reviews the suggestion and confirms it.
 
-### 0:55-1:35 - Sustained Arm Result
+### 0:55-1:42 - Sustained Arm Result
 
 **Do:** Open **2. Arm result**, click **Load verified experiment**, then point
 to the blocked claim, proven lower bound and equal-load outcomes.
 
 **Say:**
 
-> These are the long capacity tests from one c8g.4xlarge. The model, workload
-> and 16-thread runtime stayed fixed. Without KleidiAI, five runs passed at 0.24
-> requests per second. With KleidiAI, five passed at 0.56. The baseline failed
-> every run at 0.28, establishing a lower bound of twice the capacity.
+> This test asks how many banking messages one server can process while keeping
+> p95 response time under ten seconds and returning no errors. At each traffic
+> rate, we ran five 500-second trials. Without KleidiAI, 0.24 requests per second
+> passed every trial, while 0.28 failed every trial. With KleidiAI, 0.56 passed
+> all five. Since 0.56 is twice 0.28, the optimized capacity is at least twice
+> the baseline capacity.
 >
-> Earlier short tests suggested 2.5 times. We put that number through the same
-> long test. It failed, and ArmProof blocked the claim. So we publish the result
-> supported by every run: at least two times.
+> Shorter tests had suggested 2.5 times. ArmProof reprocessed all 4,200 request
+> records and required all five trials to agree. At 0.60, one trial slipped
+> under the ten-second limit by 72 milliseconds. The exact capacity boundary
+> was therefore not reproducible, so ArmProof rejected 2.5 times and released
+> only the two-times claim.
 
-### 1:35-2:15 - Prove Arm Caused It
+### 1:42-2:14 - Prove Arm Caused It
 
 **Do:** Open **3. Release proof**. Point first to **Core causal experiment**,
 then the claim ledger and optimization path.
@@ -87,19 +91,21 @@ then the claim ledger and optimization path.
 > both profiles during CI. INT4 also cut model size by 35.92 percent and peak
 > memory by 55.34 percent, while quality stayed within one point.
 
-### 2:15-2:42 - Reusable Developer Artifact
+### 2:14-2:43 - Reusable Developer Artifact
 
 **Do:** Run `demo_release_gate.py`. Point to `PASS`, `TAMPER`, `BLOCK`, then
 show the `armproof init` command in the adoption panel or README.
 
 **Say:**
 
-> Now I will alter one digest in the evidence bundle. ArmProof catches the
-> change and blocks the release. Developers can use the same check through its
-> CLI or GitHub Action, and armproof init adds the workflow to another Arm AI
-> project.
+> ArmProof first validates eight release claims across 317 files: request logs,
+> summaries and profiler exports. Now I replace one SHA-256 fingerprint in the
+> experiment ledger. The fingerprint no longer matches its evidence file, so
+> ArmProof cannot prove it is evaluating the recorded experiment and blocks the
+> release. Developers get the same check through the CLI or GitHub Action, and
+> armproof init adds it to another project.
 
-### 2:42-2:54 - Close
+### 2:43-2:55 - Close
 
 **Say:**
 
