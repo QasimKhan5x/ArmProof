@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import re
+import shlex
 from dataclasses import asdict, replace
 from importlib.metadata import entry_points
 from pathlib import Path
@@ -26,7 +27,10 @@ from armproof.evidence.pipeline import (
 from armproof.evidence.performix import (
     PERFORMIX_CONFIG_FIELDS,
     verify_performix_archive,
+    verify_performix_execution_archive,
 )
+from armproof.evidence.confirmed_audit import derive_minimum_capacity_audit
+from armproof.evidence.raw_quality import verify_raw_quality_evidence
 from armproof.policy.statistics import estimate_capacity_bracket
 from armproof.policy import decision_to_dict
 from armproof.profiling import parse_perf_attribution
@@ -871,10 +875,252 @@ class KleidiAISustainedAdapter:
         )
 
 
+class KleidiAIConfirmedAdapter:
+    """Verify the preregistered capacity and Performix confirmation runs."""
+
+    adapter_id = "kleidiai-confirmed-v2"
+
+    def verify(
+        self, contract: Contract, config: Mapping[str, Any], base: Path
+    ) -> VerifiedEvidence:
+        fields = {
+            "adapter", "archive", "archive_sha256", "preregistration", "analysis_lock",
+            "protocol_lock", "workload_manifest", "workload", "raw_quality",
+            "performix",
+        }
+        _exact_config(config, fields, self.adapter_id)
+        raw_quality_config = config["raw_quality"]
+        if not isinstance(raw_quality_config, Mapping) or set(raw_quality_config) != {
+            "root", "checksums", "ledger_sha256", "dataset"
+        }:
+            raise ValueError("confirmed adapter raw_quality config is invalid")
+        declared_artifacts = {row.artifact_sha256 for row in contract.treatments}
+        declared_runtimes = {row.runtime_sha256 for row in contract.treatments}
+        if len(declared_artifacts) != 1 or len(declared_runtimes) != 1:
+            raise ValueError("confirmed contract treatments must share model and runtime")
+        raw_quality = verify_raw_quality_evidence(
+            _path(base, raw_quality_config["root"], "raw_quality.root"),
+            _path(base, raw_quality_config["dataset"], "raw_quality.dataset"),
+            checksum_ledger=_path(
+                base, raw_quality_config["checksums"], "raw_quality.checksums"
+            ),
+            expected_ledger_sha256=str(raw_quality_config["ledger_sha256"]),
+            expected_experiment_id="EXP-2026-003",
+            expected_artifact_sha256=next(iter(declared_artifacts)),
+            expected_runtime_sha256=next(iter(declared_runtimes)),
+        )
+
+        performix = config["performix"]
+        performix_fields = {
+            "archive", "archive_sha256", "preregistration", "experiment_id",
+            "disabled_run_id", "enabled_run_id",
+        }
+        if not isinstance(performix, Mapping) or set(performix) != performix_fields:
+            raise ValueError("confirmed adapter Performix config is invalid")
+        performix_preregistration = _json(
+            _path(base, performix["preregistration"], "performix.preregistration")
+        )
+        acceptance = performix_preregistration.get("acceptance")
+        if (
+            performix_preregistration.get("experiment_id") != "EXP-2026-013"
+            or str(performix["experiment_id"]) != "EXP-2026-013"
+            or not isinstance(acceptance, Mapping)
+            or acceptance.get("required_recipe") != "code_hotspots"
+            or acceptance.get("disabled_kai_function_samples") != 0
+            or acceptance.get("matched_cpu_required") is not True
+            or acceptance.get("matched_engine_version_required") is not True
+            or acceptance.get("matched_commands_except_overlay_required") is not True
+            or acceptance.get("native_exports_required") is not True
+            or not isinstance(performix_preregistration.get("treatments"), list)
+            or len(performix_preregistration["treatments"]) != 2
+        ):
+            raise ValueError("confirmed Performix preregistration is invalid")
+        repository_root = base.parents[1]
+        declared_workload = performix_preregistration.get("workload_ref")
+        if (
+            not isinstance(declared_workload, str)
+            or (repository_root / declared_workload).resolve()
+            != _path(base, config["workload"], "workload").resolve()
+        ):
+            raise ValueError(
+                "confirmed Performix workload differs from the capacity release"
+            )
+        performix_profile = verify_performix_execution_archive(
+            _path(base, performix["archive"], "performix.archive"),
+            expected_archive_sha256=str(performix["archive_sha256"]),
+            expected_experiment_id=str(performix["experiment_id"]),
+            disabled_run_id=str(performix["disabled_run_id"]),
+            enabled_run_id=str(performix["enabled_run_id"]),
+            minimum_enabled_share=float(
+                acceptance["minimum_enabled_kai_sample_share"]
+            ),
+            minimum_total_samples=int(
+                acceptance["minimum_total_function_samples_per_treatment"]
+            ),
+            expected_experiment=performix_preregistration,
+        )
+        declared_treatments = {
+            row["id"]: row for row in performix_preregistration["treatments"]
+        }
+
+        def normalized_profile_command(command: str) -> tuple[str, ...]:
+            parts = shlex.split(command)
+            if not parts:
+                raise ValueError("Performix workload command is empty")
+            if Path(parts[0]).name not in {"python", "python3", "python3.12"}:
+                raise ValueError("Performix workload did not use the declared Python runner")
+            return ("python", *parts[1:])
+
+        for lane, treatment_id in (
+            ("disabled", "kleidiai-disabled"),
+            ("enabled", "kleidiai-enabled"),
+        ):
+            actual_command = normalized_profile_command(
+                str(performix_profile[lane]["command"])
+            )
+            declared_command = normalized_profile_command(
+                str(declared_treatments[treatment_id]["command_ref"])
+            )
+            if actual_command != declared_command:
+                raise ValueError(
+                    "Performix executed command differs from its preregistration"
+                )
+        audit = derive_minimum_capacity_audit(
+            _path(base, config["archive"], "archive"),
+            expected_sha256=str(config["archive_sha256"]),
+            contract=contract,
+            preregistration=_path(
+                base, config["preregistration"], "preregistration"
+            ),
+            analysis_lock=_path(base, config["analysis_lock"], "analysis_lock"),
+            protocol_lock=_path(base, config["protocol_lock"], "protocol_lock"),
+            workload_manifest=_path(
+                base, config["workload_manifest"], "workload_manifest"
+            ),
+            workload=_path(base, config["workload"], "workload"),
+            quality_dataset=_path(
+                base, raw_quality_config["dataset"], "raw_quality.dataset"
+            ),
+            raw_quality_results={
+                "kleidiai-disabled": raw_quality.disabled_quality,
+                "kleidiai-enabled": raw_quality.enabled_quality,
+            },
+            raw_quality_output_count=(
+                raw_quality.disabled_rows + raw_quality.enabled_rows
+            ),
+            performix_profile=performix_profile,
+        )
+        performix_profile = {
+            **performix_profile,
+            "linux_perf_separate_kai_cycle_share": audit.enabled_kai_cycle_share,
+            "linux_perf_separate_lost_samples": audit.lost_perf_samples,
+        }
+        binding = _require_performix_binding(
+            performix_profile, audit.comparison
+        )
+        _require_aws_graviton_binding(binding)
+
+        trial_matrix = [
+            {
+                "treatment": "KleidiAI disabled",
+                "boundary": "preregistered failing control rate",
+                "rate_rps": audit.baseline_failing_rps,
+                "outcomes": ["fail"] * audit.baseline_failures,
+                "p95_ms": list(audit.baseline_p95_ms),
+                "max_dispatch_ms": list(audit.baseline_max_dispatch_ms),
+            },
+            {
+                "treatment": "KleidiAI enabled",
+                "boundary": "preregistered passing treatment rate",
+                "rate_rps": audit.treatment_passing_rps,
+                "outcomes": ["pass"] * audit.treatment_passes,
+                "p95_ms": list(audit.treatment_p95_ms),
+                "max_dispatch_ms": list(audit.treatment_max_dispatch_ms),
+            },
+        ]
+        summary = {
+            "schema_version": "1.0.0",
+            "adapter": self.adapter_id,
+            "experiment_id": audit.experiment_id,
+            "passed": audit.decision.passed,
+            "archive_sha256": audit.archive_sha256,
+            "internal_checksummed_files": audit.internal_checksummed_files,
+            "raw_confirmation_files": audit.raw_confirmation_files,
+            "raw_confirmation_samples": audit.raw_confirmation_samples,
+            "raw_quality_outputs": audit.raw_quality_outputs,
+            "confirmation_seconds": audit.confirmation_seconds,
+            "matched_control_verified": audit.matched_control_verified,
+            "only_changed_control": "mlas.disable_kleidiai",
+            "minimum_capacity_ratio": audit.minimum_capacity_ratio,
+            "capacity_display": {
+                "description": (
+                    "Preregistered treatment pass rate divided by the "
+                    "preregistered failing control rate."
+                ),
+                "baseline_label": "Control fails",
+                "treatment_label": "Treatment passes",
+            },
+            "mixes": {
+                "mixed": {
+                    "valid_boundary_confirmations": True,
+                    "disabled_boundary": [audit.baseline_failing_rps],
+                    "enabled_boundary": [audit.treatment_passing_rps],
+                    "ratio": {
+                        "baseline_median": audit.baseline_failing_rps,
+                        "treatment_median": audit.treatment_passing_rps,
+                        "ratio": audit.minimum_capacity_ratio,
+                    },
+                }
+            },
+            "trial_matrix": trial_matrix,
+            "quality_comparison": {
+                "accuracy_delta_pp": audit.accuracy_delta_pp,
+                "macro_f1_delta_pp": audit.macro_f1_delta_pp,
+                "schema_valid_rate": audit.schema_valid_rate,
+            },
+            "arm_attribution": {
+                "performix_disabled_kai_sample_share": performix_profile[
+                    "disabled"
+                ]["kai_sample_share"],
+                "performix_enabled_kai_sample_share": performix_profile[
+                    "enabled"
+                ]["kai_sample_share"],
+                "performix_minimum_profile_samples": min(
+                    performix_profile["disabled"]["total_function_samples"],
+                    performix_profile["enabled"]["total_function_samples"],
+                ),
+                "linux_perf_disabled_kai_cycle_share": (
+                    audit.disabled_kai_cycle_share
+                ),
+                "linux_perf_enabled_kai_cycle_share": (
+                    audit.enabled_kai_cycle_share
+                ),
+                "linux_perf_lost_samples": audit.lost_perf_samples,
+            },
+            "decision": decision_to_dict(audit.decision),
+        }
+        return VerifiedEvidence(
+            comparison=audit.comparison,
+            summary=MappingProxyType(summary),
+            checksums=ChecksumResult(
+                checked=(
+                    audit.internal_checksummed_files
+                    + raw_quality.checksummed_files
+                ),
+                missing=(),
+                mismatched=(),
+            ),
+            reproduction_checksums=None,
+            performix=MappingProxyType(performix_profile),
+            adapter=self.adapter_id,
+        )
+
+
 BUILTIN_ADAPTERS: dict[str, EvidenceAdapter] = {
     ADAPTER_ID: KleidiAICapacityAdapter(),
     HttpSloAdapter.adapter_id: HttpSloAdapter(),
     KleidiAISustainedAdapter.adapter_id: KleidiAISustainedAdapter(),
+    KleidiAIConfirmedAdapter.adapter_id: KleidiAIConfirmedAdapter(),
 }
 
 

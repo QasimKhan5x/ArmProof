@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-012",
+  "latency_origin": "scheduled_ns",
+  "latency_end": "finished_ns",
+  "completion_deadline": "scheduled_window_plus_p95_slo",
+  "collector_summary_authoritative": false,
+  "required_response_identity": [
+    "model_identity",
+    "source_artifact_sha256",
+    "runtime",
+    "runtime_version",
+    "threads",
+    "architecture",
+    "cpu_affinity",
+    "optimization_control"
+  ],
+  "failure_rule": "Any missing runtime identity, dispatch delay hidden from latency, or completion after the measurement window plus the p95 SLO fails that request. The release decision is re-derived from raw rows rather than the collector summary."
+}
