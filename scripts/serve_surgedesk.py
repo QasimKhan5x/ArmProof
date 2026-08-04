@@ -26,7 +26,7 @@ MAX_BODY_BYTES = 16 * 1024
 
 
 def handler_for(endpoint: str | None) -> type[SimpleHTTPRequestHandler]:
-    guard, _ = _queue_guard(ROOT)
+    guard, _, _ = _queue_guard(ROOT)
     categories = json.loads(
         (ROOT / "data/banking77/source/categories.json").read_text(encoding="utf-8")
     )

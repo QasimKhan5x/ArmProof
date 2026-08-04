@@ -8,6 +8,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+from armproof import __version__
 from armproof.contracts import parse_contract
 from armproof.demo.queue_guard import QueueGuard, queue_for_intent
 from armproof.evidence import comparison_to_dict, verify_and_derive
@@ -124,7 +125,9 @@ def _percentile_95(rows: list[dict[str, Any]]) -> float:
     return values[max(0, (95 * len(values) + 99) // 100 - 1)]
 
 
-def _queue_guard(root: Path) -> tuple[QueueGuard, list[dict[str, str]]]:
+def _queue_guard(
+    root: Path,
+) -> tuple[QueueGuard, list[dict[str, str]], list[dict[str, str]]]:
     with (root / "data/banking77/source/test.csv").open(
         encoding="utf-8", newline=""
     ) as stream:
@@ -138,7 +141,7 @@ def _queue_guard(root: Path) -> tuple[QueueGuard, list[dict[str, str]]]:
         evaluation.extend(rows[:10])
         training.extend(rows[10:])
     guard = QueueGuard((row["text"], queue_for_intent(row["category"])) for row in training)
-    return guard, evaluation
+    return guard, evaluation, training
 
 
 def build_surgedesk_payload(root: Path) -> dict[str, Any]:
@@ -187,7 +190,7 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
         for row in _load_jsonl(root / "data/banking77/generated/quality.jsonl")
     }
     quality_rows = {row["request_id"]: row for row in quality_enabled["rows"]}
-    guard, guard_evaluation = _queue_guard(root)
+    guard, guard_evaluation, guard_training = _queue_guard(root)
     frozen_texts = [quality_cases[row_id]["source_text"] for row_id in quality_rows]
     if frozen_texts != [row["text"] for row in guard_evaluation]:
         raise ValueError("queue-guard evaluation does not match frozen quality set")
@@ -233,6 +236,25 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             }
         )
 
+    scenario_roles = {
+        "straight-through": next(
+            row["request_id"]
+            for row in routing_cases
+            if row["queue_correct"] and not row["guard_overrode"]
+        ),
+        "guard-intervention": next(
+            row["request_id"]
+            for row in routing_cases
+            if row["queue_correct"] and row["guard_overrode"]
+        ),
+        "human-correction": next(
+            row["request_id"] for row in routing_cases if not row["queue_correct"]
+        ),
+    }
+    role_by_request = {request_id: role for role, request_id in scenario_roles.items()}
+    for row in routing_cases:
+        row["scenario_role"] = role_by_request.get(row["request_id"])
+
     mixed_workload = {
         row["request_id"]: _extract_customer_text(row["payload"]["prompt"])
         for row in _load_jsonl(root / "data/banking77/generated/traffic-mixed.jsonl")
@@ -247,6 +269,18 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
     optimized_events = _event_rows(optimized_path, mixed_workload)
 
     deployment = _load_json(root / "ops/evidence/result-first/EXP-2026-002/summary.json")["summary"]
+    accepted_experiment = _load_json(accepted_evidence / "experiment.json")
+    reproduction_evidence = root / "ops/evidence/EXP-2026-005/accepted/evidence"
+    reproduction_experiment = _load_json(reproduction_evidence / "experiment.json")
+    replay_protocol = _load_json(evidence / "protocol.json")["protocol"]
+    runtime_lock = _load_json(root / "examples/phi4-graviton/runtime-lock.json")
+    model_id = runtime_lock["model_int4"]["id"]
+    model_name = (
+        model_id.rsplit("/", 1)[-1]
+        .replace("-instruct-onnx", "")
+        .replace("-mini", " Mini")
+    )
+    runtime_name = "ONNX Runtime GenAI INT4"
     comparison = comparison_to_dict(verified.comparison)
     computed_guard_accuracy = guard_queue_correct / quality_enabled["total"]
     if comparison["metrics"].get("guard_queue_accuracy") != computed_guard_accuracy:
@@ -269,8 +303,17 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             "optimized_pass_p95_ms": sustained.treatment_pass_p95_ms,
             "optimized_probe_p95_ms": sustained.treatment_fail_probe_p95_ms,
             "optimized_probe_failures": sustained.treatment_failures_at_fail_probe,
+            "optimized_probe_passes": (
+                sustained.confirmations - sustained.treatment_failures_at_fail_probe
+            ),
+            "preregistered_upper_ratio": (
+                sustained.treatment_fail_rps / sustained.baseline_pass_rps
+            ),
         }
     }
+
+    release_url = f"https://github.com/QasimKhan5x/ArmProof/releases/tag/v{__version__}"
+    release_tag = release_url.rsplit("/", 1)[-1]
 
     return {
         "schema_version": "1.0.0",
@@ -295,26 +338,29 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             "guard_queue_gain_pp": (guard_queue_correct - llm_queue_correct)
             / quality_enabled["total"]
             * 100,
-            "guard_training_cases": 2310,
-            "guard_evaluation_cases": 770,
+            "guard_training_cases": len(guard_training),
+            "guard_evaluation_cases": len(guard_evaluation),
+            "intent_count": len(
+                {row["category"] for row in [*guard_training, *guard_evaluation]}
+            ),
             "guard_algorithm": "Multinomial Naive Bayes with word unigrams and bigrams",
             "human_confirmation_required": True,
             "claim_boundary": "The held-out queue guard exceeds the assistive-routing target; human confirmation remains required.",
         },
         "replay": {
             "comparison": "equal_offered_load",
-            "source_experiment_id": "EXP-2026-004",
-            "note": "Supporting short-window raw slice at identical demand; the EXP-2026-009 sustained boundaries are reported separately.",
+            "source_experiment_id": accepted_experiment["experiment_id"],
+            "note": f"Supporting {replay_protocol['discovery_seconds']:.0f}-second raw slice at identical demand; the {sustained.experiment_id} sustained boundaries are reported separately.",
             "baseline": {
                 "label": "KleidiAI disabled",
-                "offered_rps": 0.26666666666666666,
+                "offered_rps": len(baseline_events) / replay_protocol["discovery_seconds"],
                 "p95_ms": _percentile_95(baseline_events),
                 "passed": _percentile_95(baseline_events) <= 10_000,
                 "events": baseline_events,
             },
             "optimized": {
                 "label": "KleidiAI enabled",
-                "offered_rps": 0.26666666666666666,
+                "offered_rps": len(optimized_events) / replay_protocol["discovery_seconds"],
                 "p95_ms": _percentile_95(optimized_events),
                 "passed": _percentile_95(optimized_events) <= 10_000,
                 "events": optimized_events,
@@ -341,7 +387,7 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             "direct_speedup_min": min(deployment["kleidiai_shape_gains"]),
             "direct_speedup_max": max(deployment["kleidiai_shape_gains"]),
             "reproduction_max_relative_difference_percent": observed_reproduction_difference * 100,
-            "reproduction_experiment_id": "EXP-2026-005",
+            "reproduction_experiment_id": reproduction_experiment["experiment_id"],
             "performix": {
                 "experiment_id": performix["experiment_id"],
                 "engine_version": performix["enabled"]["engine_version"],
@@ -370,20 +416,30 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
                     "checked"
                 ],
                 "pmu_capability_note": (
-                    "The c8g.4xlarge virtual PMU exposed two counters; Performix "
+                    f"The {sustained.comparison.treatment.controls['instance']} virtual PMU exposed two counters; Performix "
                     "CPU Microarchitecture and Instruction Mix require at least three."
                 ),
             },
         },
         "provenance": {
             "experiment_id": sustained.experiment_id,
-            "release_experiment_id": "EXP-2026-004",
+            "release_experiment_id": accepted_experiment["experiment_id"],
             "original_gate_passed": sustained.original_gate_passed,
             "corrected_claim_passed": sustained.corrected_claim_passed,
-            "claim_boundary": (
-                "The original exact 2.5x bracket gate was rejected. The public claim "
-                "is the independently supported >=2.0x sustained-capacity lower bound."
-            ),
+            "claim_boundary": {
+                "preregistered_upper_ratio": (
+                    sustained.treatment_fail_rps / sustained.baseline_pass_rps
+                ),
+                "preregistered_upper_formula": (
+                    f"{sustained.treatment_fail_rps:.2f} / "
+                    f"{sustained.baseline_pass_rps:.2f}"
+                ),
+                "released_lower_ratio": sustained.minimum_capacity_ratio,
+                "released_lower_formula": (
+                    f"{sustained.treatment_pass_rps:.2f} / "
+                    f"{sustained.baseline_fail_rps:.2f}"
+                ),
+            },
             "evidence": {
                 "checksum_verified": checksum_result.passed,
                 "checksummed_files": checksum_result.checked,
@@ -414,10 +470,13 @@ def build_surgedesk_payload(root: Path) -> dict[str, Any]:
             },
             "dataset": "BANKING77",
             "dataset_license": "CC-BY-4.0",
-            "model": "Phi-4 Mini",
-            "runtime": "ONNX Runtime GenAI INT4 + KleidiAI",
-            "machine": "AWS Graviton4 c8g.4xlarge",
+            "model": model_name,
+            "model_id": model_id,
+            "runtime": runtime_name,
+            "optimization": "KleidiAI disabled -> enabled",
+            "machine": runtime_lock["hardware"],
             "report_path": "../report/index.html",
-            "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.6.0",
+            "release_url": release_url,
+            "release_action": f"QasimKhan5x/ArmProof@{release_tag}",
         },
     }

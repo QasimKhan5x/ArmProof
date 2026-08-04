@@ -29,8 +29,10 @@
           13130.901494,
           11224.422493
         ],
+        "optimized_probe_passes": 1,
         "optimized_probe_rps": 0.6,
         "optimized_sustainable_rps": 0.56,
+        "preregistered_upper_ratio": 2.5,
         "tested_pass_point_ratio": 2.3333333333333335
       }
     },
@@ -156,7 +158,12 @@
     "weighted_pss_reduction_percent": 59.66032309469201
   },
   "provenance": {
-    "claim_boundary": "The original exact 2.5x bracket gate was rejected. The public claim is the independently supported >=2.0x sustained-capacity lower bound.",
+    "claim_boundary": {
+      "preregistered_upper_formula": "0.60 / 0.24",
+      "preregistered_upper_ratio": 2.5,
+      "released_lower_formula": "0.56 / 0.28",
+      "released_lower_ratio": 2.0
+    },
     "corrected_claim_passed": true,
     "dataset": "BANKING77",
     "dataset_license": "CC-BY-4.0",
@@ -181,13 +188,16 @@
       "total_checksummed_files": 386
     },
     "experiment_id": "EXP-2026-009",
-    "machine": "AWS Graviton4 c8g.4xlarge",
+    "machine": "AWS Graviton4 / c8g.4xlarge / 16 cores",
     "model": "Phi-4 Mini",
+    "model_id": "microsoft/Phi-4-mini-instruct-onnx",
+    "optimization": "KleidiAI disabled -> enabled",
     "original_gate_passed": false,
+    "release_action": "QasimKhan5x/ArmProof@v0.6.0",
     "release_experiment_id": "EXP-2026-004",
     "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.6.0",
     "report_path": "../report/index.html",
-    "runtime": "ONNX Runtime GenAI INT4 + KleidiAI"
+    "runtime": "ONNX Runtime GenAI INT4"
   },
   "quality": {
     "accuracy_delta_pp": -0.38961038961038974,
@@ -201,6 +211,7 @@
     "guard_queue_gain_pp": 12.337662337662337,
     "guard_training_cases": 2310,
     "human_confirmation_required": true,
+    "intent_count": 77,
     "llm_queue_accuracy_percent": 74.41558441558442,
     "llm_queue_correct": 573,
     "macro_f1_delta_pp": -0.6726444303255752,
@@ -289,7 +300,7 @@
       "passed": false
     },
     "comparison": "equal_offered_load",
-    "note": "Supporting short-window raw slice at identical demand; the EXP-2026-009 sustained boundaries are reported separately.",
+    "note": "Supporting 30-second raw slice at identical demand; the EXP-2026-009 sustained boundaries are reported separately.",
     "optimized": {
       "events": [
         {
@@ -389,6 +400,7 @@
       "queue": "Account security",
       "queue_correct": true,
       "request_id": "banking77-quality-0110",
+      "scenario_role": "straight-through",
       "source_text": "My entire gym bag, including my wallet, was stolen out of my locker today. Everything in my wallet is gone - how do I block the card to make it can't be used?",
       "suggested_intent": "lost_or_stolen_card",
       "suggested_label": "Lost Or Stolen Card",
@@ -410,6 +422,7 @@
       "queue": "Cards & payments",
       "queue_correct": true,
       "request_id": "banking77-quality-0007",
+      "scenario_role": "guard-intervention",
       "source_text": "i have not received my card",
       "suggested_intent": "lost_or_stolen_card",
       "suggested_label": "Lost Or Stolen Card",
@@ -431,6 +444,7 @@
       "queue": "Account security",
       "queue_correct": true,
       "request_id": "banking77-quality-0355",
+      "scenario_role": null,
       "source_text": "Freeze my account it's been hacked.",
       "suggested_intent": "compromised_card",
       "suggested_label": "Compromised Card",
@@ -452,6 +466,7 @@
       "queue": "Account security",
       "queue_correct": true,
       "request_id": "banking77-quality-0279",
+      "scenario_role": null,
       "source_text": "I don't recall making that payment?",
       "suggested_intent": "card_payment_not_recognised",
       "suggested_label": "Card Payment Not Recognised",
@@ -473,6 +488,7 @@
       "queue": "Transfers",
       "queue_correct": true,
       "request_id": "banking77-quality-0211",
+      "scenario_role": null,
       "source_text": "My money transfer has not arrived.",
       "suggested_intent": "transfer_not_received_by_recipient",
       "suggested_label": "Transfer Not Received By Recipient",
@@ -494,6 +510,7 @@
       "queue": "Cash & ATM",
       "queue_correct": true,
       "request_id": "banking77-quality-0056",
+      "scenario_role": null,
       "source_text": "I tried taking money from the ATM but no money came out, but the transaction is still pending? How is this possible?",
       "suggested_intent": "pending_cash_withdrawal",
       "suggested_label": "Pending Cash Withdrawal",
@@ -515,6 +532,7 @@
       "queue": "Account security",
       "queue_correct": false,
       "request_id": "banking77-quality-0044",
+      "scenario_role": "human-correction",
       "source_text": "There is a fee I don't recognize on my statement.",
       "suggested_intent": "extra_charge_on_statement",
       "suggested_label": "Extra Charge On Statement",

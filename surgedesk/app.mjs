@@ -136,7 +136,7 @@ function renderReview() {
     "inference-source",
     active.mode === "live_model_output"
       ? `${active.backend} · ${formatMs(active.inference_ms)}`
-      : "Recorded Phi-4 Mini INT4",
+      : `Recorded ${data.provenance.model} INT4`,
   );
   setText("review-priority", active.priority);
   elements["review-priority"].className = `priority-badge ${active.priority.toLowerCase()}`;
@@ -253,7 +253,7 @@ async function routeSelectedMessage(event) {
   }
   const recordedCase = findRecordedCase(data.routing_cases, elements["customer-message"].value);
   if (!recordedCase) {
-    elements["intake-error"].textContent = "No recorded Phi-4 result exists for edited text. Select an evidence-backed BANKING77 request for this offline demo.";
+    elements["intake-error"].textContent = `No recorded ${data.provenance.model} result exists for edited text. Select an evidence-backed ${data.provenance.dataset} request for this offline demo.`;
     elements["intake-error"].hidden = false;
     return;
   }
@@ -270,7 +270,9 @@ function setInferenceMode(mode) {
   elements["sample-select"].disabled = live;
   elements["scenario-picker"].hidden = live;
   setText("environment-label", live ? "Live Graviton endpoint" : "Recorded Graviton evidence");
-  elements["workspace-mode"].textContent = live ? "Live Graviton inference" : "BANKING77 recorded output";
+  elements["workspace-mode"].textContent = live
+    ? "Live Graviton inference"
+    : `${data.provenance.dataset} recorded output`;
   elements["intake-note"].textContent = live
     ? "This message is sent through the configured Graviton inference endpoint and local queue guard."
     : "Select an evidence-backed request to replay its recorded model output.";
@@ -324,6 +326,30 @@ function populateCases() {
 }
 
 
+function populateScenarios() {
+  const labels = {
+    "straight-through": ["Straight-through", "Model and guard agree"],
+    "guard-intervention": ["Guard intervention", "Guard rescues the LLM route"],
+    "human-correction": ["Human correction", "Operator catches a guard error"],
+  };
+  elements["scenario-options"].replaceChildren();
+  Object.entries(labels).forEach(([role, [title, description]], index) => {
+    const scenario = data.routing_cases.find((item) => item.scenario_role === role);
+    if (!scenario) return;
+    const button = document.createElement("button");
+    const strong = document.createElement("strong");
+    const small = document.createElement("small");
+    button.type = "button";
+    button.dataset.caseId = scenario.request_id;
+    button.setAttribute("aria-pressed", String(index === 0));
+    strong.textContent = title;
+    small.textContent = description;
+    button.append(strong, small);
+    elements["scenario-options"].append(button);
+  });
+}
+
+
 function renderMixTable() {
   elements["mix-table"].replaceChildren();
   Object.entries(data.capacity.mixes).forEach(([name, mix]) => {
@@ -352,9 +378,13 @@ function renderEvidenceSummary() {
     mixed.optimized_sustainable_rps,
   );
   const minimumRatios = mixes.map((mix) => mix.minimum_capacity_ratio);
-  setText("capacity-title", "Same instance. At least 2× sustainable capacity.");
+  setText(
+    "capacity-title",
+    `Same instance. At least ${mixed.minimum_capacity_ratio.toFixed(1)}× sustainable capacity.`,
+  );
   setText("headline-ratio", `≥${mixed.minimum_capacity_ratio.toFixed(1)}×`);
   setText("guard-accuracy", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
+  setText("guard-evaluation-size", `Held out, ${data.quality.guard_evaluation_cases.toLocaleString()} requests`);
   setText("guard-gain", `+${data.quality.guard_queue_gain_pp.toFixed(2)} pp`);
   setText(
     "guard-split",
@@ -365,6 +395,10 @@ function renderEvidenceSummary() {
     "confirmation-count",
     `${mixed.confirmations_per_treatment} × ${mixed.confirmation_seconds}s per boundary`,
   );
+  setText(
+    "mix-title",
+    `${mixed.confirmations_per_treatment} confirmations at every boundary`,
+  );
   setText("experiment-slo", `p95 ≤ ${(data.capacity.slo_ms / 1000).toFixed(0)} seconds`);
   setText("baseline-capacity-rps", `${mixed.baseline_sustainable_rps.toFixed(2)} requests/s`);
   setText("optimized-capacity-rps", `${mixed.optimized_sustainable_rps.toFixed(2)} requests/s`);
@@ -374,9 +408,30 @@ function renderEvidenceSummary() {
   setText("optimized-boundary", formatRps(mixed.optimized_sustainable_rps));
   setText("original-gate-status", data.provenance.original_gate_passed ? "PASSED" : "BLOCKED");
   setText("corrected-claim-status", data.provenance.corrected_claim_passed ? "PROVEN" : "BLOCKED");
+  const boundary = data.provenance.claim_boundary;
+  setText(
+    "original-gate-label",
+    `Preregistered upper-bound probe (${boundary.preregistered_upper_ratio.toFixed(2)}×)`,
+  );
+  setText(
+    "original-gate-formula",
+    `${boundary.preregistered_upper_formula.replace(" / ", " r/s ÷ ")} r/s = ${boundary.preregistered_upper_ratio.toFixed(2)}×`,
+  );
+  setText(
+    "corrected-claim-label",
+    `Released sustained lower bound (≥${boundary.released_lower_ratio.toFixed(2)}×)`,
+  );
+  setText(
+    "corrected-claim-formula",
+    `${boundary.released_lower_formula.replace(" / ", " r/s ÷ ")} r/s = ${boundary.released_lower_ratio.toFixed(2)}×`,
+  );
   setText(
     "audit-correction-copy",
-    `The original exact 2.5× bracket was rejected because ${mixed.optimized_probe_rps.toFixed(2)} r/s passed one of five windows. The unchanged raw rows still prove ${mixed.optimized_sustainable_rps.toFixed(2)} r/s passed all five while the baseline failed all five at ${mixed.baseline_fail_rps.toFixed(2)} r/s.`,
+    `The preregistered ${mixed.optimized_probe_rps.toFixed(2)} r/s failure probe passed ${mixed.optimized_probe_passes} of ${mixed.confirmations_per_treatment} windows, so it cannot define a sustainable boundary. The released lower bound uses the optimized rate that passed every window (${mixed.optimized_sustainable_rps.toFixed(2)} r/s) and the baseline rate that failed every window (${mixed.baseline_fail_rps.toFixed(2)} r/s).`,
+  );
+  setText(
+    "reveal-disabled-cycle-share",
+    `${data.proof.performix.disabled_kai_sample_share_percent.toFixed(2)}%`,
   );
   setText(
     "reveal-cycle-share",
@@ -388,7 +443,7 @@ function renderEvidenceSummary() {
   setText("reveal-optimized-rps", formatRps(mixed.optimized_sustainable_rps));
   setText(
     "conclusion-copy",
-    `Five ${mixed.confirmation_seconds}-second confirmations passed at ${mixed.optimized_sustainable_rps.toFixed(2)} r/s versus ${mixed.baseline_sustainable_rps.toFixed(2)} r/s. Since the baseline failed at ${mixed.baseline_fail_rps.toFixed(2)} r/s, the sustainable-capacity improvement is at least ${mixed.minimum_capacity_ratio.toFixed(1)}×.`,
+    `${mixed.confirmations_per_treatment} ${mixed.confirmation_seconds}-second confirmations passed at ${mixed.optimized_sustainable_rps.toFixed(2)} r/s versus ${mixed.baseline_sustainable_rps.toFixed(2)} r/s. Since the baseline failed at ${mixed.baseline_fail_rps.toFixed(2)} r/s, the sustainable-capacity improvement is at least ${mixed.minimum_capacity_ratio.toFixed(1)}×.`,
   );
   renderProofClaims();
   setText(
@@ -414,6 +469,19 @@ function renderEvidenceSummary() {
   );
   setText("deployment-instance", data.proof.instance);
   setText("deployment-threads", data.proof.threads);
+  setText("deployment-runtime", data.provenance.runtime);
+  setText("deployment-optimization", data.provenance.optimization);
+  setText("experiment-model", `${data.provenance.model} INT4`);
+  setText("experiment-control", data.provenance.optimization);
+  setText("arm-reveal-threads", data.proof.threads);
+  setText("arm-reveal-control", data.provenance.evidence.only_changed_control);
+  setText("stack-model", data.provenance.model);
+  setText("stack-runtime", data.provenance.runtime);
+  setText("stack-machine", data.provenance.machine.split(" / ")[0].replace("AWS ", ""));
+  setText("intent-count", data.quality.intent_count);
+  setText("release-adapter-id", data.provenance.experiment_id);
+  setText("release-action", data.provenance.release_action);
+  elements["release-link"].href = data.provenance.release_url;
   const performix = data.proof.performix;
   setText("performix-version", `Arm Performix ${performix.engine_version} · ${performix.cpu}`);
   setText("performix-disabled-share", `${performix.disabled_kai_sample_share_percent.toFixed(0)}%`);
@@ -438,7 +506,7 @@ function renderRun(name, snapshot) {
   setText(`${name}-status`, snapshot.slo_status);
   const requestStrip = elements[`${name}-request-strip`];
   requestStrip.replaceChildren();
-  snapshot.events.filter((event) => [4, 5, 7].includes(event.sequence)).forEach((event) => {
+  snapshot.events.forEach((event) => {
     const tile = document.createElement("span");
     tile.className = `request-tile ${event.within_slo ? "within-slo" : "late"}`;
     const request = document.createElement("span");
@@ -553,7 +621,24 @@ async function main() {
     setText("experiment-machine", data.proof.instance);
     setText("equal-load-source", data.replay.source_experiment_id);
     setText("absolute-accuracy", `${data.quality.optimized_accuracy_percent.toFixed(2)}%`);
+    setText("workspace-mode", `${data.provenance.dataset} recorded output`);
+    setText("rail-model", data.provenance.model);
+    setText("intent-model-label", `${data.provenance.model} intent`);
+    setText("reuse-action", `uses: ${data.provenance.release_action}`);
+    elements["reuse-action-copy"].dataset.copy = `uses: ${data.provenance.release_action}`;
+    setText(
+      "proof-decision-title",
+      data.proof.decision === "PASS"
+        ? "Approved at the conservative Graviton boundary"
+        : "Blocked at the conservative Graviton boundary",
+    );
+    setText("proof-decision-status", data.proof.decision);
+    setText(
+      "evidence-chain-counts",
+      `Check the ${data.provenance.evidence.sustained_checksummed_files}-file sustained audit, ${data.provenance.evidence.checksummed_files + data.provenance.evidence.reproduction_checksummed_files}-file release history and ${data.provenance.evidence.performix_checksummed_files}-file native Performix bundle.`,
+    );
     populateCases();
+    populateScenarios();
     renderWorkspace();
     renderMixTable();
     renderEvidenceSummary();

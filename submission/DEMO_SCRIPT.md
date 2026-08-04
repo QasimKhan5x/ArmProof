@@ -262,10 +262,15 @@ to the blocked claim, proven lower bound and equal-load outcomes.
 > passed all five at 0.56. Since the baseline cannot sustain 0.28 while the
 > optimized service sustains 0.56, the capacity gain is at least two times.
 >
-> Short tests had suggested 2.5 times, but ArmProof reprocessed all 4,200 request
-> records and required every trial to agree. At 0.60, one optimized trial passed
-> by 72 milliseconds, so that boundary was not reproducible; ArmProof rejected
-> the exact 2.5-times estimate and published the defensible two-times result.
+> The original test plan included a 0.60-request-per-second probe for the optimized
+> service and a 0.24 passing point for the baseline. Dividing those rates gives the
+> 2.5-times upper-bound estimate shown here. ArmProof then reprocessed all 4,200
+> request records and found that the 0.60 probe passed one of its five long windows,
+> so it was not a consistent failure boundary and could not support that estimate.
+> The released claim uses two boundaries that agreed in every run: the optimized
+> service passed five out of five windows at 0.56, while the baseline failed five
+> out of five at 0.28. Dividing 0.56 by 0.28 establishes at least twice the
+> sustainable capacity.
 
 ### 1:42-2:20 - Prove Arm Caused It
 

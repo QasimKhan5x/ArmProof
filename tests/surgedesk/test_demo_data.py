@@ -21,6 +21,8 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertEqual(mixed["optimized_sustainable_rps"], 0.56)
         self.assertAlmostEqual(mixed["tested_pass_point_ratio"], 2.3333333333)
         self.assertEqual(mixed["minimum_capacity_ratio"], 2.0)
+        self.assertEqual(mixed["preregistered_upper_ratio"], 2.5)
+        self.assertEqual(mixed["optimized_probe_passes"], 1)
         self.assertEqual(mixed["confirmation_seconds"], 500)
         self.assertEqual(self.payload["provenance"]["experiment_id"], "EXP-2026-009")
         self.assertFalse(self.payload["provenance"]["original_gate_passed"])
@@ -36,6 +38,8 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertAlmostEqual(quality["guard_queue_accuracy_percent"], 86.7532467532)
         self.assertAlmostEqual(quality["guard_queue_gain_pp"], 12.3376623377)
         self.assertEqual(quality["guard_training_cases"], 2310)
+        self.assertEqual(quality["guard_evaluation_cases"], 770)
+        self.assertEqual(quality["intent_count"], 77)
         self.assertTrue(quality["human_confirmation_required"])
 
     def test_routes_are_recorded_outputs_with_both_correct_and_review_cases(self) -> None:
@@ -46,6 +50,37 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertTrue(any(case["guard_overrode"] for case in cases))
         self.assertTrue(all(case["mode"] == "recorded_model_output" for case in cases))
         self.assertTrue(all(case["source_text"] for case in cases))
+        self.assertEqual(
+            {case["scenario_role"] for case in cases if case["scenario_role"]},
+            {"straight-through", "guard-intervention", "human-correction"},
+        )
+
+    def test_displayed_claim_boundaries_include_evidence_formulas(self) -> None:
+        boundary = self.payload["provenance"]["claim_boundary"]
+        self.assertEqual(boundary["preregistered_upper_ratio"], 2.5)
+        self.assertEqual(boundary["preregistered_upper_formula"], "0.60 / 0.24")
+        self.assertEqual(boundary["released_lower_ratio"], 2.0)
+        self.assertEqual(boundary["released_lower_formula"], "0.56 / 0.28")
+
+    def test_static_ui_contains_no_embedded_experiment_results(self) -> None:
+        html = (ROOT / "surgedesk/index.html").read_text(encoding="utf-8")
+        javascript = (ROOT / "surgedesk/app.mjs").read_text(encoding="utf-8")
+        forbidden = (
+            "2.5×",
+            "2.0×",
+            "0.267 r/s",
+            "0.600 r/s",
+            "69-file",
+            "282-file",
+            "35-file",
+            "EXP-2026-009",
+            "banking77-quality-0110",
+            "[4, 5, 7]",
+            "Five confirmations at every boundary",
+        )
+        for literal in forbidden:
+            self.assertNotIn(literal, html)
+            self.assertNotIn(literal, javascript)
 
     def test_replay_uses_raw_confirmation_samples(self) -> None:
         replay = self.payload["replay"]

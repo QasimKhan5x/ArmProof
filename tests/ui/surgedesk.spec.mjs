@@ -59,7 +59,7 @@ test("operator confirms and corrects recorded support routes", async ({ page }) 
   await page.locator("#customer-message").fill("A new message without recorded evidence");
   await page.getByRole("button", { name: "Load model suggestion" }).click();
   await expect(page.locator("#intake-error")).toBeVisible();
-  await expect(page.locator("#intake-error")).toContainText("No recorded Phi-4 result");
+  await expect(page.locator("#intake-error")).toContainText("No recorded Phi-4 Mini result");
   expect(messages).toEqual([]);
 });
 
@@ -140,9 +140,12 @@ test("verified evidence load reveals the fixed-SLO Arm result", async ({ page })
   await page.getByRole("button", { name: "Load verified experiment" }).click();
   await expect(page.getByRole("button", { name: "Verified experiment loaded" })).toBeDisabled();
   await expect(page.locator("#experiment-results")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Same instance. At least 2× sustainable capacity." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Same instance. At least 2.0× sustainable capacity." })).toBeVisible();
   await expect(page.locator("#original-gate-status")).toHaveText("BLOCKED");
   await expect(page.locator("#corrected-claim-status")).toHaveText("PROVEN");
+  await expect(page.locator("#original-gate-label")).toContainText("2.50×");
+  await expect(page.locator("#original-gate-formula")).toHaveText("0.60 r/s ÷ 0.24 r/s = 2.50×");
+  await expect(page.locator("#corrected-claim-formula")).toHaveText("0.56 r/s ÷ 0.28 r/s = 2.00×");
   await expect(page.locator("#baseline-status")).toHaveText("failed");
   await expect(page.locator("#optimized-status")).toHaveText("passed");
   await expect(page.locator("#baseline-completed")).toHaveText("8 / 8");
@@ -151,6 +154,8 @@ test("verified evidence load reveals the fixed-SLO Arm result", async ({ page })
   await expect(page.locator("#optimized-rps")).toHaveText("0.267 r/s");
   await expect(page.locator("#equal-load-source")).toHaveText("EXP-2026-004");
   await expect(page.locator("#baseline-request-strip .late")).toHaveCount(3);
+  await expect(page.locator("#baseline-request-strip .request-tile")).toHaveCount(8);
+  await expect(page.locator("#optimized-request-strip .request-tile")).toHaveCount(8);
   await expect(page.locator("#optimized-request-strip .late")).toHaveCount(0);
   await expect(page.locator("#baseline-p95")).toHaveText(/s$/);
   await expect(page.locator("#replay-conclusion")).toContainText("at least 2.0×");

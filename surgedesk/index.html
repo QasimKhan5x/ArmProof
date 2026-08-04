@@ -47,7 +47,7 @@
           <ul id="queue-list" class="queue-list" aria-label="Support queue counts"></ul>
           <div class="rail-note">
             <strong>Decision boundary</strong>
-            <p>Phi-4 proposes a route. A support operator confirms or corrects every ticket.</p>
+            <p><span id="rail-model">The model</span> proposes a route. A support operator confirms or corrects every ticket.</p>
           </div>
         </aside>
 
@@ -57,11 +57,11 @@
               <p class="eyebrow">Customer intake</p>
               <h2>Route an incoming request</h2>
             </div>
-            <span id="workspace-mode" class="source-chip">BANKING77 recorded output</span>
+            <span id="workspace-mode" class="source-chip">—</span>
           </header>
 
           <section class="quality-scoreband" aria-label="Held-out routing quality">
-            <div><span>Operational queue accuracy</span><strong id="guard-accuracy">—</strong><small>Held-out, 770 requests</small></div>
+            <div><span>Operational queue accuracy</span><strong id="guard-accuracy">—</strong><small id="guard-evaluation-size">—</small></div>
             <div><span>Improvement over LLM mapping</span><strong id="guard-gain">—</strong><small id="guard-split">—</small></div>
             <div><span>Schema-valid responses</span><strong id="schema-valid">—</strong><small>Human confirmation required</small></div>
           </section>
@@ -75,11 +75,7 @@
             </fieldset>
             <div id="scenario-picker" class="scenario-picker">
               <div class="scenario-heading"><span>Evidence scenario</span><small>Choose the decision path to inspect</small></div>
-              <div class="scenario-options" aria-label="Recorded evidence scenarios">
-                <button type="button" data-case-id="banking77-quality-0110" aria-pressed="true"><strong>Straight-through</strong><small>Model and guard agree</small></button>
-                <button type="button" data-case-id="banking77-quality-0007" aria-pressed="false"><strong>Guard intervention</strong><small>Guard rescues the LLM route</small></button>
-                <button type="button" data-case-id="banking77-quality-0044" aria-pressed="false"><strong>Human correction</strong><small>Operator catches a guard error</small></button>
-              </div>
+              <div id="scenario-options" class="scenario-options" aria-label="Recorded evidence scenarios"></div>
             </div>
             <label for="sample-select">Recorded customer request</label>
             <select id="sample-select" name="sample"></select>
@@ -102,10 +98,10 @@
               <span id="review-priority" class="priority-badge"></span>
             </div>
             <dl class="review-details four-up">
-              <div><dt>Phi-4 intent</dt><dd id="suggested-intent"></dd></div>
+              <div><dt id="intent-model-label">Model intent</dt><dd id="suggested-intent"></dd></div>
               <div><dt>LLM-mapped queue</dt><dd id="llm-queue"></dd></div>
               <div><dt>Guarded queue</dt><dd id="suggested-queue"></dd></div>
-              <div><dt>Inference source</dt><dd id="inference-source">Recorded Phi-4 Mini INT4</dd></div>
+              <div><dt>Inference source</dt><dd id="inference-source">—</dd></div>
             </dl>
             <div id="review-warning" class="quality-warning"></div>
             <div class="review-actions">
@@ -165,10 +161,10 @@
         </section>
 
         <div class="experiment-strip" aria-label="Experiment controls">
-          <div><span>Machine</span><strong id="experiment-machine">c8g.4xlarge</strong></div>
-          <div><span>Model</span><strong>Phi-4 Mini INT4</strong></div>
+          <div><span>Machine</span><strong id="experiment-machine">—</strong></div>
+          <div><span>Model</span><strong id="experiment-model">—</strong></div>
           <div><span>SLO</span><strong id="experiment-slo">—</strong></div>
-          <div><span>Only changed control</span><strong>KleidiAI off → on</strong></div>
+          <div><span>Only changed control</span><strong id="experiment-control">—</strong></div>
         </div>
 
         <div id="experiment-results" class="experiment-results" hidden>
@@ -176,10 +172,10 @@
           <div>
             <p class="eyebrow">One controlled Arm change</p>
             <h2 id="arm-reveal-title">Arm-optimized matrix kernels changed the service outcome</h2>
-            <p>The contract binds the same model source, runtime lock, workload, Graviton4 identity and 16-thread setting. Its treatment overlay changes <code>mlas.disable_kleidiai</code>.</p>
+            <p>The contract binds the same model source, runtime lock, workload, machine identity and <span id="arm-reveal-threads">—</span>-thread setting. Its treatment overlay changes <code id="arm-reveal-control">—</code>.</p>
           </div>
           <dl>
-            <div><dt>KleidiAI cycle share</dt><dd><span>0%</span> → <strong id="reveal-cycle-share">—</strong></dd></div>
+            <div><dt>KleidiAI cycle share</dt><dd><span id="reveal-disabled-cycle-share">—</span> → <strong id="reveal-cycle-share">—</strong></dd></div>
             <div><dt>Equal-load p95</dt><dd><span id="reveal-baseline-p95">—</span> → <strong id="reveal-optimized-p95">—</strong></dd></div>
             <div><dt>Confirmed tested traffic</dt><dd><span id="reveal-baseline-rps">—</span> → <strong id="reveal-optimized-rps">—</strong></dd></div>
           </dl>
@@ -191,8 +187,8 @@
             <p id="audit-correction-copy">Loading the sustained boundary decision…</p>
           </div>
           <dl>
-            <div><dt>Original exact 2.5× bracket</dt><dd id="original-gate-status">—</dd></div>
-            <div><dt>Conservative ≥2.0× claim</dt><dd id="corrected-claim-status">—</dd></div>
+            <div><dt id="original-gate-label">Preregistered upper-bound probe</dt><dd id="original-gate-status">—</dd><small id="original-gate-formula">—</small></div>
+            <div><dt id="corrected-claim-label">Released sustained lower bound</dt><dd id="corrected-claim-status">—</dd><small id="corrected-claim-formula">—</small></div>
           </dl>
         </section>
         <section class="capacity-reveal" aria-labelledby="capacity-title">
@@ -228,10 +224,10 @@
               <div id="baseline-request-strip" class="request-strip" aria-label="Baseline customer request outcomes"></div>
             </div>
             <dl class="metric-grid">
-              <div><dt>Offered load</dt><dd id="baseline-rps">0.267 r/s</dd></div>
-              <div><dt>Completed</dt><dd id="baseline-completed">0 / 8</dd></div>
+              <div><dt>Offered load</dt><dd id="baseline-rps">—</dd></div>
+              <div><dt>Completed</dt><dd id="baseline-completed">—</dd></div>
               <div><dt>Observed p95</dt><dd id="baseline-p95">—</dd></div>
-              <div><dt>SLO breaches</dt><dd id="baseline-breaches">0</dd></div>
+              <div><dt>SLO breaches</dt><dd id="baseline-breaches">—</dd></div>
             </dl>
             <p id="baseline-event" class="event-line">Accepted run not loaded.</p>
           </article>
@@ -247,10 +243,10 @@
               <div id="optimized-request-strip" class="request-strip" aria-label="Optimized customer request outcomes"></div>
             </div>
             <dl class="metric-grid">
-              <div><dt>Offered load</dt><dd id="optimized-rps">0.600 r/s</dd></div>
-              <div><dt>Completed</dt><dd id="optimized-completed">0 / 18</dd></div>
+              <div><dt>Offered load</dt><dd id="optimized-rps">—</dd></div>
+              <div><dt>Completed</dt><dd id="optimized-completed">—</dd></div>
               <div><dt>Observed p95</dt><dd id="optimized-p95">—</dd></div>
-              <div><dt>SLO breaches</dt><dd id="optimized-breaches">0</dd></div>
+              <div><dt>SLO breaches</dt><dd id="optimized-breaches">—</dd></div>
             </dl>
             <p id="optimized-event" class="event-line">Accepted run not loaded.</p>
           </article>
@@ -265,7 +261,7 @@
 
         <section class="mix-table-section" aria-labelledby="mix-title">
           <div class="section-heading compact-heading">
-            <div><p class="eyebrow">Long-window evidence</p><h2 id="mix-title">Five confirmations at every boundary</h2></div>
+            <div><p class="eyebrow">Long-window evidence</p><h2 id="mix-title">Confirmations at every boundary</h2></div>
             <span id="confirmation-count" class="source-chip">—</span>
           </div>
           <div class="table-wrap">
@@ -285,10 +281,10 @@
           <div class="decision-mark" aria-hidden="true">✓</div>
           <div>
             <p class="eyebrow">ArmProof release decision</p>
-            <h1>Approved at the conservative Graviton boundary</h1>
+            <h1 id="proof-decision-title">Evaluating the conservative Graviton boundary</h1>
             <p id="proof-decision-detail">Every required claim passed against checksum-bound evidence.</p>
           </div>
-          <span>PASS</span>
+          <span id="proof-decision-status">—</span>
         </header>
 
         <section class="proof-section performix-proof" aria-labelledby="performix-title">
@@ -327,7 +323,7 @@
             <span id="proof-evidence-count" class="source-chip">Verifying evidence...</span>
           </div>
           <ol class="evidence-chain">
-            <li><span>1</span><div><strong>Verify</strong><small>Check the 69-file sustained audit, 282-file release history and 35-file native Performix bundle.</small></div></li>
+            <li><span>1</span><div><strong>Verify</strong><small id="evidence-chain-counts">Check the checksum-bound sustained audit, release history and native Performix bundle.</small></div></li>
             <li><span>2</span><div><strong>Derive</strong><small>Recompute sustained capacity and quality metrics from request and quality rows.</small></div></li>
             <li><span>3</span><div><strong>Bind</strong><small>Match model, runtime, workload, environment and treatment identities to the contract.</small></div></li>
             <li><span>4</span><div><strong>Decide</strong><small id="proof-derived-claims">Evaluate the contract; missing or inconsistent evidence blocks release.</small></div></li>
@@ -339,11 +335,11 @@
             <div><p class="eyebrow">Arm optimization path</p><h2 id="stack-title">From model migration to executed kernels</h2></div>
           </div>
           <ol class="stack-path">
-            <li><span>1</span><div><strong>Phi-4 Mini</strong><small>Cloud support classification workload</small></div></li>
+            <li><span>1</span><div><strong id="stack-model">—</strong><small>Cloud support classification workload</small></div></li>
             <li><span>2</span><div><strong>INT4 ONNX</strong><small id="artifact-reduction">—</small></div></li>
-            <li><span>3</span><div><strong>ONNX Runtime GenAI</strong><small>Identical runtime and model in both treatments</small></div></li>
+            <li><span>3</span><div><strong id="stack-runtime">—</strong><small>Identical runtime and model in both treatments</small></div></li>
             <li><span>4</span><div><strong>KleidiAI</strong><small id="direct-speedup">—</small></div></li>
-            <li><span>5</span><div><strong>Graviton4</strong><small id="capacity-range">—</small></div></li>
+            <li><span>5</span><div><strong id="stack-machine">—</strong><small id="capacity-range">—</small></div></li>
           </ol>
         </section>
 
@@ -351,7 +347,7 @@
           <section class="proof-section quality-boundary" aria-labelledby="quality-title">
             <p class="eyebrow">Claim boundary</p>
             <h2 id="quality-title"><span id="queue-accuracy">—</span> held-out queue accuracy</h2>
-            <p>A dependency-free queue guard improves the recorded LLM mapping by <strong id="queue-gain">—</strong>. Fine-grained 77-intent accuracy remains <strong id="absolute-accuracy">—</strong>, so SurgeDesk stays assistive and every route is human-confirmed.</p>
+            <p>A dependency-free queue guard improves the recorded LLM mapping by <strong id="queue-gain">—</strong>. Fine-grained <span id="intent-count">—</span>-intent accuracy remains <strong id="absolute-accuracy">—</strong>, so SurgeDesk stays assistive and every route is human-confirmed.</p>
           </section>
           <section class="proof-section deployment-output" aria-labelledby="deploy-title">
             <p class="eyebrow">Conservative passing deployment</p>
@@ -359,8 +355,8 @@
             <dl>
               <div><dt>Instance</dt><dd id="deployment-instance">—</dd></div>
               <div><dt>Threads</dt><dd id="deployment-threads">—</dd></div>
-              <div><dt>Runtime</dt><dd>ORT GenAI INT4</dd></div>
-              <div><dt>KleidiAI</dt><dd>Enabled</dd></div>
+              <div><dt>Runtime</dt><dd id="deployment-runtime">—</dd></div>
+              <div><dt>Optimization</dt><dd id="deployment-optimization">—</dd></div>
             </dl>
           </section>
         </div>
@@ -369,23 +365,23 @@
           <div>
             <p class="eyebrow">Reusable developer artifact</p>
             <h2 id="release-title">The same fail-closed method runs in pull requests</h2>
-            <p>The reusable Action evaluates versioned contracts and blocks tampered files, identity swaps, quality regressions and absent Arm callchains. The EXP009 sustained adapter ships in this repository.</p>
+            <p>The reusable Action evaluates versioned contracts and blocks tampered files, identity swaps, quality regressions and absent Arm callchains. The <span id="release-adapter-id">—</span> sustained adapter ships in this repository.</p>
           </div>
-          <pre><code>- uses: QasimKhan5x/ArmProof@v0.6.0
+          <pre><code>- uses: <span id="release-action">—</span>
   with:
     config: armproof.json</code></pre>
-          <a class="primary-link" href="https://github.com/QasimKhan5x/ArmProof">View source and evidence</a>
+          <a id="release-link" class="primary-link" href="https://github.com/QasimKhan5x/ArmProof">View source and evidence</a>
         </section>
 
         <section class="proof-section reuse-walkthrough" aria-labelledby="reuse-title">
           <div class="section-heading">
-            <div><p class="eyebrow">Five-minute adoption path</p><h2 id="reuse-title">Scaffold another Arm AI service</h2></div>
+            <div><p class="eyebrow">Adoption path</p><h2 id="reuse-title">Scaffold another Arm AI service</h2></div>
             <span class="source-chip">No hosted service required</span>
           </div>
           <ol class="reuse-steps">
             <li><span>1</span><div><strong>Generate the starter</strong><code>armproof init --endpoint http://127.0.0.1:8000/infer --output my-arm-service</code></div><button class="copy-button" type="button" data-copy="armproof init --endpoint http://127.0.0.1:8000/infer --output my-arm-service">Copy</button></li>
             <li><span>2</span><div><strong>Collect real evidence</strong><code>cat my-arm-service/ADOPTION_CHECKLIST.md</code></div><button class="copy-button" type="button" data-copy="cat my-arm-service/ADOPTION_CHECKLIST.md">Copy</button></li>
-            <li><span>3</span><div><strong>Add the portable gate</strong><code>uses: QasimKhan5x/ArmProof@v0.6.0</code></div><button class="copy-button" type="button" data-copy="uses: QasimKhan5x/ArmProof@v0.6.0">Copy</button></li>
+            <li><span>3</span><div><strong>Add the portable gate</strong><code id="reuse-action">uses: —</code></div><button id="reuse-action-copy" class="copy-button" type="button" data-copy="">Copy</button></li>
           </ol>
           <p id="copy-status" class="copy-status" role="status" aria-live="polite"></p>
         </section>
