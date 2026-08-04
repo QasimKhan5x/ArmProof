@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-012",
+  "status": "preregistered",
+  "hypothesis": "On a fresh c8g.4xlarge, an otherwise matched Phi-4 Mini INT4 service with KleidiAI enabled will pass five isolated 500-second windows at 0.56 requests/s while the KleidiAI-disabled control fails five isolated 500-second windows at 0.28 requests/s under the same 10-second p95 SLO.",
+  "causal_scope": "minimum_sustainable_capacity_ratio",
+  "discovery_evidence": ["EXP-2026-008", "EXP-2026-009"],
+  "treatments": {
+    "control": "Phi-4 Mini INT4 on ONNX Runtime GenAI with mlas.disable_kleidiai=1",
+    "treatment": "The same artifact, runtime, API, 16 threads and workload with mlas.disable_kleidiai=0"
+  },
+  "acceptance": {
+    "control_rate_rps": 0.28,
+    "control_expected_outcome": "fail",
+    "treatment_rate_rps": 0.56,
+    "treatment_expected_outcome": "pass",
+    "confirmations_per_treatment": 5,
+    "confirmation_seconds": 500,
+    "maximum_p95_ms": 10000.0,
+    "maximum_error_rate": 0.0,
+    "minimum_delivery_ratio": 0.95,
+    "minimum_requests_per_confirmation": 100,
+    "minimum_capacity_ratio": 2.0,
+    "maximum_quality_loss_pp": 1.0,
+    "minimum_schema_valid_rate": 0.99
+  },
+  "claim_on_success": "On the same Graviton4 server, the KleidiAI-enabled service sustains at least twice the request rate of the first confirmed failing control rate.",
+  "failure_rule": "Any control window that passes, treatment window that fails, missing request row, quality breach or identity mismatch rejects the claim. No narrower rate or threshold will be substituted from this run.",
+  "environment_ref": "AWS Graviton4 c8g.4xlarge, Ubuntu 24.04 Arm64, CPU-only, pinned runtime lock",
+  "workload_ref": "data/banking77/generated/traffic-mixed.jsonl",
+  "quality_ref": "frozen 770-row BANKING77 holdout summaries reused byte-for-byte from EXP-2026-003",
+  "maximum_runtime_minutes": 130,
+  "maximum_project_cumulative_cost_usd": 15.0,
+  "evidence_path": "ops/evidence/EXP-2026-012",
+  "notes": "This is the confirmatory follow-up to the exploratory lower bound observed after EXP-2026-009 rejected its exact bracket. The contract is committed before provisioning and tests only the public lower-bound claim."
+}

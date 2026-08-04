@@ -123,6 +123,45 @@ class CapacityProtocol:
             raise ValueError("quality thresholds are invalid")
 
 
+@dataclass(frozen=True)
+class MinimumCapacityProtocol:
+    """Confirm one conservative capacity lower bound without estimating a maximum."""
+
+    experiment_id: str
+    workload: Path
+    quality_dataset: Path
+    p95_slo_ms: float
+    baseline_failing_rps: float
+    treatment_passing_rps: float
+    confirmation_seconds: float = 500.0
+    confirmations: int = 5
+    max_error_rate: float = 0.0
+    minimum_delivery_ratio: float = 0.95
+    max_workers: int = 48
+    request_timeout_seconds: float = 60.0
+    warmup_requests: int = 5
+    maximum_quality_loss_pp: float = 1.0
+    minimum_schema_valid_rate: float = 0.99
+    minimum_confirmation_requests: int = 100
+    minimum_capacity_ratio: float = 2.0
+
+    def __post_init__(self) -> None:
+        if not self.experiment_id.startswith("EXP-"):
+            raise ValueError("experiment ID must start with EXP-")
+        if self.p95_slo_ms <= 0 or self.confirmation_seconds <= 0:
+            raise ValueError("SLO and confirmation duration must be positive")
+        if self.confirmations < 5:
+            raise ValueError("at least five confirmations are required")
+        if self.baseline_failing_rps <= 0 or self.treatment_passing_rps <= 0:
+            raise ValueError("confirmation rates must be positive")
+        observed_ratio = self.treatment_passing_rps / self.baseline_failing_rps
+        if observed_ratio < self.minimum_capacity_ratio:
+            raise ValueError("frozen rates cannot establish the minimum capacity ratio")
+        for rate in (self.baseline_failing_rps, self.treatment_passing_rps):
+            if round(rate * self.confirmation_seconds) < self.minimum_confirmation_requests:
+                raise ValueError("each confirmation must schedule enough requests")
+
+
 SendRequest = Callable[[str, RequestInput, int, float], RequestSample]
 PrepareWindow = Callable[[str, str], None]
 
@@ -421,6 +460,153 @@ def run_capacity_experiment(
         "elapsed_seconds": time.time() - started_at,
     }
     _write_json(output / "discovery.json", discovery)
+    _write_json(output / "confirmations.json", confirmations)
+    _write_json(output / "summary.json", summary)
+    return summary
+
+
+def run_minimum_capacity_confirmation(
+    protocol: MinimumCapacityProtocol,
+    treatments: Sequence[TreatmentEndpoint],
+    output: Path,
+    *,
+    send: SendRequest = _default_send,
+    precomputed_quality: Mapping[str, QualityResult] | None = None,
+    prepare_window: PrepareWindow | None = None,
+) -> dict[str, Any]:
+    """Confirm a preregistered lower bound using only its two identifying rates."""
+
+    treatment_index = {item.treatment_id: item for item in treatments}
+    if set(treatment_index) != {"kleidiai-disabled", "kleidiai-enabled"}:
+        raise ValueError("treatments must be the matched KleidiAI enabled and disabled controls")
+    output.mkdir(parents=True, exist_ok=True)
+    started_at = time.time()
+    _write_json(output / "protocol.json", {
+        "experiment_id": protocol.experiment_id,
+        "protocol": {**asdict(protocol), "workload": str(protocol.workload),
+                     "quality_dataset": str(protocol.quality_dataset)},
+        "treatments": [asdict(item) for item in treatments],
+    })
+    _write_json(output / "environment.json", {
+        "platform": platform.platform(),
+        "python": platform.python_version(),
+        "processor": platform.processor(),
+        "started_at_unix": started_at,
+    })
+
+    workload = load_requests_jsonl(protocol.workload)
+    warm_requests = materialize_requests(workload, protocol.warmup_requests, "warmup")
+    for treatment in treatments:
+        samples = run_closed_loop(
+            warm_requests,
+            lambda item, scheduled, endpoint=treatment.endpoint: send(
+                endpoint, item, scheduled, protocol.request_timeout_seconds
+            ),
+            concurrency=1,
+        )
+        write_samples_jsonl(output / "warmup" / f"{treatment.treatment_id}.jsonl", samples)
+        if not all(sample.accepted for sample in samples):
+            raise RuntimeError(f"warmup failed for {treatment.treatment_id}")
+
+    quality_cases = load_quality_cases(protocol.quality_dataset)
+    quality_results = dict(precomputed_quality or {})
+    if set(quality_results) != set(treatment_index):
+        raise ValueError("precomputed quality must contain both matched treatments")
+    for treatment_id, result in quality_results.items():
+        if result.total != len(quality_cases):
+            raise ValueError(f"quality row count mismatch for {treatment_id}")
+        _write_json(output / "quality" / f"{treatment_id}.json", quality_to_dict(result))
+    quality_comparison = compare_quality(
+        quality_results["kleidiai-disabled"], quality_results["kleidiai-enabled"]
+    )
+    _write_json(output / "quality" / "comparison.json", asdict(quality_comparison))
+
+    policy = SloPolicy(
+        protocol.p95_slo_ms, protocol.max_error_rate, protocol.minimum_delivery_ratio
+    )
+    confirmations: list[dict[str, Any]] = []
+    claim_rows = (
+        ("kleidiai-disabled", protocol.baseline_failing_rps, False),
+        ("kleidiai-enabled", protocol.treatment_passing_rps, True),
+    )
+    for repetition in range(protocol.confirmations):
+        ordered = claim_rows if repetition % 2 == 0 else tuple(reversed(claim_rows))
+        for treatment_id, requested_rps, expected_pass in ordered:
+            window_id = f"confirm-{repetition + 1}-{treatment_id}"
+            endpoint = treatment_index[treatment_id].endpoint
+            if prepare_window is not None:
+                prepare_window(treatment_id, window_id)
+                window_warmup = materialize_requests(
+                    workload, protocol.warmup_requests, f"window-warmup-{window_id}"
+                )
+                warm_samples = run_closed_loop(
+                    window_warmup,
+                    lambda item, scheduled: send(
+                        endpoint, item, scheduled, protocol.request_timeout_seconds
+                    ),
+                    concurrency=1,
+                )
+                write_samples_jsonl(output / "window-warmup" / f"{window_id}.jsonl", warm_samples)
+                if not all(sample.accepted for sample in warm_samples):
+                    raise RuntimeError(f"window warmup failed for {window_id}")
+            samples, sample_summary, offered_rps = _run_window(
+                endpoint,
+                workload,
+                requested_rps,
+                protocol.confirmation_seconds,
+                protocol.max_workers,
+                protocol.request_timeout_seconds,
+                window_id,
+                send,
+            )
+            observed_pass = _passes(sample_summary, offered_rps, policy)
+            row = {
+                "repetition": repetition + 1,
+                "treatment_id": treatment_id,
+                "requested_rps": requested_rps,
+                "offered_rps": offered_rps,
+                "expected_pass": expected_pass,
+                "observed_pass": observed_pass,
+                "matched_expectation": observed_pass is expected_pass,
+                "summary": sample_summary,
+            }
+            confirmations.append(row)
+            write_samples_jsonl(
+                output / "confirmations" / f"{window_id}.jsonl", samples
+            )
+
+    quality_passed = (
+        quality_comparison.accuracy_delta_pp >= -protocol.maximum_quality_loss_pp
+        and quality_comparison.macro_f1_delta_pp >= -protocol.maximum_quality_loss_pp
+        and all(
+            result.schema_valid_rate >= protocol.minimum_schema_valid_rate
+            for result in quality_results.values()
+        )
+    )
+    boundary_passed = all(
+        row["matched_expectation"]
+        and row["summary"]["total"] >= protocol.minimum_confirmation_requests
+        for row in confirmations
+    )
+    minimum_ratio = protocol.treatment_passing_rps / protocol.baseline_failing_rps
+    summary = {
+        "schema_version": "1.0.0",
+        "experiment_id": protocol.experiment_id,
+        "claim": "minimum_sustainable_capacity_ratio",
+        "baseline_failing_rps": protocol.baseline_failing_rps,
+        "treatment_passing_rps": protocol.treatment_passing_rps,
+        "minimum_capacity_ratio": minimum_ratio,
+        "confirmation_seconds": protocol.confirmation_seconds,
+        "confirmation_count_per_treatment": protocol.confirmations,
+        "raw_request_count": sum(row["summary"]["total"] for row in confirmations),
+        "quality_passed": quality_passed,
+        "boundary_passed": boundary_passed,
+        "passed": quality_passed and boundary_passed
+        and minimum_ratio >= protocol.minimum_capacity_ratio,
+        "quality_comparison": asdict(quality_comparison),
+        "confirmations": confirmations,
+        "elapsed_seconds": time.time() - started_at,
+    }
     _write_json(output / "confirmations.json", confirmations)
     _write_json(output / "summary.json", summary)
     return summary

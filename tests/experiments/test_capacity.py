@@ -9,9 +9,11 @@ from unittest.mock import patch
 from armproof.experiments.capacity import (
     CapacityProtocol,
     FixedBoundary,
+    MinimumCapacityProtocol,
     MixProtocol,
     TreatmentEndpoint,
     run_capacity_experiment,
+    run_minimum_capacity_confirmation,
 )
 from armproof.quality.banking77 import QualityResult, QualityRow
 from armproof.workload import RequestInput, RequestSample
@@ -54,6 +56,69 @@ class CapacityProtocolTests(unittest.TestCase):
     def test_treatment_value_object_is_serializable(self) -> None:
         endpoint = TreatmentEndpoint("kleidiai-enabled", "http://127.0.0.1:8001/infer")
         self.assertEqual(endpoint.treatment_id, "kleidiai-enabled")
+
+    def test_minimum_capacity_confirmation_uses_only_identifying_rates(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            traffic = root / "traffic.jsonl"
+            traffic.write_text(json.dumps({
+                "request_id": "traffic-1", "payload": {"prompt": "route"},
+            }) + "\n")
+            quality = root / "quality.jsonl"
+            quality.write_text(json.dumps({
+                "request_id": "quality-1", "payload": {"prompt": "route"},
+                "expected_intent": "label", "source_text": "route",
+            }) + "\n")
+            protocol = MinimumCapacityProtocol(
+                "EXP-2026-012", traffic, quality, 1_000, 0.2, 0.4,
+                confirmation_seconds=10, minimum_confirmation_requests=2,
+            )
+            quality_row = QualityRow("quality-1", "label", "label", True, True, None)
+            quality_result = QualityResult(
+                1, 1, 1, 0, 1.0, 1.0, 1.0, (quality_row,)
+            )
+
+            def send(endpoint, item, scheduled, timeout):
+                return RequestSample(item.request_id, scheduled, scheduled,
+                                     scheduled + 1_000_000, 200, None, {})
+
+            observed_rates = []
+
+            def fixed_outcomes(requests, send_request, target_rps, max_workers):
+                observed_rates.append(target_rps)
+                expected_pass = "kleidiai-enabled" in requests[0].request_id
+                latency = 1_000_000 if expected_pass else 2_000_000_000
+                return [
+                    RequestSample(item.request_id, 0, 0, latency, 200, None, {})
+                    for item in requests
+                ]
+
+            prepared = []
+            with patch(
+                "armproof.experiments.capacity.run_open_loop",
+                side_effect=fixed_outcomes,
+            ):
+                summary = run_minimum_capacity_confirmation(
+                    protocol,
+                    [
+                        TreatmentEndpoint("kleidiai-disabled", "disabled"),
+                        TreatmentEndpoint("kleidiai-enabled", "enabled"),
+                    ],
+                    root / "evidence",
+                    send=send,
+                    precomputed_quality={
+                        "kleidiai-disabled": quality_result,
+                        "kleidiai-enabled": quality_result,
+                    },
+                    prepare_window=lambda treatment, window: prepared.append(
+                        (treatment, window)
+                    ),
+                )
+            self.assertTrue(summary["passed"])
+            self.assertEqual(summary["minimum_capacity_ratio"], 2.0)
+            self.assertEqual(summary["raw_request_count"], 30)
+            self.assertEqual(set(observed_rates), {0.2, 0.4})
+            self.assertEqual(len(prepared), 10)
 
     def test_high_confidence_protocol_enforces_confirmation_sample_count(self) -> None:
         mix = MixProtocol("mixed", Path("mixed.jsonl"), 10_000, (0.20, 0.24))
