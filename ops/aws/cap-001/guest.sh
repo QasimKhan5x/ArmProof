@@ -40,6 +40,11 @@ case "${EXPERIMENT_APPROVAL_TOKEN:-}" in
     PROTOCOL_PATH="ops/aws/sustained-005/protocol.json"
     WATCHDOG_MINUTES=125
     ;;
+  exp-2026-014-identity-bound-capacity)
+    EXPERIMENT_ID="EXP-2026-014"
+    PROTOCOL_PATH="ops/aws/sustained-006/protocol.json"
+    WATCHDOG_MINUTES=125
+    ;;
   *) exit 64 ;;
 esac
 
@@ -106,7 +111,7 @@ export OMP_PROC_BIND=close
 export OMP_PLACES=cores
 set +e
 QUALITY_ARGS=()
-if [[ "$EXPERIMENT_ID" == "EXP-2026-004" || "$EXPERIMENT_ID" == "EXP-2026-005" || "$EXPERIMENT_ID" == "EXP-2026-006" || "$EXPERIMENT_ID" == "EXP-2026-007" || "$EXPERIMENT_ID" == "EXP-2026-008" || "$EXPERIMENT_ID" == "EXP-2026-009" || "$EXPERIMENT_ID" == "EXP-2026-012" ]]; then
+if [[ "$EXPERIMENT_ID" == "EXP-2026-004" || "$EXPERIMENT_ID" == "EXP-2026-005" || "$EXPERIMENT_ID" == "EXP-2026-006" || "$EXPERIMENT_ID" == "EXP-2026-007" || "$EXPERIMENT_ID" == "EXP-2026-008" || "$EXPERIMENT_ID" == "EXP-2026-009" || "$EXPERIMENT_ID" == "EXP-2026-012" || "$EXPERIMENT_ID" == "EXP-2026-014" ]]; then
   mkdir -p "$ROOT/quality-reuse"
   curl -fsSL "$QUALITY_DISABLED_URL" -o "$ROOT/quality-reuse/kleidiai-disabled.json"
   echo "$QUALITY_DISABLED_SHA256  $ROOT/quality-reuse/kleidiai-disabled.json" | sha256sum -c -
@@ -114,7 +119,7 @@ if [[ "$EXPERIMENT_ID" == "EXP-2026-004" || "$EXPERIMENT_ID" == "EXP-2026-005" |
   echo "$QUALITY_ENABLED_SHA256  $ROOT/quality-reuse/kleidiai-enabled.json" | sha256sum -c -
   QUALITY_ARGS=(--precomputed-quality-dir "$ROOT/quality-reuse")
 fi
-if [[ "$EXPERIMENT_ID" == "EXP-2026-012" ]]; then
+if [[ "$EXPERIMENT_ID" == "EXP-2026-012" || "$EXPERIMENT_ID" == "EXP-2026-014" ]]; then
   "$ROOT/venv/bin/python" scripts/run_confirmatory_012.py \
     --model-source "$MODEL_SOURCE" --output "$RESULTS/capacity" \
     --protocol "$PROTOCOL_PATH" "${QUALITY_ARGS[@]}" | tee "$RESULTS/capacity.stdout.json"

@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-014",
+  "workload": "data/banking77/generated/traffic-mixed.jsonl",
+  "quality_dataset": "data/banking77/generated/quality.jsonl",
+  "p95_slo_ms": 10000.0,
+  "baseline_failing_rps": 0.28,
+  "treatment_passing_rps": 0.56,
+  "confirmation_seconds": 500.0,
+  "confirmations": 5,
+  "minimum_confirmation_requests": 100,
+  "minimum_capacity_ratio": 2.0,
+  "max_error_rate": 0.0,
+  "minimum_delivery_ratio": 0.95,
+  "max_workers": 48,
+  "request_timeout_seconds": 60.0,
+  "warmup_requests": 5,
+  "maximum_quality_loss_pp": 1.0,
+  "minimum_schema_valid_rate": 0.99
+}
