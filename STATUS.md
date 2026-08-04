@@ -67,8 +67,7 @@ The c8g.4xlarge virtual PMU exposed two counters. Performix CPU
 Microarchitecture and Instruction Mix each require at least three, so those
 readiness failures remain public and unavailable rather than passing.
 
-Version `v0.6.0` is the Performix-integrated release candidate pending tag and
-remote CI.
+Version `v0.6.0` is the validated Performix-integrated release.
 Native Arm64, x86 and report-browser CI cover the Action, decision and offline
 report. Submission copy and the under-three-minute script are under
 `submission/`. Remaining owner work is recording/uploading the video and
