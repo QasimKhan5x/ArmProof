@@ -31,9 +31,10 @@ three-minute limit.
 
 **Say:**
 
-> SurgeDesk is a banking-support AI service on Graviton4. The same Phi-4 Mini
-> INT4 model handles at least twice the traffic with Arm KleidiAI. First, I will
-> show the support workflow. Then we will open the measurements behind it.
+> SurgeDesk runs a Phi-4 Mini INT4 banking-support service on Graviton4.
+> Enabling Arm KleidiAI lets the same server handle at least twice the traffic,
+> and I will show the workflow, benchmark and release evidence behind that
+> result.
 
 ### 0:15-0:35 - Live Illustration
 
@@ -41,10 +42,10 @@ three-minute limit.
 
 **Say:**
 
-> I am sending the same customer message to two live endpoints. They use the
-> same model and runtime settings; only KleidiAI changes. The optimized endpoint
-> completes first. Later tests show whether this advantage survives sustained
-> traffic.
+> Here, the same customer message goes to two live endpoints with identical
+> model and runtime settings. KleidiAI is the only change, and the optimized
+> endpoint finishes first; the sustained benchmark will show whether that lead
+> holds under traffic.
 
 ### 0:35-0:55 - User Workflow
 
@@ -53,10 +54,10 @@ queues, then click **Confirm route**.
 
 **Say:**
 
-> This customer has lost a card. The model initially sends the case to the
-> security queue. The routing guard corrects it to cards and payments. Across
-> 770 unseen messages, the guard raises accuracy by 12.34 points. The support
-> agent reviews the suggestion and confirms it.
+> The model initially sends this missing-card case to security, but the routing
+> guard corrects it to cards and payments. Across 770 unseen messages, the guard
+> raises accuracy by 12.34 points before the agent reviews and confirms the
+> suggestion.
 
 ### 0:55-1:42 - Sustained Arm Result
 
@@ -65,47 +66,47 @@ to the blocked claim, proven lower bound and equal-load outcomes.
 
 **Say:**
 
-> This test asks how many banking messages one server can process while keeping
-> p95 response time under ten seconds and returning no errors. At each traffic
-> rate, we ran five 500-second trials. Without KleidiAI, 0.24 requests per second
-> passed every trial, while 0.28 failed every trial. With KleidiAI, 0.56 passed
-> all five. Since 0.56 is twice 0.28, the optimized capacity is at least twice
-> the baseline capacity.
+> The benchmark measures how many banking messages one server can process while
+> keeping p95 response time under ten seconds with no errors. At each traffic
+> rate, we ran five 500-second trials. The baseline passed all five at 0.24
+> requests per second but failed all five at 0.28, while the optimized service
+> passed all five at 0.56. Since the baseline cannot sustain 0.28 while the
+> optimized service sustains 0.56, the capacity gain is at least two times.
 >
-> Shorter tests had suggested 2.5 times. ArmProof reprocessed all 4,200 request
-> records and required all five trials to agree. At 0.60, one trial slipped
-> under the ten-second limit by 72 milliseconds. The exact capacity boundary
-> was therefore not reproducible, so ArmProof rejected 2.5 times and released
-> only the two-times claim.
+> Short tests had suggested 2.5 times, but ArmProof reprocessed all 4,200 request
+> records and required every trial to agree. At 0.60, one optimized trial passed
+> by 72 milliseconds, so that boundary was not reproducible; ArmProof rejected
+> the exact 2.5-times estimate and published the defensible two-times result.
 
-### 1:42-2:14 - Prove Arm Caused It
+### 1:42-2:20 - Prove Arm Caused It
 
 **Do:** Open **3. Release proof**. Point first to **Core causal experiment**,
 then the claim ledger and optimization path.
 
 **Say:**
 
-> Performix shows where the gain came from. With KleidiAI disabled, none of its
-> samples landed in KleidiAI code. With it enabled, 67.02 percent landed in the
-> Neoverse I8MM matrix kernel. Linux perf measured 68.53 percent. ArmProof checks
-> both profiles during CI. INT4 also cut model size by 35.92 percent and peak
-> memory by 55.34 percent, while quality stayed within one point.
+> To check that the gain came from Arm-optimized execution, Performix profiled
+> otherwise identical enabled and disabled runs. It found zero KleidiAI samples
+> when disabled, compared with 67.02 percent in the Neoverse I8MM matrix kernel
+> when enabled. Linux perf independently attributed 68.53 percent of CPU cycles
+> to the same call chain, and ArmProof validates both profiles during CI.
+> Separately, INT4 reduced model size by 35.92 percent and peak memory by 55.34
+> percent while accuracy remained within one point.
 
-### 2:14-2:43 - Reusable Developer Artifact
+### 2:20-2:46 - Reusable Developer Artifact
 
 **Do:** Run `demo_release_gate.py`. Point to `PASS`, `TAMPER`, `BLOCK`, then
 show the `armproof init` command in the adoption panel or README.
 
 **Say:**
 
-> ArmProof first validates eight release claims across 317 files: request logs,
-> summaries and profiler exports. Now I replace one SHA-256 fingerprint in the
-> experiment ledger. The fingerprint no longer matches its evidence file, so
-> ArmProof cannot prove it is evaluating the recorded experiment and blocks the
-> release. Developers get the same check through the CLI or GitHub Action, and
-> armproof init adds it to another project.
+> ArmProof first validates eight claims from 317 request logs, summaries and
+> profiler files. I then replace one SHA-256 fingerprint in the experiment
+> ledger. Because it no longer matches the recorded evidence, ArmProof blocks
+> the release instead of trusting the metrics. Developers can add the same check
+> to another Arm AI project through the CLI, GitHub Action and armproof init.
 
-### 2:43-2:55 - Close
+### 2:46-2:56 - Close
 
 **Say:**
 
