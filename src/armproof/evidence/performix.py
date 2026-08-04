@@ -196,6 +196,49 @@ def compare_code_hotspots(
     }
 
 
+def compare_code_hotspots_execution(
+    disabled_path: Path,
+    enabled_path: Path,
+    *,
+    minimum_enabled_share: float,
+    minimum_total_samples: int,
+) -> dict[str, Any]:
+    """Confirm matched positive/negative KleidiAI execution without mixing units."""
+
+    if not math.isfinite(minimum_enabled_share) or not 0 < minimum_enabled_share <= 1:
+        raise ValueError("minimum enabled share must be between zero and one")
+    if minimum_total_samples < 1:
+        raise ValueError("minimum total samples must be positive")
+    disabled = read_code_hotspots_export(disabled_path)
+    enabled = read_code_hotspots_export(enabled_path)
+    if disabled.engine_version != enabled.engine_version:
+        raise ValueError("Performix engine versions do not match")
+    if disabled.cpu_names != enabled.cpu_names or not disabled.cpu_names:
+        raise ValueError("Performix target CPU identities do not match")
+    normalized_disabled = disabled.command.replace("kleidiai-disabled", "TREATMENT")
+    normalized_enabled = enabled.command.replace("kleidiai-enabled", "TREATMENT")
+    if normalized_disabled != normalized_enabled:
+        raise ValueError("Performix workload commands differ beyond treatment overlay")
+    if min(disabled.total_function_samples, enabled.total_function_samples) < minimum_total_samples:
+        raise ValueError("Performix runs contain too few function samples")
+    if disabled.kai_function_samples != 0:
+        raise ValueError("disabled Performix control contains measured kai_* samples")
+    if enabled.kai_sample_share < minimum_enabled_share:
+        raise ValueError("enabled Performix treatment did not meet the frozen kai_* share")
+    return {
+        "schema_version": "1.0.0",
+        "passed": True,
+        "disabled": asdict(disabled),
+        "enabled": asdict(enabled),
+        "minimum_enabled_share": minimum_enabled_share,
+        "minimum_total_samples": minimum_total_samples,
+        "comparison_note": (
+            "Performix function-sample share is evaluated on its own units; "
+            "Linux perf cycle attribution is separate corroborating evidence."
+        ),
+    }
+
+
 def _sha256_bytes(payload: bytes) -> str:
     return hashlib.sha256(payload).hexdigest()
 

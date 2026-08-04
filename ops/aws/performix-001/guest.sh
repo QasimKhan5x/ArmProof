@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+CODE_HOTSPOTS_ONLY=0
+
 case "${EXPERIMENT_APPROVAL_TOKEN:-}" in
   exp-2026-010-performix)
     EXPERIMENT_ID="EXP-2026-010"
@@ -9,6 +11,11 @@ case "${EXPERIMENT_APPROVAL_TOKEN:-}" in
   exp-2026-011-performix-cloud)
     EXPERIMENT_ID="EXP-2026-011"
     INCLUDE_CPU_MICROARCHITECTURE=0
+    ;;
+  exp-2026-013-performix-confirmation)
+    EXPERIMENT_ID="EXP-2026-013"
+    INCLUDE_CPU_MICROARCHITECTURE=0
+    CODE_HOTSPOTS_ONLY=1
     ;;
   *) exit 64 ;;
 esac
@@ -134,6 +141,19 @@ run_profile() {
 
 run_profile code_hotspots disabled "$DISABLED" --param sampling_freq=normal
 run_profile code_hotspots enabled "$ENABLED" --param sampling_freq=normal
+if [[ "$CODE_HOTSPOTS_ONLY" == 1 ]]; then
+  DISABLED_RUN_ID=$(awk '$1 == "code_hotspots" && $2 == "disabled" {print $3}' "$RESULTS/performix/run-ids.tsv")
+  ENABLED_RUN_ID=$(awk '$1 == "code_hotspots" && $2 == "enabled" {print $3}' "$RESULTS/performix/run-ids.tsv")
+  "$ROOT/venv/bin/python" scripts/analyze_performix_execution.py \
+    --disabled "$RESULTS/performix/exports/$DISABLED_RUN_ID.zip" \
+    --enabled "$RESULTS/performix/exports/$ENABLED_RUN_ID.zip" \
+    --minimum-enabled-share 0.50 --minimum-total-samples 100000 \
+    --output "$RESULTS/performix-confirmation.json"
+  cp "$ROOT/variants/kleidiai-disabled/genai_config.json" "$RESULTS/disabled-genai-config.json"
+  cp "$ROOT/variants/kleidiai-enabled/genai_config.json" "$RESULTS/enabled-genai-config.json"
+  date --iso-8601=seconds > "$RESULTS/completed-at.txt"
+  exit 0
+fi
 if [[ "$INCLUDE_CPU_MICROARCHITECTURE" == 1 ]]; then
   run_profile cpu_microarchitecture enabled "$ENABLED" --param sampling_freq=normal
   run_profile cpu_microarchitecture disabled "$DISABLED" --param sampling_freq=normal

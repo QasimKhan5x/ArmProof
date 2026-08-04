@@ -12,6 +12,7 @@ import tarfile
 from pathlib import Path
 
 from armproof.evidence.performix import (
+    compare_code_hotspots_execution,
     compare_code_hotspots,
     extract_run_id,
     verify_performix_archive,
@@ -80,6 +81,34 @@ class PerformixExportTests(unittest.TestCase):
             )
             self.assertTrue(result["passed"])
             self.assertAlmostEqual(result["enabled"]["kai_sample_share"], 0.67)
+
+            execution = compare_code_hotspots_execution(
+                root / "disabled.zip",
+                root / "enabled.zip",
+                minimum_enabled_share=0.5,
+                minimum_total_samples=100,
+            )
+            self.assertTrue(execution["passed"])
+            self.assertNotIn("absolute_share_difference", execution)
+
+    def test_execution_gate_rejects_too_few_samples_or_weak_enabled_share(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            _export(root / "disabled.zip", "disabled-run", "disabled", [(100, "Mlas")])
+            _export(
+                root / "enabled.zip", "enabled-run", "enabled",
+                [(49, "kai_kernel_matmul_neon_i8mm"), (51, "Mlas")],
+            )
+            with self.assertRaisesRegex(ValueError, "frozen kai"):
+                compare_code_hotspots_execution(
+                    root / "disabled.zip", root / "enabled.zip",
+                    minimum_enabled_share=0.5, minimum_total_samples=100,
+                )
+            with self.assertRaisesRegex(ValueError, "too few"):
+                compare_code_hotspots_execution(
+                    root / "disabled.zip", root / "enabled.zip",
+                    minimum_enabled_share=0.4, minimum_total_samples=101,
+                )
 
     def test_disabled_kai_samples_and_profiler_disagreement_fail(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

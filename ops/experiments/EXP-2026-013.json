@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-013",
+  "status": "preregistered",
+  "hypothesis": "Matched Arm Performix Code Hotspots profiles will observe no kai_* function samples in the KleidiAI-disabled control and at least 50% kai_* function-sample share in the KleidiAI-enabled treatment on AWS Graviton4.",
+  "causal_scope": "arm_execution_attribution",
+  "discovery_evidence": ["EXP-2026-010", "EXP-2026-011"],
+  "treatments": [
+    {
+      "id": "kleidiai-disabled",
+      "artifact_ref": "microsoft/Phi-4-mini-instruct-onnx@fc04c8f93df696602fd9f300a30d1bf2e3081347#cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4 plus disabled overlay",
+      "runtime_ref": "examples/phi4-graviton/runtime-lock.json",
+      "command_ref": "python scripts/profile_ort.py --model /opt/armproof/variants/kleidiai-disabled --workload data/banking77/generated/traffic-mixed.jsonl --repetitions 3",
+      "environment_overrides": {"mlas.disable_kleidiai": "1", "OMP_NUM_THREADS": "16", "OMP_PROC_BIND": "close", "OMP_PLACES": "cores"}
+    },
+    {
+      "id": "kleidiai-enabled",
+      "artifact_ref": "microsoft/Phi-4-mini-instruct-onnx@fc04c8f93df696602fd9f300a30d1bf2e3081347#cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4 plus enabled overlay",
+      "runtime_ref": "examples/phi4-graviton/runtime-lock.json",
+      "command_ref": "python scripts/profile_ort.py --model /opt/armproof/variants/kleidiai-enabled --workload data/banking77/generated/traffic-mixed.jsonl --repetitions 3",
+      "environment_overrides": {"mlas.disable_kleidiai": "0", "OMP_NUM_THREADS": "16", "OMP_PROC_BIND": "close", "OMP_PLACES": "cores"}
+    }
+  ],
+  "acceptance": {
+    "required_recipe": "code_hotspots",
+    "disabled_kai_function_samples": 0,
+    "minimum_enabled_kai_sample_share": 0.50,
+    "minimum_total_function_samples_per_treatment": 100000,
+    "matched_cpu_required": true,
+    "matched_engine_version_required": true,
+    "matched_commands_except_overlay_required": true,
+    "native_exports_required": true
+  },
+  "failure_rule": "Any missing export, identity mismatch, kai_* sample in the control, enabled share below 50%, or sample count below 100,000 rejects the Arm execution claim. Unsupported counter-heavy recipes are outside this Code Hotspots-only claim and cannot be substituted into it.",
+  "environment_ref": "AWS Graviton4 c8g.4xlarge, Ubuntu 24.04 Arm64, CPU-only, pinned runtime lock",
+  "workload_ref": "data/banking77/generated/traffic-mixed.jsonl",
+  "profiler_ref": "Arm Performix 1.20.0 Code Hotspots at normal sampling",
+  "repetitions": 3,
+  "maximum_runtime_minutes": 40,
+  "maximum_project_cumulative_cost_usd": 15.0,
+  "evidence_path": "ops/evidence/EXP-2026-013",
+  "notes": "This confirmatory follow-up freezes only the Code Hotspots claim supported by the Graviton virtual PMU. Performix function samples are not numerically compared with Linux perf cycle attribution because they are different units."
+}
