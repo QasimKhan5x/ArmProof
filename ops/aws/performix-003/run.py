@@ -11,9 +11,9 @@ from pathlib import Path
 from armproof.cloud import execute_aws_run, make_plan
 
 
-# Uses the maximum projected EXP-2026-012 total so this plan remains safe even
-# when the capacity confirmation consumes its full watchdog allowance.
-PRIOR_SPEND_USD = 12.3369
+# Carries the conservative EXP-2026-012 projection plus the rejected first
+# profiling attempt recorded in its spend ledger.
+PRIOR_SPEND_USD = 12.3762
 EXPERIMENT_TOKEN = "exp-2026-013-performix-confirmation"
 
 
