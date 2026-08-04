@@ -1,0 +1,16 @@
+{
+  "backend": "llama.cpp-qwen2.5-0.5b-q4_0",
+  "bridge_contract": "armproof-http-infer-v1",
+  "date": "2026-08-04",
+  "host_architecture": "arm64",
+  "llama_cpp_build": "9910-f5525f7e7",
+  "model": "Qwen/Qwen2.5-0.5B-Instruct-GGUF:Q4_0",
+  "performance_claim": false,
+  "response_fields_verified": [
+    "request_id",
+    "output",
+    "backend",
+    "inference_ms"
+  ],
+  "smoke_passed": true
+}

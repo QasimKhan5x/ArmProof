@@ -26,6 +26,7 @@ from armproof.evidence import (
 from armproof.policy import decision_to_dict, evaluate_claims
 from armproof.quality import evaluate_quality, load_quality_cases, quality_to_dict
 from armproof.report import generate_report
+from armproof.scaffold import create_scaffold
 from armproof.workload import (
     SloPolicy,
     capacity_to_dict,
@@ -91,6 +92,9 @@ def build_parser() -> argparse.ArgumentParser:
     evidence.add_argument("--root", type=Path, required=True)
     evidence.add_argument("--source-prefix", default="/opt/armproof/evidence")
     subparsers.add_parser("adapters", help="list installed evidence adapters")
+    init = subparsers.add_parser("init", help="scaffold a fail-closed HTTP adoption kit")
+    init.add_argument("--endpoint", required=True)
+    init.add_argument("--output", type=Path, required=True)
     ci = subparsers.add_parser("ci", help="evaluate and report from one ArmProof config")
     ci.add_argument("config", type=Path)
     ci.add_argument("--output", type=Path)
@@ -136,6 +140,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0 if result.passed else 2
     if args.command == "adapters":
         print(json.dumps({"adapters": list(list_evidence_adapters())}, indent=2))
+        return 0
+    if args.command == "init":
+        try:
+            paths = create_scaffold(args.output.resolve(), args.endpoint)
+        except (OSError, ValueError) as exc:
+            print(f"armproof: {exc}", file=sys.stderr)
+            return 1
+        print(f"Created {len(paths)} files in {args.output.resolve()}")
+        print("Next: open ADOPTION_CHECKLIST.md and replace the workload and identities.")
         return 0
     if args.command == "ci":
         return _run_ci(args)

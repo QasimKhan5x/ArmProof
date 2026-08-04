@@ -1,136 +1,120 @@
 # Three-Minute Demo Script
 
-Target duration: **2:40-2:50**. Do not exceed 3:00. Every visible result must
-be loaded or validated during the recording.
+Target duration: **2:40-2:50**. The spoken script is deliberately limited to
+about 345 words so clicks and pauses fit inside three minutes.
 
 ## Prepare Before Recording
 
-1. Use a 1440x900 or 1440x960 browser window at 100% zoom.
-2. Start the local app:
+1. Follow [`LIVE_REQUEST_RUNBOOK.md`](LIVE_REQUEST_RUNBOOK.md) and leave both
+   prepared endpoints warm.
+2. Start SurgeDesk with `python3.12 scripts/serve_surgedesk.py --port 8765`.
+3. Open `http://127.0.0.1:8765/surgedesk/#triage` at 100% zoom and select
+   **Guard intervention**.
+4. Prepare two terminal tabs without executing their commands:
 
    ```bash
-   python3.12 scripts/serve_surgedesk.py --port 8765
-   ```
+   python3.12 scripts/demo_live_compare.py \
+     --baseline-endpoint http://127.0.0.1:18001/infer \
+     --optimized-endpoint http://127.0.0.1:18002/infer
 
-3. Open `http://127.0.0.1:8765/surgedesk/#triage`.
-4. Select **Guard intervention** but do not load the suggestion yet.
-5. Open a terminal beside the browser with this command already typed:
-
-   ```bash
    python3.12 scripts/demo_release_gate.py
    ```
 
-6. Close notifications, hide bookmarks and enable Do Not Disturb. Record only
-   the browser and terminal. Do not use copyrighted music.
+5. Record the browser and terminal. Hide notifications and bookmarks.
 
 ## Exact Recording
 
 ### 0:00-0:15 - Hook
 
-**Show:** SurgeDesk triage, with the 86.75%, +12.34 pp and 100% score band in
-the first viewport.
+**Show:** SurgeDesk first viewport.
 
 **Say:**
 
-> This is SurgeDesk, a banking-support AI service on AWS Graviton4. We migrated
-> Phi-4 Mini to INT4 ONNX Runtime GenAI and isolated Arm KleidiAI against the
-> same model and runtime. The result is at least twice the sustainable mixed
-> traffic on the same instance. ArmProof is why I can defend that number: it
-> rejected our earlier, prettier 2.5-times claim.
+> SurgeDesk is a banking-support AI service on Graviton4. The same Phi-4 Mini
+> INT4 deployment sustains at least twice the traffic when Arm KleidiAI is
+> enabled. ArmProof makes that claim defensible: it rejected our more
+> impressive 2.5-times number when the long test contradicted it.
 
-### 0:15-0:43 - Real Application And Honest Quality Boundary
+### 0:15-0:35 - Live Illustration
 
-**Do:** Click **Load model suggestion**. Point to **Phi-4 intent**, then
-**LLM-mapped queue**, then **Guarded queue**. Click **Confirm route**.
+**Do:** Run `demo_live_compare.py`. Let the enabled completion print first.
 
 **Say:**
 
-> Here Phi-4 calls this a lost-card request and maps it to account security.
-> The held-out queue guard sees that the card never arrived and repairs the
-> operational route to cards and payments. Across 770 unseen requests this
-> two-stage route reaches 86.75 percent, up 12.34 points. Every route remains
-> human-confirmed; the app shows the model's limit instead of hiding it.
+> This is one live illustrative request to two prepared endpoints, not the
+> capacity benchmark. They use the same prompt, model and runtime; the
+> KleidiAI control differs. Enabled finishes first. The sustained audit, not
+> this single request, establishes the headline.
 
-### 0:43-1:25 - The Arm Result, Loaded Honestly
+### 0:35-0:55 - User Workflow
 
-**Do:** Click **2. Arm result**. Point briefly to `EXP-2026-009`, the verified
-archive status and **Matched INT4 control**. Click **Load verified experiment**.
-Point in this order: experiment strip, the blocked original gate, the proven
-conservative claim, equal-load outcomes and the `≥2.0x` headline.
+**Do:** Return to SurgeDesk, click **Load model suggestion**, point to the two
+queues, then click **Confirm route**.
 
 **Say:**
 
-> Now the optimization. I am loading the immutable EXP-2026-009 sustained
-> audit, not pretending to run a three-hour benchmark in three seconds. The matched deployment is one
-> c8g.4xlarge, one Phi-4 Mini INT4 model, 16 threads and a 10-second p95 target;
-> the versioned contract binds model, runtime, workload and machine identities,
-> while the treatment overlay toggles KleidiAI. This equal-load panel is visibly
-> labeled as a supporting EXP-2026-004 slice: disabled breaches the target three
-> times at 12.66 seconds p95; enabled breaches none at 2.21. More importantly,
-> five 500-second confirmations passed at 0.24 versus 0.56 requests per second.
-> Baseline failed all five at 0.28, proving at least twice the sustainable
-> capacity. The exact 2.5-times bracket is visibly blocked because 0.60 passed
-> one window by 72 milliseconds. ArmProof re-derives all 4,200 raw outcomes.
-> We keep the failure and release the lower bound.
+> Phi-4 misroutes this missing card to security. The held-out guard repairs it
+> to cards and payments. Across 770 unseen requests, operational accuracy is
+> 86.75 percent, up 12.34 points. A human still confirms every route.
 
-### 1:25-2:08 - Prove It Is Optimization On Arm
+### 0:55-1:35 - Sustained Arm Result
 
-**Do:** Click **3. Release proof**. Point to the nine-claim sustained ledger and the
-**dashboard cannot approve itself** chain. Scroll once to the optimization path.
+**Do:** Open **2. Arm result**, click **Load verified experiment**, then point
+to the blocked claim, proven lower bound and equal-load outcomes.
 
 **Say:**
 
-> This is not a dashboard assertion. ArmProof verifies both ledgers, derives
-> metrics from the evidence, binds model, runtime, workload and environment
-> identities, and only then decides. Phi-4 moved from BF16 to INT4, reducing
-> the artifact by 35.92 percent, peak PSS by 55.34 percent and time-weighted
-> PSS by 59.66 percent. Inside the identical INT4 deployment, KleidiAI delivers
-> 1.72 to 2.59 times direct execution speedup, and 68.53 percent of sampled
-> cycles descend through the KleidiAI matmul callchain in the enabled profile,
-> versus none in the control. Quality changed by less than one percentage point,
-> schema validity stayed at 100 percent. Twenty long windows, process isolation
-> and zero lost profiler samples make the service claim auditable.
+> Now I load immutable EXP-2026-009; I am not pretending to rerun hours of
+> testing in seconds. On one c8g.4xlarge, the contract binds the model,
+> runtime, workload, machine and 16 threads while its treatment overlay toggles
+> KleidiAI. Five 500-second confirmations passed at 0.24 requests per second
+> without KleidiAI and 0.56 with it. Baseline failed all five at 0.28, proving
+> at least twice the sustainable capacity. The exact 2.5-times gate stayed
+> blocked because 0.60 passed one window by 72 milliseconds. All 4,200 request
+> outcomes remain in the audit.
 
-### 2:08-2:38 - Community Artifact
+### 1:35-2:08 - Prove Arm Caused It
 
-**Do:** Scroll to **The same fail-closed method runs in pull requests**. Switch to the
-terminal and press Enter on the prepared integrity-challenge command. Let the
-three concise lines print: PASS, TAMPER, BLOCK.
+**Do:** Open **3. Release proof** and point to the claim ledger and optimization
+path.
 
 **Say:**
 
-> ArmProof packages that method for other developers. The sustained adapter just
-> evaluated nine claims from EXP009. This portable reference Action evaluates
-> eight claims from its own 282-file example. Then the demo changes one digest
-> in a temporary ledger and blocks before policy evaluation. It ships
-> as a zero-dependency Python CLI,
-> GitHub Action, public schemas, matched-treatment runner, offline report and
-> exact deployment manifest. Replace the adapter and workload to gate another
-> Arm AI optimization.
+> ArmProof verifies checksums, derives metrics from raw rows, binds treatment
+> identities, then evaluates nine claims. INT4 reduced artifact size by 35.92
+> percent and peak memory by 55.34 percent. Inside the identical INT4 runtime,
+> KleidiAI produced 1.72 to 2.59-times direct speedup. Perf attributed 68.53
+> percent of enabled cycles to its matrix callchain and zero in the control.
+> Quality moved less than one point and schema validity remained 100 percent.
+
+### 2:08-2:38 - Reusable Developer Artifact
+
+**Do:** Run `demo_release_gate.py`. Point to `PASS`, `TAMPER`, `BLOCK`, then
+show the `armproof init` command in the adoption panel or README.
+
+**Say:**
+
+> This is reusable software, not just our report. ArmProof ships a CLI, GitHub
+> Action, schemas, fixed-SLO adapter and deployment recipe. One digest change
+> blocks before policy evaluation. A new developer can scaffold the same
+> fail-closed workflow with armproof init; the generated project refuses to
+> pass until real evidence replaces its templates.
 
 ### 2:38-2:50 - Close
-
-**Do:** Return to the SurgeDesk proof header or keep the terminal output and
-browser visible side by side.
 
 **Say:**
 
 > SurgeDesk shows what Arm optimization changes for users. ArmProof proves why
-> it changed and lets the next Arm developer reuse the work. Same instance,
-> at least twice the sustainable capacity, verified before merge.
+> it changed. Same instance, at least twice the sustainable capacity, verified
+> before merge.
 
 Stop recording immediately.
 
 ## Recording Rules
 
-- Click **Load verified experiment** during the video and call it a sustained
-  evidence load, never a live benchmark.
-- Do not call recorded requests live inference.
-- Do not say Arm certified; say verified by ArmProof.
-- Do not attribute BF16-to-INT4 size or memory gains to KleidiAI.
-- Do not call the queue guard an Arm optimization.
-- Keep the cursor moving only when it directs attention.
-- Use hard cuts only for dead time; do not cut across an interaction in a way
-  that suggests a different result.
-- Upload publicly to YouTube or Vimeo and verify playback in a logged-out
-  browser.
+- Call the live race an illustrative request, never capacity proof.
+- Call the loaded audit sustained evidence, never a live benchmark.
+- Do not call recorded requests live inference or ArmProof Arm-certified.
+- Keep BF16-to-INT4 size and memory gains separate from KleidiAI gains.
+- Keep the queue guard separate from the Arm optimization.
+- Use no copyrighted music and publish the final video without sign-in.

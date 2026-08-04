@@ -354,7 +354,7 @@
             <h2 id="release-title">The same fail-closed method runs in pull requests</h2>
             <p>The reusable Action evaluates versioned contracts and blocks tampered files, identity swaps, quality regressions and absent Arm callchains. The EXP009 sustained adapter ships in this repository.</p>
           </div>
-          <pre><code>- uses: QasimKhan5x/VerifyLane@v0.4.0
+          <pre><code>- uses: QasimKhan5x/VerifyLane@v0.5.0
   with:
     config: armproof.json</code></pre>
           <a class="primary-link" href="https://github.com/QasimKhan5x/VerifyLane">View source and evidence</a>
@@ -362,13 +362,13 @@
 
         <section class="proof-section reuse-walkthrough" aria-labelledby="reuse-title">
           <div class="section-heading">
-            <div><p class="eyebrow">Five-minute adoption path</p><h2 id="reuse-title">Adopt the same method in another Arm AI repository</h2></div>
+            <div><p class="eyebrow">Five-minute adoption path</p><h2 id="reuse-title">Scaffold another Arm AI service</h2></div>
             <span class="source-chip">No hosted service required</span>
           </div>
           <ol class="reuse-steps">
-            <li><span>1</span><div><strong>Evaluate the reference</strong><code>armproof ci examples/armproof-reference/armproof.json</code></div><button class="copy-button" type="button" data-copy="armproof ci examples/armproof-reference/armproof.json">Copy</button></li>
-            <li><span>2</span><div><strong>Inspect a blocked claim</strong><code>armproof verify --contract examples/fixture-fail/contract.json --comparison examples/fixture-fail/comparison.json</code></div><button class="copy-button" type="button" data-copy="armproof verify --contract examples/fixture-fail/contract.json --comparison examples/fixture-fail/comparison.json">Copy</button></li>
-            <li><span>3</span><div><strong>Add the portable gate</strong><code>uses: QasimKhan5x/VerifyLane@v0.4.0</code></div><button class="copy-button" type="button" data-copy="uses: QasimKhan5x/VerifyLane@v0.4.0">Copy</button></li>
+            <li><span>1</span><div><strong>Generate the starter</strong><code>armproof init --endpoint http://127.0.0.1:8000/infer --output my-arm-service</code></div><button class="copy-button" type="button" data-copy="armproof init --endpoint http://127.0.0.1:8000/infer --output my-arm-service">Copy</button></li>
+            <li><span>2</span><div><strong>Collect real evidence</strong><code>cat my-arm-service/ADOPTION_CHECKLIST.md</code></div><button class="copy-button" type="button" data-copy="cat my-arm-service/ADOPTION_CHECKLIST.md">Copy</button></li>
+            <li><span>3</span><div><strong>Add the portable gate</strong><code>uses: QasimKhan5x/VerifyLane@v0.5.0</code></div><button class="copy-button" type="button" data-copy="uses: QasimKhan5x/VerifyLane@v0.5.0">Copy</button></li>
           </ol>
           <p id="copy-status" class="copy-status" role="status" aria-live="polite"></p>
         </section>

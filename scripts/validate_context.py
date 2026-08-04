@@ -222,7 +222,18 @@ def validate_context_budgets() -> None:
             fail(f"{path.relative_to(ROOT)} exceeds context limit {limit}: {line_count}")
 
     spec = (ROOT / "docs/PRODUCT_SPEC.md").read_text(encoding="utf-8")
-    if "Status: **APPROVED**" not in spec or "Version: **1.0.0**" not in spec:
+    work_items = load_json(ROOT / "ops/work-items.json")
+    if not isinstance(work_items, dict) or not isinstance(
+        work_items.get("spec_gate"), dict
+    ):
+        fail("ops/work-items.json must define spec_gate")
+    approved_version = work_items["spec_gate"].get("version")
+    if not isinstance(approved_version, str):
+        fail("spec gate must define an approved version")
+    if (
+        "Status: **APPROVED**" not in spec
+        or f"Version: **{approved_version}**" not in spec
+    ):
         fail("product spec approval block is missing or stale")
 
 

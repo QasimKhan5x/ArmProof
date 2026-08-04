@@ -167,6 +167,8 @@ test("proof view exposes the authoritative evidence chain", async ({ page }) => 
   await expect(page.locator("#proof-decision-detail")).toContainText("9 required claims");
   await expect(page.locator("#proof-claims")).toContainText("68.53%");
   await expect(page.locator(".evidence-chain li")).toHaveCount(4);
+  await expect(page.getByRole("heading", { name: "Scaffold another Arm AI service" })).toBeVisible();
+  await expect(page.locator(".reuse-steps")).toContainText("armproof init");
 });
 
 

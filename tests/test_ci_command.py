@@ -14,6 +14,70 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CiCommandTests(unittest.TestCase):
+    def test_init_scaffolds_a_fail_closed_http_adoption_kit(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "kit"
+            with redirect_stdout(io.StringIO()) as stdout:
+                status = main([
+                    "init",
+                    "--endpoint", "http://127.0.0.1:8000/infer",
+                    "--output", str(output),
+                ])
+            self.assertEqual(status, 0)
+            self.assertIn("Next:", stdout.getvalue())
+            expected = {
+                "armproof.json",
+                "contract.json",
+                "collection-plan.json",
+                "workload.jsonl",
+                "ADOPTION_CHECKLIST.md",
+                "README.md",
+                ".github/workflows/armproof.yml",
+            }
+            self.assertTrue(all((output / relative).is_file() for relative in expected))
+            plan = json.loads(
+                (output / "collection-plan.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(plan["endpoint"], "http://127.0.0.1:8000/infer")
+            config = json.loads((output / "armproof.json").read_text(encoding="utf-8"))
+            self.assertEqual(config["evidence"]["adapter"], "http-slo-v1")
+            workflow = (output / ".github/workflows/armproof.yml").read_text(
+                encoding="utf-8"
+            )
+            self.assertIn("QasimKhan5x/VerifyLane@v0.5.0", workflow)
+
+            with redirect_stderr(io.StringIO()) as stderr:
+                self.assertEqual(main(["ci", str(output / "armproof.json")]), 1)
+            self.assertIn("evidence", stderr.getvalue())
+
+    def test_init_refuses_to_overwrite_an_existing_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "kit"
+            output.mkdir()
+            (output / "owner.txt").write_text("keep\n", encoding="utf-8")
+            with redirect_stderr(io.StringIO()) as stderr:
+                status = main([
+                    "init",
+                    "--endpoint", "http://127.0.0.1:8000/infer",
+                    "--output", str(output),
+                ])
+            self.assertEqual(status, 1)
+            self.assertIn("not empty", stderr.getvalue())
+            self.assertEqual((output / "owner.txt").read_text(encoding="utf-8"), "keep\n")
+
+    def test_init_rejects_a_non_http_endpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "kit"
+            with redirect_stderr(io.StringIO()) as stderr:
+                status = main([
+                    "init",
+                    "--endpoint", "file:///tmp/model",
+                    "--output", str(output),
+                ])
+            self.assertEqual(status, 1)
+            self.assertIn("HTTP(S)", stderr.getvalue())
+            self.assertFalse(output.exists())
+
     def test_lists_installed_adapters(self) -> None:
         with redirect_stdout(io.StringIO()) as stdout:
             self.assertEqual(main(["adapters"]), 0)

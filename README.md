@@ -89,8 +89,9 @@ fail-closed versioned claim ledger
 Evaluate the accepted reference from one config:
 
 ```bash
-python3.12 -m pip install -e .
-armproof ci examples/armproof-reference/armproof.json
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -e .
+.venv/bin/armproof ci examples/armproof-reference/armproof.json
 ```
 
 The reference command verifies 282 files across the primary and reproduction bundles,
@@ -111,11 +112,32 @@ and shows the release blocked before policy evaluation.
 Use the same config in GitHub Actions:
 
 ```yaml
-- uses: QasimKhan5x/VerifyLane@v0.4.0
+- uses: QasimKhan5x/VerifyLane@v0.5.0
   with:
     config: armproof.json
     output: build/armproof-report
 ```
+
+## Scaffold Another Arm Service
+
+Create a runtime-neutral, fail-closed starter for any bounded HTTP inference
+endpoint:
+
+```bash
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -e .
+.venv/bin/armproof init \
+  --endpoint http://127.0.0.1:8000/infer \
+  --output my-arm-service
+cd my-arm-service
+```
+
+The command creates a versioned contract, workload template, identity sources,
+collection plan, adoption checklist, `armproof.json` and GitHub workflow. It
+does **not** generate passing evidence. `armproof ci armproof.json` fails closed
+until real request rows, profiler output, observed identities and a SHA-256
+ledger replace the templates. The complete executable evidence shape is in
+[`examples/http-slo/`](examples/http-slo/).
 
 ## Current Build
 
@@ -142,6 +164,11 @@ For a runtime-neutral starting point, the executable
 layout, observed identities, contract, report and Action template. External
 adapters are discovered through Python entry points and listed by
 `armproof adapters`.
+
+The tested [`examples/llama-cpp-http-slo/`](examples/llama-cpp-http-slo/)
+bridge adapts llama.cpp's OpenAI-compatible endpoint to the same bounded
+`/infer` contract. Its real Qwen2.5 smoke proves runtime compatibility only;
+it intentionally publishes no performance or optimization result.
 
 ## Start Here
 

@@ -1,6 +1,6 @@
 # Current Status
 
-Last updated: 2026-08-03
+Last updated: 2026-08-04
 
 ## Product
 
@@ -53,10 +53,21 @@ before policy evaluation.
 The SurgeDesk workflow now includes a held-out two-stage queue guard, human
 confirm/correct state machine, equal-load customer-outcome replay, sustained
 capacity lower bound, visible rejected overclaim, release-proof view,
-executable adoption path and optional live Graviton gateway. Recorded mode refuses to present edited text as
-inference; live mode remains disabled unless a trusted endpoint is configured.
+executable adoption path and optional live Graviton gateway. A matched-request
+demo races two prepared, core-isolated Graviton endpoints while explicitly
+separating that live illustration from the sustained capacity evidence.
+Recorded mode refuses to present edited text as inference; live mode remains
+disabled unless a trusted endpoint is configured.
 
-Version `v0.4.0` is the intended release for this completed evidence path.
+`armproof init` now scaffolds a runtime-neutral HTTP evidence project and
+deliberately fails closed until real evidence is supplied. Its documented
+clean-venv installation, generated files and missing-evidence failure were
+executed end to end. A separate llama.cpp/Qwen2.5 0.5B Q4_0 bridge completed a
+real local Arm64 inference smoke, proving protocol portability without
+publishing an unmeasured performance claim.
+
+Version `v0.5.0` is the intended release for the completed evidence, live-demo
+and adoption paths.
 Native Arm64, x86 and report-browser CI cover the Action, decision and offline
 report. The complete
 Devpost copy, judge guide, technical evidence map, media set, final checklist
@@ -75,6 +86,8 @@ armproof evidence-verify \
   --checksums ops/evidence/EXP-2026-004/accepted/evidence/SHA256SUMS \
   --root ops/evidence/EXP-2026-004/accepted/evidence
 npm run test:ui
+python3.12 scripts/demo_live_compare.py --help
+.venv/bin/armproof init --endpoint http://127.0.0.1:8000/infer --output KIT
 ```
 
 ## Constraints

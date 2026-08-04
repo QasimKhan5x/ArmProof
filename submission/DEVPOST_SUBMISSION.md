@@ -14,7 +14,7 @@
 
 **Technical proof:** https://qasimkhan5x.github.io/VerifyLane/report/
 
-**Release:** https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.4.0
+**Release:** https://github.com/QasimKhan5x/VerifyLane/releases/tag/v0.5.0
 
 **Video:** ADD THE PUBLIC YOUTUBE OR VIMEO URL AFTER RECORDING
 
@@ -173,6 +173,8 @@ required.
   schemas, portable evidence ledger, deployment template and responsive
   offline report.
 - Native Arm64, x86 and browser CI, including eleven end-to-end UI workflows.
+- A fail-closed `armproof init` scaffold and a real llama.cpp/Qwen2.5 HTTP
+  compatibility smoke, kept separate from measured optimization claims.
 
 ## What We Learned
 
@@ -205,8 +207,10 @@ contribution is the workflow:
 - raw-evidence derivation and contract identity binding;
 - explicit Arm execution attribution;
 - pass, fail and unknown fixtures;
-- a GitHub Action and offline report; and
-- a pinned conservative deployment manifest.
+- a GitHub Action and offline report;
+- a pinned conservative deployment manifest;
+- a one-command fail-closed adoption scaffold; and
+- a tested llama.cpp bridge with no fabricated performance claim.
 
 A maintainer can fork the repository, replace the model adapter and workload,
 declare the claims that matter to their service, and make unproven Arm
@@ -228,8 +232,8 @@ implementation is inspectable and available for another Arm developer to adopt.
 
 ## What's Next
 
-- Add first-class adapters and examples for llama.cpp, vLLM and additional
-  ONNX Runtime workloads.
+- Promote the llama.cpp compatibility bridge to a measured adapter, then add
+  vLLM and additional ONNX Runtime workloads.
 - Add an optional Arm Performix importer while keeping profiler runs separate
   from primary measurements.
 - Validate the same contract on Google Axion and Microsoft Cobalt.
@@ -242,9 +246,10 @@ implementation is inspectable and available for another Arm developer to adopt.
 ```bash
 git clone https://github.com/QasimKhan5x/VerifyLane.git
 cd VerifyLane
-python3.12 -m pip install -e .
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -e .
 make check
-armproof ci examples/armproof-reference/armproof.json
+.venv/bin/armproof ci examples/armproof-reference/armproof.json
 python3.12 scripts/demo_release_gate.py
 python3.12 scripts/serve_surgedesk.py --port 8765
 ```

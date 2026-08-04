@@ -2,7 +2,7 @@
 
 Status: **APPROVED**
 
-Version: **1.0.0**
+Version: **1.1.0**
 
 Approved by: Qasim Khan
 
@@ -61,7 +61,9 @@ output with the same live `/infer` contract; it may not fake availability.
 | Report | Static interactive web report |
 | CI | Portable GitHub Action consuming trusted Graviton evidence |
 
-The first release supports one excellent adapter. Runtime breadth is deferred.
+The measured reference remains one excellent adapter. A compact llama.cpp
+compatibility example may demonstrate the runtime-neutral HTTP adoption path,
+but it must not publish an unmeasured optimization or capacity claim.
 
 ## Required Workflow
 
@@ -84,6 +86,7 @@ armproof quality --endpoint URL --dataset DATASET [policy options]
 armproof verify --contract CONTRACT --comparison COMPARISON
 armproof report --decision DECISION --summary SUMMARY --output REPORT
 armproof ci armproof.json
+armproof init --endpoint URL --output DIRECTORY
 ```
 
 `armproof ci` is the one-command release gate. Collection remains explicit so
@@ -141,6 +144,9 @@ generation run on any GitHub runner.
 - No submission copy implies official Arm certification.
 - A judge can move from customer request to service surge to causal Arm proof
   in under three minutes without terminal narration.
+- A fresh developer can scaffold the runtime-neutral HTTP adoption path with
+  one command and receives explicit fail-closed next steps rather than
+  synthetic passing evidence.
 - The quality boundary and human-confirmation requirement remain visible.
 - Equal-load latency evidence and confirmed capacity evidence remain visually
   and verbally distinct.
@@ -159,4 +165,4 @@ availability execution evidence, or attribute whole-stack gains to KleidiAI.
 ## Deferred Decisions
 
 - Public repository name and remote configuration.
-- Whether a second runtime adapter is justified after submission.
+- Whether additional measured runtime adapters are justified after submission.

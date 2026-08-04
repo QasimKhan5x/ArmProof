@@ -74,7 +74,18 @@ upstream dataset's attribution terms must remain explicit.
   r/s passed one window. The lower bound is fully supported; an exact bracket
   is not. This is the product's fail-closed behavior operating on itself.
 
+## ADR-010: Permit One Non-Claiming llama.cpp Adoption Example
+
+- Status: accepted on 2026-08-04.
+- Decision: add one tested llama.cpp compatibility example through the generic
+  HTTP SLO interface. It may prove protocol compatibility and onboarding, but
+  it may not publish performance, quality or Arm-acceleration results without
+  real checksum-bound evidence.
+- Reason: the submission needs to demonstrate that ArmProof is not coupled to
+  Phi-4 or ONNX Runtime while preserving the single measured reference and its
+  causal boundaries.
+
 ## Pending Decisions
 
-- Public repository name and remote.
-- Whether to add a second adapter after the hackathon.
+- Whether to promote the compatibility-only llama.cpp bridge into a measured
+  adapter after the hackathon.

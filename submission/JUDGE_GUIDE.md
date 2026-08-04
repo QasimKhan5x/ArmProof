@@ -37,8 +37,9 @@ Open http://127.0.0.1:8765/surgedesk/.
 ## Validate The Reusable Artifact
 
 ```bash
-python3.12 -m pip install -e .
-armproof ci examples/armproof-reference/armproof.json
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -e .
+.venv/bin/armproof ci examples/armproof-reference/armproof.json
 ```
 
 Expected behavior:
@@ -58,6 +59,20 @@ python3.12 scripts/demo_release_gate.py
 
 The script alters only a temporary copy of one ledger digest. Expected output
 is a valid eight-claim pass followed by a checksum block before policy runs.
+
+Scaffold a new endpoint without generating synthetic passing evidence:
+
+```bash
+armproof init \
+  --endpoint http://127.0.0.1:8000/infer \
+  --output /tmp/my-arm-service
+armproof ci /tmp/my-arm-service/armproof.json
+```
+
+The first command creates seven adoption files. The second intentionally exits
+`1` until real checksum-bound evidence is collected. The tested
+`examples/llama-cpp-http-slo/` bridge demonstrates that the same endpoint
+contract works with llama.cpp; it is a compatibility smoke, not a benchmark.
 
 ## Full Test Suite
 

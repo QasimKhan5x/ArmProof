@@ -56,8 +56,9 @@ and the accepted
 ## Reproduce The Portable Reference Action
 
 ```bash
-python3.12 -m pip install -e .
-armproof ci examples/armproof-reference/armproof.json
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -e .
+.venv/bin/armproof ci examples/armproof-reference/armproof.json
 ```
 
 Expected exit code: `0`. The command verifies 282 files, re-derives capacity
