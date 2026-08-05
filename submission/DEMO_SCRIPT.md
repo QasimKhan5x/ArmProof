@@ -144,10 +144,10 @@ route**. Point to the fresh request ID, timestamp, `aarch64 · 16 threads`, and
 `mlas.disable_kleidiai=1` receipt. Choose **Account security**, then click
 **Route ticket**.
 
-> This customer message just ran through Phi-4 on our 16-core Graviton4
-> service. SurgeDesk identified the issue, found the card-security procedure,
-> and left the final queue to the support agent. The receipt shows the real
-> Arm64 request and the standard KleidiAI-off configuration that served it.
+> SurgeDesk routes support messages to the right procedure and queue. This one
+> is running on Phi-4 on our 16-core Graviton4 service. It found the
+> card-security procedure; the agent still chooses the final queue. The receipt
+> identifies the standard Arm64 lane with KleidiAI off.
 
 ### 0:32-1:18 - Establish The Operational Problem
 
@@ -155,21 +155,24 @@ Click **Review measured upgrade**, **Verify measured experiment**, then **Open c
 to its five completed stages, 2,100 request outcomes and 1,540 model outputs.
 Scroll to **What the support queue experienced**, then the capacity equation.
 
-> During sustained traffic, every standard-service trial missed our ten-second
-> target: p95 response time reached about a minute at 0.28 requests per second.
-> With only KleidiAI changed, all five optimized trials stayed near 3.35 seconds
-> while accepting 0.56 requests per second. These frozen rates establish the
-> conservative result shown here: at least twice the sustainable capacity.
+> A single request shows the workflow; capacity needs a long test. Discovery
+> found the standard lane passing at 0.24 requests per second and failing at
+> 0.28; optimized passed at 0.56 and became mixed at 0.60. We froze
+> 0.28 and 0.56 before the final run. ArmProof just recalculated ten 500-second
+> windows from 2,100 raw outcomes. Every standard window missed the ten-second
+> target, while every optimized window passed near 3.35 seconds. That supports
+> at least twice the sustainable capacity.
 
 ### 1:18-1:50 - Show Why The Gain Is Arm-Specific
 
 Scroll to **Evidence that KleidiAI ran**, then click **Review and activate the optimized service** and **Activate verified optimized service**. Point to the
 model fingerprint, runtime, Arm shape, and `1 → 0` control change.
 
-> Both lanes use the same INT4 model, runtime, workload, server and 16 threads.
-> Performix found no KleidiAI samples in the control and 67.35 percent in the
-> treatment, including the Neoverse I8MM kernel. The live identities match the
-> measured release, so SurgeDesk can switch lanes.
+> Why did capacity improve? The model, runtime, workload, server and 16 threads
+> are identical; only KleidiAI changes. Arm's Performix
+> profiler saw zero KleidiAI samples in the control and 67.35 percent in the
+> treatment, including the Neoverse I8MM kernel. The gateway matched both live
+> identities before allowing the switch.
 
 ### 1:50-2:17 - Close The Loop With The Same Request
 
@@ -178,19 +181,19 @@ click **Run live route**. Point to the new request ID, timestamp and
 `mlas.disable_kleidiai=0`. Choose **Account security**, click **Route ticket**,
 and show both entries in the ticket history.
 
-> The same request now came back from the optimized Arm lane. Its new receipt
-> records KleidiAI on, and the ticket history ties the serving change to the
-> EXP-2026-014 audit that approved it.
+> The identical message now returns from the optimized Arm lane. Its new receipt
+> shows KleidiAI on, and the ticket history preserves both requests and the
+> experiment that authorized the change.
 
 ### 2:17-2:45 - Give The Mechanism To Another Developer
 
 Click **Carry this release gate to another service**. Point to **Structure
 valid**, the contract digest, workflow and download link.
 
-> ArmProof now generates a complete starter for another HTTP AI service,
-> including exact evidence templates, representative workloads, a collection
-> plan and a GitHub Action. It remains blocked until that developer collects and
-> seals their own measurements, so nobody can inherit our result by accident.
+> The deployment rule is reusable. ArmProof generates a starter for another
+> HTTP AI service with evidence templates, workloads, a collection plan and a
+> GitHub Action. It stays blocked until that developer collects and seals their
+> own measurements.
 
 Stop recording on the generated workflow and download link.
 
