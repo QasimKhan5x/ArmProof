@@ -325,6 +325,7 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
         "name: ArmProof\non: [push, pull_request]\njobs:\n"
         "  verify:\n    runs-on: ubuntu-latest\n    steps:\n"
         "      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7\n"
+        "        with:\n          fetch-depth: 0\n"
         f"      - uses: QasimKhan5x/ArmProof@v{__version__}\n"
         "        with:\n          config: armproof.json\n"
         f"          contract-sha256: {_sha256(output / 'contract.json')}\n",

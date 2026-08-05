@@ -81,7 +81,8 @@ class CiCommandTests(unittest.TestCase):
             workflow = (output / ".github/workflows/armproof.yml").read_text(
                 encoding="utf-8"
             )
-            self.assertIn("QasimKhan5x/ArmProof@v0.8.0", workflow)
+            self.assertIn("QasimKhan5x/ArmProof@v0.8.1", workflow)
+            self.assertIn("fetch-depth: 0", workflow)
             self.assertIn("Created 16 files", stdout.getvalue())
 
             with redirect_stderr(io.StringIO()) as stderr:

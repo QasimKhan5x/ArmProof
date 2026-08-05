@@ -121,7 +121,7 @@ test("a live ticket causes the audit, activation, and optimized second route", a
   await expect(page.locator("#proof-details")).toHaveAttribute("open", "");
   await expect(page.locator("#adoption-result")).toBeVisible();
   await expect(page.locator("#adoption-gate")).toContainText("STRUCTURE VALID");
-  await expect(page.locator("#adoption-workflow")).toContainText("QasimKhan5x/ArmProof@v0.8.0");
+  await expect(page.locator("#adoption-workflow")).toContainText("QasimKhan5x/ArmProof@v0.8.1");
   await expect(page.locator("#adoption-download")).toHaveAttribute("download", "armproof-service-starter.zip");
   await expect(page.locator("#adoption-download")).toHaveAttribute("href", /^blob:/);
   expect(await overflowingElements(page)).toEqual([]);

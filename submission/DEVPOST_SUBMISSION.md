@@ -14,7 +14,7 @@
 
 **Technical report:** https://qasimkhan5x.github.io/ArmProof/report/
 
-**Release:** https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.8.0
+**Release:** https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.8.1
 
 **Video:** ADD THE PUBLIC YOUTUBE OR VIMEO URL AFTER RECORDING
 

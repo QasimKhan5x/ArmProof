@@ -27,7 +27,7 @@ class SurgeDeskGatewayTests(unittest.TestCase):
         self.assertIn("bound to this contract digest", receipt["validation_detail"])
         self.assertIn("contract.json", receipt["generated_files"])
         self.assertIn(".github/workflows/armproof.yml", receipt["generated_files"])
-        self.assertIn("QasimKhan5x/ArmProof@v0.8.0", receipt["workflow"])
+        self.assertIn("QasimKhan5x/ArmProof@v0.8.1", receipt["workflow"])
         self.assertEqual(len(receipt["contract_sha256"]), 64)
         self.assertEqual(receipt["archive_name"], "armproof-service-starter.zip")
         with zipfile.ZipFile(
