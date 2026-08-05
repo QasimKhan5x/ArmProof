@@ -1,18 +1,54 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import tempfile
 import subprocess
 import sys
 import unittest
+from io import BytesIO
 from pathlib import Path
+from unittest.mock import patch
 
-from armproof.reference.phi4 import _ort_model_identity, create_ort_variant, validate_request
+from armproof.reference.phi4 import (
+    _aws_instance_type,
+    _ort_model_identity,
+    _verify_runtime_artifact_ledger,
+    create_ort_variant,
+    validate_request,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 class Phi4ReferenceTests(unittest.TestCase):
+    def test_instance_type_comes_from_aws_imdsv2(self) -> None:
+        with patch(
+            "armproof.reference.phi4.urllib.request.urlopen",
+            side_effect=[BytesIO(b"token"), BytesIO(b"c8g.4xlarge")],
+        ) as urlopen:
+            self.assertEqual(_aws_instance_type(), "c8g.4xlarge")
+        token_request = urlopen.call_args_list[0].args[0]
+        metadata_request = urlopen.call_args_list[1].args[0]
+        self.assertEqual(token_request.get_method(), "PUT")
+        self.assertEqual(metadata_request.get_header("X-aws-ec2-metadata-token"), "token")
+
+    def test_runtime_artifact_ledger_verifies_every_declared_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            wheel = root / "runtime.whl"
+            wheel.write_bytes(b"pinned runtime")
+            ledger = root / "SHA256SUMS"
+            digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
+            ledger.write_text(f"{digest}  {wheel.name}\n", encoding="utf-8")
+            self.assertEqual(
+                _verify_runtime_artifact_ledger(ledger),
+                hashlib.sha256(ledger.read_bytes()).hexdigest(),
+            )
+            wheel.write_bytes(b"changed")
+            with self.assertRaisesRegex(ValueError, "runtime artifact checksum mismatch"):
+                _verify_runtime_artifact_ledger(ledger)
+
     def test_reference_imports_in_a_fresh_interpreter(self) -> None:
         result = subprocess.run(
             [

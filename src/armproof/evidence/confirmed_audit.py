@@ -47,6 +47,9 @@ class ConfirmedCapacityAudit:
     disabled_kai_cycle_share: float
     enabled_kai_cycle_share: float
     lost_perf_samples: int
+    model_identity: str
+    runtime_version: str
+    cpu_affinity: tuple[int, ...]
     comparison: Comparison
     decision: Decision
 
@@ -799,6 +802,9 @@ def derive_minimum_capacity_audit(
         disabled_kai_cycle_share=disabled_perf.maximum_children_share,
         enabled_kai_cycle_share=enabled_perf.maximum_children_share,
         lost_perf_samples=disabled_perf.lost_samples + enabled_perf.lost_samples,
+        model_identity=next(iter(model_identities)),
+        runtime_version=next(iter(runtime_versions)),
+        cpu_affinity=tuple(range(threads)),
         comparison=comparison,
         decision=decision,
     )

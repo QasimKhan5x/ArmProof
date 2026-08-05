@@ -57,7 +57,7 @@ Create an `armproof.json` matching
 [`schemas/ci-config.schema.json`](../schemas/ci-config.schema.json), then add:
 
 ```yaml
-- uses: QasimKhan5x/ArmProof@v0.8.2
+- uses: QasimKhan5x/ArmProof@v0.9.0
   with:
     config: armproof.json
     output: build/armproof-report

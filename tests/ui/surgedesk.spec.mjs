@@ -35,39 +35,71 @@ async function overflowingElements(page) {
 }
 
 
-test("a live ticket causes the audit, activation, and optimized second route", async ({ page }) => {
+test("a live ticket causes the audit, traffic switch, and optimized second route", async ({ page }) => {
   const messages = captureBrowserErrors(page);
   await page.setViewportSize({ width: 320, height: 780 });
   await page.goto(appUrl);
+  await expect(page.locator("#opening-capacity")).toHaveText("≥2.0×");
+  await expect(page.locator(".opening-result")).toContainText("blocked until ArmProof rechecks it");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mkdir("build/screenshots", { recursive: true });
+  await page.screenshot({ path: "build/screenshots/surgedesk-opening.png" });
+  await page.setViewportSize({ width: 320, height: 780 });
 
   await page.getByLabel("Live matched Arm64 endpoint").check();
+  await expect(page.locator("#sample-select")).toBeHidden();
+  await expect(page.locator("#sample-select-label")).toBeHidden();
   await page.locator("#customer-message").fill(
     "My card was stolen while I am travelling. Freeze it and help me replace it.",
   );
-  await page.getByRole("button", { name: "Run live route" }).click();
+  await page.getByRole("button", { name: "Compare current route with Arm candidate" }).click();
+  await expect(page.locator("#shadow-comparison")).toBeVisible();
+  await expect(page.locator("#shadow-baseline-latency")).toContainText("ms");
+  await expect(page.locator("#shadow-optimized-latency")).toContainText("ms");
+  await expect(page.locator("#shadow-optimized-result")).toContainText("shadow only");
+  await expect(page.locator("#shadow-observation")).toContainText("not the sustained-capacity claim");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.locator("#shadow-comparison").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "build/screenshots/surgedesk-live-shadow.png" });
+  await page.setViewportSize({ width: 320, height: 780 });
   await expect(page.locator("#inference-source")).toContainText("Standard service · KleidiAI off");
   await expect(page.locator("#live-request-receipt")).toBeVisible();
-  await expect(page.locator("#live-request-id")).toContainText("surgedesk-");
+  await expect(page.locator("#live-request-id")).toContainText("shadow-baseline-");
   const firstRequestId = await page.locator("#live-request-id").textContent();
   await expect(page.locator("#live-arm-runtime")).toContainText("aarch64 · 16 threads");
-  await expect(page.locator("#live-control")).toHaveText("mlas.disable_kleidiai=1");
+  await expect(page.locator("#live-control")).toHaveText("KleidiAI off · raw flag 1");
   await page.locator("#final-queue").selectOption("Account security");
   await page.getByRole("button", { name: "Route ticket" }).click();
-  await page.getByRole("button", { name: "Review measured upgrade" }).click();
+  await page.getByRole("button", { name: "Check the Arm optimization" }).click();
 
   await expect(page.locator("#experiment-results")).toBeHidden();
   await expect(page.locator("#optimization-summary")).toBeHidden();
-  await page.getByRole("button", { name: "Verify measured experiment" }).click();
+  await page.getByRole("button", { name: "Recompute release decision" }).click();
   await expect(page.locator("#audit-progress li")).toHaveCount(5);
-  await expect(page.locator('#audit-progress li[data-stage="quality"]')).toContainText("raw model outputs");
-  await expect(page.locator('#audit-progress li[data-stage="performix"]')).toContainText("Performix function samples");
-  await expect(page.locator('#audit-progress li[data-stage="requests"]')).toContainText("traffic outcomes");
+  await expect(page.locator('#audit-progress li[data-stage="quality"]')).toContainText("Quality outputs checked");
+  await expect(page.locator('#audit-progress li[data-stage="performix"]')).toContainText("Arm profiler evidence parsed");
+  await expect(page.locator('#audit-progress li[data-stage="requests"]')).toContainText("Ten long capacity windows");
   await expect(page.locator("#audit-progress time")).toHaveCount(5);
   await expect(page.locator("#audit-receipt")).toBeVisible();
   await expect(page.locator("#experiment-results")).toBeHidden();
   await expect(page.locator("#audit-request-result")).toContainText("2,100 capacity requests");
   await expect(page.locator("#audit-request-result")).toContainText("1,540 model outputs");
   await page.getByRole("button", { name: "Open confirmed result" }).click();
+  await expect(page.locator("#release-result-title")).toContainText("At least 2.0×");
+  await expect(page.locator("#result-control-outcomes")).toHaveText("0/5 long windows passed");
+  await expect(page.locator("#result-treatment-outcomes")).toHaveText("5/5 long windows passed");
+  await expect(page.locator("#result-quality-delta")).toContainText("86.75% queue accuracy");
+  await expect(page.locator("#result-quality-scope")).toContainText("Fine-grained intent 46.49% (-0.39 pp vs standard");
+  await expect(page.locator("#rejected-run-id")).toHaveText("EXP-2026-012");
+  await expect(page.locator("#accepted-run-id")).toHaveText("EXP-2026-014");
+  await expect(page.locator(".rejected-receipt")).toContainText("source_artifact_sha256");
+  await expect(page.locator(".original-gate-disclosure")).not.toHaveAttribute("open", "");
+  await expect(page.locator(".experiment-method")).not.toHaveAttribute("open", "");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mkdir("build/screenshots", { recursive: true });
+  await page.locator("#release-result-title").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "build/screenshots/surgedesk-accepted-result.png" });
+  await page.setViewportSize({ width: 320, height: 780 });
   await expect(page.locator("#trial-matrix-body tr")).toHaveCount(2);
   await expect(page.locator("#trial-matrix-body tr").nth(0).locator(".fail")).toHaveCount(5);
   await expect(page.locator("#trial-matrix-body tr").nth(1).locator(".pass")).toHaveCount(5);
@@ -83,33 +115,41 @@ test("a live ticket causes the audit, activation, and optimized second route", a
   await expect(page.locator("#rate-confirmation-id")).toContainText("EXP-2026-014");
   await expect(page.locator("#rate-confirmation-id")).toHaveAttribute("href", /\/commit\//);
 
-  await page.getByRole("button", { name: "Review and activate the optimized service" }).click();
+  await page.getByRole("button", { name: "Review and switch live traffic" }).click();
   await expect(page.locator("#optimization-summary")).toBeVisible();
   await expect(page.locator("#performix-proof")).toBeVisible();
-  await page.getByRole("button", { name: "Activate verified optimized service" }).click();
-  await expect(page.locator("#promotion-result")).toContainText("now serving");
+  await expect(page.locator("#summary-quality")).toHaveText("86.75%");
+  await expect(page.locator("#performix-disabled-count")).toContainText("0 / 944,847");
+  await expect(page.locator("#performix-sample-count")).toContainText("245,876 / 365,062");
+  await page.getByRole("button", { name: "Switch live traffic to optimized service" }).click();
+  await expect(page.locator("#promotion-result")).toContainText("switched live support traffic");
   await expect(page.locator("#promotion-identity")).toBeVisible();
   await expect(page.locator("#promotion-control-match")).toContainText("1 → 0");
+  await expect(page.locator("#promotion-candidate-label")).toHaveText("Previous route");
+  await expect(page.locator("#opening-status")).toContainText("approved · serving now");
+  await expect(page.locator("#route-next-request")).toBeVisible();
   expect(await overflowingElements(page)).toEqual([]);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await mkdir("build/screenshots", { recursive: true });
   await page.locator("#optimization-summary").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "build/screenshots/surgedesk-release-proof.png" });
   await page.setViewportSize({ width: 320, height: 780 });
-  await page.getByRole("button", { name: "Route the next live request" }).click();
+  await page.getByRole("button", { name: "Send a request through the optimized service" }).click();
+  await expect(page.locator("#review-complete")).toBeHidden();
   await page.locator("#customer-message").fill(
-    "My card was stolen while I am travelling. Freeze it and help me replace it.",
+    "My card is about to expire. How do I get a replacement?",
   );
-  await page.getByRole("button", { name: "Run live route" }).click();
+  await page.getByRole("button", { name: "Run optimized live route" }).click();
   await expect(page.locator("#inference-source")).toContainText("Optimized service · KleidiAI on");
-  await expect(page.locator("#live-control")).toHaveText("mlas.disable_kleidiai=0");
+  await expect(page.locator("#live-control")).toHaveText("KleidiAI on · raw flag 0");
   const secondRequestId = await page.locator("#live-request-id").textContent();
   expect(secondRequestId).not.toBe(firstRequestId);
-  await expect(page.locator("#suggested-intent")).toContainText("Card");
-  await page.locator("#final-queue").selectOption("Account security");
+  await expect(page.locator("#suggested-intent")).toContainText("Card About To Expire");
+  await page.locator("#final-queue").selectOption("Cards & payments");
   await page.getByRole("button", { name: "Route ticket" }).click();
   await expect(page.locator("#reviewed-tickets")).toContainText("Standard service");
   await expect(page.locator("#reviewed-tickets")).toContainText("Optimized service");
+  await expect(page.locator("#reviewed-tickets")).toContainText("My card is about to expire");
   await expect(page.locator("#reviewed-tickets")).toContainText("observed");
   await expect(page.locator("#reviewed-tickets")).toContainText(firstRequestId);
   await expect(page.locator("#reviewed-tickets")).toContainText(secondRequestId);
@@ -121,14 +161,22 @@ test("a live ticket causes the audit, activation, and optimized second route", a
     await expect(receipt).toContainText("aarch64/16 threads");
     await expect(receipt).toContainText(/\d{2}:\d{2}:\d{2}/);
   }
+  await expect(page.locator("#live-cutover-summary")).toBeVisible();
+  await expect(page.locator("#cutover-before-lane")).toContainText("KleidiAI off");
+  await expect(page.locator("#cutover-after-lane")).toContainText("KleidiAI on");
+  await expect(page.locator("#cutover-capacity")).toContainText("≥2.0×");
   await expect(page.locator("#adoption-handoff")).toBeVisible();
-  await page.getByRole("button", { name: "Carry this release gate to another service" }).click();
-  await expect(page.locator("#proof-details")).toHaveAttribute("open", "");
-  await expect(page.locator("#adoption-result")).toBeVisible();
-  await expect(page.locator("#adoption-gate")).toContainText("STRUCTURE VALID");
-  await expect(page.locator("#adoption-workflow")).toContainText("QasimKhan5x/ArmProof@v0.8.2");
-  await expect(page.locator("#adoption-download")).toHaveAttribute("download", "armproof-service-starter.zip");
-  await expect(page.locator("#adoption-download")).toHaveAttribute("href", /^blob:/);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.locator("#live-cutover-summary").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "build/screenshots/surgedesk-live-cutover.png" });
+  await page.getByRole("button", { name: "Generate a starter for another service" }).click();
+  await expect(page.locator("#inline-adoption-receipt")).toBeVisible();
+  await expect(page.locator("#inline-adoption-files")).toHaveText("16 files");
+  await expect(page.locator("#inline-adoption-gate")).toHaveText("BLOCKED");
+  await expect(page.locator("#inline-adoption-reason")).toHaveText("no measured evidence found");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.locator("#adoption-handoff").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "build/screenshots/surgedesk-generated-starter.png" });
   expect(await overflowingElements(page)).toEqual([]);
 
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -164,6 +212,11 @@ test("public mode reveals checked-in proof only after the visitor requests it", 
   await expect(page.locator("#open-required-audit")).toHaveText("Inspect capacity evidence");
   await expect(page.locator("#proof-claims tr")).toHaveCount(10);
   await expect(page.locator("body")).not.toContainText(/tamper|altered archive/i);
+  await expect(page.getByRole("button", { name: "Inspect included starter" }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Inspect included starter" }).first().click();
+  await expect(page.locator("#release-adoption-receipt")).toBeVisible();
+  await expect(page.locator("#release-adoption-files-label")).toHaveText("Included files");
+  await expect(page.getByRole("button", { name: "Included starter inspected" })).toBeVisible();
   await mkdir("build/screenshots", { recursive: true });
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: "build/screenshots/surgedesk-public-release-proof.png" });
@@ -207,6 +260,7 @@ test("mobile public evidence remains readable without horizontal overflow", asyn
     (buttons) => buttons.map((button) => button.getBoundingClientRect().height),
   );
   expect(Math.min(...mobileControls)).toBeGreaterThanOrEqual(44);
+  await page.locator(".experiment-method").getByText("Inspect rate selection").click();
   const firstTrial = page.locator("#trial-matrix-body tr").first();
   await expect(firstTrial.locator("td").first()).toBeVisible();
   expect(await firstTrial.evaluate(

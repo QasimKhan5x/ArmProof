@@ -288,6 +288,12 @@ def build_surgedesk_payload(
         raise ValueError("live runtime identity is not bound to the release lock")
     if live_runtime["source_artifact_sha256"] != release.comparison.treatment.artifact_sha256:
         raise ValueError("live runtime model identity is not bound to the release")
+    live_runtime = {
+        **live_runtime,
+        "model_identity": release_summary["model_identity"],
+        "runtime_version": release_summary["runtime_version"],
+        "cpu_affinity": release_summary["cpu_affinity"],
+    }
     model_id = runtime_lock["model_int4"]["id"]
     model_name = (
         model_id.rsplit("/", 1)[-1]
@@ -326,6 +332,13 @@ def build_surgedesk_payload(
         len(trial["outcomes"]) for trial in release_summary["trial_matrix"]
     )
     confirmation_seconds = release_summary["confirmation_seconds"]
+    rejected_predecessor = confirmation_plan.get("rejected_predecessor")
+    if not isinstance(rejected_predecessor, dict):
+        raise ValueError("confirmation plan does not identify its rejected predecessor")
+    rejected_experiment_id = rejected_predecessor.get("experiment_id")
+    rejection_reason = rejected_predecessor.get("reason")
+    if not isinstance(rejected_experiment_id, str) or not isinstance(rejection_reason, str):
+        raise ValueError("rejected predecessor metadata is incomplete")
 
     payload = {
         "schema_version": "1.0.0",
@@ -431,6 +444,15 @@ def build_surgedesk_payload(
                 "enabled_function_samples": performix["enabled"][
                     "total_function_samples"
                 ],
+                "disabled_function_samples": performix["disabled"][
+                    "total_function_samples"
+                ],
+                "disabled_kai_function_samples": performix["disabled"][
+                    "kai_function_samples"
+                ],
+                "enabled_kai_function_samples": performix["enabled"][
+                    "kai_function_samples"
+                ],
                 "kernel_family": next(
                     symbol
                     for symbol in performix["enabled"]["kai_symbols"]
@@ -459,6 +481,12 @@ def build_surgedesk_payload(
                     f"{mixes['mixed']['baseline_fail_rps']:.2f}"
                 ),
                 "preregistration_publication": publication,
+            },
+            "release_history": {
+                "rejected_experiment_id": rejected_experiment_id,
+                "accepted_experiment_id": release_summary["experiment_id"],
+                "rejection_reason": rejection_reason,
+                "rates_unchanged": True,
             },
             "evidence": {
                 "checksum_verified": checksum_result.passed,

@@ -14,7 +14,7 @@
 
 **Technical report:** https://qasimkhan5x.github.io/ArmProof/report/
 
-**Release:** https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.8.2
+**Release:** https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.9.0
 
 **Video:** ADD THE PUBLIC YOUTUBE OR VIMEO URL AFTER RECORDING
 
@@ -29,15 +29,17 @@ message, receives an AI-classified intent and the application's matching
 procedure, chooses the final queue, and routes the ticket.
 
 The application begins on the standard Phi-4 Mini INT4 service with KleidiAI
-off. It recalculates a Graviton4 capacity test and checks an Arm Performix
-profile showing which code ran. Once those checks pass, the same interface
-activates the optimized service. The same support message is then sent again;
-its new request ID, timestamp and runtime receipt visibly come back through the
-KleidiAI-enabled service.
+off. One live message also runs as a sequential shadow copy on the optimized
+candidate, so judges can see fresh behavior from both configurations before the
+candidate is allowed to serve. SurgeDesk then recalculates a Graviton4 capacity
+test and checks an Arm Performix profile showing which code ran. Once those
+checks pass, the interface switches live traffic to the optimized service. A
+different support message visibly comes back through the KleidiAI-enabled route
+with a new request ID, timestamp and release receipt.
 
 The public GitHub Pages build lets judges inspect the application and its
 checked-in evidence without AWS access. The video uses the local gateway and
-two live Graviton endpoints for the control-to-treatment activation.
+two live Graviton endpoints for the control-to-treatment route cutover.
 
 On the same `c8g.4xlarge`, the optimized service sustained 0.56 requests per
 second in five 500-second windows. The control failed the same ten-second p95
@@ -86,11 +88,14 @@ the current ArmProof audit from the application. The audit:
 - evaluates ten required quality, capacity, evidence-volume and Arm-execution claims; and
 - reads the native Arm Performix Code Hotspots exports directly.
 
-After the audit passes, activation probes both live services again. Their source
-model fingerprint, ONNX Runtime GenAI version, Arm64 architecture, 16-thread
-shape and KleidiAI controls must match the audited deployment. The route then
-switches to the treatment, and the next real request carries the release audit
-ID in the application's audit trail.
+After the audit passes, the gateway probes both live services again. Their model
+and source hashes, verified runtime-wheel ledger, ONNX Runtime GenAI version,
+Arm64 architecture, 16-thread placement and KleidiAI controls must match the
+audited deployment. The instance type comes from AWS IMDSv2 instead of a command
+line label. The route then switches to the treatment, and the next real request
+carries the release audit ID in the application's audit trail. Every later
+optimized response is checked again; drift blocks the response, invalidates the
+release and returns the gateway to the standard lane.
 
 ## What We Optimized
 
@@ -177,8 +182,9 @@ confirmation.
    attestation.
 6. We wrote adapters that reopen the immutable archives and derive decisions
    from raw rows and native profiler exports.
-7. We connected that decision to a stateful gateway: control route, fresh
-   audit, identity-bound activation, optimized route.
+7. We connected that decision to a stateful gateway: serving-plus-shadow
+   comparison, fresh audit, deployment-bound traffic switch, per-request drift
+   checks and optimized route.
 8. We packaged the verification path as a Python CLI, offline report and GitHub Action.
 
 ## Why Arm Matters
@@ -205,9 +211,9 @@ ArmProof ships with:
 - a CLI that exits successfully only when every required claim passes;
 - an offline HTML report and machine-readable decision;
 - a GitHub Action for pull-request release gates;
-- `armproof init`, which creates a blocked-by-default 16-file starter with exact protocol, identity and profiler-manifest templates for another HTTP AI service;
+- `armproof init`, which creates a blocked-by-default 16-file starter with exact protocol, identity and profiler-manifest templates for another bounded HTTP classification service;
 - `armproof seal`, which writes a deterministic evidence ledger after collection without approving the result;
-- a SurgeDesk handoff that runs the scaffold check and downloads the generated starter as a ZIP;
+- a SurgeDesk handoff that generates the starter, runs its empty state through ArmProof CI to prove it blocks, and downloads the files as a ZIP;
 - a complete Graviton4 deployment recipe; and
 - a tested llama.cpp HTTP compatibility adapter whose performance extension is documented separately.
 
@@ -229,9 +235,11 @@ threshold in its native units and presents Linux perf as separate supporting
 evidence.
 
 Finally, the live application had to bind deployment behavior to the evidence.
-The gateway now keeps the control active until a fresh audit passes, compares
-the live source-model fingerprint and runtime shape with the release, and only
-then changes the route.
+The gateway keeps the control active until a fresh audit passes. The model
+service verifies the runtime-wheel ledger, reads the instance type from AWS
+IMDSv2, and reports its actual CPU affinity. The gateway compares those values,
+the model and source hashes, runtime lock and treatment controls with the
+accepted release before changing the route and on each optimized response.
 
 ## What We Learned
 

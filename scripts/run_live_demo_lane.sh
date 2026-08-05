@@ -27,4 +27,7 @@ exec taskset -c 0-15 env OMP_NUM_THREADS=16 OMP_PROC_BIND=close OMP_PLACES=cores
   --backend ort-int4 \
   --model "$MODELS/variants/$LABEL" \
   --label "$LABEL" \
+  --runtime-lock examples/phi4-graviton/runtime-lock.json \
+  --runtime-artifact-ledger "$HOME/runtime-checkpoints/SHA256SUMS" \
+  --expected-instance-type c8g.4xlarge \
   --port "$PORT" --threads 16 --max-inflight 1

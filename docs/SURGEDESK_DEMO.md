@@ -31,13 +31,16 @@ python3.12 scripts/serve_surgedesk.py --port 8765 \
 
 The state transition is:
 
-1. A free-form customer message runs through the control service.
-2. The operator chooses the final support queue.
+1. One free-form customer message runs on the serving control and then on the
+   candidate as a sequential shadow copy. The screen shows both fresh results
+   without presenting one request as capacity proof.
+2. The operator chooses the final support queue from the serving result.
 3. ArmProof verifies the preregistered capacity, raw quality and Performix evidence.
 4. The gateway probes both services and compares them with the audited deployment.
-5. The route changes to the treatment only after the audit and identity checks pass.
-6. A second free-form message returns through the treatment and records the audit ID.
-7. ArmProof generates and validates a downloadable starter for another service.
+5. The route changes to the treatment only after the audit and deployment checks pass.
+6. A different free-form message runs through the treatment and records the audit ID.
+7. ArmProof generates a starter for another bounded classification service and
+   runs its empty state through CI, which blocks until evidence exists.
 
 The complete host setup, expected outputs and narration are in
 [`submission/DEMO_SCRIPT.md`](../submission/DEMO_SCRIPT.md).
@@ -75,15 +78,18 @@ The two live lanes must expose:
 
 - the same content-derived model identity;
 - the source-artifact SHA-256 declared by the release;
+- the SHA-256 of the pinned runtime lock and verified runtime-wheel ledger;
+- a `c8g.4xlarge` instance type read from AWS IMDSv2;
 - ONNX Runtime GenAI at the pinned version;
 - Arm64 architecture;
-- 16 threads on the declared core set; and
+- 16 threads on the exact audited CPU set; and
 - opposite values for `mlas.disable_kleidiai`.
 
-Each inference response repeats the probed identity. Promotion compares the
-matched live identity with the deployment identity returned by the fresh audit.
-An optimized endpoint that merely matches another endpoint cannot bypass this
-comparison.
+Each inference response repeats the probed deployment data. Promotion compares
+the model fingerprint, source artifact, runtime lock, verified wheel ledger,
+IMDSv2 instance type, runtime, architecture, CPU placement and controls with the
+fresh audit. Every later optimized response is checked again. Drift blocks that
+response, invalidates the release and returns the gateway to the control lane.
 
 ## Quality Boundary
 

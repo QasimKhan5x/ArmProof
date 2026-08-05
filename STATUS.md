@@ -9,8 +9,9 @@ message is classified by Phi-4 Mini on a CPU-only Graviton4 service, a person
 chooses the final support queue, and the resulting ticket records the serving
 lane. The application begins on the KleidiAI-disabled lane. It can activate the
 optimized lane only after ArmProof re-derives the measured release and confirms
-that both running services match the audited model, runtime, Arm shape, thread
-count, affinity, and treatment control.
+that both running services match the audited model, verified runtime artifacts,
+AWS instance type, Arm shape, thread count, affinity, and treatment control.
+Every optimized response is checked again, and drift restores the control route.
 
 ArmProof is the reusable component: a Python CLI, evidence-adapter interface,
 offline report, GitHub Action, fixed-rate HTTP harness, native Performix parser,
@@ -42,27 +43,29 @@ cannot approve this release.
 ## Verification State
 
 - `armproof ci examples/armproof-reference/armproof.json` passes and generates the public report from raw evidence.
-- 188 Python tests pass; one optional localhost-connectivity test is skipped by design.
-- 5 JavaScript behavior tests pass.
+- 192 Python tests pass; one optional localhost-connectivity test is skipped by design.
+- 6 JavaScript behavior tests pass.
 - 8 Playwright workflows pass across desktop, tablet, and 320-pixel mobile.
-- The real localhost end-to-end test routes control traffic, recalculates the audit, binds deployment identity, activates the optimized lane, and routes the next request through it.
+- The real localhost end-to-end test runs a control-plus-shadow comparison,
+  recalculates the audit, binds deployment data, activates the optimized lane,
+  routes the next request through it, and proves post-release drift fails closed.
 - Static UI source contains no measured result literals, fake timers, tampering scene, or rejected 2.5x claim.
-- The generated adoption ZIP contains 13 files, an explicit evidence layout and a GitHub Action bound to its parsed contract digest; `armproof seal` creates the portable evidence ledger after collection.
+- The generated adoption ZIP contains 16 files, an explicit evidence layout and a GitHub Action bound to its parsed contract digest; `armproof seal` creates the portable evidence ledger after collection.
 - AWS cumulative evidence cost is estimated at `$13.4872`; the final inventory is empty.
 
 ## Demo Boundary
 
-The recording uses two live Graviton inference requests: one before and one
-after identity-bound activation. The ten long capacity windows and matched
-Performix profiles were collected earlier because they require more than three
-minutes; the video visibly reruns their verification from the checked-in raw
-archives. The demo never presents recorded traffic as live inference or a
-single request as capacity proof.
+The recording uses a live control-plus-shadow comparison before activation and
+a different live request after activation. The ten long capacity windows and
+matched Performix profiles were collected earlier because they require more
+than three minutes; the video visibly reruns their verification from checked-in
+raw archives. The app labels the one-request timing as illustrative and keeps it
+separate from the sustained-capacity claim.
 
 ## Remaining Owner Work
 
 The repository, public artifacts, screenshots, submission copy, and recording
-runbook are ready for the `v0.8.2` release. The owner must record and publicly
+runbook are ready for the `v0.9.0` release. The owner must record and publicly
 upload the video, replace the Devpost video placeholder, paste the prepared
 submission, and complete the logged-out link check.
 

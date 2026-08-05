@@ -11,6 +11,7 @@ import platform
 import shutil
 import threading
 import time
+import urllib.request
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -77,6 +78,51 @@ def _sha256_file(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _aws_instance_type(timeout: float = 2.0) -> str:
+    """Read the instance type from AWS IMDSv2 rather than a caller-supplied label."""
+    token_request = urllib.request.Request(
+        "http://169.254.169.254/latest/api/token",
+        headers={"X-aws-ec2-metadata-token-ttl-seconds": "60"},
+        method="PUT",
+    )
+    with urllib.request.urlopen(token_request, timeout=timeout) as response:
+        token = response.read().decode("utf-8").strip()
+    if not token:
+        raise ValueError("AWS IMDSv2 returned an empty token")
+    metadata_request = urllib.request.Request(
+        "http://169.254.169.254/latest/meta-data/instance-type",
+        headers={"X-aws-ec2-metadata-token": token},
+    )
+    with urllib.request.urlopen(metadata_request, timeout=timeout) as response:
+        instance_type = response.read().decode("utf-8").strip()
+    if not instance_type:
+        raise ValueError("AWS IMDSv2 returned an empty instance type")
+    return instance_type
+
+
+def _verify_runtime_artifact_ledger(path: Path) -> str:
+    """Verify the pinned runtime artifacts and return the ledger digest."""
+    if not path.is_file():
+        raise FileNotFoundError(path)
+    entries = 0
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        parts = line.split(maxsplit=1)
+        if len(parts) != 2 or len(parts[0]) != 64:
+            raise ValueError("runtime artifact ledger is malformed")
+        expected, relative = parts
+        artifact = (path.parent / relative.strip()).resolve()
+        if not artifact.is_relative_to(path.parent.resolve()):
+            raise ValueError("runtime artifact ledger escapes its directory")
+        if not artifact.is_file() or _sha256_file(artifact) != expected:
+            raise ValueError(f"runtime artifact checksum mismatch: {relative.strip()}")
+        entries += 1
+    if entries == 0:
+        raise ValueError("runtime artifact ledger is empty")
+    return _sha256_file(path)
 
 
 def _model_item_fingerprint(path: Path) -> dict[str, Any]:
@@ -152,7 +198,15 @@ def _ort_model_identity(model_path: Path) -> tuple[str, str, str, int]:
 
 
 class OrtInt4Backend:
-    def __init__(self, model_path: Path, label: str) -> None:
+    def __init__(
+        self,
+        model_path: Path,
+        label: str,
+        *,
+        runtime_lock: Path | None = None,
+        runtime_artifact_ledger: Path | None = None,
+        expected_instance_type: str | None = None,
+    ) -> None:
         import onnxruntime_genai as og
 
         model_identity, source_artifact_sha256, control, threads = _ort_model_identity(model_path)
@@ -168,6 +222,23 @@ class OrtInt4Backend:
             "optimization_control": {"mlas.disable_kleidiai": control},
             "threads": threads,
         }
+        if runtime_lock is not None:
+            self.health_metadata["runtime_lock_sha256"] = _sha256_file(runtime_lock)
+        if runtime_artifact_ledger is not None:
+            self.health_metadata["runtime_artifact_ledger_sha256"] = (
+                _verify_runtime_artifact_ledger(runtime_artifact_ledger)
+            )
+        if expected_instance_type is not None:
+            observed_instance_type = _aws_instance_type()
+            if observed_instance_type != expected_instance_type:
+                raise ValueError(
+                    "AWS instance type differs from the expected deployment: "
+                    f"{observed_instance_type} != {expected_instance_type}"
+                )
+            self.health_metadata.update({
+                "instance_type": observed_instance_type,
+                "instance_identity_source": "aws-imdsv2",
+            })
 
     def generate(self, prompt: str, max_new_tokens: int) -> dict[str, Any]:
         tokens = self.tokenizer.encode(CHAT.format(prompt))
@@ -337,11 +408,20 @@ def main() -> None:
     parser.add_argument("--port", type=int, required=True)
     parser.add_argument("--threads", type=int, default=int(os.environ.get("OMP_NUM_THREADS", "16")))
     parser.add_argument("--max-inflight", type=int, default=1)
+    parser.add_argument("--runtime-lock", type=Path)
+    parser.add_argument("--runtime-artifact-ledger", type=Path)
+    parser.add_argument("--expected-instance-type")
     args = parser.parse_args()
     if args.threads < 1 or args.max_inflight < 1:
         parser.error("threads and max-inflight must be positive")
     if args.backend == "ort-int4":
-        backend: Backend = OrtInt4Backend(args.model, args.label or "ort-int4")
+        backend: Backend = OrtInt4Backend(
+            args.model,
+            args.label or "ort-int4",
+            runtime_lock=args.runtime_lock,
+            runtime_artifact_ledger=args.runtime_artifact_ledger,
+            expected_instance_type=args.expected_instance_type,
+        )
     else:
         backend = PytorchBf16Backend(args.model, args.threads)
     ThreadingHTTPServer(

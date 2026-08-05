@@ -12,18 +12,20 @@ class SubmissionStoryTests(unittest.TestCase):
         script = (ROOT / "submission/DEMO_SCRIPT.md").read_text(encoding="utf-8")
         moments = (
             "My card was stolen while I am travelling",
-            "Verify measured experiment",
+            "Compare current route with Arm candidate",
+            "Recompute release decision",
             "Open confirmed result",
-            "What the support queue experienced",
-            "Evidence that KleidiAI ran",
-            "Review and activate the optimized service",
-            "Close The Loop With The Same Request",
-            "Carry this release gate to another service",
+            "Review and switch live traffic",
+            "Switch live traffic to optimized service",
+            "My card is about to expire",
+            "Generate a starter for another service",
         )
         positions = [script.index(moment) for moment in moments]
         self.assertEqual(positions, sorted(positions))
-        self.assertIn("Use this customer message both times", script)
-        self.assertIn("paste the same customer message", script)
+        self.assertIn("different message", script.lower())
+        self.assertIn("then sends a shadow copy", script.lower())
+        self.assertNotIn("use this customer message both times", script.lower())
+        self.assertNotIn("paste the same message", script.lower())
         for staged_device in (
             "2.5 times",
             "2.5x",
@@ -32,6 +34,7 @@ class SubmissionStoryTests(unittest.TestCase):
             "preloaded results",
             "pretending to rerun",
             "checksum trick",
+            "activate verified optimized service",
         ):
             self.assertNotIn(staged_device, script.lower())
 
@@ -63,7 +66,7 @@ class SubmissionStoryTests(unittest.TestCase):
         narration_words = sum(
             len(line.lstrip("> ").split()) for line in lines if line.startswith(">")
         )
-        self.assertLessEqual(narration_words, 240)
+        self.assertLessEqual(narration_words, 320)
 
     def test_submission_leads_with_product_and_arm_optimization(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")

@@ -45,8 +45,10 @@ def verify_live_identities(
         payloads.append(payload)
     baseline, optimized = payloads
     matched = (
-        "model_identity", "source_artifact_sha256", "runtime", "runtime_version",
-        "threads", "architecture", "cpu_affinity",
+        "model_identity", "source_artifact_sha256", "runtime_lock_sha256",
+        "runtime_artifact_ledger_sha256", "instance_type",
+        "instance_identity_source", "runtime", "runtime_version", "threads",
+        "architecture", "cpu_affinity",
     )
     if any(baseline.get(field) != optimized.get(field) for field in matched):
         raise ValueError("endpoint model, runtime, thread, or CPU identity differs")
@@ -59,10 +61,12 @@ def verify_live_identities(
         raise ValueError("endpoint KleidiAI controls do not form the matched pair")
     return {
         field: baseline[field]
-        for field in (
-            "source_artifact_sha256", "runtime", "runtime_version", "threads",
-            "architecture", "cpu_affinity",
-        )
+        for field in matched
+    } | {
+        "controls": {
+            "baseline": baseline["optimization_control"],
+            "optimized": optimized["optimization_control"],
+        }
     }
 
 
@@ -161,9 +165,21 @@ def main(argv: Sequence[str] | None = None) -> int:
         identity = verify_live_identities(
             args.baseline_endpoint, args.optimized_endpoint, args.timeout
         )
+        expected = json.loads(
+            (ROOT / "surgedesk/data.json").read_text(encoding="utf-8")
+        )["proof"]["live_deployment_identity"]
+        comparable_fields = {
+            "model_identity", "source_artifact_sha256", "runtime_lock_sha256",
+            "runtime_artifact_ledger_sha256", "instance_type",
+            "instance_identity_source", "runtime", "runtime_version", "threads",
+            "architecture", "cpu_affinity", "controls",
+        }
+        if any(identity.get(field) != expected.get(field) for field in comparable_fields):
+            raise ValueError("live endpoint identity differs from the accepted audit")
         print(
             f"Matched runtime: {identity['runtime']} {identity['runtime_version']} · "
-            f"{identity['architecture']} · {identity['threads']} threads · "
+            f"{identity['instance_type']} via IMDSv2 · {identity['architecture']} · "
+            f"{identity['threads']} threads · "
             f"source={str(identity['source_artifact_sha256'])[:12]}…",
             flush=True,
         )

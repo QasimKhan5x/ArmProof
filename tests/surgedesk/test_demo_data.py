@@ -77,6 +77,13 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertEqual(boundary["released_lower_ratio"], 2.0)
         self.assertEqual(boundary["released_lower_formula"], "0.56 / 0.28")
 
+    def test_release_history_explains_the_rejected_identity_incomplete_run(self) -> None:
+        history = self.payload["provenance"]["release_history"]
+        self.assertEqual(history["rejected_experiment_id"], "EXP-2026-012")
+        self.assertEqual(history["accepted_experiment_id"], "EXP-2026-014")
+        self.assertIn("source_artifact_sha256", history["rejection_reason"])
+        self.assertTrue(history["rates_unchanged"])
+
     def test_static_ui_contains_no_embedded_experiment_results(self) -> None:
         html = (ROOT / "surgedesk/index.html").read_text(encoding="utf-8")
         javascript = (ROOT / "surgedesk/app.mjs").read_text(encoding="utf-8")
@@ -137,11 +144,22 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertEqual(performix["engine_version"], "1.20.0")
         self.assertEqual(performix["cpu"], "Neoverse-V2")
         self.assertEqual(performix["disabled_kai_sample_share_percent"], 0.0)
+        self.assertEqual(performix["disabled_kai_function_samples"], 0)
+        self.assertEqual(performix["disabled_function_samples"], 944847)
+        self.assertEqual(performix["enabled_kai_function_samples"], 245876)
+        self.assertEqual(performix["enabled_function_samples"], 365062)
         self.assertAlmostEqual(
             performix["enabled_kai_sample_share_percent"], 67.3518470835
         )
         self.assertIn("different denominator", performix["scope_note"])
         self.assertIn("neon_i8mm", performix["kernel_family"])
+
+    def test_live_release_identity_is_fully_bound_to_the_audit(self) -> None:
+        identity = self.payload["proof"]["live_deployment_identity"]
+        self.assertEqual(identity["model_identity"], "d86ae7ca1f12b2ae4abe70abb856cb9c688908477a7de653467623764ab5c687")
+        self.assertEqual(identity["runtime_lock_sha256"], "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884")
+        self.assertEqual(identity["instance_type"], "c8g.4xlarge")
+        self.assertEqual(identity["cpu_affinity"], list(range(16)))
 
     def test_demo_identifies_a_verified_matched_control_bundle(self) -> None:
         evidence = self.payload["provenance"]["evidence"]

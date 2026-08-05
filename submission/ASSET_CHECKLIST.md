@@ -1,30 +1,33 @@
 # Devpost Media Assets
 
-Upload these in order after they are copied into `submission/assets/`:
+Upload these in order from `submission/assets/`:
 
-1. `01-surge-capacity.png` - use as the cover image. It leads with SurgeDesk,
-   the checked-in release decision, the at-least-2x sustained result and Arm
-   execution proof without implying that the public page controls a live route.
-2. `02-triage-guard.png` - shows the real application and the queue guard
-   correcting an LLM route.
-3. `03-release-proof.png` - shows all ten long confirmation trials, their p95
-   consequence for the support queue and the conservative capacity equation.
-4. `04-mobile-proof.png` - optional; demonstrates responsive product quality.
+1. `01-live-shadow.png` - cover image. One customer message reaches the current
+   service and the optimized Arm candidate, with fresh request receipts and an
+   explicit shadow-only label.
+2. `02-capacity-result.png` - the release decision re-derived from ten long
+   traffic windows, application quality, and the conservative capacity bound.
+3. `03-release-proof.png` - the guarded traffic switch, deployment identity,
+   Arm Performix samples, and observed Neoverse I8MM kernel.
+4. `04-live-cutover.png` - two different customer requests before and after the
+   release, routed by the standard and optimized services respectively.
 
 Suggested captions:
 
-- **A measured Arm upgrade controls a real service release.** The public page
-  shows the checked-in decision. In the live demo, SurgeDesk keeps the optimized
-  route locked until ArmProof verifies at least 2x sustainable traffic and
-  confirms KleidiAI execution with Arm Performix.
-- **A real support workflow.** The two-stage route
-  reaches 86.75% held-out operational queue accuracy and remains
-  human-confirmed.
-- **The operational consequence is visible in every long trial.** The control
-  reached roughly 60 seconds p95 at 0.28 requests/s; the optimized lane stayed
-  near 3.35 seconds at 0.56 requests/s across all five confirmations.
-- **Judgeable on any screen.** SurgeDesk and the offline evidence report are
-  tested down to 320 pixels.
+- **A live Arm candidate earns its release.** SurgeDesk first sends a real
+  request to the current Graviton4 service and then to the optimized candidate
+  as a shadow copy. ArmProof still keeps the candidate away from customers
+  until sustained evidence passes.
+- **The release rests on a measured boundary.** The standard service failed all
+  five long windows at 0.28 requests/s; the KleidiAI service passed all five at
+  0.56 requests/s, establishing at least twice the sustainable capacity while
+  operational queue accuracy remained 86.75%.
+- **The Arm path is visible.** The gateway validates the deployed artifacts and
+  placement, while Arm Performix attributes 245,876 of 365,062 treatment
+  samples to `kai_*`, including the Neoverse I8MM matrix kernel.
+- **The result changes a real workflow.** A stolen-card message is handled by
+  the standard route before release. A different expiring-card request is
+  handled by the optimized route afterward, and both remain human-confirmed.
 
-Do not upload raw profiler text as a primary image. It is available through
-the repository and evidence links for technical inspection.
+Do not use raw profiler text as the cover image. It remains available in the
+repository for technical inspection.

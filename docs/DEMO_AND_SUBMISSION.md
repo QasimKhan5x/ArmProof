@@ -17,16 +17,19 @@ The canonical submission package is [`../submission/README.md`](../submission/RE
 - Upload-ready images: [`../submission/assets/`](../submission/assets/)
 - Final owner checklist: [`../submission/SUBMISSION_CHECKLIST.md`](../submission/SUBMISSION_CHECKLIST.md)
 
-The recording starts with a message typed into the live support application.
-After that request is routed through the control service, the app recomputes
-the accepted release decision from the published capacity, quality, and native
-Arm Performix evidence. That decision unlocks the measured KleidiAI treatment,
-and a second typed message is routed through the newly activated service.
+The recording starts with one typed message running on the serving control and
+the candidate as a sequential shadow copy. After the control result is routed,
+the app recomputes the accepted release decision from published capacity,
+quality, and native Arm Performix evidence. That decision unlocks the measured
+KleidiAI treatment, and a different typed message is routed through the newly
+activated service. The final action generates a starter for another service and
+shows its expected missing-evidence CI block.
 
 ## Submission Claim Rules
 
 - Every number names its comparison and environment.
-- Label endpoint output live only when the gateway has verified the Arm64 runtime identity.
+- Label endpoint output live only when the gateway has checked the Arm64
+  deployment data and response against the active release.
 - Say "verified by ArmProof," never "Arm certified."
 - Queue quality is 86.75%; 77-intent quality is 46.49%; human confirmation is
   mandatory and visible.

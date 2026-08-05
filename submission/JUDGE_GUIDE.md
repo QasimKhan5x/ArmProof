@@ -12,12 +12,12 @@ infrastructure or model downloads.
    the two rates chosen before the final test, five outcomes per service and
    the `0.56 / 0.28 = at least 2.0x` lower bound.
 4. Open **Release** to inspect the sustainable-capacity result, Arm Performix
-   profile and identity-bound deployment activation. Expand technical details
+   profile and identity-bound live traffic control. Expand technical details
    for the exploratory fixed-shape result, quality limits and GitHub Action.
 
 The public page uses checked-in evidence. The demo video adds the live path: a
-real request on the standard service, a newly recalculated release decision,
-activation of the matching optimized service and a second real request.
+real serving-plus-shadow comparison, a newly recalculated release decision, a
+route cutover to the matching optimized service and a different real request.
 
 ## Recompute The Release
 
@@ -52,7 +52,7 @@ Open <http://127.0.0.1:8765/surgedesk/>.
 
 `build_surgedesk_demo.py --verify` independently derives the JSON used by the
 page and compares it byte for byte with the checked-in payload. The local
-**Verify measured experiment** action runs the same analysis again and displays
+**Recompute release decision** action runs the same analysis again and displays
 the newly recalculated result.
 
 ## Inspect The Arm Work
@@ -110,6 +110,10 @@ npm run test:ui
 The browser suite covers desktop, tablet and 320-pixel mobile layouts. The
 backend suite includes a real localhost HTTP flow through control routing,
 fresh audit, deployment-identity comparison, promotion and optimized routing.
+The visible action is a route cutover between two already-running services.
+The service verifies the pinned runtime-wheel ledger at startup, reads its
+instance type from AWS IMDSv2, and checks every optimized response against the
+release that authorized it.
 
 ## Evidence Boundary
 

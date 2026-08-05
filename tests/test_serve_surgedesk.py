@@ -21,13 +21,17 @@ from scripts.serve_surgedesk import (
 class SurgeDeskGatewayTests(unittest.TestCase):
     def test_adoption_action_generates_and_validates_a_real_starter(self) -> None:
         receipt = _adoption_receipt()
-        self.assertEqual(receipt["validation_status"], "STRUCTURE VALID")
-        self.assertIn("measured evidence still required", receipt["validation_detail"])
-        self.assertIn("required claims parsed", receipt["validation_detail"])
+        self.assertEqual(receipt["validation_status"], "BLOCKED")
+        self.assertNotEqual(receipt["initial_ci_exit_code"], 0)
+        self.assertEqual(
+            receipt["initial_ci_reason"],
+            "no measured evidence found",
+        )
+        self.assertIn("measured evidence is absent", receipt["validation_detail"])
         self.assertIn("bound to this contract digest", receipt["validation_detail"])
         self.assertIn("contract.json", receipt["generated_files"])
         self.assertIn(".github/workflows/armproof.yml", receipt["generated_files"])
-        self.assertIn("QasimKhan5x/ArmProof@v0.8.2", receipt["workflow"])
+        self.assertIn("QasimKhan5x/ArmProof@v0.9.0", receipt["workflow"])
         self.assertEqual(len(receipt["contract_sha256"]), 64)
         self.assertEqual(receipt["archive_name"], "armproof-service-starter.zip")
         with zipfile.ZipFile(
@@ -40,20 +44,32 @@ class SurgeDeskGatewayTests(unittest.TestCase):
     def test_deployment_cannot_promote_before_a_passing_fresh_audit(self) -> None:
         state = DeploymentState(active_lane="baseline")
         live_identity = {
+            "model_identity": "b" * 64,
             "source_artifact_sha256": "a" * 64,
+            "runtime_lock_sha256": "c" * 64,
+            "runtime_artifact_ledger_sha256": "e" * 64,
             "runtime": "onnxruntime-genai",
             "runtime_version": "0.15.0.dev0",
             "architecture": "aarch64",
             "threads_per_lane": 16,
+            "cpu_affinity": list(range(16)),
+            "instance_type": "c8g.4xlarge",
+            "instance_identity_source": "aws-imdsv2",
             "baseline_control": "1",
             "optimized_control": "0",
         }
         audited = {
+            "model_identity": "b" * 64,
             "source_artifact_sha256": "a" * 64,
+            "runtime_lock_sha256": "c" * 64,
+            "runtime_artifact_ledger_sha256": "e" * 64,
             "runtime": "onnxruntime-genai",
             "runtime_version": "0.15.0.dev0",
             "architecture": "aarch64",
             "threads": 16,
+            "cpu_affinity": list(range(16)),
+            "instance_type": "c8g.4xlarge",
+            "instance_identity_source": "aws-imdsv2",
             "controls": {
                 "baseline": {"mlas.disable_kleidiai": "1"},
                 "optimized": {"mlas.disable_kleidiai": "0"},
@@ -81,6 +97,53 @@ class SurgeDeskGatewayTests(unittest.TestCase):
         swapped = {**live_identity, "source_artifact_sha256": "b" * 64}
         with self.assertRaisesRegex(ValueError, "differs from audited"):
             state.promote(swapped)
+        for field, value in (
+            ("model_identity", "d" * 64),
+            ("runtime_lock_sha256", "e" * 64),
+            ("instance_type", "c8g.8xlarge"),
+            ("cpu_affinity", list(range(1, 17))),
+        ):
+            with self.subTest(field=field):
+                state.active_lane = "baseline"
+                with self.assertRaisesRegex(ValueError, "differs from audited"):
+                    state.promote({**live_identity, field: value})
+
+        state.active_lane = "optimized"
+        self.assertEqual(
+            state.authorize_active_route("optimized", {
+                "model_identity": live_identity["model_identity"],
+                "source_artifact_sha256": live_identity["source_artifact_sha256"],
+                "runtime_lock_sha256": live_identity["runtime_lock_sha256"],
+                "runtime_artifact_ledger_sha256": live_identity["runtime_artifact_ledger_sha256"],
+                "runtime": live_identity["runtime"],
+                "runtime_version": live_identity["runtime_version"],
+                "architecture": live_identity["architecture"],
+                "threads": live_identity["threads_per_lane"],
+                "cpu_affinity": live_identity["cpu_affinity"],
+                "instance_type": live_identity["instance_type"],
+                "instance_identity_source": live_identity["instance_identity_source"],
+                "optimization_control": {"mlas.disable_kleidiai": "0"},
+            }),
+            "EXP-2026-014",
+        )
+        drifted = {
+            "model_identity": "f" * 64,
+            "source_artifact_sha256": live_identity["source_artifact_sha256"],
+            "runtime_lock_sha256": live_identity["runtime_lock_sha256"],
+            "runtime_artifact_ledger_sha256": live_identity["runtime_artifact_ledger_sha256"],
+            "runtime": live_identity["runtime"],
+            "runtime_version": live_identity["runtime_version"],
+            "architecture": live_identity["architecture"],
+            "threads": live_identity["threads_per_lane"],
+            "cpu_affinity": live_identity["cpu_affinity"],
+            "instance_type": live_identity["instance_type"],
+            "instance_identity_source": live_identity["instance_identity_source"],
+            "optimization_control": {"mlas.disable_kleidiai": "0"},
+        }
+        with self.assertRaisesRegex(ValueError, "drifted from audited release"):
+            state.authorize_active_route("optimized", drifted)
+        self.assertEqual(state.snapshot()["active_lane"], "baseline")
+        self.assertIsNone(state.snapshot()["audit_experiment_id"])
 
     def test_upstream_request_binds_the_expected_backend_and_request_id(self) -> None:
         response = io.BytesIO(json.dumps({
@@ -173,6 +236,10 @@ class SurgeDeskGatewayTests(unittest.TestCase):
             "architecture": "aarch64",
             "model_identity": "a" * 64,
             "source_artifact_sha256": "c" * 64,
+            "runtime_lock_sha256": "d" * 64,
+            "runtime_artifact_ledger_sha256": "e" * 64,
+            "instance_type": "c8g.4xlarge",
+            "instance_identity_source": "aws-imdsv2",
             "optimization_control": {"mlas.disable_kleidiai": "0"},
             "threads": 8,
         }).encode())
@@ -194,6 +261,11 @@ class SurgeDeskGatewayTests(unittest.TestCase):
             "runtime_version": "0.15.0.dev0",
             "threads": 8,
             "architecture": "aarch64",
+            "cpu_affinity": list(range(8)),
+            "runtime_lock_sha256": "d" * 64,
+            "runtime_artifact_ledger_sha256": "e" * 64,
+            "instance_type": "c8g.4xlarge",
+            "instance_identity_source": "aws-imdsv2",
         }
         baseline = (True, "verified", {
             **common,
@@ -216,6 +288,10 @@ class SurgeDeskGatewayTests(unittest.TestCase):
         health = {
             "model_identity": "a" * 64,
             "source_artifact_sha256": "c" * 64,
+            "runtime_lock_sha256": "d" * 64,
+            "runtime_artifact_ledger_sha256": "e" * 64,
+            "instance_type": "c8g.4xlarge",
+            "instance_identity_source": "aws-imdsv2",
             "runtime": "onnxruntime-genai",
             "runtime_version": "0.15.0.dev0",
             "threads": 8,

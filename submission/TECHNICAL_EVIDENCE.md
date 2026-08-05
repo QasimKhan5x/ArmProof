@@ -104,8 +104,12 @@ preregistered plans. A publication record binds the exact EXP-2026-014 plan
 bytes in the prelaunch project bundle and measurement archive to a Git object
 in this checkout. The Git object time predates the recorded AWS launch time;
 that launch time remains experiment metadata rather than independent cloud
-attestation. The live gateway rechecks the model and runtime identity before
-activation.
+attestation. The live service verifies the pinned runtime-wheel ledger and reads
+the instance type from AWS IMDSv2. The gateway rechecks the model fingerprint,
+source artifact, runtime lock, wheel ledger, runtime version, instance, Arm64
+CPU placement, threads and treatment controls before switching its route and
+again on every optimized response. Drift invalidates the release and restores
+the control route.
 
 Performix reports function-sample share. Linux perf reports sampled-cycle
 attribution. ArmProof presents both but never compares the percentages as if

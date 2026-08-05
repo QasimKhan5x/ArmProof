@@ -19,11 +19,12 @@ Do not attribute the whole BF16-to-INT4 transformation to KleidiAI.
 
 ## UX And Developer Experience: 15
 
-SurgeDesk first makes the value tangible: a support operator can confirm a live
-route, verify the measured treatment, activate it, and see the next request
-record the optimized lane and authorizing audit. The recurring developer workflow is a
-PR merge decision. A developer supplies one contract file and receives a
-GitHub Check, explanation, report and deployable configuration.
+SurgeDesk first makes the value tangible: one live message produces a serving
+result and a shadow candidate result side by side. A support operator confirms
+the serving route, verifies the measured treatment, activates it, and sees a
+different request record the optimized lane and authorizing audit. The recurring
+developer workflow is a PR merge decision. A developer supplies one contract
+file and receives a GitHub Check, explanation, report and deployment recipe.
 
 Required proof:
 
@@ -52,15 +53,17 @@ claims enforceable in a workflow maintainers already use.
 
 The three-minute story is operational and causal:
 
-1. A stolen-card request reaches a human-confirmed support queue.
-2. The first request records the KleidiAI-disabled control lane.
+1. A stolen-card request runs on the serving control and optimized shadow lane,
+   making the behavior difference visible before release.
+2. The control result reaches a human-confirmed support queue while the faster
+   candidate remains blocked from production.
 3. ArmProof re-derives 2,100 capacity requests and 1,540 model outputs from the
    preregistered confirmation, then exposes all ten long windows.
 4. Native Performix evidence shows no `kai_*` function samples in the control
    and substantial KleidiAI execution in the treatment.
-5. Activation rechecks the live runtime identity, and the second real request
-   records the optimized lane and audit ID.
-6. The closing adoption view generates and validates a downloadable contract,
+5. Activation rechecks the model, wheel ledger, AWS instance and Arm placement;
+   a different real request then records the optimized lane and audit ID.
+6. The closing action generates and validates a downloadable contract,
    workload templates, evidence checklist and GitHub Action.
 
 The audience should understand the application within 10 seconds and the Arm

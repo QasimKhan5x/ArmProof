@@ -1114,6 +1114,9 @@ class KleidiAIConfirmedAdapter:
             "confirmation_seconds": audit.confirmation_seconds,
             "matched_control_verified": audit.matched_control_verified,
             "only_changed_control": "mlas.disable_kleidiai",
+            "model_identity": audit.model_identity,
+            "runtime_version": audit.runtime_version,
+            "cpu_affinity": list(audit.cpu_affinity),
             "minimum_capacity_ratio": audit.minimum_capacity_ratio,
             "capacity_display": {
                 "description": (

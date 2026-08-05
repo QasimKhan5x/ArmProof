@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import threading
+import time
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
@@ -13,12 +14,18 @@ from scripts.serve_surgedesk import handler_for
 
 
 SOURCE_SHA = "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1"
+RUNTIME_LOCK_SHA = "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884"
+MODEL_SHA = "d86ae7ca1f12b2ae4abe70abb856cb9c688908477a7de653467623764ab5c687"
 
 
 def lane_handler(backend: str, control: str) -> type[BaseHTTPRequestHandler]:
     identity = {
-        "model_identity": "a" * 64,
+        "model_identity": MODEL_SHA,
         "source_artifact_sha256": SOURCE_SHA,
+        "runtime_lock_sha256": RUNTIME_LOCK_SHA,
+        "runtime_artifact_ledger_sha256": "2ac3491c5ce6d6b1dc178f27568b1e6e66b9b76031bc488143e72d9e7488d8c7",
+        "instance_type": "c8g.4xlarge",
+        "instance_identity_source": "aws-imdsv2",
         "runtime": "onnxruntime-genai",
         "runtime_version": "0.15.0.dev0",
         "threads": 16,
@@ -56,11 +63,13 @@ def lane_handler(backend: str, control: str) -> type[BaseHTTPRequestHandler]:
                 if "about to expire" in prompt
                 else "lost_or_stolen_card"
             )
+            inference_ms = 180.0 if control == "1" else 60.0
+            time.sleep(inference_ms / 1000)
             self.respond(HTTPStatus.OK, {
                 "request_id": request["request_id"],
                 "backend": backend,
                 "output": json.dumps({"intent": intent}),
-                "inference_ms": 3.0,
+                "inference_ms": inference_ms,
                 "runtime_identity": identity,
             })
 

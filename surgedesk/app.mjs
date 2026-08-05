@@ -18,6 +18,8 @@ let matchedLanesAvailable = false;
 let auditAvailable = false;
 let proofState = "recorded";
 let proofClaims = [];
+let adoptionReceipt = null;
+let adoptionReceiptGeneratedLive = false;
 let deploymentStatus = {
   active_lane: null,
   release_ready: false,
@@ -54,9 +56,16 @@ function liveServiceLabel(lane) {
 }
 
 
+function liveActionLabel() {
+  return deploymentStatus.active_lane === "baseline" && matchedLanesAvailable
+    ? "Compare current route with Arm candidate"
+    : "Run optimized live route";
+}
+
+
 function matchedComparisonText() {
-  return `Same ${data.provenance.model} model and ${data.provenance.runtime}; only `
-    + `${data.provenance.evidence.only_changed_control} changed`;
+  return `Same model, runtime, workload, machine, and ${data.proof.threads} threads; `
+    + `${data.provenance.evidence.only_changed_control} is the service control under test`;
 }
 
 
@@ -205,7 +214,7 @@ function renderReview() {
     active.mode === "live_model_output"
       ? `${liveServiceLabel(active.deployment_lane)} · `
         + `${formatMs(active.inference_ms)} inference · ${formatMs(active.gateway_latency_ms)} end to end`
-        + (active.release_audit_id ? ` · activated by ${active.release_audit_id}` : "")
+        + (active.release_audit_id ? ` · release audit ${active.release_audit_id}` : "")
       : `Recorded ${data.provenance.model} · ${data.provenance.runtime}`,
   );
   setText("review-priority", active.priority);
@@ -221,7 +230,8 @@ function renderReview() {
       Number.isNaN(observed.getTime()) ? active.observed_at : observed.toLocaleTimeString([], { hour12: false }),
     );
     setText("live-arm-runtime", `${runtime.architecture} · ${runtime.threads} threads · ${runtime.runtime_version}`);
-    setText("live-control", `mlas.disable_kleidiai=${runtime.optimization_control["mlas.disable_kleidiai"]}`);
+    const control = runtime.optimization_control["mlas.disable_kleidiai"];
+    setText("live-control", `KleidiAI ${control === "0" ? "on" : "off"} · raw flag ${control}`);
   }
   if (active.mode === "live_model_output") {
     elements["review-warning"].textContent = active.guard_overrode
@@ -293,6 +303,29 @@ function renderReviewedTickets() {
     (ticket) => ticket.deployment_lane === "optimized" && ticket.release_audit_id,
   );
   elements["adoption-handoff"].hidden = !optimizedTicket;
+  const baselineTicket = workspace.resolved.find(
+    (ticket) => ticket.deployment_lane === "baseline" && ticket.mode === "live_model_output",
+  );
+  const treatmentTicket = workspace.resolved.find(
+    (ticket) => ticket.deployment_lane === "optimized" && ticket.release_audit_id,
+  );
+  const cutoverComplete = Boolean(baselineTicket && treatmentTicket);
+  elements["live-cutover-summary"].hidden = !cutoverComplete;
+  if (cutoverComplete) {
+    elements["intake-form"].before(elements["live-cutover-summary"]);
+    const baselineControl = baselineTicket.runtime_identity.optimization_control["mlas.disable_kleidiai"];
+    const treatmentControl = treatmentTicket.runtime_identity.optimization_control["mlas.disable_kleidiai"];
+    setText("cutover-before-lane", "Standard · KleidiAI off");
+    setText("cutover-before-request", `${baselineTicket.request_id} · ${formatMs(baselineTicket.gateway_latency_ms)} · raw control ${baselineControl}`);
+    setText("cutover-after-lane", "Optimized · KleidiAI on");
+    setText("cutover-after-request", `${treatmentTicket.request_id} · ${formatMs(treatmentTicket.gateway_latency_ms)} · raw control ${treatmentControl}`);
+    setText("cutover-audit", treatmentTicket.release_audit_id);
+    setText(
+      "cutover-capacity",
+      `Authorizes the measured ≥${data.capacity.mixes.mixed.minimum_capacity_ratio.toFixed(1)}× capacity lower bound`,
+    );
+    elements["review-complete"].hidden = true;
+  }
   setText(
     "review-complete-title",
     latest.review_status === "corrected"
@@ -303,7 +336,7 @@ function renderReviewedTickets() {
 
 
 function revealVerifiedProof() {
-  for (const id of ["optimization-summary", "performix-proof", "proof-details", "release-gate"]) {
+  for (const id of ["optimization-summary", "release-reuse-summary", "performix-proof", "proof-details", "release-gate"]) {
     elements[id].hidden = false;
   }
 }
@@ -338,16 +371,46 @@ async function routeSelectedMessage(event) {
   event.preventDefault();
   if (inferenceMode === "live") {
     elements["route-request"].disabled = true;
-    elements["route-request"].textContent = "Routing on Arm64…";
+    const compare = deploymentStatus.active_lane === "baseline" && matchedLanesAvailable;
+    elements["route-request"].textContent = compare
+      ? "Running matched request…"
+      : "Routing on optimized Arm service…";
+    if (compare) {
+      elements["shadow-comparison"].hidden = false;
+      setText("shadow-baseline-latency", "Running…");
+      setText("shadow-optimized-latency", "Waiting…");
+      setText("shadow-baseline-result", "Current production request");
+      setText("shadow-optimized-result", "Shadow copy follows on the same cores");
+      setText("shadow-observation", "Running the serving lane, then the candidate without full-core contention…");
+    }
     try {
-      const response = await fetch("/api/route", {
+      const response = await fetch(compare ? "/api/shadow-compare" : "/api/route", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: elements["customer-message"].value }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
-      workspace = selectRecordedCase(workspace, payload);
+      if (compare) {
+        const baseline = payload.lanes.baseline;
+        const optimized = payload.lanes.optimized;
+        setText("shadow-baseline-latency", formatMs(baseline.gateway_latency_ms));
+        setText("shadow-optimized-latency", formatMs(optimized.gateway_latency_ms));
+        setText("shadow-baseline-result", `${baseline.suggested_label} · ${baseline.queue}`);
+        setText("shadow-optimized-result", `${optimized.suggested_label} · ${optimized.queue} · shadow only`);
+        const ratio = payload.observed_latency_ratio;
+        const latencySentence = ratio >= 1
+          ? `The candidate completed this request with ${ratio.toFixed(2)}× lower observed latency.`
+          : `The candidate was ${(1 / ratio).toFixed(2)}× slower on this request.`;
+        setText(
+          "shadow-observation",
+          `${latencySentence} Both proposed ${payload.same_queue ? "the same" : "different"} final queue. `
+            + "This live observation is not the sustained-capacity claim.",
+        );
+        workspace = selectRecordedCase(workspace, baseline);
+      } else {
+        workspace = selectRecordedCase(workspace, payload);
+      }
       elements["intake-error"].hidden = true;
       renderWorkspace();
       elements["review-panel"].scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -360,7 +423,7 @@ async function routeSelectedMessage(event) {
       elements["intake-error"].focus();
     } finally {
       elements["route-request"].disabled = false;
-      elements["route-request"].textContent = "Run live route";
+      elements["route-request"].textContent = liveActionLabel();
     }
     return;
   }
@@ -383,6 +446,8 @@ function setInferenceMode(mode) {
   inferenceMode = mode;
   const live = mode === "live";
   elements["sample-select"].disabled = live;
+  elements["sample-select"].hidden = live;
+  elements["sample-select-label"].hidden = live;
   elements["scenario-picker"].hidden = live;
   setText(
     "environment-label",
@@ -394,9 +459,11 @@ function setInferenceMode(mode) {
     ? "Live matched Arm64 inference"
     : `${data.provenance.dataset} recorded output`;
   elements["intake-note"].textContent = live
-    ? "This message is sent through the identity-checked Arm64 inference endpoint and local queue guard."
+    ? deploymentStatus.active_lane === "baseline"
+      ? "The serving lane handles the request; the candidate receives a sequential shadow copy for a contention-free comparison."
+      : "This message is sent through the evidence-cleared optimized service and local queue guard."
     : "Select an evidence-backed request to load its recorded model output.";
-  elements["route-request"].textContent = live ? "Run live route" : "Inspect stored output";
+  elements["route-request"].textContent = live ? liveActionLabel() : "Inspect stored output";
   elements["customer-message"].readOnly = !live;
   if (live) {
     elements["customer-message"].value = "";
@@ -406,9 +473,13 @@ function setInferenceMode(mode) {
     elements["customer-message"].placeholder = "";
     loadSelectedSample();
   }
+  if (!live) elements["shadow-comparison"].hidden = true;
   elements["intake-error"].hidden = true;
   workspace = { ...workspace, active: null };
   renderWorkspace();
+  if (live && deploymentStatus.active_lane === "optimized") {
+    elements["review-complete"].hidden = true;
+  }
 }
 
 
@@ -479,13 +550,22 @@ function renderDeploymentStatus() {
   setText(
     "workspace-release-status",
     optimized
-      ? `${deploymentStatus.audit_experiment_id} approved and active`
+      ? `${deploymentStatus.audit_experiment_id} approved · optimized route serving`
       : freshAudit
-        ? `${deploymentStatus.audit_experiment_id} approved; ready to activate`
+        ? `${deploymentStatus.audit_experiment_id} approved · route switch ready`
       : publicEvidence
         ? `${data.provenance.experiment_id} passed the checked-in release policy`
         : "Waiting for the measured release check",
   );
+  setText(
+    "opening-status",
+    optimized
+      ? `${deploymentStatus.audit_experiment_id} approved · serving now`
+      : freshAudit
+        ? `${deploymentStatus.audit_experiment_id} approved · switch ready`
+        : "blocked until ArmProof rechecks it",
+  );
+  elements["opening-status"].classList.toggle("approved", optimized || freshAudit);
   setText(
     "promotion-current-lane",
     !connected
@@ -499,6 +579,8 @@ function renderDeploymentStatus() {
       : "Fresh audit required",
   );
   if (publicEvidence) {
+    elements["generate-release-starter"].textContent = "Inspect included starter";
+    elements["generate-adoption-kit"].textContent = "Inspect included starter";
     setText("promotion-eyebrow", "Recorded release decision");
     setText("promotion-current-label", "Baseline");
     setText("promotion-current-lane", `${data.capacity.mixes.mixed.trial_matrix[0].treatment} · measured`);
@@ -519,38 +601,43 @@ function renderDeploymentStatus() {
     elements["open-required-audit"].textContent = "Inspect capacity evidence";
     elements["route-next-request"].hidden = true;
   } else if (optimized) {
-    setText("promotion-title", "The verified optimized service is handling live requests");
+    elements["generate-release-starter"].textContent = "Generate blocked starter";
+    elements["generate-adoption-kit"].textContent = "Generate and validate starter";
+    setText("promotion-current-label", "Serving now");
+    setText("promotion-candidate-label", "Previous route");
+    setText("promotion-candidate-lane", liveServiceLabel("baseline"));
+    setText("promotion-title", "The optimized service is handling live requests");
     setText(
       "promotion-detail",
-      "The gateway changed its active route only after the measured release check passed and both service identities were checked again.",
+      "The gateway changed its active route only after the measured release check passed and both service declarations were checked again.",
     );
     elements["promote-route"].disabled = true;
-    elements["promote-route"].textContent = "Optimized service active";
+    elements["promote-route"].textContent = "Live traffic switched";
     elements["route-next-request"].hidden = false;
     elements["open-required-audit"].hidden = true;
   } else if (freshAudit && matchedLanesAvailable) {
     setText("promotion-title", "The measured optimized service is ready for live traffic");
     setText(
       "promotion-detail",
-      "The release check passed. Activation will recheck both Arm service identities, then switch traffic from the standard service to the optimized service.",
+      "The release check passed. The gateway will recheck both Arm service declarations, then switch traffic from the standard service to the optimized service.",
     );
     elements["promote-route"].disabled = false;
-    elements["promote-route"].textContent = "Activate verified optimized service";
+    elements["promote-route"].textContent = "Switch live traffic to optimized service";
     elements["route-next-request"].hidden = true;
     elements["open-required-audit"].hidden = true;
   } else {
     setText("promotion-title", connected
       ? "The standard service is handling support requests"
-      : "Connect both matched Arm64 lanes to activate a release");
+      : "Connect both matched Arm64 lanes to switch live traffic");
     setText(
       "promotion-detail",
       connected
         ? "Run the measured release check before routing live requests to the optimized service."
-        : "The public evidence remains inspectable, but changing the live route requires both identity-checked endpoints and a fresh local audit.",
+        : "The public evidence remains inspectable, but changing the live route requires both matched endpoints and a fresh local audit.",
     );
     elements["promote-route"].disabled = true;
     elements["promote-route"].textContent = connected
-      ? "Verify the measured experiment first"
+      ? "Recompute the release decision first"
       : "Matched live lanes required";
     elements["route-next-request"].hidden = true;
     elements["open-required-audit"].hidden = false;
@@ -568,10 +655,10 @@ function review() {
       : "Decision recorded in the audit trail.",
   );
   elements["tab-workspace"].classList.add("completed");
-  if (workspace.resolved.length > 1) {
-    elements["recent-title"].setAttribute("tabindex", "-1");
-    elements["recent-title"].scrollIntoView({ block: "start" });
-    elements["recent-title"].focus({ preventScroll: true });
+  if (workspace.resolved.length > 1 && !elements["live-cutover-summary"].hidden) {
+    elements["live-cutover-title"].setAttribute("tabindex", "-1");
+    elements["live-cutover-summary"].scrollIntoView({ block: "start" });
+    elements["live-cutover-title"].focus({ preventScroll: true });
   } else {
     elements["review-complete"].querySelector("button").focus();
   }
@@ -625,11 +712,11 @@ function populateScenarios() {
 
 function renderAuditStage(stage, detail, elapsedMs) {
   const labels = {
-    quality: () => `${detail.raw_model_outputs.toLocaleString()} raw model outputs checked for quality`,
-    performix: () => `${(detail.disabled_function_samples + detail.enabled_function_samples).toLocaleString()} Performix function samples parsed`,
-    archive: () => `${detail.checksummed_files} capacity files matched the frozen plan`,
-    requests: () => `${detail.raw_request_outcomes.toLocaleString()} traffic outcomes reconstructed from ${detail.confirmation_files} windows`,
-    policy: () => `${detail.claims_evaluated} release rules evaluated · ${detail.passed ? "passed" : "blocked"}`,
+    quality: () => "Quality outputs checked against the release limit",
+    performix: () => "Arm profiler evidence parsed",
+    archive: () => "Capacity archive matched the frozen plan",
+    requests: () => "Ten long capacity windows reconstructed",
+    policy: () => `Release policy ${detail.passed ? "passed" : "blocked"}`,
   };
   const item = document.createElement("li");
   const text = document.createElement("strong");
@@ -752,6 +839,7 @@ async function loadVerifiedExperiment() {
     setText("evidence-seal", "✓");
     elements["tab-surge"].classList.add("completed");
     elements["reveal-experiment-results"].hidden = false;
+    elements["reveal-experiment-results"].scrollIntoView({ behavior: "smooth", block: "center" });
     elements["reveal-experiment-results"].focus({ preventScroll: true });
   } catch (error) {
     console.error(error);
@@ -770,9 +858,9 @@ async function loadVerifiedExperiment() {
 function revealConfirmedResult() {
   elements["experiment-results"].hidden = false;
   elements["reveal-experiment-results"].hidden = true;
-  elements["rate-selection-title"].scrollIntoView({ behavior: "smooth", block: "start" });
-  elements["rate-selection-title"].setAttribute("tabindex", "-1");
-  elements["rate-selection-title"].focus({ preventScroll: true });
+  elements["release-result-title"].scrollIntoView({ behavior: "smooth", block: "start" });
+  elements["release-result-title"].setAttribute("tabindex", "-1");
+  elements["release-result-title"].focus({ preventScroll: true });
 }
 
 
@@ -801,6 +889,9 @@ function showRepositoryEvidence() {
       engine_version: data.proof.performix.engine_version,
       cpu: data.proof.performix.cpu,
       enabled_function_samples: data.proof.performix.enabled_function_samples,
+      disabled_function_samples: data.proof.performix.disabled_function_samples,
+      disabled_kai_function_samples: data.proof.performix.disabled_kai_function_samples,
+      enabled_kai_function_samples: data.proof.performix.enabled_kai_function_samples,
       scope_note: data.proof.performix.scope_note,
       pmu_capability_note: data.proof.performix.pmu_capability_note,
     },
@@ -955,6 +1046,29 @@ function renderAuditResult(receipt) {
   const description = describeCapacity(capacity);
   const arm = receipt.arm;
   const supporting = receipt.supporting;
+  const controlTrial = capacity.trial_matrix[0];
+  const treatmentTrial = capacity.trial_matrix[1];
+  const controlPasses = controlTrial.outcomes.filter((outcome) => outcome === "pass").length;
+  const treatmentPasses = treatmentTrial.outcomes.filter((outcome) => outcome === "pass").length;
+  const qualityDelta = data.quality.accuracy_delta_pp;
+  const history = data.provenance.release_history;
+  setText("result-capacity-ratio", `At least ${capacity.minimum_ratio.toFixed(1)}×`);
+  setText(
+    "result-capacity-scope",
+    `CPU-only generative classification on the same ${data.proof.instance}, model, runtime, workload, ${data.proof.threads} threads, and `
+      + `${description.slo_seconds}-second p95 rule. Offered rate differs intentionally to locate each capacity boundary.`,
+  );
+  setText("result-control-boundary", `${capacity.baseline_fail_rps.toFixed(2)} requests/s`);
+  setText("result-control-outcomes", `${controlPasses}/${controlTrial.outcomes.length} long windows passed`);
+  setText("result-treatment-boundary", `${capacity.optimized_pass_rps.toFixed(2)} requests/s`);
+  setText("result-treatment-outcomes", `${treatmentPasses}/${treatmentTrial.outcomes.length} long windows passed`);
+  setText("result-quality-delta", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}% queue accuracy`);
+  setText(
+    "result-quality-scope",
+    `Fine-grained intent ${data.quality.optimized_accuracy_percent.toFixed(2)}% (${qualityDelta.toFixed(2)} pp vs standard and inside the 1-point limit); human confirmation required`,
+  );
+  setText("rejected-run-id", history.rejected_experiment_id);
+  setText("accepted-run-id", history.accepted_experiment_id);
   setText(
     "confirmation-count",
     `${description.windows_per_rate} trials × ${description.rate_count} frozen rates × ${description.window_seconds}s`,
@@ -998,6 +1112,8 @@ function renderAuditResult(receipt) {
   );
   setText("summary-capacity", `≥${capacity.minimum_ratio.toFixed(2)}×`);
   setText("summary-performix", `${arm.performix_enabled_sample_share_percent.toFixed(2)}%`);
+  setText("summary-quality", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
+  setText("summary-quality-context", `Operational queue accuracy · fine-grained intent ${data.quality.optimized_accuracy_percent.toFixed(2)}% · ${qualityDelta.toFixed(2)} pp vs standard`);
   setText("capacity-range", `≥${capacity.minimum_ratio.toFixed(2)}× sustainable capacity under the fixed response-time rule`);
   setText("artifact-reduction", `${supporting.artifact_reduction_percent.toFixed(2)}% smaller`);
   setText("memory-reduction", `${supporting.peak_pss_reduction_percent.toFixed(2)}% lower peak PSS`);
@@ -1010,7 +1126,8 @@ function renderAuditResult(receipt) {
   setText("performix-version", `Arm Performix ${arm.engine_version} · ${arm.cpu}`);
   setText("performix-disabled-share", `${arm.performix_disabled_sample_share_percent.toFixed(0)}%`);
   setText("performix-enabled-share", `${arm.performix_enabled_sample_share_percent.toFixed(2)}%`);
-  setText("performix-sample-count", `${arm.enabled_function_samples.toLocaleString()} measured function samples`);
+  setText("performix-disabled-count", `${arm.disabled_kai_function_samples.toLocaleString()} / ${arm.disabled_function_samples.toLocaleString()} measured function samples`);
+  setText("performix-sample-count", `${arm.enabled_kai_function_samples.toLocaleString()} / ${arm.enabled_function_samples.toLocaleString()} measured function samples`);
   setText("performix-linux-share", `${arm.linux_perf_cycle_share_percent.toFixed(2)}%`);
   setText("performix-kernel", arm.kernel);
   setText("performix-scope-note", arm.scope_note);
@@ -1038,22 +1155,21 @@ async function promoteOptimizedLane() {
     renderDeploymentStatus();
     setText(
       "promotion-result",
-      `${payload.backend} on cores ${payload.core_group} is now serving the live support route. `
-      + `Its source-model fingerprint ${payload.runtime_identity.source_artifact_sha256.slice(0, 12)}… `
-      + `and ${payload.runtime_identity.runtime} ${payload.runtime_identity.runtime_version} matched the audited deployment.`,
+      `The gateway switched live support traffic to ${payload.backend} on cores ${payload.core_group}. `
+      + "The model and source artifact matched; the runtime artifact ledger was verified; AWS IMDSv2 reported the expected instance; Arm placement and controls matched the accepted audit.",
     );
-    setText("environment-label", "Verified optimized Arm64 lane serving");
+    setText("environment-label", "Optimized Arm64 lane serving");
     setText(
       "promotion-model-hash",
-      `${payload.runtime_identity.source_artifact_sha256.slice(0, 16)}…`,
+      `model ${payload.runtime_identity.model_identity.slice(0, 10)}… · source ${payload.runtime_identity.source_artifact_sha256.slice(0, 10)}…`,
     );
     setText(
       "promotion-runtime-match",
-      `${payload.runtime_identity.runtime} ${payload.runtime_identity.runtime_version} · matched`,
+      `${payload.runtime_identity.runtime} ${payload.runtime_identity.runtime_version} · wheel ledger ${payload.runtime_identity.runtime_artifact_ledger_sha256.slice(0, 10)}…`,
     );
     setText(
       "promotion-arm-match",
-      `${payload.runtime_identity.architecture} · ${payload.runtime_identity.threads_per_lane} threads per lane`,
+      `${payload.runtime_identity.instance_type} via IMDSv2 · ${payload.runtime_identity.architecture} · cores ${payload.runtime_identity.cpu_affinity[0]}–${payload.runtime_identity.cpu_affinity.at(-1)}`,
     );
     setText(
       "promotion-control-match",
@@ -1062,9 +1178,9 @@ async function promoteOptimizedLane() {
     elements["promotion-identity"].hidden = false;
     elements["tab-proof"].classList.add("completed");
   } catch (error) {
-    elements["promotion-result"].textContent = `Activation blocked: ${error.message}`;
+    elements["promotion-result"].textContent = `Traffic switch blocked: ${error.message}`;
     elements["promote-route"].disabled = false;
-    elements["promote-route"].textContent = "Retry optimized-lane activation";
+    elements["promote-route"].textContent = "Retry live traffic switch";
   }
 }
 
@@ -1073,50 +1189,128 @@ function routeNextLiveRequest() {
   activateView("workspace");
   elements["live-mode"].checked = true;
   setInferenceMode("live");
+  elements["shadow-comparison"].hidden = true;
+}
+
+
+async function loadAdoptionReceipt() {
+  if (adoptionReceipt !== null) return adoptionReceipt;
+  const response = auditAvailable
+    ? await fetch("/api/adoption", { method: "POST" })
+    : await fetch("./adoption.json", { cache: "no-store" });
+  const receipt = await response.json();
+  if (!response.ok) throw new Error(receipt.error || `HTTP ${response.status}`);
+  adoptionReceipt = receipt;
+  adoptionReceiptGeneratedLive = auditAvailable;
+  return receipt;
+}
+
+
+function configureAdoptionDownload(receipt) {
+  const download = elements["adoption-download"];
+  if (receipt.archive_base64) {
+    const bytes = Uint8Array.from(
+      atob(receipt.archive_base64),
+      (character) => character.charCodeAt(0),
+    );
+    download.href = URL.createObjectURL(new Blob([bytes], { type: "application/zip" }));
+  } else {
+    download.href = receipt.archive_href;
+  }
+  download.download = receipt.archive_name;
+  download.hidden = false;
+}
+
+
+async function generateReleaseStarter() {
+  elements["generate-release-starter"].disabled = true;
+  elements["generate-release-starter"].textContent = auditAvailable
+    ? "Generating and running CI…"
+    : "Loading included starter…";
+  try {
+    const receipt = await loadAdoptionReceipt();
+    setText("release-adoption-files", `${receipt.generated_files.length} files`);
+    setText(
+      "release-adoption-files-label",
+      adoptionReceiptGeneratedLive ? "Created now" : "Included files",
+    );
+    setText("release-adoption-gate", `${receipt.validation_status} · evidence required`);
+    setText("release-adoption-contract", `${receipt.contract_sha256.slice(0, 16)}…`);
+    elements["release-adoption-receipt"].hidden = false;
+    elements["generate-release-starter"].textContent = adoptionReceiptGeneratedLive
+      ? "Starter generated now"
+      : "Included starter inspected";
+  } catch (error) {
+    elements["generate-release-starter"].disabled = false;
+    elements["generate-release-starter"].textContent = "Retry starter generation";
+    setText("promotion-result", `Starter generation failed: ${error.message}`);
+  }
 }
 
 
 async function generateAdoptionKit() {
   elements["generate-adoption-kit"].disabled = true;
-  elements["generate-adoption-kit"].textContent = "Generating and validating starter…";
-  setText("adoption-status", "Creating the files with ArmProof now.");
+  elements["generate-adoption-kit"].textContent = auditAvailable
+    ? "Generating and validating starter…"
+    : "Inspecting included starter…";
+  setText(
+    "adoption-status",
+    auditAvailable ? "Creating the files with ArmProof now." : "Loading the checked-in example starter.",
+  );
   try {
-    const response = auditAvailable
-      ? await fetch("/api/adoption", { method: "POST" })
-      : await fetch("./adoption.json", { cache: "no-store" });
-    const receipt = await response.json();
-    if (!response.ok) throw new Error(receipt.error || `HTTP ${response.status}`);
-    setText("adoption-files", `${receipt.generated_files.length} files · ${receipt.generated_files.join(", ")}`);
+    const receipt = await loadAdoptionReceipt();
+    setText(
+      "adoption-files",
+      `${receipt.generated_files.length} files ${adoptionReceiptGeneratedLive ? "created locally" : "included in the repository"}`,
+    );
+    setText(
+      "adoption-files-label",
+      adoptionReceiptGeneratedLive ? "Files generated now" : "Included files",
+    );
     setText(
       "adoption-gate",
       `${receipt.validation_status} · ${receipt.validation_detail}`,
     );
     setText("adoption-contract", `${receipt.contract_sha256.slice(0, 16)}…`);
     setText("adoption-workflow", receipt.workflow.trim());
-    const download = elements["adoption-download"];
-    if (receipt.archive_base64) {
-      const bytes = Uint8Array.from(
-        atob(receipt.archive_base64),
-        (character) => character.charCodeAt(0),
-      );
-      download.href = URL.createObjectURL(new Blob([bytes], { type: "application/zip" }));
-    } else {
-      download.href = receipt.archive_href;
-    }
-    download.download = receipt.archive_name;
-    download.hidden = false;
+    configureAdoptionDownload(receipt);
     elements["adoption-result"].hidden = false;
     setText(
       "adoption-status",
-      "Starter structure validated. It remains blocked until the new service collects and seals its own measured evidence.",
+      adoptionReceiptGeneratedLive
+        ? "The starter was generated now. Its first CI run blocked because measured evidence has not been collected yet."
+        : "This checked-in starter records the same blocked initial state. Run the local demo to generate and execute it live.",
     );
-    elements["generate-adoption-kit"].textContent = "Collection starter generated";
+    elements["generate-adoption-kit"].textContent = adoptionReceiptGeneratedLive
+      ? "Collection starter generated"
+      : "Included starter inspected";
     elements["adoption-result"].setAttribute("tabindex", "-1");
     elements["adoption-result"].focus();
   } catch (error) {
     elements["generate-adoption-kit"].disabled = false;
     elements["generate-adoption-kit"].textContent = "Retry starter generation";
     setText("adoption-status", `Starter generation unavailable: ${error.message}. The repository includes the same executable example under examples/http-slo/.`);
+  }
+}
+
+
+async function generateInlineStarter() {
+  elements["generate-inline-starter"].disabled = true;
+  elements["generate-inline-starter"].textContent = "Generating and running first CI check…";
+  try {
+    const receipt = await loadAdoptionReceipt();
+    setText("inline-adoption-files", `${receipt.generated_files.length} files`);
+    setText("inline-adoption-gate", receipt.validation_status);
+    setText("inline-adoption-reason", receipt.initial_ci_reason);
+    elements["inline-adoption-receipt"].hidden = false;
+    elements["generate-inline-starter"].textContent = adoptionReceiptGeneratedLive
+      ? "Starter generated during this session"
+      : "Included starter inspected";
+    elements["inline-adoption-receipt"].scrollIntoView({ block: "nearest" });
+  } catch (error) {
+    elements["generate-inline-starter"].disabled = false;
+    elements["generate-inline-starter"].textContent = "Retry starter generation";
+    setText("review-complete-detail", `Starter generation failed: ${error.message}`);
   }
 }
 
@@ -1135,6 +1329,7 @@ function renderRedesignEvidence() {
   const mixed = data.capacity.mixes.mixed;
   const proof = data.proof;
   const evidence = data.provenance.evidence;
+  setText("opening-capacity", `≥${mixed.minimum_capacity_ratio.toFixed(1)}×`);
   setText("guard-accuracy", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
   setText(
     "guard-evaluation-size",
@@ -1210,7 +1405,8 @@ function bindInteractions() {
   elements["open-required-audit"].addEventListener("click", () => {
     activateView("surge", { focusHeading: true });
   });
-  elements["open-adoption-kit"].addEventListener("click", openAdoptionKit);
+  elements["generate-inline-starter"].addEventListener("click", generateInlineStarter);
+  elements["generate-release-starter"].addEventListener("click", generateReleaseStarter);
   elements["generate-adoption-kit"].addEventListener("click", generateAdoptionKit);
   document.querySelectorAll('input[name="inference-mode"]').forEach((radio) => {
     radio.addEventListener("change", () => setInferenceMode(radio.value));

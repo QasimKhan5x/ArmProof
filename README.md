@@ -27,9 +27,11 @@ is below 0.28. The optimized service passes at 0.56, so its sustainable rate is
 at least 0.56. That establishes the conservative lower bound
 `0.56 / 0.28 = at least 2.0x`.
 
-Both sides use the same Phi-4 Mini INT4 files, ONNX Runtime build, 16 threads,
-workload, server and response-time rule. The only change is whether KleidiAI is
-enabled. Git commit `ab22cc0` contains the exact final plan, and its commit time
+The two service configurations use the same Phi-4 Mini INT4 files, ONNX Runtime
+build, 16 threads, workload, server and response-time rule; their only changed
+runtime setting enables KleidiAI. The final capacity test intentionally offers
+each service its frozen boundary rate, 0.28 and 0.56 requests per second, to
+establish the conservative lower bound. Git commit `ab22cc0` contains the exact final plan, and its commit time
 precedes the instance-launch time recorded in the experiment metadata. That is
 a reproducible chronology check, not independent AWS attestation.
 
@@ -67,19 +69,19 @@ editing the display summary cannot change the published report.
 real support message
         |
         v
-Phi-4 intent -> SurgeDesk procedure + queue guard -> human chooses final queue
+serving control + sequential optimized shadow -> fresh side-by-side observation
         |
         v
-control lane recorded in the ticket audit trail
+Phi-4 intent -> SurgeDesk procedure + queue guard -> human chooses final queue
         |
         v
 verify preregistered capacity + raw quality + native Performix evidence
         |
         v
-match live source model, runtime, Arm64 shape, threads and treatment controls
+verify wheel ledger + AWS instance + model + Arm placement + treatment control
         |
         v
-activate KleidiAI treatment -> next real request records optimized lane + audit ID
+switch live traffic -> different request records optimized lane + audit ID
 ```
 
 The five-queue routing guard was built on 2,310 BANKING77 examples and evaluated
@@ -128,9 +130,10 @@ The three views have stable URLs:
 
 - `#triage`: support workflow and human routing decision
 - `#surge`: preregistered capacity audit and raw outcomes
-- `#proof`: activation control, optimization summary and Arm Performix evidence
+- `#proof`: live traffic control, optimization summary and Arm Performix evidence
 
-The full recording uses real Graviton inference before and after activation.
+The full recording uses a real serving-plus-shadow comparison before the route
+cutover and a different real Graviton request after it.
 The exact commands and expected outputs are in
 [`submission/DEMO_SCRIPT.md`](submission/DEMO_SCRIPT.md).
 
@@ -171,7 +174,7 @@ endpoint compatibility; it does not claim a llama.cpp performance result.
 Use ArmProof in GitHub Actions:
 
 ```yaml
-- uses: QasimKhan5x/ArmProof@v0.8.2
+- uses: QasimKhan5x/ArmProof@v0.9.0
   with:
     config: armproof.json
     contract-sha256: REPLACE_WITH_THE_PROTECTED_CONTRACT_DIGEST
@@ -207,9 +210,10 @@ npm run test:ui
 ```
 
 Tests cover policy evaluation, archive derivation, raw-output quality checks,
-native Performix parsing, gateway identity binding, a real localhost control to
-treatment HTTP flow, the SurgeDesk workflow, the offline report and responsive
-layouts down to 320 pixels.
+native Performix parsing, runtime-artifact and IMDSv2 deployment checks,
+per-request drift rejection, a real localhost control-to-treatment HTTP flow,
+the SurgeDesk workflow, the offline report and responsive layouts down to 320
+pixels.
 
 ## Repository Map
 
@@ -228,9 +232,11 @@ layouts down to 320 pixels.
 ArmProof verifies a declared contract for a pinned model, workload, runtime and
 machine. Repository SHA-256 ledgers detect changes after collection; they are
 integrity controls rather than independent attestation of the original AWS
-host. The live gateway rechecks content-derived source-model and runtime
-identities, while AWS hardware provenance comes from the recorded environment
-and profiler exports.
+host. The live service verifies the pinned wheel ledger, reads its instance type
+from AWS IMDSv2, and reports actual CPU affinity. The gateway checks those values
+and content-derived model identities before promotion and on every optimized
+response. This is deployment validation rather than hardware-backed remote
+attestation.
 
 SurgeDesk and ArmProof were created and meaningfully developed from July 29
 through August 5, 2026, during the challenge period. The Git history contains
