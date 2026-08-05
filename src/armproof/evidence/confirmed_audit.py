@@ -1,4 +1,4 @@
-"""Derive the preregistered EXP-2026-012 release claim from raw evidence."""
+"""Derive a preregistered identity-bound capacity claim from raw evidence."""
 
 from __future__ import annotations
 
@@ -57,6 +57,125 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def validate_confirmed_contract_claims(
+    contract: Contract,
+    *,
+    experiment_id: str,
+    acceptance: Mapping[str, Any],
+    protocol: Mapping[str, Any],
+    performix_acceptance: Mapping[str, Any],
+    raw_quality_output_count: int,
+) -> None:
+    """Bind every release claim to the frozen experiment and profiler plans."""
+    plan_pairs = {
+        "control_rate_rps": "baseline_failing_rps",
+        "treatment_rate_rps": "treatment_passing_rps",
+        "confirmations_per_treatment": "confirmations",
+        "confirmation_seconds": "confirmation_seconds",
+        "maximum_p95_ms": "p95_slo_ms",
+        "maximum_error_rate": "max_error_rate",
+        "minimum_delivery_ratio": "minimum_delivery_ratio",
+        "minimum_requests_per_confirmation": "minimum_confirmation_requests",
+        "minimum_capacity_ratio": "minimum_capacity_ratio",
+        "maximum_quality_loss_pp": "maximum_quality_loss_pp",
+        "minimum_schema_valid_rate": "minimum_schema_valid_rate",
+    }
+    for acceptance_field, protocol_field in plan_pairs.items():
+        if acceptance_field not in acceptance or protocol_field not in protocol:
+            raise ValueError("confirmation plans omit a required release threshold")
+        if not math.isclose(
+            float(acceptance[acceptance_field]),
+            float(protocol[protocol_field]),
+            rel_tol=0,
+            abs_tol=1e-12,
+        ):
+            raise ValueError(
+                f"confirmation protocol {protocol_field} differs from preregistration"
+            )
+    comparison_id = f"{experiment_id.lower()}-confirmed"
+    confirmations = int(protocol["confirmations"])
+    seconds = float(protocol["confirmation_seconds"])
+    expected_request_count = confirmations * (
+        round(float(protocol["baseline_failing_rps"]) * seconds)
+        + round(float(protocol["treatment_passing_rps"]) * seconds)
+    )
+    common_quality = frozenset({
+        "quality_rows", "raw_model_outputs", "artifact_hashes",
+        "performix_code_hotspots",
+    })
+    expected = {
+        "quality-accuracy": (
+            "accuracy_delta_pp", "gte", -float(acceptance["maximum_quality_loss_pp"]),
+            common_quality, (),
+        ),
+        "quality-macro-f1": (
+            "macro_f1_delta_pp", "gte", -float(acceptance["maximum_quality_loss_pp"]),
+            common_quality, (),
+        ),
+        "quality-schema": (
+            "schema_valid_rate", "gte", float(acceptance["minimum_schema_valid_rate"]),
+            common_quality, (),
+        ),
+        "sustained-capacity-lower-bound": (
+            "minimum_capacity_ratio", "gte", float(protocol["minimum_capacity_ratio"]),
+            frozenset({
+                "request_samples", "boundary_confirmations", "artifact_hashes",
+                "performix_code_hotspots",
+            }),
+            ("quality-accuracy", "quality-macro-f1", "quality-schema"),
+        ),
+        "sustained-window-count": (
+            "raw_confirmation_files", "gte", float(confirmations * 2),
+            frozenset({"request_samples", "boundary_confirmations", "artifact_hashes"}), (),
+        ),
+        "sustained-request-count": (
+            "raw_confirmation_samples", "gte", float(expected_request_count),
+            frozenset({"request_samples", "boundary_confirmations", "artifact_hashes"}), (),
+        ),
+        "raw-quality-output-count": (
+            "raw_quality_outputs", "eq", float(raw_quality_output_count),
+            frozenset({"quality_rows", "raw_model_outputs", "artifact_hashes"}), (),
+        ),
+        "arm-control-zero": (
+            "performix_disabled_kai_share", "eq", 0.0,
+            frozenset({"performix_code_hotspots", "artifact_hashes"}), (),
+        ),
+        "arm-treatment-share": (
+            "performix_enabled_kai_share", "gte",
+            float(performix_acceptance["minimum_enabled_kai_sample_share"]),
+            frozenset({"performix_code_hotspots", "artifact_hashes"}),
+            ("arm-control-zero",),
+        ),
+        "performix-sample-count": (
+            "performix_minimum_profile_samples", "gte",
+            float(performix_acceptance["minimum_total_function_samples_per_treatment"]),
+            frozenset({"performix_code_hotspots", "artifact_hashes"}),
+            ("arm-control-zero",),
+        ),
+    }
+    if contract.contract_id != "phi4-graviton-kleidiai-confirmed-release":
+        raise ValueError("confirmation contract id differs from the frozen release")
+    actual = {claim.claim_id: claim for claim in contract.claims}
+    if set(actual) != set(expected):
+        raise ValueError("confirmation contract claim set differs from the frozen plans")
+    for claim_id, (metric, operator, threshold, evidence, dependencies) in expected.items():
+        claim = actual[claim_id]
+        matches = (
+            claim.causal_scope is CausalScope.ARM_ACCELERATION
+            and claim.comparison_id == comparison_id
+            and claim.metric == metric
+            and claim.operator == operator
+            and math.isclose(claim.threshold, threshold, rel_tol=0, abs_tol=1e-12)
+            and claim.required_evidence == evidence
+            and claim.required is True
+            and claim.depends_on == dependencies
+        )
+        if not matches:
+            raise ValueError(
+                f"confirmation contract claim {claim_id} differs from the frozen plans"
+            )
 
 
 def _text(archive: tarfile.TarFile, name: str) -> str:
@@ -131,7 +250,19 @@ def _verify_matched_control(archive: tarfile.TarFile) -> tuple[bool, int]:
         }
     if set(members["disabled"]) != set(members["enabled"]):
         return False, threads
-    for relative in set(members["disabled"]) - {"genai_config.json"}:
+    source_identity_name = "armproof_source_identity.json"
+    if source_identity_name in members["disabled"]:
+        if _json(
+            archive,
+            f"evidence/capacity/variants/disabled/{source_identity_name}",
+        ) != _json(
+            archive,
+            f"evidence/capacity/variants/enabled/{source_identity_name}",
+        ):
+            return False, threads
+    for relative in set(members["disabled"]) - {
+        "genai_config.json", source_identity_name,
+    }:
         disabled = members["disabled"][relative]
         enabled = members["enabled"][relative]
         if not (
@@ -167,13 +298,19 @@ def _parse_samples(
         if row["request_id"] != expected_id or expected_id in seen:
             raise ValueError("confirmation request sequence is invalid")
         response = row["response"]
-        if (
-            row["status_code"] != 200
-            or row["error"] is not None
-            or not isinstance(response, dict)
-            or response.get("backend") != treatment_id
-            or response.get("request_id") != source_id
-        ):
+        succeeded = (
+            row["status_code"] == 200
+            and row["error"] is None
+            and isinstance(response, dict)
+            and response.get("backend") == treatment_id
+            and response.get("request_id") == source_id
+        )
+        timed_out = (
+            row["status_code"] is None
+            and row["error"] == "TimeoutError"
+            and response is None
+        )
+        if not (succeeded or timed_out):
             raise ValueError("confirmation response is not attributed to its treatment")
         scheduled = int(row["scheduled_ns"])
         started = int(row["started_ns"])
@@ -184,7 +321,15 @@ def _parse_samples(
         if not math.isclose(float(row["latency_ms"]), latency_ms, abs_tol=1e-9):
             raise ValueError("confirmation latency does not match timestamps")
         seen.add(expected_id)
-        rows.append(RequestSample(expected_id, scheduled, started, finished, 200, None, response))
+        rows.append(RequestSample(
+            expected_id,
+            scheduled,
+            started,
+            finished,
+            row["status_code"],
+            row["error"],
+            response,
+        ))
     if not rows:
         raise ValueError("confirmation request file is empty")
     schedules = [row.scheduled_ns for row in rows]
@@ -233,6 +378,8 @@ def _verify_response_identities(
     expected_control = "1" if treatment_id == "kleidiai-disabled" else "0"
     for sample in samples:
         response = sample.response
+        if response is None and sample.status_code is None and sample.error == "TimeoutError":
+            continue
         identity = response.get("runtime_identity") if isinstance(response, Mapping) else None
         if not isinstance(identity, Mapping):
             raise ValueError("confirmation response is missing its runtime identity")
@@ -255,6 +402,8 @@ def _verify_response_identities(
             raise ValueError("confirmation response runtime identity is inconsistent")
         model_identities.add(model_identity)
         runtime_versions.add(runtime_version)
+    if not model_identities:
+        raise ValueError("confirmation lane has no identity-bearing responses")
     return model_identities, runtime_versions
 
 
@@ -301,10 +450,14 @@ def derive_minimum_capacity_audit(
         raise ValueError("confirmation archive digest does not match its release lock")
     if set(raw_quality_results) != {"kleidiai-disabled", "kleidiai-enabled"}:
         raise ValueError("raw quality verification must contain both treatments")
+    preregistered = json.loads(preregistration.read_text(encoding="utf-8"))
+    expected_experiment_id = preregistered.get("experiment_id")
+    if not isinstance(expected_experiment_id, str) or not expected_experiment_id:
+        raise ValueError("confirmation preregistration has no experiment identity")
     analysis = json.loads(analysis_lock.read_text(encoding="utf-8"))
     if analysis != {
         "schema_version": "1.0.0",
-        "experiment_id": "EXP-2026-012",
+        "experiment_id": expected_experiment_id,
         "latency_origin": "scheduled_ns",
         "latency_end": "finished_ns",
         "completion_deadline": "scheduled_window_plus_p95_slo",
@@ -337,7 +490,7 @@ def derive_minimum_capacity_audit(
         checked = _verify_internal_checksums(archive)
         experiment = _json(archive, "evidence/experiment.json")
         protocol = _json(archive, "evidence/protocol.json")
-        if experiment != json.loads(preregistration.read_text(encoding="utf-8")):
+        if experiment != preregistered:
             raise ValueError("confirmation experiment differs from its committed preregistration")
         if protocol != json.loads(protocol_lock.read_text(encoding="utf-8")):
             raise ValueError("confirmation protocol differs from its committed lock")
@@ -355,6 +508,12 @@ def derive_minimum_capacity_audit(
         enabled_perf = parse_perf_attribution(
             _text(archive, "evidence/perf-enabled.txt"), r"^kai_run_matmul"
         )
+        if on_stage is not None:
+            on_stage("archive", {
+                "checksummed_files": checked,
+                "matched_control": matched_control,
+                "experiment_id": expected_experiment_id,
+            })
 
         quality_results = {
             lane: quality_from_dict(_json(
@@ -484,7 +643,7 @@ def derive_minimum_capacity_audit(
         })
     experiment_id = str(experiment.get("experiment_id"))
     if (
-        experiment_id != "EXP-2026-012"
+        experiment_id != expected_experiment_id
         or protocol.get("experiment_id") != experiment_id
         or summary.get("experiment_id") != experiment_id
     ):
@@ -561,7 +720,7 @@ def derive_minimum_capacity_audit(
         base_controls=base_controls,
         enabled=True,
     )
-    comparison_id = "exp-2026-012-confirmed"
+    comparison_id = f"{experiment_id.lower()}-confirmed"
     metrics = {
         "accuracy_delta_pp": quality.accuracy_delta_pp,
         "macro_f1_delta_pp": quality.macro_f1_delta_pp,

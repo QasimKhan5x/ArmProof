@@ -20,11 +20,11 @@ implementation. It is a routing summary, not a substitute for raw evidence.
 | Peak PSS | INT4 versus BF16 | 55.34% lower |
 | Time-weighted PSS | INT4 versus BF16 | 59.66% lower |
 | KleidiAI end-to-end speed | enabled versus disabled, same INT4 runtime | 1.72x to 2.59x |
-| Quality | INT4 versus BF16 | 20/24 versus 19/24 |
+| 24-case migration spot-check | INT4 versus BF16 | 20/24 versus 19/24 |
 | Parseability | both | 24/24 |
 | Arm attribution | enabled/disabled perf callchains | `kai_*` only when enabled |
-| Independent Arm Performix attribution | matched Code Hotspots, enabled versus disabled | 67.02% versus 0% measured `kai_*` function-sample share; 1.51 pp from Linux perf |
-| Sustained fixed-SLO capacity | KleidiAI enabled versus disabled, mixed traffic | at least 2.0x; 2.33x tested pass-point ratio |
+| Independent Arm Performix attribution | matched Code Hotspots, enabled versus disabled | 67.35% versus 0% measured `kai_*` function-sample share; Linux perf separately measures cycle attribution |
+| Sustained fixed-SLO capacity | KleidiAI enabled versus disabled, mixed traffic | at least 2.0x |
 | Large-set quality | enabled versus disabled on 770 BANKING77 cases | -0.390 pp accuracy, -0.673 pp macro F1 |
 | Schema validity | both normalized treatments | 100% |
 | Clean reproduction | fresh `c8g.4xlarge` versus accepted result | 0% ratio difference in all mixes |
@@ -53,6 +53,12 @@ numbers for public sustained-capacity claims. Its exact 2.5x bracket gate was
 rejected, while five-of-five passes at 0.24 and 0.56 r/s plus five-of-five
 baseline failures at 0.28 r/s establish the conservative at-least-2.0x result.
 
+EXP-2026-012 repeated the final two-rate design and matched its capacity
+outcomes, but the successful responses omitted the source-artifact hash required
+by the hardened release analyzer. ArmProof rejected that archive. EXP-2026-014
+repeats the same rates and controls with complete response-level identities; it
+does not select a new boundary.
+
 ## Current Evidence Location
 
 The imported size, memory and direct-speed evidence is under
@@ -61,10 +67,10 @@ The imported size, memory and direct-speed evidence is under
 `armproof evidence-verify` checks all of them after relocation. The independent
 reproduction is under `ops/evidence/EXP-2026-005/accepted/` with its comparison
 at `ops/evidence/EXP-2026-005/reproduction-comparison.json`.
-The decisive sustained archive, failed original gate and conservative derived
-claim are under `ops/evidence/EXP-2026-009/`.
-The immutable native Arm Performix exports and 35-entry guest ledger are under
-`ops/evidence/EXP-2026-010/`. The reference `armproof ci` command verifies and
+The release capacity archive and its rejected identity-incomplete predecessor
+are under `ops/evidence/EXP-2026-014/` and `ops/evidence/EXP-2026-012/`.
+The immutable native Arm Performix exports and 40-entry guest ledger are under
+`ops/evidence/EXP-2026-013/`. The reference `armproof ci` command verifies and
 re-derives them; it does not trust the checked-in normalized JSON.
 
 ## Not Yet Established

@@ -3,17 +3,16 @@
 ## Technological Implementation: 40
 
 Show matched controls, fail-closed evidence, immutable identities, real
-Graviton4 execution, PSS methodology, concurrent service testing and
+Graviton4 execution, PSS methodology, sustained open-loop service testing and
 positive/negative `kai_*` attribution.
 
 Target evidence:
 
 - 35.92% smaller INT4 artifacts;
 - 55.34% lower peak PSS and 59.66% lower time-weighted PSS;
-- 1.72x to 2.59x direct KleidiAI speedup;
+- exploratory 1.72x to 2.59x direct KleidiAI speedup from raw repetitions;
 - fixed-SLO capacity result;
-- missing/swapped evidence rejection; and
-- a separately labeled fresh-instance reproduction of the earlier short-window grid.
+- missing/swapped evidence rejection;
 - 86.75% held-out operational routing accuracy from a dependency-free guard.
 
 Do not attribute the whole BF16-to-INT4 transformation to KleidiAI.
@@ -21,8 +20,8 @@ Do not attribute the whole BF16-to-INT4 transformation to KleidiAI.
 ## UX And Developer Experience: 15
 
 SurgeDesk first makes the value tangible: a support operator can confirm a live
-route, watch matched requests complete on two core groups and inspect why
-the optimized deployment holds its SLO. The recurring developer workflow is a
+route, verify the measured treatment, activate it, and see the next request
+record the optimized lane and authorizing audit. The recurring developer workflow is a
 PR merge decision. A developer supplies one contract file and receives a
 GitHub Check, explanation, report and deployable configuration.
 
@@ -51,15 +50,18 @@ claims enforceable in a workflow maintainers already use.
 
 ## WOW: 25
 
-The 90-second reveal is operational and causal:
+The three-minute story is operational and causal:
 
 1. A stolen-card request reaches a human-confirmed support queue.
-2. The two-stage route scores 86.75% held-out queue accuracy.
-3. Six live tiles expose the matched backend, core group and request latency.
-4. ArmProof re-derives 4,200 outcomes, exposes all twenty long windows, and
-   proves an at-least-2.0x sustained lower bound from stable boundaries.
-5. ArmProof reveals 68.53% enabled `kai_*` cycle attribution and releases the exact
-   measured deployment through a reusable GitHub Action.
+2. The first request records the KleidiAI-disabled control lane.
+3. ArmProof re-derives 2,100 capacity requests and 1,540 model outputs from the
+   preregistered confirmation, then exposes all ten long windows.
+4. Native Performix evidence shows no `kai_*` function samples in the control
+   and substantial KleidiAI execution in the treatment.
+5. Activation rechecks the live runtime identity, and the second real request
+   records the optimized lane and audit ID.
+6. The closing adoption view generates and validates a downloadable contract,
+   workload templates, evidence checklist and GitHub Action.
 
 The audience should understand the application within 10 seconds and the Arm
 optimization within 45 seconds. The report supports this reveal; it is not the

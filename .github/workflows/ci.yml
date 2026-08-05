@@ -37,7 +37,7 @@ jobs:
       - run: >-
           PYTHONPATH=src python3.12 -m armproof.cli ci
           examples/armproof-reference/armproof.json --output report
-          --contract-sha256 3dea0ec2062275181902907d011d27d2b83b11b3ea2e9f8ed5cbce38ede9ff0c
+          --contract-sha256 5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369
       - run: python3.12 scripts/build_surgedesk_demo.py --verify
       - run: npm run test:logic
       - run: npm run test:ui

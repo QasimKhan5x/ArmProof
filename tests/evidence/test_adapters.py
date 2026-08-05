@@ -71,6 +71,7 @@ class EvidenceAdapterTests(unittest.TestCase):
                 "bios_vendor_id": "AWS",
                 "bios_model_name": "AWS Graviton4",
                 "model_name": "Neoverse-V2",
+                "cpu_count": 16,
             }
         })
 
@@ -366,6 +367,7 @@ class EvidenceAdapterTests(unittest.TestCase):
                     "external-v1",
                     "http-slo-v1",
                     "kleidiai-capacity-v1",
+                    "kleidiai-confirmed-v2",
                     "kleidiai-sustained-v1",
                 ),
             )

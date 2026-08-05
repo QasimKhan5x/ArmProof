@@ -2,12 +2,15 @@
 
 ## Mission
 
-Build ArmProof: a fail-closed CI release gate that verifies whether an Arm AI
+Build ArmProof, a fail-closed CI release gate that verifies whether an Arm AI
 optimization preserves a declared quality contract, improves cloud-serving
 performance, executes the required Arm acceleration path, and is reproducible.
+SurgeDesk is the real banking-support reference application that demonstrates
+the gate changing a live deployment from the control to the measured treatment.
 
-The product is not a generic benchmark dashboard, optimizer, formal
-attestation system, or customer-support application.
+ArmProof is not a generic benchmark dashboard, optimizer or formal attestation
+system. SurgeDesk must remain a usable product workflow rather than a decorative
+wrapper around the evidence report.
 
 ## Session Startup
 
@@ -52,9 +55,10 @@ of truth. Never silently choose convenient evidence.
 Supported reference path: Phi-4 Mini, PyTorch BF16, ONNX Runtime GenAI INT4,
 KleidiAI, Linux Arm64 and AWS Graviton4.
 
-Do not add vLLM, llama.cpp, automatic parameter search, multi-cloud
-orchestration, hosted SaaS, formal cryptography, training, fine-tuning or
-arbitrary model conversion without an approved spec amendment.
+Do not add vLLM, automatic parameter search, multi-cloud orchestration, hosted
+SaaS, formal cryptography, training, fine-tuning or arbitrary model conversion
+without an approved spec amendment. ADR-010 permits the existing
+compatibility-only llama.cpp HTTP example; it carries no performance claim.
 
 ## Implementation Discipline
 
@@ -78,7 +82,8 @@ arbitrary model conversion without an approved spec amendment.
 
 ```bash
 make check
-PYTHONPATH=src python3.12 -m armproof.cli verify \
-  --contract examples/fixture-pass/contract.json \
-  --comparison examples/fixture-pass/comparison.json
+PYTHONPATH=src python3.12 -m armproof.cli ci \
+  examples/armproof-reference/armproof.json
+npm run test:logic
+npm run test:ui
 ```

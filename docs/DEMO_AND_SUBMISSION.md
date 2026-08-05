@@ -17,10 +17,11 @@ The canonical submission package is [`../submission/README.md`](../submission/RE
 - Upload-ready images: [`../submission/assets/`](../submission/assets/)
 - Final owner checklist: [`../submission/SUBMISSION_CHECKLIST.md`](../submission/SUBMISSION_CHECKLIST.md)
 
-The recording script visibly loads the accepted surge experiment during
-capture. The app explicitly says it verifies both 141-file ledgers and derives
-the view from accepted request and quality evidence rather than running the
-Graviton benchmark live.
+The recording starts with a message typed into the live support application.
+After that request is routed through the control service, the app recomputes
+the accepted release decision from the published capacity, quality, and native
+Arm Performix evidence. That decision unlocks the measured KleidiAI treatment,
+and a second typed message is routed through the newly activated service.
 
 ## Submission Claim Rules
 
@@ -36,7 +37,9 @@ Graviton benchmark live.
 ## Offline Backup
 
 The repository ships `surgedesk/`, the generated data payload, screenshots,
-the ArmProof report, derived summaries, verification receipt and checksummed
-evidence. The terminal segment runs `scripts/demo_release_gate.py` so judges
-see both a valid release and a deliberate temporary checksum block. Judging
-does not depend on AWS uptime or a live GitHub workflow.
+the ArmProof report, derived summaries, verification receipt, and the evidence
+used to produce the release decision. If the recording host is unavailable,
+the public explorer opens that checked-in receipt and preserves the same order:
+support request, measured release decision, Arm execution evidence, deployment
+identity, and developer adoption path. The backup does not simulate inference,
+capacity traffic, or a release failure.

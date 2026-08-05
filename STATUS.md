@@ -1,100 +1,74 @@
 # Current Status
 
-Last updated: 2026-08-04
+Last updated: 2026-08-05
+
 ## Product
-SurgeDesk is the judge-facing banking-support application. It routes recorded
-BANKING77 requests through human confirmation, can send a matched six-request
-identity check to two verified Arm endpoints, and streams a fresh derivation
-of the canonical sustained experiment. ArmProof remains the reusable
-fail-closed CI gate and evidence engine.
-## Accepted Result
 
-The decisive sustained audit ran on AWS Graviton4 `c8g.4xlarge`:
+SurgeDesk is the judge-facing banking-support application. A real customer
+message is classified by Phi-4 Mini on a CPU-only Graviton4 service, a person
+chooses the final support queue, and the resulting ticket records the serving
+lane. The application begins on the KleidiAI-disabled lane. It can activate the
+optimized lane only after ArmProof re-derives the measured release and confirms
+that both running services match the audited model, runtime, Arm shape, thread
+count, affinity, and treatment control.
 
-- Public fixed-SLO claim: at least 2.0x higher sustainable mixed traffic.
-- Stable passing points: disabled 0.24 r/s and enabled 0.56 r/s, each passing
-  all five 500-second confirmations.
-- Baseline 0.28 r/s failed all five windows, establishing the 2.0x lower bound.
-- The original exact 2.5x bracket was rejected because enabled 0.60 r/s passed
-  one of five windows. This rejected gate remains public.
-- Quality delta: -0.390 percentage points accuracy and -0.673 points macro F1,
-  both inside the preregistered one-point tolerance.
-- Schema validity: 100% across the 770-item BANKING77 evaluation.
-- Operational queue guard: 86.75% held-out five-destination accuracy (668/770), up
-  12.34 percentage points from direct LLM intent-to-queue mapping.
-- Arm attribution: 68.53% of sampled cycles reached the enabled KleidiAI I8MM
-  callchain, versus 0% disabled, with zero lost samples.
-- Arm Performix 1.20 independently measured 67.02% `kai_*` function samples
-  enabled versus 0% disabled. The 1.51 pp difference from Linux perf is inside
-  the frozen 5 pp agreement limit.
-- Whole deployment: 35.92% less disk, 55.34% lower peak PSS and 59.66% lower
-  time-weighted PSS than the BF16 reference.
-- Earlier short-window evidence reproduced on a fresh instance but is retained
-  as supporting history, not the public sustained-capacity headline.
+ArmProof is the reusable component: a Python CLI, evidence-adapter interface,
+offline report, GitHub Action, fixed-rate HTTP harness, native Performix parser,
+and `armproof init` starter generator for other bounded Arm AI services.
 
-The public sustained result is derived from `EXP-2026-009`. That experiment is
-marked rejected under its original exact-bracket gate; only its independently
-supported conservative lower bound is released. All failed and inconclusive
-attempts remain preserved and visible.
+## Accepted Release
 
-## Product State
+The final capacity release is `EXP-2026-014`, run on one AWS Graviton4
+`c8g.4xlarge` with 16 threads and a ten-second p95 SLO.
 
-Completed: guarded AWS lifecycle, reference service, fixed-SLO harness, policy
-engine, pass/fail/unknown fixtures, single-config CLI, reusable GitHub Action,
-responsive offline report, integrity verifier and pinned deployment artifact.
+- KleidiAI-disabled control at 0.28 requests/s: all five 500-second windows failed.
+- KleidiAI-enabled treatment at 0.56 requests/s: all five windows passed.
+- Released lower bound: `0.56 / 0.28 = at least 2.0x` sustainable traffic.
+- Evidence volume: 2,100 raw scheduled-request records and 1,540 raw model outputs.
+- Quality: -0.390 percentage points accuracy, -0.673 points macro F1, and 100% schema validity.
+- Native Arm Performix: 0% `kai_*` function samples in the control and 67.35% in the treatment, including the Neoverse I8MM matrix kernel.
+- Linux perf, kept as a separate unit, measured 67.91% KleidiAI cycle attribution in the treatment and 0% in the control.
+- Separate BF16-to-INT4 migration: 35.92% smaller files, 55.34% lower peak PSS, and 59.66% lower time-weighted PSS.
+- SurgeDesk queue guard: 86.75% held-out five-queue accuracy versus 74.42% for direct LLM intent mapping; this is a product-quality result, not an Arm speed claim.
 
-The reference release path verifies 69 checksummed sustained-evidence files
-and 35 native Arm Performix files. It re-derives 4,200 request outcomes,
-quality, and matched Code Hotspots attribution; binds model, runtime, workload,
-environment, and treatment identities to the contract; and then evaluates
-nine required claims. Caller-authored normalized comparisons are rejected by
-`armproof ci`. The report emits a verification receipt, and the safe tamper
-challenge proves one changed ledger digest blocks before policy evaluation.
+All ten required claims pass. The Git object `ab22cc0` contains the exact plan
+bytes and its time predates the recorded instance-launch and measurement times.
+The same bytes are present in the prelaunch project bundle and final measurement
+archive. The launch timestamp is recorded experiment metadata rather than
+independent cloud attestation. The rejected
+identity-incomplete `EXP-2026-012` and earlier discovery runs remain visible but
+cannot approve this release.
 
-SurgeDesk includes a held-out queue guard, human confirmation, optional live
-matched endpoints, a streamed sustained audit, the visible lower-bound
-equation, causal profiler evidence, and a reusable starter-kit preview.
-Recorded mode rejects edited text rather than presenting it as inference. The
-gateway compares content-derived model identity, runtime, Arm architecture,
-treatment control and CPU affinity before enabling the matched run, then
-rechecks both health records and the response fingerprint on every request.
-Identical endpoints and overlapping or unequal core groups are rejected.
+## Verification State
 
-`armproof init` scaffolds a runtime-neutral HTTP classification evidence
-project and fails closed until real load rows, quality rows, identity sources, positive/negative
-Arm profiles, and their checksum ledger are supplied. The `http-slo-v1`
-adapter derives identities from source files, parses profiler samples, and
-requires quality to pass before capacity. A llama.cpp/Qwen2.5 0.5B Q4_0 bridge
-completed a local Arm64 compatibility smoke without a performance claim.
+- `armproof ci examples/armproof-reference/armproof.json` passes and generates the public report from raw evidence.
+- 188 Python tests pass; one optional localhost-connectivity test is skipped by design.
+- 5 JavaScript behavior tests pass.
+- 8 Playwright workflows pass across desktop, tablet, and 320-pixel mobile.
+- The real localhost end-to-end test routes control traffic, recalculates the audit, binds deployment identity, activates the optimized lane, and routes the next request through it.
+- Static UI source contains no measured result literals, fake timers, tampering scene, or rejected 2.5x claim.
+- The generated adoption ZIP contains 13 files, an explicit evidence layout and a GitHub Action bound to its parsed contract digest; `armproof seal` creates the portable evidence ledger after collection.
+- AWS cumulative evidence cost is estimated at `$13.4872`; the final inventory is empty.
 
-The c8g.4xlarge virtual PMU exposed two counters. Performix CPU
-Microarchitecture and Instruction Mix each require at least three, so those
-readiness failures remain public and unavailable rather than passing.
+## Demo Boundary
 
-Version `v0.7.0` is the redesigned sustained-audit release.
-Native Arm64, x86 and report-browser CI cover the Action, decision and offline
-report. Submission copy and the under-three-minute script are under
-`submission/`. Remaining owner work is recording/uploading the video and
-pasting the prepared entry into Devpost. Capacity collection and profiler runs
-remain separate; the project makes no measurement-overhead claim.
+The recording uses two live Graviton inference requests: one before and one
+after identity-bound activation. The ten long capacity windows and matched
+Performix profiles were collected earlier because they require more than three
+minutes; the video visibly reruns their verification from the checked-in raw
+archives. The demo never presents recorded traffic as live inference or a
+single request as capacity proof.
 
-## Verified Commands
+## Remaining Owner Work
 
-```bash
-make check
-armproof ci examples/armproof-reference/armproof.json
-python3.12 scripts/demo_release_gate.py
-shasum -a 256 ops/evidence/EXP-2026-009/evidence.tar.gz
-shasum -a 256 ops/evidence/EXP-2026-010/evidence.tar.gz
-npm run test:ui
-python3.12 scripts/demo_live_compare.py --help
-.venv/bin/armproof init --endpoint http://127.0.0.1:8000/infer --output KIT
-```
+The repository, public artifacts, screenshots, submission copy, and recording
+runbook are ready for the `v0.8.0` release. The owner must record and publicly
+upload the video, replace the Devpost video placeholder, paste the prepared
+submission, and complete the logged-out link check.
 
 ## Constraints
 
-- Accepted performance claims are scoped to the pinned Phi-4 Mini workload,
-  runtime and `c8g.4xlarge`; they are not universal model claims.
-- Project source is MIT licensed; BANKING77 is attributed under CC-BY-4.0.
-- Estimated cumulative AWS evidence cost is USD 10.9399 and inventory is empty.
-- ArmProof means "verified against the declared contract," not Arm certified.
+- Results apply to the pinned Phi-4 Mini INT4 model, workload, ONNX Runtime GenAI build, 16-thread Graviton4 deployment, and fixed response-time rule.
+- Performix CPU Microarchitecture and Instruction Mix recipes were unavailable because the VM exposed two PMU counters while those recipes require three.
+- ArmProof means verified against the declared contract; it is not Arm certification.
+- Project source is MIT licensed. BANKING77 is attributed under CC BY 4.0.

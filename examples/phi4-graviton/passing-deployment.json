@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0.0",
   "status": "verified_by_armproof",
-  "experiment_id": "EXP-2026-009",
+  "experiment_id": "EXP-2026-014",
   "hardware": {
     "provider": "AWS",
     "instance_type": "c8g.4xlarge",
@@ -35,17 +35,25 @@
   },
   "accepted_result": {
     "minimum_fixed_slo_capacity_ratio": 2.0,
-    "tested_pass_point_ratio": 2.3333333333333335,
+    "control_rate_rps": 0.28,
+    "control_confirmations": "5/5 failed",
+    "treatment_rate_rps": 0.56,
+    "treatment_confirmations": "5/5 passed",
+    "confirmation_seconds": 500,
     "quality_accuracy_delta_pp": -0.38961038961038974,
     "quality_macro_f1_delta_pp": -0.6726444303255752,
     "schema_valid_rate": 1.0,
-    "arm_callchains": "68.53% enabled kai_* cycle share, 0% disabled, zero lost samples",
+    "arm_performix": "67.35% enabled kai_* function-sample share, 0% disabled; Neoverse I8MM kernel observed",
+    "linux_perf": "67.91% enabled kai_* cycle share, 0% disabled, zero lost samples",
     "claim_boundary": "at least 2.0x sustainable mixed capacity; no exact upper bound"
   },
   "evidence": {
-    "contract": "examples/armproof-reference/sustained-contract.json",
-    "summary": "ops/evidence/EXP-2026-009/RESULT.md",
-    "archive": "ops/evidence/EXP-2026-009/evidence.tar.gz",
-    "archive_sha256": "f22e647aabe40eefd2abc5548306f40e2a5558ce1a85bc31c18319e6e51d78da"
+    "contract": "examples/armproof-reference/confirmed-contract.json",
+    "summary": "ops/evidence/EXP-2026-014/RESULT.md",
+    "archive": "ops/evidence/EXP-2026-014/evidence.tar.gz",
+    "archive_sha256": "c4f94870eece68081c54411eedc24e17ae3b6d541afb94daee7ed86577a1bb06",
+    "performix_archive": "ops/evidence/EXP-2026-013/evidence.tar.gz",
+    "performix_archive_sha256": "9301e9da951ce8b294b8b1a2153a2d333017cbeecef73ab5d930b90bde2d7d4e",
+    "preregistration_commit": "ab22cc055881c5e8bae35dd6e4d919f0b407971e"
   }
 }

@@ -1,81 +1,59 @@
-# Arm Performix Core Experiment
+# Arm Performix Confirmation
 
-ArmProof uses Arm Performix as a required causal check for its reference
-Graviton release. It is not a screenshot, optional report import or future
-integration.
+Arm Performix is a required input to the SurgeDesk release. It answers one
+question: when the KleidiAI setting changes, did the optimized process actually
+execute KleidiAI functions on Graviton4?
 
-## Question
+## Frozen Experiment
 
-When the only changed control is `mlas.disable_kleidiai`, does native profiling
-observe KleidiAI work in the optimized process and none in the control?
+[`EXP-2026-013`](../ops/experiments/EXP-2026-013.json) was committed before its
+AWS instance was created. It fixes:
 
-## Matched Runs
+- AWS Graviton4 `c8g.4xlarge`, 16 Neoverse V2 cores;
+- Arm Performix 1.20 Code Hotspots at normal sampling;
+- the pinned Phi-4 Mini INT4 and ONNX Runtime GenAI Arm64 build;
+- the BANKING77 mixed workload repeated three times;
+- `mlas.disable_kleidiai=1` for the control and `0` for the treatment;
+- zero `kai_*` function samples in the control;
+- at least 50% `kai_*` function-sample share in the treatment; and
+- at least 100,000 total function samples in each profile.
 
-- Machine: AWS Graviton4 `c8g.4xlarge`, 16 vCPUs, Neoverse V2.
-- Profiler: Arm Performix CLI 1.20.0, Code Hotspots recipe.
-- Runtime: the same pinned ONNX Runtime GenAI INT4 build.
-- Workload: the same frozen BANKING77 mixed workload, repeated three times.
-- Control: `mlas.disable_kleidiai=1`.
-- Treatment: `mlas.disable_kleidiai=0`.
+The native exports, run-ID map, captured treatment configs, runtime lock,
+machine identity and environment are stored under
+[`ops/evidence/EXP-2026-013`](../ops/evidence/EXP-2026-013/).
 
-The commands, profiler version, CPU identity, run IDs and native exports are
-inside [`EXP-2026-010`](../ops/evidence/EXP-2026-010/). The archive SHA-256 is:
-
-```text
-28d411e40de38f3ad4a455bbfa09524dee8b44d6e44eb4d3b599e01635789148
-```
-
-## Result
-
-| Treatment | Measured function samples | `kai_*` samples | Share |
-|---|---:|---:|---:|
-| KleidiAI disabled | 947,888 | 0 | 0% |
-| KleidiAI enabled | 368,119 | 246,698 | 67.02% |
-
-The enabled export directly names the Neoverse I8MM matrix kernel family,
-including
-`kai_kernel_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_opt32_neon_i8mm`.
-
-Linux perf separately attributed 68.53% of sampled cycles to the enabled
-KleidiAI callchain. Performix function-sample share and Linux perf cycle share
-have different denominators, so ArmProof does not call them the same metric.
-Their absolute difference is 1.51 percentage points, inside the
-preregistered five-point consistency limit.
-
-## Fail-Closed Validation
-
-The reference command performs these checks every time:
+## Release Verification
 
 ```bash
 armproof ci examples/armproof-reference/armproof.json
 ```
 
-It verifies the outer archive digest and all 35 guest checksums, opens the two
-declared native ZIP exports, checks recipe success, CPU identity and matched
-commands, then derives the sample totals. The release is invalid if:
+The verifier requires the experiment copied into the archive to equal the
+committed plan. It then:
 
-- the archive or any bound file changes;
-- either native export is missing;
-- the run IDs, CPUs, profiler versions or commands do not match;
-- the disabled run contains a measured `kai_*` sample;
-- the enabled run contains no measured `kai_*` sample; or
-- Performix disagrees with Linux perf beyond the frozen tolerance.
+1. checks the outer digest and every guest ledger entry;
+2. binds each export to the captured disabled/enabled run-ID map;
+3. checks the captured model configs differ only in the KleidiAI setting;
+4. matches the executed commands with the preregistered commands;
+5. requires the same CPU and Performix engine version;
+6. reads function samples and symbols directly from each native export; and
+7. evaluates the frozen control, treatment-share and sample-volume thresholds.
 
-The normalized JSON is convenient for inspection but is not trusted by CI.
+The release config contains archive locations and run IDs. The acceptance
+thresholds are read from EXP-2026-013, so they cannot be lowered while packaging
+the result.
 
-## Cloud PMU Limitation
+## Linux Perf
 
-Performix reported that this VM exposes two PMU counters. CPU
-Microarchitecture and Instruction Mix each require at least three, so their
-readiness checks are preserved as unavailable. This does not weaken the Code
-Hotspots result: that recipe completed successfully in two matched sessions
-and supplies the execution attribution required by the release contract.
+The capacity archive also contains a separate Linux perf callchain profile.
+Performix reports function samples; Linux perf reports sampled cycles. ArmProof
+shows both measurements in their native units and does not compare their
+percentages numerically.
 
-No additional AWS run is needed to validate the checked-in evidence. The two
-Performix sessions cost an estimated USD 0.1521 combined, and both final AWS
-inventories were empty.
-`EXP-2026-010` originally required a broader set of Performix recipes and was
-rejected when the VM exposed too few PMU counters for all of them. ArmProof does
-not relabel that experiment as accepted. The release gate consumes only the
-completed, matched Code Hotspots control/treatment pair for the narrower claim
-that the optimized service executed the KleidiAI path.
+## Cloud PMU Scope
+
+Earlier exploratory work found that this Graviton VM exposed two virtual PMU
+counters. Performix CPU Microarchitecture and Instruction Mix recipes required
+at least three, so those recipes remain unavailable. EXP-2026-013 intentionally
+preregistered only Code Hotspots, the supported recipe needed for the execution
+claim. The earlier EXP-2026-010/011 records remain in the repository history.

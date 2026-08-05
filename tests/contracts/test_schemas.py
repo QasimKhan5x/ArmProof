@@ -25,6 +25,18 @@ class PublicSchemaTests(unittest.TestCase):
                 self.assertEqual(schema["title"], title)
                 self.assertFalse(schema["additionalProperties"])
 
+    def test_ci_schema_covers_the_reference_adapter_and_optional_evidence(self) -> None:
+        schema = json.loads(
+            (ROOT / "schemas/ci-config.schema.json").read_text(encoding="utf-8")
+        )
+        adapter_constants = {
+            branch.get("properties", {}).get("adapter", {}).get("const")
+            for branch in schema["properties"]["evidence"]["oneOf"]
+        }
+        self.assertIn("kleidiai-confirmed-v2", adapter_constants)
+        self.assertIn("publication_proof", schema["properties"])
+        self.assertIn("supporting_evidence", schema["properties"])
+
 
 if __name__ == "__main__":
     unittest.main()

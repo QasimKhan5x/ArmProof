@@ -1,28 +1,80 @@
 {
-  "schema_version": "1.0.0",
-  "experiment_id": "EXP-2026-002",
   "comparison": "PyTorch BF16 deployment versus ONNX Runtime GenAI INT4 deployment",
+  "evidence": "ops/evidence/result-first/EXP-2026-002/summary.json",
+  "experiment_id": "EXP-2026-002",
+  "history": [
+    {
+      "id": "EXP-2026-001",
+      "note": "Loaded-RSS proxy rejected",
+      "status": "failed"
+    },
+    {
+      "id": "EXP-2026-002",
+      "note": "PSS, size, speed and Arm attribution",
+      "status": "passed"
+    },
+    {
+      "id": "EXP-2026-003",
+      "note": "Offered-load accounting defect preserved",
+      "status": "inconclusive"
+    },
+    {
+      "id": "EXP-2026-004",
+      "note": "Corrected fixed-SLO capacity gate",
+      "status": "passed"
+    },
+    {
+      "id": "EXP-2026-005",
+      "note": "Fresh instance confirmed every tested capacity-grid boundary",
+      "status": "passed"
+    },
+    {
+      "id": "EXP-2026-009",
+      "note": "Original exact bracket rejected; a separate conservative >=2.0x lower bound was established",
+      "status": "failed"
+    },
+    {
+      "id": "EXP-2026-010",
+      "note": "All-recipe Performix gate rejected; the completed Code Hotspots pair supports only its narrower attribution claim",
+      "status": "failed"
+    },
+    {
+      "id": "EXP-2026-011",
+      "note": "Counter-heavy cloud recipe set rejected on the two-counter virtual PMU",
+      "status": "failed"
+    },
+    {
+      "id": "EXP-2026-012",
+      "note": "Capacity outcomes matched, but the release was rejected for missing source-artifact identity in successful responses",
+      "status": "failed"
+    },
+    {
+      "id": "EXP-2026-013",
+      "note": "Preregistered matched Performix Code Hotspots profiles bound execution to the Neoverse I8MM path",
+      "status": "passed"
+    },
+    {
+      "id": "EXP-2026-014",
+      "note": "Preregistered identity-bound confirmation established the >=2.0x sustained-capacity lower bound across all ten 500-second windows",
+      "status": "passed"
+    }
+  ],
+  "metric_source": {
+    "checksummed_files": 4,
+    "derivation": "locked_aggregate_footprint_and_raw_timing_repetitions",
+    "experiment_id": "EXP-2026-002"
+  },
   "metrics": {
     "disk_reduction_percent": 35.91724249132322,
+    "maximum_kleidiai_speedup": 2.5870578477345356,
+    "minimum_kleidiai_speedup": 1.7170141477125782,
     "peak_pss_reduction_percent": 55.336785335288766,
-    "weighted_pss_reduction_percent": 59.66032309469201,
-    "minimum_kleidiai_speedup": 1.7170141477125784,
-    "maximum_kleidiai_speedup": 2.5870578477345356
+    "weighted_pss_reduction_percent": 59.66032309469201
   },
-  "history": [
-    {"id": "EXP-2026-001", "status": "failed", "note": "Loaded-RSS proxy rejected"},
-    {"id": "EXP-2026-002", "status": "passed", "note": "PSS, size, speed and Arm attribution"},
-    {"id": "EXP-2026-003", "status": "inconclusive", "note": "Offered-load accounting defect preserved"},
-    {"id": "EXP-2026-004", "status": "passed", "note": "Corrected fixed-SLO capacity gate"},
-    {"id": "EXP-2026-005", "status": "passed", "note": "Fresh instance confirmed every tested capacity-grid boundary"},
-    {"id": "EXP-2026-009", "status": "failed", "note": "Original exact bracket rejected; a separate conservative >=2.0x lower bound was established"},
-    {"id": "EXP-2026-010", "status": "failed", "note": "All-recipe Performix gate rejected; the completed Code Hotspots pair supports only its narrower attribution claim"},
-    {"id": "EXP-2026-011", "status": "failed", "note": "Counter-heavy cloud recipe set rejected on the two-counter virtual PMU"}
-  ],
   "reproduction": {
     "experiment_id": "EXP-2026-005",
     "maximum_relative_difference": 0.0,
     "mixes_reproduced": 3
   },
-  "evidence": "ops/evidence/result-first/EXP-2026-002/summary.json"
+  "schema_version": "1.0.0"
 }

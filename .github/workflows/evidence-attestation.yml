@@ -23,13 +23,14 @@ jobs:
           python -m pip install .
           armproof ci examples/armproof-reference/armproof.json \
             --output build/armproof-report \
-            --contract-sha256 3dea0ec2062275181902907d011d27d2b83b11b3ea2e9f8ed5cbce38ede9ff0c
+            --contract-sha256 5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369
       - name: Assemble immutable publication bundle
         run: |
           tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner \
             -czf build/armproof-evidence.tar.gz \
-            ops/evidence/EXP-2026-009/evidence.tar.gz \
-            ops/evidence/EXP-2026-010/evidence.tar.gz \
+            ops/evidence/EXP-2026-014/evidence.tar.gz \
+            ops/evidence/EXP-2026-013/evidence.tar.gz \
+            ops/evidence/EXP-2026-003/attempt-002/evidence \
             data/banking77/generated \
             data/banking77/source \
             examples/armproof-reference \

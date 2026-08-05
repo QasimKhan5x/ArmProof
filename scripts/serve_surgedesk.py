@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
+import io
 import json
 import os
 import sys
@@ -13,10 +15,13 @@ import time
 import urllib.error
 import urllib.request
 import uuid
+import zipfile
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from threading import Lock
 from typing import Any
 from urllib.parse import unquote, urlsplit
 
@@ -26,12 +31,83 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from armproof.demo.live import build_prompt, compose_live_route  # noqa: E402
 from armproof.demo.surgedesk import _queue_guard, build_surgedesk_payload  # noqa: E402
-from armproof.contracts import parse_contract  # noqa: E402
-from armproof.evidence.sustained_audit import derive_sustained_audit  # noqa: E402
+from armproof.contracts.parser import parse_contract  # noqa: E402
 from armproof.scaffold import create_scaffold  # noqa: E402
-
-
 MAX_BODY_BYTES = 16 * 1024
+
+
+@dataclass
+class DeploymentState:
+    """Session-local route state unlocked by the fresh release audit."""
+
+    active_lane: str | None
+    audit_experiment_id: str | None = None
+    release_ready: bool = False
+    promoted_at: str | None = None
+    audited_deployment: dict[str, Any] | None = None
+    _lock: Lock = field(default_factory=Lock, repr=False)
+
+    def record_audit(self, receipt: dict[str, Any]) -> None:
+        with self._lock:
+            self.release_ready = receipt.get("passed") is True
+            self.audit_experiment_id = (
+                str(receipt["experiment_id"]) if self.release_ready else None
+            )
+            identity = receipt.get("deployment_identity")
+            self.audited_deployment = (
+                dict(identity)
+                if self.release_ready and isinstance(identity, dict)
+                else None
+            )
+
+    def promote(self, live_identity: dict[str, Any]) -> dict[str, Any]:
+        with self._lock:
+            if (
+                not self.release_ready
+                or not self.audit_experiment_id
+                or not self.audited_deployment
+            ):
+                raise ValueError("optimized lane requires a fresh passing audit")
+            expected = self.audited_deployment
+            compared = {
+                "source_artifact_sha256": live_identity.get("source_artifact_sha256"),
+                "runtime": live_identity.get("runtime"),
+                "runtime_version": live_identity.get("runtime_version"),
+                "architecture": live_identity.get("architecture"),
+                "threads": live_identity.get("threads_per_lane"),
+                "controls": {
+                    "baseline": {
+                        "mlas.disable_kleidiai": live_identity.get("baseline_control")
+                    },
+                    "optimized": {
+                        "mlas.disable_kleidiai": live_identity.get("optimized_control")
+                    },
+                },
+            }
+            required = {
+                key: expected[key]
+                for key in (
+                    "source_artifact_sha256", "runtime", "runtime_version",
+                    "architecture", "threads", "controls",
+                )
+            }
+            if compared != required:
+                raise ValueError("live deployment identity differs from audited release")
+            self.active_lane = "optimized"
+            self.promoted_at = datetime.now(UTC).isoformat(timespec="milliseconds")
+            return self._snapshot_unlocked()
+
+    def snapshot(self) -> dict[str, Any]:
+        with self._lock:
+            return self._snapshot_unlocked()
+
+    def _snapshot_unlocked(self) -> dict[str, Any]:
+        return {
+            "active_lane": self.active_lane,
+            "audit_experiment_id": self.audit_experiment_id,
+            "release_ready": self.release_ready,
+            "promoted_at": self.promoted_at,
+        }
 
 
 def _core_set(value: str) -> frozenset[int]:
@@ -79,6 +155,12 @@ def _probe_lane(config: dict[str, Any]) -> tuple[bool, str, dict[str, Any]]:
             or not isinstance(payload.get("model_identity"), str)
             or len(payload["model_identity"]) != 64
             or any(character not in "0123456789abcdef" for character in payload["model_identity"])
+            or not isinstance(payload.get("source_artifact_sha256"), str)
+            or len(payload["source_artifact_sha256"]) != 64
+            or any(
+                character not in "0123456789abcdef"
+                for character in payload["source_artifact_sha256"]
+            )
             or payload.get("threads") != len(expected_cores)
         ):
             return False, "health identity, control, or CPU affinity mismatch", payload
@@ -96,12 +178,14 @@ def _match_lane_identity(
     left = baseline[2]
     right = optimized[2]
     matched_fields = (
-        "model_identity", "runtime", "runtime_version", "threads", "architecture"
+        "model_identity", "source_artifact_sha256", "runtime", "runtime_version",
+        "threads", "architecture",
     )
     if any(left.get(field) != right.get(field) for field in matched_fields):
         return False, "model, runtime, or thread identity mismatch", {}
     return True, "matched", {
         "model_identity": left["model_identity"],
+        "source_artifact_sha256": left["source_artifact_sha256"],
         "runtime": left["runtime"],
         "runtime_version": left["runtime_version"],
         "threads_per_lane": left["threads"],
@@ -117,7 +201,7 @@ def _response_identity_matches(
 ) -> bool:
     response_identity = upstream.get("runtime_identity")
     identity_fields = (
-        "model_identity", "runtime", "runtime_version", "threads",
+        "model_identity", "source_artifact_sha256", "runtime", "runtime_version", "threads",
         "architecture", "cpu_affinity", "optimization_control",
     )
     return isinstance(response_identity, dict) and all(
@@ -135,10 +219,13 @@ def _audit_receipt(payload: dict[str, Any], elapsed_ms: float) -> dict[str, Any]
         "experiment_id": payload["provenance"]["experiment_id"],
         "adapter": decision["adapter_id"],
         "claims_verified": decision["verified_claims"],
+        "claims": decision["claims"],
         "raw_request_outcomes": evidence["sustained_raw_confirmation_samples"],
+        "raw_quality_outputs": evidence["raw_quality_outputs"],
         "confirmation_files": evidence["sustained_raw_confirmation_files"],
         "archive_sha256": evidence["sustained_archive_sha256"],
         "matched_control": evidence["sustained_matched_control_verified"],
+        "deployment_identity": decision["live_deployment_identity"],
         "capacity": {
             "trial_matrix": mixed["trial_matrix"],
             "optimized_pass_rps": mixed["optimized_sustainable_rps"],
@@ -146,17 +233,7 @@ def _audit_receipt(payload: dict[str, Any], elapsed_ms: float) -> dict[str, Any]
             "minimum_ratio": mixed["minimum_capacity_ratio"],
             "confirmations": mixed["confirmations_per_treatment"],
             "confirmation_seconds": mixed["confirmation_seconds"],
-        },
-        "original_gate": {
-            "passed": payload["provenance"]["original_gate_passed"],
-            "required_probe_failures": mixed["confirmations_per_treatment"],
-            "observed_probe_failures": mixed["optimized_probe_failures"],
-            "observed_probe_passes": mixed["optimized_probe_passes"],
-            "probe_rps": mixed["optimized_probe_rps"],
-            "exact_lower_ratio": mixed["minimum_capacity_ratio"],
-            "exact_upper_ratio": (
-                mixed["optimized_probe_rps"] / mixed["baseline_sustainable_rps"]
-            ),
+            "rate_selection": payload["capacity"]["rate_selection"],
         },
         "arm": {
             "performix_disabled_sample_share_percent": decision["performix"][
@@ -169,9 +246,76 @@ def _audit_receipt(payload: dict[str, Any], elapsed_ms: float) -> dict[str, Any]
                 "kleidiai_cycle_callchain_share_percent"
             ],
             "kernel": decision["performix"]["kernel_family"],
+            "engine_version": decision["performix"]["engine_version"],
+            "cpu": decision["performix"]["cpu"],
+            "enabled_function_samples": decision["performix"][
+                "enabled_function_samples"
+            ],
+            "scope_note": decision["performix"]["scope_note"],
+            "pmu_capability_note": decision["performix"]["pmu_capability_note"],
+        },
+        "supporting": {
+            "direct_speedup_min": decision["direct_speedup_min"],
+            "direct_speedup_max": decision["direct_speedup_max"],
+            "direct_shape_gains": decision["direct_shape_gains"],
+            "artifact_reduction_percent": decision["artifact_reduction_percent"],
+            "peak_pss_reduction_percent": decision["peak_pss_reduction_percent"],
+            "migration_quality_delta_pp": decision["migration_quality_delta_pp"],
+            "migration_int4_quality_correct": decision[
+                "migration_int4_quality_correct"
+            ],
+            "migration_bf16_quality_correct": decision[
+                "migration_bf16_quality_correct"
+            ],
+            "migration_quality_total": decision["migration_quality_total"],
         },
         "elapsed_ms": elapsed_ms,
     }
+
+
+def _adoption_receipt() -> dict[str, Any]:
+    """Generate and structurally validate a downloadable starter."""
+    with tempfile.TemporaryDirectory(prefix="armproof-adoption-") as directory:
+        output = Path(directory) / "my-arm-service"
+        create_scaffold(output, "http://127.0.0.1:8000/infer")
+        contract_path = output / "contract.json"
+        contract = parse_contract(json.loads(contract_path.read_text(encoding="utf-8")))
+        contract_sha256 = hashlib.sha256(contract_path.read_bytes()).hexdigest()
+        workflow = (output / ".github/workflows/armproof.yml").read_text(
+            encoding="utf-8"
+        )
+        if f"contract-sha256: {contract_sha256}" not in workflow:
+            raise ValueError("generated workflow is not bound to its contract")
+        config = json.loads((output / "armproof.json").read_text(encoding="utf-8"))
+        if config.get("contract") != "contract.json":
+            raise ValueError("generated config is not bound to its contract")
+        archive_buffer = io.BytesIO()
+        generated_files = sorted(
+            candidate for candidate in output.rglob("*") if candidate.is_file()
+        )
+        with zipfile.ZipFile(
+            archive_buffer, mode="w", compression=zipfile.ZIP_DEFLATED
+        ) as archive:
+            for path in generated_files:
+                name = str(Path("my-arm-service") / path.relative_to(output))
+                info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
+                info.compress_type = zipfile.ZIP_DEFLATED
+                info.external_attr = 0o100644 << 16
+                archive.writestr(info, path.read_bytes())
+        return {
+            "generated_files": [
+                str(path.relative_to(output)) for path in generated_files
+            ],
+            "validation_status": "STRUCTURE VALID",
+            "validation_detail": (
+                f"{len(contract.claims)} required claims parsed; GitHub Action "
+                "bound to this contract digest; measured evidence still required"
+            ),
+            "workflow": workflow,
+            "contract_sha256": contract_sha256,
+            "archive_name": "armproof-service-starter.zip",
+            "archive_base64": base64.b64encode(archive_buffer.getvalue()).decode("ascii"),
+        }
 
 
 def _upstream_request(
@@ -216,12 +360,11 @@ def _upstream_request(
 
 
 def handler_for(
-    endpoint: str | None = None,
     *,
     baseline_endpoint: str | None = None,
     optimized_endpoint: str | None = None,
-    baseline_cores: str = "0-7",
-    optimized_cores: str = "8-15",
+    baseline_cores: str = "0-15",
+    optimized_cores: str = "0-15",
 ) -> type[SimpleHTTPRequestHandler]:
     if baseline_endpoint and optimized_endpoint and baseline_endpoint == optimized_endpoint:
         raise ValueError("matched endpoints must be distinct")
@@ -229,13 +372,12 @@ def handler_for(
     optimized_core_set = _core_set(optimized_cores)
     if len(baseline_core_set) != len(optimized_core_set):
         raise ValueError("matched endpoint core groups must have equal size")
-    if baseline_core_set & optimized_core_set:
-        raise ValueError("matched endpoint core groups must be disjoint")
+    if baseline_core_set & optimized_core_set and baseline_core_set != optimized_core_set:
+        raise ValueError("matched endpoint core groups must be identical or disjoint")
     guard, _, _ = _queue_guard(ROOT)
     categories = json.loads(
         (ROOT / "data/banking77/source/categories.json").read_text(encoding="utf-8")
     )
-    route_endpoint = endpoint or optimized_endpoint
     lanes = {
         "baseline": {
             "endpoint": baseline_endpoint,
@@ -254,6 +396,17 @@ def handler_for(
             "label": "KleidiAI enabled",
         },
     }
+    deployment = DeploymentState(
+        active_lane=(
+            "baseline" if baseline_endpoint and optimized_endpoint else None
+        )
+    )
+
+    def active_route() -> tuple[str | None, dict[str, Any] | None]:
+        lane = deployment.snapshot()["active_lane"]
+        if lane in lanes:
+            return lane, lanes[str(lane)]
+        return None, None
 
     class Handler(SimpleHTTPRequestHandler):
         def __init__(self, *args: object, **kwargs: object) -> None:
@@ -290,6 +443,42 @@ def handler_for(
             self.end_headers()
             self.wfile.write(body)
 
+        def _audit_stream(self) -> None:
+            self.send_response(HTTPStatus.OK.value)
+            self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            self.close_connection = True
+
+            def emit(event_type: str, payload: dict[str, Any]) -> None:
+                line = json.dumps(
+                    {"type": event_type, **payload}, separators=(",", ":")
+                ).encode("utf-8") + b"\n"
+                self.wfile.write(line)
+                self.wfile.flush()
+
+            started = time.perf_counter()
+            try:
+                payload = build_surgedesk_payload(
+                    ROOT,
+                    on_audit_stage=lambda stage, detail: emit(
+                        "stage",
+                        {
+                            "stage": stage,
+                            "detail": detail,
+                            "elapsed_ms": (time.perf_counter() - started) * 1000,
+                        },
+                    ),
+                )
+                receipt = _audit_receipt(
+                    payload, (time.perf_counter() - started) * 1000
+                )
+                deployment.record_audit(receipt)
+                emit("result", {"receipt": receipt})
+            except Exception as exc:
+                emit("error", {"error": str(exc)})
+
         def _body(self) -> dict[str, Any]:
             length = int(self.headers.get("Content-Length", "0"))
             if not 0 < length <= MAX_BODY_BYTES:
@@ -314,25 +503,18 @@ def handler_for(
                 matched_available, matched_reason, matched_identity = _match_lane_identity(
                     lane_status["baseline"], lane_status["optimized"]
                 )
-                if route_endpoint == optimized_endpoint:
-                    route_available = lane_status["optimized"][0]
-                elif route_endpoint:
-                    route_config = {
-                        **lanes["optimized"],
-                        "endpoint": route_endpoint,
-                    }
-                    route_available = _probe_lane(route_config)[0]
-                else:
-                    route_available = False
+                _, route_config = active_route()
+                route_available = bool(route_config and _probe_lane(route_config)[0])
                 self._json(
                     HTTPStatus.OK,
                     {
                         "live_available": route_available,
-                        "matched_surge_available": matched_available,
+                        "matched_lanes_available": matched_available,
                         "matched_identity": matched_identity,
                         "matched_status": matched_reason,
                         "audit_available": True,
-                        "mode": "live" if route_endpoint else "recorded",
+                        "mode": "live" if route_config else "recorded",
+                        "deployment": deployment.snapshot(),
                         "lanes": {
                             name: {
                                 "backend": row["expected_backend"],
@@ -361,126 +543,55 @@ def handler_for(
         def do_POST(self) -> None:
             try:
                 if self.path == "/api/audit-stream":
-                    started = time.perf_counter()
-                    self.send_response(HTTPStatus.OK.value)
-                    self.send_header("Content-Type", "application/x-ndjson")
-                    self.send_header("Cache-Control", "no-store")
-                    self.end_headers()
-
-                    def emit(kind: str, payload: dict[str, Any]) -> None:
-                        row = json.dumps(
-                            {"type": "stage", "stage": kind, "detail": payload},
-                            separators=(",", ":"),
-                        ).encode("utf-8") + b"\n"
-                        self.wfile.write(row)
-                        self.wfile.flush()
-
-                    try:
-                        payload = build_surgedesk_payload(ROOT, on_audit_stage=emit)
-                        receipt = _audit_receipt(
-                            payload, (time.perf_counter() - started) * 1000
-                        )
-                        terminal = {"type": "result", "receipt": receipt}
-                    except (OSError, ValueError) as exc:
-                        terminal = {"type": "error", "error": str(exc)}
-                    self.wfile.write(json.dumps(
-                        terminal,
-                        separators=(",", ":"),
-                    ).encode("utf-8") + b"\n")
-                    self.wfile.flush()
-                    self.close_connection = True
+                    self._audit_stream()
                     return
                 if self.path == "/api/audit":
                     started = time.perf_counter()
                     payload = build_surgedesk_payload(ROOT)
+                    receipt = _audit_receipt(
+                        payload, (time.perf_counter() - started) * 1000
+                    )
+                    deployment.record_audit(receipt)
                     self._json(
                         HTTPStatus.OK,
-                        _audit_receipt(
-                            payload, (time.perf_counter() - started) * 1000
-                        ),
+                        receipt,
                     )
                     return
-                if self.path == "/api/scaffold-preview":
-                    with tempfile.TemporaryDirectory() as directory:
-                        output = Path(directory) / "my-arm-service"
-                        create_scaffold(output, "http://127.0.0.1:8000/infer")
-                        files = sorted(
-                            path.relative_to(output).as_posix()
-                            for path in output.rglob("*")
-                            if path.is_file()
+                if self.path == "/api/adoption":
+                    self._json(HTTPStatus.OK, _adoption_receipt())
+                    return
+                if self.path == "/api/promote":
+                    lane_probes = {
+                        name: _probe_lane(config) for name, config in lanes.items()
+                    }
+                    matched, reason, live_identity = _match_lane_identity(
+                        lane_probes["baseline"], lane_probes["optimized"]
+                    )
+                    if not matched:
+                        self._json(
+                            HTTPStatus.CONFLICT,
+                            {"error": "matched_runtime_identity_changed", "detail": reason},
                         )
+                        return
+                    promoted = deployment.promote(live_identity)
                     self._json(
                         HTTPStatus.OK,
                         {
-                            "command": (
-                                "armproof init --endpoint "
-                                "http://127.0.0.1:8000/infer --output my-arm-service"
-                            ),
-                            "files": files,
-                            "next": (
-                                "The CLI writes these files to the selected directory. "
-                                "Collect declared evidence next; CI blocks until "
-                                "evidence/SHA256SUMS exists."
-                            ),
-                        },
-                    )
-                    return
-                if self.path == "/api/tamper-check":
-                    archive = ROOT / "ops/evidence/EXP-2026-009/evidence.tar.gz"
-                    expected_digest = (
-                        "f22e647aabe40eefd2abc5548306f40e2a5558ce1a85bc31c18319e6e51d78da"
-                    )
-                    started = time.perf_counter()
-                    with tempfile.TemporaryDirectory() as directory:
-                        altered = Path(directory) / "altered-evidence.tar.gz"
-                        content = bytearray(archive.read_bytes())
-                        content[-1] ^= 1
-                        altered.write_bytes(content)
-                        observed_digest = hashlib.sha256(content).hexdigest()
-                        contract = parse_contract(json.loads((
-                            ROOT / "examples/armproof-reference/sustained-contract.json"
-                        ).read_text(encoding="utf-8")))
-                        try:
-                            derive_sustained_audit(
-                                altered,
-                                expected_sha256=expected_digest,
-                                contract=contract,
-                                workload_manifest=(
-                                    ROOT / "data/banking77/generated/manifest.json"
-                                ),
-                            )
-                        except ValueError as exc:
-                            if "digest" not in str(exc).lower():
-                                raise
-                        else:
-                            self._json(
-                                HTTPStatus.INTERNAL_SERVER_ERROR,
-                                {"error": "altered_archive_was_not_blocked"},
-                            )
-                            return
-                    self._json(
-                        HTTPStatus.OK,
-                        {
-                            "decision": "BLOCK",
-                            "reason": "archive_digest_mismatch",
-                            "expected_sha256": expected_digest,
-                            "observed_sha256": observed_digest,
-                            "mutation": "one byte changed in a temporary copy",
-                            "elapsed_ms": (time.perf_counter() - started) * 1000,
+                            **promoted,
+                            "backend": lanes["optimized"]["expected_backend"],
+                            "core_group": lanes["optimized"]["core_group"],
+                            "runtime_identity": live_identity,
                         },
                     )
                     return
                 if self.path == "/api/route":
-                    if not route_endpoint:
+                    active_lane, route_config = active_route()
+                    if not route_config:
                         self._json(
                             HTTPStatus.SERVICE_UNAVAILABLE,
                             {"error": "live_endpoint_not_configured"},
                         )
                         return
-                    route_config = {
-                        **lanes["optimized"],
-                        "endpoint": route_endpoint,
-                    }
                     route_probe = _probe_lane(route_config)
                     if not route_probe[0]:
                         self._json(
@@ -491,11 +602,11 @@ def handler_for(
                     payload = self._body()
                     text = self._text(payload)
                     upstream, elapsed_ms, _ = _upstream_request(
-                        route_endpoint,
+                        str(route_config["endpoint"]),
                         text=text,
                         categories=categories,
                         request_id=f"surgedesk-{uuid.uuid4().hex[:12]}",
-                        expected_backend=None,
+                        expected_backend=str(route_config["expected_backend"]),
                     )
                     if not _response_identity_matches(upstream, route_probe[2]):
                         self._json(
@@ -505,77 +616,21 @@ def handler_for(
                         return
                     result = compose_live_route(text, upstream, guard, categories)
                     result["gateway_latency_ms"] = elapsed_ms
+                    result["deployment_lane"] = active_lane
+                    result["observed_at"] = datetime.now(UTC).isoformat()
+                    result["runtime_identity"] = upstream["runtime_identity"]
+                    result["release_audit_id"] = deployment.snapshot()[
+                        "audit_experiment_id"
+                    ]
                     self._json(HTTPStatus.OK, result)
                     return
-                if self.path.startswith("/api/surge/"):
-                    lane = self.path.rsplit("/", 1)[-1]
-                    lane_config = lanes.get(lane)
-                    if not lane_config:
-                        self._json(HTTPStatus.NOT_FOUND, {"error": "unknown_lane"})
-                        return
-                    lane_endpoint = lane_config["endpoint"]
-                    if not lane_endpoint:
-                        self._json(
-                            HTTPStatus.SERVICE_UNAVAILABLE,
-                            {"error": f"{lane}_endpoint_not_configured"},
-                        )
-                        return
-                    lane_probes = {
-                        name: _probe_lane(config) for name, config in lanes.items()
-                    }
-                    matched, reason, live_identity = _match_lane_identity(
-                        lane_probes["baseline"], lane_probes["optimized"]
-                    )
-                    if not matched:
-                        self._json(
-                            HTTPStatus.CONFLICT,
-                            {"error": "runtime_identity_changed", "detail": reason},
-                        )
-                        return
-                    payload = self._body()
-                    text = self._text(payload)
-                    run_id = payload.get("run_id")
-                    sequence = payload.get("sequence")
-                    if (
-                        not isinstance(run_id, str)
-                        or not run_id.isalnum()
-                        or not isinstance(sequence, int)
-                        or sequence not in {1, 2, 3}
-                    ):
-                        raise ValueError("run_id and sequence are invalid")
-                    request_id = f"surge-{run_id}-{sequence}"
-                    upstream, elapsed_ms, started_at = _upstream_request(
-                        str(lane_endpoint),
-                        text=text,
-                        categories=categories,
-                        request_id=request_id,
-                        expected_backend=str(lane_config["expected_backend"]),
-                    )
-                    expected_health = lane_probes[lane][2]
-                    if not _response_identity_matches(upstream, expected_health):
-                        self._json(
-                            HTTPStatus.CONFLICT,
-                            {"error": "inference_identity_mismatch"},
-                        )
-                        return
-                    route = compose_live_route(text, upstream, guard, categories)
-                    self._json(
-                        HTTPStatus.OK,
-                        {
-                            **route,
-                            "lane": lane,
-                            "lane_label": lane_config["label"],
-                            "sequence": sequence,
-                            "request_id": request_id,
-                            "core_group": lane_config["core_group"],
-                            "gateway_started_at": started_at,
-                            "gateway_latency_ms": elapsed_ms,
-                            "runtime_identity": live_identity,
-                        },
-                    )
-                    return
                 self._json(HTTPStatus.NOT_FOUND, {"error": "not_found"})
-            except (ValueError, json.JSONDecodeError) as exc:
+            except KeyError as exc:
+                self._json(
+                    HTTPStatus.INTERNAL_SERVER_ERROR,
+                    {"error": f"evidence schema is incomplete: {exc.args[0]}"},
+                )
+            except (OSError, ValueError, json.JSONDecodeError) as exc:
                 self._json(HTTPStatus.BAD_REQUEST, {"error": str(exc)})
             except (urllib.error.URLError, TimeoutError) as exc:
                 self._json(HTTPStatus.BAD_GATEWAY, {"error": type(exc).__name__})
@@ -587,29 +642,23 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
-    parser.add_argument("--endpoint", default=os.environ.get("SURGEDESK_INFERENCE_ENDPOINT"))
     parser.add_argument(
         "--baseline-endpoint", default=os.environ.get("SURGEDESK_BASELINE_ENDPOINT")
     )
     parser.add_argument(
         "--optimized-endpoint", default=os.environ.get("SURGEDESK_OPTIMIZED_ENDPOINT")
     )
-    parser.add_argument("--baseline-cores", default="0-7")
-    parser.add_argument("--optimized-cores", default="8-15")
+    parser.add_argument("--baseline-cores", default="0-15")
+    parser.add_argument("--optimized-cores", default="0-15")
     args = parser.parse_args()
     print(f"SurgeDesk: http://{args.host}:{args.port}/surgedesk/")
     print(
         "Live route: "
-        f"{'configured; enabled after runtime identity probe' if args.endpoint or args.optimized_endpoint else 'disabled'}"
-    )
-    print(
-        "Matched request check: "
         f"{'configured; enabled after matched identity probes' if args.baseline_endpoint and args.optimized_endpoint else 'disabled'}"
     )
     ThreadingHTTPServer(
         (args.host, args.port),
         handler_for(
-            args.endpoint,
             baseline_endpoint=args.baseline_endpoint,
             optimized_endpoint=args.optimized_endpoint,
             baseline_cores=args.baseline_cores,

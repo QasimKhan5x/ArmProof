@@ -20,7 +20,7 @@ jobs:
         with:
           config: examples/armproof-reference/armproof.json
           output: build/armproof-report
-          contract-sha256: 3dea0ec2062275181902907d011d27d2b83b11b3ea2e9f8ed5cbce38ede9ff0c
+          contract-sha256: 5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369
       - name: Upload decision and offline report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

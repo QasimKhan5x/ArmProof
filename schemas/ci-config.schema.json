@@ -82,17 +82,74 @@
         },
         {
           "type": "object",
+          "additionalProperties": false,
+          "required": ["adapter", "archive", "archive_sha256", "preregistration", "analysis_lock", "protocol_lock", "workload_manifest", "workload", "raw_quality", "performix"],
+          "properties": {
+            "adapter": {"const": "kleidiai-confirmed-v2"},
+            "archive": {"type": "string", "minLength": 1},
+            "archive_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "preregistration": {"type": "string", "minLength": 1},
+            "analysis_lock": {"type": "string", "minLength": 1},
+            "protocol_lock": {"type": "string", "minLength": 1},
+            "workload_manifest": {"type": "string", "minLength": 1},
+            "workload": {"type": "string", "minLength": 1},
+            "raw_quality": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["root", "checksums", "ledger_sha256", "dataset"],
+              "properties": {
+                "root": {"type": "string", "minLength": 1},
+                "checksums": {"type": "string", "minLength": 1},
+                "ledger_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "dataset": {"type": "string", "minLength": 1}
+              }
+            },
+            "performix": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["archive", "archive_sha256", "preregistration", "experiment_id", "disabled_run_id", "enabled_run_id"],
+              "properties": {
+                "archive": {"type": "string", "minLength": 1},
+                "archive_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "preregistration": {"type": "string", "minLength": 1},
+                "experiment_id": {"type": "string", "minLength": 1},
+                "disabled_run_id": {"type": "string", "minLength": 1},
+                "enabled_run_id": {"type": "string", "minLength": 1}
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
           "required": ["adapter"],
           "properties": {
             "adapter": {
               "type": "string",
-              "pattern": "^(?!(kleidiai-capacity-v1|kleidiai-sustained-v1|http-slo-v1)$).+"
+              "pattern": "^(?!(kleidiai-capacity-v1|kleidiai-sustained-v1|kleidiai-confirmed-v2|http-slo-v1)$).+"
             }
           }
         }
       ]
     },
     "deployment_summary": {"type": "string", "minLength": 1},
+    "supporting_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root", "lock"],
+      "properties": {
+        "root": {"type": "string", "minLength": 1},
+        "lock": {"type": "string", "minLength": 1}
+      }
+    },
+    "publication_proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record", "project_bundle"],
+      "properties": {
+        "record": {"type": "string", "minLength": 1},
+        "project_bundle": {"type": "string", "minLength": 1}
+      }
+    },
     "output": {"type": "string", "minLength": 1}
   }
 }

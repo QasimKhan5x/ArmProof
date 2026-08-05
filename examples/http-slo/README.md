@@ -16,6 +16,7 @@ Run it from the repository root:
 ```bash
 python3 examples/http-slo/build_example.py --output /tmp/armproof-http-slo
 python3 -m pip install -e .
+armproof seal /tmp/armproof-http-slo/armproof.json
 armproof ci \
   /tmp/armproof-http-slo/armproof.json
 open /tmp/armproof-http-slo/report/index.html

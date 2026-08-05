@@ -4,17 +4,17 @@
 
 **Project name:** SurgeDesk + ArmProof
 
-**Tagline:** At least twice the AI request capacity on one Graviton server, backed by proof that rejects unsupported claims.
+**Tagline:** SurgeDesk uses KleidiAI to handle at least twice the sustained banking-support traffic on the same Graviton4 server.
 
 **Track:** Cloud AI
 
 **Source code:** https://github.com/QasimKhan5x/ArmProof
 
-**Live application:** https://qasimkhan5x.github.io/ArmProof/surgedesk/
+**Interactive evidence explorer:** https://qasimkhan5x.github.io/ArmProof/surgedesk/
 
 **Technical report:** https://qasimkhan5x.github.io/ArmProof/report/
 
-**Release:** https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.7.0
+**Release:** https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.8.0
 
 **Video:** ADD THE PUBLIC YOUTUBE OR VIMEO URL AFTER RECORDING
 
@@ -22,312 +22,252 @@
 Phi-4 Mini, Python 3.12, Linux perf, GitHub Actions, BANKING77, JavaScript,
 HTML, CSS and Playwright.
 
-**Challenge-period confirmation:** SurgeDesk and ArmProof were created and
-meaningfully developed from July 29 through August 4, 2026, within the
-[official June 10 through August 14, 2026 submission period](https://arm-ai-optimization-challenge.devpost.com/rules).
-The public Git history records the implementation, Arm experiments, evidence
-and releases completed during that period.
-
 ## Short Description
 
-SurgeDesk is an AI assistant for a bank's customer-support team. It reads a
-customer message, suggests the correct support queue and procedure, and asks a
-human operator to confirm or correct the route.
+SurgeDesk is a banking-support application. A support agent enters a customer
+message, receives an AI-classified intent and the application's matching
+procedure, chooses the final queue, and routes the ticket.
 
-We optimized its Phi-4 Mini language model for AWS Graviton4, a cloud server
-processor built on Arm technology. On the same server, with the same model and workload, the Arm-optimized version
-handled at least twice as much sustained traffic while still answering 95% of
-requests in under 10 seconds.
+The application begins on the standard Phi-4 Mini INT4 service with KleidiAI
+off. It recalculates a Graviton4 capacity test and checks an Arm Performix
+profile showing which code ran. Once those checks pass, the same interface
+activates the optimized service. The same support message is then sent again;
+its new request ID, timestamp and runtime receipt visibly come back through the
+KleidiAI-enabled service.
 
-ArmProof is the reusable open-source tool behind that result. It checks the
-raw benchmark files, model quality and proof that Arm's optimized code really
-ran. If any required proof is missing or changed, ArmProof blocks the software
-release.
+The public GitHub Pages build lets judges inspect the application and its
+checked-in evidence without AWS access. The video uses the local gateway and
+two live Graviton endpoints for the control-to-treatment activation.
 
-## Inspiration
+On the same `c8g.4xlarge`, the optimized service sustained 0.56 requests per
+second in five 500-second windows. The control failed the same ten-second p95
+objective in all five windows at 0.28 requests per second. This establishes a
+conservative lower bound of at least twice the sustained request rate.
 
-Performance projects are often presented as one impressive chart. That chart
-may be correct, but it does not show what the improvement means to a user. It
-also does not stop a future code change from shipping a slower or untested
-configuration.
+ArmProof is the reusable open-source component behind the release. It verifies
+raw request records, raw model outputs, treatment identities, quality limits
+and native Arm profiler exports before a deployment can be approved.
 
-We wanted to answer two practical questions:
+## The Problem
 
-1. What does Arm optimization change for a real cloud application?
-2. How can another developer verify a similar claim in their own project?
+An AI service can look faster in a short test and still fail under sustained
+traffic, damage output quality or miss the intended optimized code path. This
+project connects those three checks to a real deployment action:
 
-SurgeDesk answers the first question with a working support workflow. ArmProof
-answers the second with a command-line tool and GitHub Action that turn raw
-performance evidence into a release decision.
+1. SurgeDesk shows the operational effect of the optimization in a live support workflow.
+2. ArmProof turns the measurements into a versioned release contract, CLI check and GitHub Action.
 
-## What It Does
+## What The Application Does
 
-### A Real Support Workflow
+### Live Support Triage
 
-SurgeDesk uses the public BANKING77 dataset, which contains realistic banking
-support questions. For example, a customer might write, "My card has not
-arrived."
+The demo uses realistic banking questions from BANKING77. Phi-4 Mini proposes a
+fine-grained intent, and SurgeDesk selects the matching support procedure. A
+small local routing guard proposes one of five operational queues, and the
+support agent chooses the final queue.
 
-Phi-4 Mini identifies the detailed issue and suggests a support procedure. A
-small routing guard then chooses one of five operational teams. A human sees
-both suggestions and makes the final decision.
+The routing guard was built on 2,310 examples and evaluated on a disjoint
+770-message development holdout. It improved five-queue routing accuracy from
+74.42% for direct model mapping to 86.75%. This is an application-quality
+feature; it is separate from the Arm performance claim and every final route
+still requires a person.
 
-On 770 test messages that were not used to build the routing guard, the final
-queue was correct 86.75% of the time. Directly turning the language model's
-answer into a queue was correct about 74.4% of the time. The guard therefore added
-12.34 percentage points of routing accuracy. This quality improvement is an
-application feature, not an Arm performance claim.
+### Evidence-Driven Deployment
 
-### A Visible Traffic Surge
+The live gateway starts on the control lane. The platform operator then runs
+the current ArmProof audit from the application. The audit:
 
-The application shows what happens when many customers need help at once. The
-unoptimized service starts missing its response-time target. The
-Arm-optimized service keeps the queue responsive on the same Graviton4
-machine.
+- verifies the capacity archive and its internal SHA-256 ledger;
+- re-derives 2,100 individual request outcomes from ten long windows;
+- re-evaluates 1,540 raw model outputs, 770 from each treatment;
+- recalculates size and memory percentages from locked aggregate measurements
+  and direct-speed medians from raw repetitions in four hash-locked files;
+- checks that the model, runtime, workload, server shape, SLO and thread count match;
+- evaluates ten required quality, capacity, evidence-volume and Arm-execution claims; and
+- reads the native Arm Performix Code Hotspots exports directly.
 
-The headline is based on a long controlled test, not on an animation in the
-web application:
-
-- Without KleidiAI, 0.24 requests per second passed all five long tests.
-- With KleidiAI, 0.56 requests per second passed all five long tests.
-- Without KleidiAI, the next tested rate, 0.28 requests per second, failed all
-  five tests.
-
-This proves that the optimized service supports at least twice the sustainable
-traffic: 0.56 is twice 0.28. We use the control's failing boundary in the
-equation so the published number remains a lower bound.
-
-Each long test ran for 500 seconds. In total, ArmProof checks 4,200 recorded
-request results across 20 long test windows.
-
-### A Release Gate Other Developers Can Use
-
-ArmProof verifies the evidence before approving an optimized deployment. It:
-
-- checks that benchmark files have not been changed;
-- recalculates the results from the raw request records;
-- checks the recorded model, runtime, workload and server identities against
-  the release contract;
-- checks that model quality stayed within the declared limit;
-- checks matched Linux perf and native Arm Performix evidence showing that
-  Arm KleidiAI code executed; and
-- returns pass, fail or unknown for every required claim.
-
-Missing proof does not count as success. A failed or unknown required check
-blocks the release. ArmProof produces a machine-readable decision, a visual
-offline report, a pinned deployment recipe and a GitHub pull-request check.
-The demo also changes one byte in a temporary archive copy and shows the same
-integrity boundary block the release before any metric is calculated.
+After the audit passes, activation probes both live services again. Their source
+model fingerprint, ONNX Runtime GenAI version, Arm64 architecture, 16-thread
+shape and KleidiAI controls must match the audited deployment. The route then
+switches to the treatment, and the next real request carries the release audit
+ID in the application's audit trail.
 
 ## What We Optimized
 
-We made three separate comparisons so that each result has a clear cause.
+### Model Footprint
 
-### 1. A Smaller Model
+We migrated the reference model from BF16 to the public Phi-4 Mini INT4 ONNX
+artifact and served it with ONNX Runtime GenAI. The migration measurements
+recorded:
 
-We moved Phi-4 Mini from a 16-bit format called BF16 to a 4-bit format called
-INT4. We served the compressed model with ONNX Runtime GenAI, software for
-running generative AI models. Fewer bits make the model smaller and reduce the
-memory needed to serve it.
+- 35.92% smaller model files;
+- 55.34% lower peak proportional set size (PSS), which estimates the process's
+  share of memory also used by other processes; and
+- 59.66% lower time-weighted PSS.
 
-Compared with the BF16 version:
+The current release keeps these migration results separate from the KleidiAI
+control experiment because quantization and Arm kernel dispatch answer different
+questions.
 
-- the model files were 35.92% smaller;
-- peak process memory was 55.34% lower; and
-- memory use over the full run was 59.66% lower.
+### Arm Execution
 
-### 2. Faster Execution With Arm KleidiAI
+For the KleidiAI experiment, both services use the same INT4 files, ONNX Runtime
+build, API, workload, 16 threads and Graviton4 server. The declared treatment
+control is `mlas.disable_kleidiai`: `1` for the control and `0` for the treatment.
 
-KleidiAI is Arm's library of optimized mathematical building blocks for AI.
-To isolate its effect, we compared two otherwise identical
-INT4 services. They used the same model files, ONNX Runtime build, API, 16 CPU
-threads, workload, Graviton4 instance and response-time target. The only
-intended difference was whether Arm KleidiAI was enabled.
+An exploratory fixed-shape test covered batch/prompt shapes `(1,128)`,
+`(1,512)`, `(4,128)` and `(4,512)`. ArmProof recalculates each median from five
+raw repetitions and reports a 1.72 to 2.59 times speed range as supporting
+evidence, separate from the confirmed capacity result. Arm Performix sampled
+the running code in a matched control and optimized profile. The control must contain
+zero KleidiAI-prefixed (`kai_*`) functions, the treatment must contain at least
+50%, and each profile must contain at least 100,000 function samples. The native export also
+names the Neoverse I8MM matrix kernel that executed.
 
-Across four model-input shapes, enabling KleidiAI made execution 1.72 to 2.59
-times faster. Linux profiling showed that 68.53% of sampled CPU cycles in the
-optimized run passed through KleidiAI matrix-multiplication code, versus 0% in
-the control.
+Linux perf provides a second view using sampled cycles. ArmProof reports the
+Performix function-sample share and Linux perf cycle attribution separately
+because the denominators are different.
 
-We then repeated the positive/negative test with Arm Performix 1.20 Code
-Hotspots. From its native profile exports, ArmProof measured 67.02% of
-function samples in `kai_*` code when KleidiAI was enabled and 0% when it was
-disabled. Performix also exposed the Arm I8MM matrix-kernel family that ran.
-These tools count different things: Performix reports function samples, while
-Linux perf reports cycle attribution. Together they show the optimized Arm
-path executing from two independent profiler views.
+The release report calculates these supporting size, memory and direct-speed
+figures from the locked EXP-2026-002 measurement files.
 
-### 3. More Useful Server Capacity
+### Sustainable Server Capacity
 
-A faster individual request matters only if the whole service handles more
-traffic reliably. We therefore sent requests at fixed rates and required 95%
-of responses to finish within 10 seconds.
+The HTTP client sends requests on a fixed schedule instead of waiting for each
+response. A window passes when 95% of responses finish within ten seconds, no
+request errors occur, and at least 95% of the scheduled traffic completes. Each
+confirmation lasts 500 seconds.
 
-The optimized service passed every 0.56-request-per-second test. The control
-failed every 0.28-request-per-second test. This establishes the conservative
-"at least 2x" capacity result on the same server.
+Latency begins at the scheduled send time, so client dispatch delay is included.
+Responses that finish after the 500-second window plus a ten-second SLO drain
+do not count as delivered. Every successful response also carries the source-model,
+runtime, Arm64, thread and KleidiAI identity that ArmProof checks against the
+release.
 
-The next optimized probe, at 0.60 requests per second, passed only one of five
-windows. The interface shows that mixed row alongside the three stable
-boundaries and derives only the lower bound supported by every test.
-The preregistered exact 2.0x-2.5x bracket therefore failed and remains marked
-rejected. ArmProof releases a separately versioned, narrower claim: the
-evidence proves a lower bound of at least 2.0x, not an exact capacity interval.
+Discovery found the standard service passing at 0.24 requests per second and
+failing at 0.28. The optimized service passed at 0.56, while 0.60 produced mixed
+results and was not used as an exact upper boundary. Before launching the final
+confirmation instance, we committed a contract with one possible success:
+
+- every one of five control windows at 0.28 requests per second must fail; and
+- every one of five treatment windows at 0.56 requests per second must pass.
+
+Any opposite outcome, missing request, quality breach or identity mismatch
+rejects the public claim. The final run met every condition, so the release
+publishes `0.56 / 0.28 = at least 2.0x` sustained capacity. No rate or threshold
+was selected after seeing the confirmation result.
+
+EXP-2026-014 ran those unchanged rates and rules with the complete response
+identity required by the release contract. The repository retains every earlier
+attempt in its evidence history; the public capacity claim uses only this final
+confirmation.
 
 ## How We Built It
 
-1. We fixed the model, software versions, workload, server type and test rules
-   before accepting a result.
-2. We created two matched INT4 deployments: KleidiAI disabled and KleidiAI
-   enabled.
-3. We exposed both deployments through the same HTTP API.
-4. We measured model speed, memory, quality and sustained service traffic.
-5. We tested both versions on the same 770 BANKING77 quality examples. Accuracy
-   changed by less than one percentage point, and every response followed the
-   required JSON format.
-6. We recorded matched Linux perf and native Arm Performix profiles in
-   separate runs so profiling overhead could not distort the traffic result.
-7. ArmProof checks the Performix archive, opens both native Code Hotspots
-   exports and recalculates the `kai_*` sample shares during every reference CI
-   run. Missing or contradictory profiles block the release.
-8. We stored raw evidence with SHA-256 checksums, which work like fingerprints
-   for files. Changing one file changes its fingerprint and blocks approval.
-9. We built SurgeDesk and the GitHub Action on the same ArmProof verification
-   engine, so the application cannot approve itself by editing displayed data.
+1. We pinned the model revisions, ONNX Runtime and ONNX Runtime GenAI commits,
+   KleidiAI version, AWS instance type, workloads and quality limits.
+2. We generated two model overlays whose only intended runtime change is the
+   KleidiAI control.
+3. We ran the same bounded HTTP service on CPU-only AWS Graviton4.
+4. We collected direct inference, memory, fixed-rate capacity, quality, Linux
+   perf and Arm Performix evidence in separately scoped experiments.
+5. We committed the final capacity and Performix acceptance rules before their
+   AWS resources were created.
+6. We wrote adapters that reopen the immutable archives and derive decisions
+   from raw rows and native profiler exports.
+7. We connected that decision to a stateful gateway: control route, fresh
+   audit, identity-bound activation, optimized route.
+8. We packaged the verification path as a Python CLI, offline report and GitHub Action.
 
-## Challenges We Faced
+## Why Arm Matters
 
-The hardest part was not getting the model to run. It was proving why it ran
-better.
+This project targets CPU-only cloud inference on AWS Graviton4 and uses Arm's
+KleidiAI kernels through ONNX Runtime GenAI. The matched control isolates the
+effect of that Arm path, while Arm Performix identifies the `kai_*` functions
+and Neoverse I8MM kernel family observed during inference.
 
-Our first memory experiment used the wrong measurement. It counted memory that
-the operating system had mapped but did not prove that the model data was
-actually resident in memory. We kept that failed experiment, corrected the
-method and measured process memory throughout inference.
+The result is useful at service level: the same 16-core server accepts at least
+twice the sustained request rate under the same latency and quality rules. On
+an x86 machine the KleidiAI treatment and the measured Neoverse I8MM path are
+absent, so the central experiment and deployment contract do not carry over.
 
-Capacity testing also required more than comparing two requests-per-second
-numbers. We used the same response-time target, fixed arrival rates, known
-passing and failing rates, and five long confirmations for each boundary. We
-also required quality to pass before a speed claim could pass.
+## Reusable Work For Other Developers
 
-Finally, installing KleidiAI was not enough to prove it caused the gain. We
-required profiler records from both configurations: positive evidence in the
-optimized version and negative evidence in the control. Arm Performix's CPU
-Microarchitecture and Instruction Mix recipes require at least three exposed
-hardware counters, while this cloud VM exposed two. We preserved those
-readiness failures instead of claiming those reports. Code Hotspots was
-supported and completed successfully for the matched causal comparison.
+ArmProof ships with:
 
-## Accomplishments
+- a public contract format for performance, quality and Arm-execution claims;
+- raw-evidence adapters for fixed-SLO HTTP services;
+- direct readers for native Arm Performix Code Hotspots exports;
+- a fixed-rate load generator and BANKING77 quality evaluator;
+- source-model, runtime, workload and environment identity checks;
+- a CLI that exits successfully only when every required claim passes;
+- an offline HTML report and machine-readable decision;
+- a GitHub Action for pull-request release gates;
+- `armproof init`, which creates a blocked-by-default 16-file starter with exact protocol, identity and profiler-manifest templates for another HTTP AI service;
+- `armproof seal`, which writes a deterministic evidence ledger after collection without approving the result;
+- a SurgeDesk handoff that runs the scaffold check and downloads the generated starter as a ZIP;
+- a complete Graviton4 deployment recipe; and
+- a tested llama.cpp HTTP compatibility adapter whose performance extension is documented separately.
 
-- At least 2x higher sustainable AI traffic on the same Graviton4 server.
-- 1.72x to 2.59x faster execution with KleidiAI across four input shapes.
-- 35.92% smaller model files and more than 55% lower peak memory after the
-  INT4 migration.
-- Less than one percentage point of model-quality change and 100% structurally
-  valid output across 770 test messages.
-- Independent Linux perf and Arm Performix evidence that KleidiAI executed in
-  the optimized service and did not execute in the control.
-- A release-blocking native Performix importer with archive, checksum,
-  treatment, target and contradiction checks.
-- A complete trial matrix that keeps mixed and failed boundary results visible.
-- A reusable Python command-line tool, GitHub Action, public data formats,
-  benchmark templates, deployment recipe and offline report.
-- Automated testing on native Arm64, x86 and desktop/mobile browsers.
-- A one-command starter project for another HTTP inference service.
-- A tested llama.cpp example showing that ArmProof is not limited to Phi-4 or
-  ONNX Runtime. This is a compatibility example, not a performance claim.
+A developer can clone the repository, verify the checked-in reference without
+AWS credentials, or use the same contract and adapter interface for another
+bounded classification service.
+
+## Challenges
+
+The largest challenge was separating a promising measurement from a claim that
+could survive review. Early experiments helped choose the final rates but could
+not approve the release. We therefore committed narrower capacity and Performix
+contracts and ran fresh confirmation instances.
+
+Profiling also required careful treatment. Performix function samples and Linux
+perf cycle samples both show KleidiAI execution, but their percentages are not
+directly interchangeable. The final adapter evaluates the frozen Performix
+threshold in its native units and presents Linux perf as separate supporting
+evidence.
+
+Finally, the live application had to bind deployment behavior to the evidence.
+The gateway now keeps the control active until a fresh audit passes, compares
+the live source-model fingerprint and runtime shape with the release, and only
+then changes the route.
 
 ## What We Learned
 
-Model compression, Arm acceleration and server capacity are different results.
-They need different comparisons:
+- Short tests suggested larger capacity gains, while 500-second windows exposed
+  the reliable two-times lower bound.
+- A favorable latency result is insufficient when a response cannot be tied to
+  the measured source model and runtime; complete deployment identity matters.
+- The Graviton virtual PMU supported Performix Code Hotspots but lacked enough
+  counters for two heavier profiler recipes, so the release uses the supported
+  evidence instead of inferring unavailable metrics.
+- Connecting the audit to an actual service switch made the optimization easier
+  to understand than a standalone benchmark page.
 
-- BF16 versus INT4 explains the file-size and memory savings.
-- KleidiAI disabled versus enabled explains the Arm-specific speedup.
-- Fixed-rate traffic tests explain how many requests the service can support.
+## Try It
 
-We also learned that a polished report is not proof by itself. ArmProof starts
-from raw evidence, recalculates the comparison, verifies the declared
-configuration and only then creates the decision used by the report and GitHub
-Action.
-
-Most importantly, performance is easier to understand when it changes a real
-user outcome. In SurgeDesk, twice the sustainable capacity means the support
-queue remains responsive during a surge without buying a larger server.
-
-## Why It Matters To The Arm Community
-
-Developers can reuse the measured Phi-4 Mini, ONNX Runtime GenAI and KleidiAI
-reference directly. They can also use ArmProof with a different model or
-runtime.
-
-The repository includes:
-
-- a common HTTP interface for inference services;
-- traffic and quality test tools;
-- matched baseline and optimized deployment templates;
-- public evidence and decision formats;
-- file-integrity verification;
-- Arm execution checks using native Linux perf and Arm Performix data;
-- a plain-English Performix tutorial and reusable native-export validator;
-- examples of pass, fail and missing evidence;
-- a GitHub Action and offline report;
-- a contract-digest input so branch-protected workflows can detect a pull
-  request that quietly weakens the quality or capacity policy;
-- a pinned Graviton deployment recipe;
-- a one-command adoption scaffold; and
-- a tested llama.cpp bridge.
-
-A developer can fork the project, connect their own service, choose the quality
-and performance requirements that matter to them, and make unsupported
-optimization claims fail automatically. No hosted ArmProof service is needed.
-
-## Why It Should Win
-
-This project does not simply place an AI application on an Arm server. It
-compresses a real model, isolates and measures an Arm-specific acceleration
-path, validates quality, measures sustained cloud capacity and turns the
-result into reusable developer tooling.
-
-The result is simple to see: the same Graviton4 server handles at least twice
-the sustained AI traffic. The engineering behind that result is inspectable,
-reproducible and honest enough to reject a stronger number when the evidence
-does not support it.
-
-SurgeDesk shows why the optimization matters. ArmProof helps the next Arm
-developer prove their own work.
-
-## What's Next
-
-- Turn the llama.cpp compatibility example into a fully measured adapter.
-- Add vLLM and more ONNX Runtime examples.
-- Validate the same workflow on Google Axion and Microsoft Cobalt.
-- Add ready-made templates for text generation, vision and speech services.
-
-## Setup And Validation
-
-The web demo and accepted evidence run locally; judges do not need an AWS
-account.
+Prerequisite: Python 3.12.
 
 ```bash
 git clone https://github.com/QasimKhan5x/ArmProof.git
 cd ArmProof
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -e .
-make check
 .venv/bin/armproof ci examples/armproof-reference/armproof.json
-python3.12 scripts/demo_release_gate.py
+python3.12 scripts/build_surgedesk_demo.py --verify
 python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
-Open `http://127.0.0.1:8765/surgedesk/`.
+Open <http://127.0.0.1:8765/surgedesk/>. The checked-in evidence path works
+without AWS credentials. The complete live Graviton recording sequence is in
+`submission/DEMO_SCRIPT.md`.
 
-The complete Graviton service recipe, pinned software versions, matched
-deployment generator and benchmark runner are under `examples/phi4-graviton/`
-and `deploy/`.
+## Open Source, Data And Challenge Period
 
-## Open Source And Data
+The project is MIT licensed. BANKING77 is used under CC BY 4.0 and credited in
+`THIRD_PARTY_NOTICES.md`. Model weights are downloaded from their original
+source and are not stored in this repository.
 
-The project is MIT licensed. BANKING77 is used under CC BY 4.0 and is credited
-in `THIRD_PARTY_NOTICES.md`. Model weights are not redistributed.
+SurgeDesk and ArmProof were created and meaningfully developed from July 29
+through August 5, 2026, during the challenge submission period. The public Git
+history records the source changes, preregistrations, AWS experiments, evidence
+and releases.

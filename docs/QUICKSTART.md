@@ -3,16 +3,16 @@
 ## Run SurgeDesk
 
 The application works from accepted, checksummed experiment files without
-cloud access. Its local gateway streams a fresh archive derivation, and optional
-live endpoints add real matched Arm64 requests:
+cloud access. Its local gateway re-derives the release evidence when requested,
+and optional live endpoints add real Arm64 requests before and after activation:
 
 ```bash
 python3.12 scripts/build_surgedesk_demo.py --verify
 python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
-Open `http://127.0.0.1:8765/surgedesk/#triage`. Choose **Guard intervention**
-or **Human correction**, then continue through Capacity audit and Release gate.
+Open `http://127.0.0.1:8765/surgedesk/#triage`, route a request, then continue
+through Capacity audit and Release gate.
 The views are directly addressable as `#triage`, `#surge`, and `#proof`. See
 [`SURGEDESK_DEMO.md`](SURGEDESK_DEMO.md) for provenance and narration.
 
@@ -26,14 +26,14 @@ python3.12 -m pip install .
 armproof ci examples/armproof-reference/armproof.json
 ```
 
-The command verifies and derives from 69 checksummed files in the sustained
-archive and 35 in the native Arm Performix bundle. It re-derives 4,200 request outcomes, then writes a
-machine-readable decision, a verification receipt and an offline `index.html`.
+The command verifies the confirmatory capacity and native Arm Performix
+archives. It re-derives 2,100 capacity requests and 1,540 raw model outputs,
+then writes a machine-readable decision, a verification receipt and an offline
+`index.html`.
 Exit `0` means all required claims passed, `2` means at least one required
 claim failed or is unknown, and `1` means the inputs could not be evaluated.
 
-Run the integrity challenge to see valid evidence pass and a temporary
-one-digest mutation block before policy evaluation:
+Print the same release decision consumed by SurgeDesk and CI:
 
 ```bash
 python3.12 scripts/demo_release_gate.py
@@ -57,11 +57,11 @@ Create an `armproof.json` matching
 [`schemas/ci-config.schema.json`](../schemas/ci-config.schema.json), then add:
 
 ```yaml
-- uses: QasimKhan5x/ArmProof@v0.7.0
+- uses: QasimKhan5x/ArmProof@v0.8.0
   with:
     config: armproof.json
     output: build/armproof-report
-    contract-sha256: 3dea0ec2062275181902907d011d27d2b83b11b3ea2e9f8ed5cbce38ede9ff0c
+    contract-sha256: 5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369
 
 - if: always()
   uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -121,6 +121,17 @@ Run matched baseline and treatment configurations on the same Arm machine.
 Record model, runtime, workload and environment hashes, and provide executed
 Arm-path evidence for Arm-specific claims. A compiled or available library is
 not execution evidence.
+
+When collection is complete, seal every file under the configured evidence
+root and then evaluate the contract:
+
+```bash
+armproof seal armproof.json
+armproof ci armproof.json
+```
+
+`seal` only writes the deterministic ledger. It does not approve incomplete or
+invalid measurements; the subsequent `ci` command remains the policy gate.
 
 ## Verify Raw Evidence
 

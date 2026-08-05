@@ -2,59 +2,35 @@
   "capacity": {
     "mixes": {
       "mixed": {
-        "baseline_fail_rps": 0.28,
-        "baseline_pass_p95_ms": [
-          8331.46282,
-          8241.560369,
-          8428.073218,
-          8362.083283,
-          8292.810668
+        "baseline_fail_p95_ms": [
+          59311.178856,
+          60904.386374,
+          60144.229696,
+          59650.557467,
+          59804.253449
         ],
-        "baseline_sustainable_rps": 0.24,
+        "baseline_fail_rps": 0.28,
         "confirmation_seconds": 500,
         "confirmations_per_treatment": 5,
         "minimum_capacity_ratio": 2.0,
         "optimized_pass_p95_ms": [
-          3295.10353,
-          3279.866876,
-          3293.478156,
-          3305.65856,
-          3292.177148
+          3346.5036,
+          3350.138929,
+          3337.658983,
+          3343.913765,
+          3335.516618
         ],
-        "optimized_probe_failures": 4,
-        "optimized_probe_p95_ms": [
-          10338.03675,
-          9927.676582,
-          10137.207889,
-          13130.901494,
-          11224.422493
-        ],
-        "optimized_probe_passes": 1,
-        "optimized_probe_rps": 0.6,
         "optimized_sustainable_rps": 0.56,
-        "tested_pass_point_ratio": 2.3333333333333335,
         "trial_matrix": [
           {
-            "boundary": "Known sustainable",
-            "outcomes": [
-              "pass",
-              "pass",
-              "pass",
-              "pass",
-              "pass"
+            "boundary": "preregistered failing control rate",
+            "max_dispatch_ms": [
+              2.414747,
+              3.143784,
+              2.365,
+              3.025653,
+              3.163576
             ],
-            "p95_ms": [
-              8331.46282,
-              8241.560369,
-              8428.073218,
-              8362.083283,
-              8292.810668
-            ],
-            "rate_rps": 0.24,
-            "treatment": "KleidiAI disabled"
-          },
-          {
-            "boundary": "First failing probe",
             "outcomes": [
               "fail",
               "fail",
@@ -63,17 +39,24 @@
               "fail"
             ],
             "p95_ms": [
-              58960.120524,
-              58187.366381,
-              59287.382817,
-              59048.016977,
-              58659.50801
+              59311.178856,
+              60904.386374,
+              60144.229696,
+              59650.557467,
+              59804.253449
             ],
             "rate_rps": 0.28,
             "treatment": "KleidiAI disabled"
           },
           {
-            "boundary": "Known sustainable",
+            "boundary": "preregistered passing treatment rate",
+            "max_dispatch_ms": [
+              3.305797,
+              3.333289,
+              3.200229,
+              3.298681,
+              3.254334
+            ],
             "outcomes": [
               "pass",
               "pass",
@@ -82,46 +65,124 @@
               "pass"
             ],
             "p95_ms": [
-              3295.10353,
-              3279.866876,
-              3293.478156,
-              3305.65856,
-              3292.177148
+              3346.5036,
+              3350.138929,
+              3337.658983,
+              3343.913765,
+              3335.516618
             ],
             "rate_rps": 0.56,
-            "treatment": "KleidiAI enabled"
-          },
-          {
-            "boundary": "Next probe",
-            "outcomes": [
-              "fail",
-              "pass",
-              "fail",
-              "fail",
-              "fail"
-            ],
-            "p95_ms": [
-              10338.03675,
-              9927.676582,
-              10137.207889,
-              13130.901494,
-              11224.422493
-            ],
-            "rate_rps": 0.6,
             "treatment": "KleidiAI enabled"
           }
         ]
       }
     },
-    "slo_ms": 10000
+    "rate_selection": {
+      "confirmation_experiment_id": "EXP-2026-014",
+      "experiment_id": "EXP-2026-009",
+      "interpretation": "Discovery located the one-sided capacity bounds. The Git object for EXP-2026-014 contains the exact final plan and predates the recorded AWS launch time. It froze both rates, all ten 500-second windows, and every pass rule used here.",
+      "publication": {
+        "chronology_scope": "Git commit and plan bytes verified in this checkout; instance launch time is recorded experiment metadata, not independent cloud attestation.",
+        "experiment_id": "EXP-2026-014",
+        "git_commit": "ab22cc055881c5e8bae35dd6e4d919f0b407971e",
+        "git_commit_time": "2026-08-05T00:57:09+02:00",
+        "git_commit_verified_in_checkout": true,
+        "instance_launch_time": "2026-08-04T22:58:28+00:00",
+        "instance_launch_time_source": "recorded_experiment_metadata",
+        "measurement_started_at": "2026-08-04T22:58:48+00:00",
+        "plan_embedded_in_measurement_archive": true,
+        "plan_embedded_in_project_bundle": true,
+        "preregistration_sha256": "534933500ac1c8af473d0b649be30bcae285743e616513dbdeeae0cce0935e84",
+        "public_commit_url": "https://github.com/QasimKhan5x/ArmProof/commit/ab22cc055881c5e8bae35dd6e4d919f0b407971e"
+      },
+      "trial_matrix": [
+        {
+          "boundary": "known sustainable",
+          "outcomes": [
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass"
+          ],
+          "p95_ms": [
+            8331.46282,
+            8241.560369,
+            8428.073218,
+            8362.083283,
+            8292.810668
+          ],
+          "rate_rps": 0.24,
+          "treatment": "KleidiAI disabled"
+        },
+        {
+          "boundary": "first failing probe",
+          "outcomes": [
+            "fail",
+            "fail",
+            "fail",
+            "fail",
+            "fail"
+          ],
+          "p95_ms": [
+            58960.120524,
+            58187.366381,
+            59287.382817,
+            59048.016977,
+            58659.50801
+          ],
+          "rate_rps": 0.28,
+          "treatment": "KleidiAI disabled"
+        },
+        {
+          "boundary": "known sustainable",
+          "outcomes": [
+            "pass",
+            "pass",
+            "pass",
+            "pass",
+            "pass"
+          ],
+          "p95_ms": [
+            3295.10353,
+            3279.866876,
+            3293.478156,
+            3305.65856,
+            3292.177148
+          ],
+          "rate_rps": 0.56,
+          "treatment": "KleidiAI enabled"
+        },
+        {
+          "boundary": "next probe",
+          "outcomes": [
+            "fail",
+            "pass",
+            "fail",
+            "fail",
+            "fail"
+          ],
+          "p95_ms": [
+            10338.03675,
+            9927.676582,
+            10137.207889,
+            13130.901494,
+            11224.422493
+          ],
+          "rate_rps": 0.6,
+          "treatment": "KleidiAI enabled"
+        }
+      ]
+    },
+    "slo_ms": 10000.0
   },
   "product": {
-    "demo_mode": "accepted_evidence_load",
+    "demo_mode": "live_gateway_with_verified_release_evidence",
     "description": "Human-confirmed support triage on an Arm-optimized cloud AI service.",
     "name": "SurgeDesk"
   },
   "proof": {
-    "adapter_id": "kleidiai-sustained-v1",
+    "adapter_id": "kleidiai-confirmed-v2",
     "artifact_reduction_percent": 35.91724249132322,
     "claims": [
       {
@@ -164,89 +225,135 @@
         "id": "sustained-window-count",
         "label": "Long confirmation windows",
         "metric": "raw_confirmation_files",
-        "observed": 20.0,
+        "observed": 10.0,
         "operator": "gte",
         "status": "pass",
-        "threshold": 20.0
+        "threshold": 10.0
       },
       {
         "id": "sustained-request-count",
         "label": "Raw request outcomes",
         "metric": "raw_confirmation_samples",
-        "observed": 4200.0,
+        "observed": 2100.0,
         "operator": "gte",
         "status": "pass",
-        "threshold": 4200.0
+        "threshold": 2100.0
       },
       {
-        "id": "arm-execution",
-        "label": "Executed Arm path",
-        "metric": "enabled_kai_callchains_observed",
-        "observed": 1.0,
+        "id": "raw-quality-output-count",
+        "label": "Raw quality outputs",
+        "metric": "raw_quality_outputs",
+        "observed": 1540.0,
         "operator": "eq",
         "status": "pass",
-        "threshold": 1.0
+        "threshold": 1540.0
       },
       {
-        "id": "arm-cycle-attribution",
-        "label": "KleidiAI cycle attribution",
-        "metric": "enabled_kai_cycle_callchain_share",
-        "observed": 0.6853,
+        "id": "arm-control-zero",
+        "label": "KleidiAI absent in control profile",
+        "metric": "performix_disabled_kai_share",
+        "observed": 0.0,
+        "operator": "eq",
+        "status": "pass",
+        "threshold": 0.0
+      },
+      {
+        "id": "arm-treatment-share",
+        "label": "KleidiAI share in treatment profile",
+        "metric": "performix_enabled_kai_share",
+        "observed": 0.673518470835091,
         "operator": "gte",
         "status": "pass",
         "threshold": 0.5
       },
       {
-        "id": "perf-sample-integrity",
-        "label": "Profiler sample integrity",
-        "metric": "lost_perf_samples",
-        "observed": 0.0,
-        "operator": "eq",
+        "id": "performix-sample-count",
+        "label": "Performix profile samples",
+        "metric": "performix_minimum_profile_samples",
+        "observed": 365062.0,
+        "operator": "gte",
         "status": "pass",
-        "threshold": 0.0
+        "threshold": 100000.0
       }
     ],
-    "contract_id": "phi4-graviton-kleidiai-sustained-release",
+    "contract_id": "phi4-graviton-kleidiai-confirmed-release",
     "decision": "PASS",
-    "decision_source": "derived_from_versioned_sustained_contract",
+    "decision_source": "derived_from_preregistered_confirmation",
+    "direct_shape_gains": [
+      1.7170141477125782,
+      2.128817498309564,
+      2.4081349473078624,
+      2.5870578477345356
+    ],
     "direct_speedup_max": 2.5870578477345356,
-    "direct_speedup_min": 1.7170141477125784,
+    "direct_speedup_min": 1.7170141477125782,
     "instance": "c8g.4xlarge",
-    "kleidiai_cycle_callchain_share_percent": 68.53,
+    "kleidiai_cycle_callchain_share_percent": 67.91,
     "kleidiai_disabled_callchains": false,
     "kleidiai_enabled_callchains": true,
+    "live_deployment_identity": {
+      "architecture": "aarch64",
+      "controls": {
+        "baseline": {
+          "mlas.disable_kleidiai": "1"
+        },
+        "optimized": {
+          "mlas.disable_kleidiai": "0"
+        }
+      },
+      "instance_type": "c8g.4xlarge",
+      "runtime": "onnxruntime-genai",
+      "runtime_lock_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
+      "runtime_version": "0.15.0.dev0",
+      "schema_version": "1.0.0",
+      "source_artifact_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
+      "threads": 16
+    },
     "migration_bf16_quality_correct": 19,
     "migration_int4_quality_correct": 20,
     "migration_quality_delta_pp": 4.166666666666666,
     "migration_quality_total": 24,
     "peak_pss_reduction_percent": 55.336785335288766,
     "performix": {
-      "absolute_share_difference_pp": 1.5141708795253783,
       "cpu": "Neoverse-V2",
       "disabled_kai_sample_share_percent": 0.0,
-      "enabled_function_samples": 368119,
-      "enabled_kai_sample_share_percent": 67.01582912047462,
+      "enabled_function_samples": 365062,
+      "enabled_kai_sample_share_percent": 67.3518470835091,
       "engine_version": "1.20.0",
-      "experiment_id": "EXP-2026-010",
-      "internal_checksummed_files": 35,
+      "experiment_id": "EXP-2026-013",
+      "internal_checksummed_files": 40,
       "kernel_family": "kai_kernel_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_opt32_neon_i8mm",
-      "linux_perf_cycle_share_percent": 68.53,
+      "linux_perf_cycle_share_percent": 67.91,
       "pmu_capability_note": "Code Hotspots was available on the c8g.4xlarge virtual PMU; counter-heavy recipes were capability-gated and excluded.",
-      "scope_note": "ArmProof re-derived this matched Code Hotspots pair from native Performix exports and cross-checked it against Linux perf."
+      "scope_note": "ArmProof re-derived this matched Code Hotspots pair from native Performix exports. Linux perf supplies separate cycle-attribution evidence with a different denominator."
     },
     "reproduction_experiment_id": "EXP-2026-005",
     "reproduction_max_relative_difference_percent": 0.0,
     "threads": 16,
-    "verified_claims": 9,
+    "verified_claims": 10,
     "weighted_pss_reduction_percent": 59.66032309469201
   },
   "provenance": {
+    "application_evaluation_experiment_id": "EXP-2026-004",
     "claim_boundary": {
+      "preregistration_publication": {
+        "chronology_scope": "Git commit and plan bytes verified in this checkout; instance launch time is recorded experiment metadata, not independent cloud attestation.",
+        "experiment_id": "EXP-2026-014",
+        "git_commit": "ab22cc055881c5e8bae35dd6e4d919f0b407971e",
+        "git_commit_time": "2026-08-05T00:57:09+02:00",
+        "git_commit_verified_in_checkout": true,
+        "instance_launch_time": "2026-08-04T22:58:28+00:00",
+        "instance_launch_time_source": "recorded_experiment_metadata",
+        "measurement_started_at": "2026-08-04T22:58:48+00:00",
+        "plan_embedded_in_measurement_archive": true,
+        "plan_embedded_in_project_bundle": true,
+        "preregistration_sha256": "534933500ac1c8af473d0b649be30bcae285743e616513dbdeeae0cce0935e84",
+        "public_commit_url": "https://github.com/QasimKhan5x/ArmProof/commit/ab22cc055881c5e8bae35dd6e4d919f0b407971e"
+      },
       "released_lower_formula": "0.56 / 0.28",
       "released_lower_ratio": 2.0
     },
-    "contract_sha256": "3dea0ec2062275181902907d011d27d2b83b11b3ea2e9f8ed5cbce38ede9ff0c",
-    "corrected_claim_passed": true,
+    "contract_sha256": "5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369",
     "dataset": "BANKING77",
     "dataset_license": "CC-BY-4.0",
     "evidence": {
@@ -254,30 +361,31 @@
       "checksummed_files": 141,
       "comparison": "matched_control",
       "only_changed_control": "mlas.disable_kleidiai",
-      "performix_archive_sha256": "28d411e40de38f3ad4a455bbfa09524dee8b44d6e44eb4d3b599e01635789148",
+      "performix_archive_sha256": "9301e9da951ce8b294b8b1a2153a2d333017cbeecef73ab5d930b90bde2d7d4e",
       "performix_archive_verified": true,
-      "performix_checksummed_files": 35,
+      "performix_checksummed_files": 40,
       "performix_internal_checksums_verified": true,
+      "raw_quality_checksummed_files": 111,
+      "raw_quality_outputs": 1540,
       "reproduction_checksum_verified": true,
       "reproduction_checksummed_files": 141,
-      "sustained_archive_sha256": "f22e647aabe40eefd2abc5548306f40e2a5558ce1a85bc31c18319e6e51d78da",
+      "sustained_archive_sha256": "c4f94870eece68081c54411eedc24e17ae3b6d541afb94daee7ed86577a1bb06",
       "sustained_archive_verified": true,
-      "sustained_checksummed_files": 69,
+      "sustained_checksummed_files": 50,
       "sustained_internal_checksums_verified": true,
       "sustained_matched_control_verified": true,
-      "sustained_raw_confirmation_files": 20,
-      "sustained_raw_confirmation_samples": 4200,
-      "total_checksummed_files": 386
+      "sustained_raw_confirmation_files": 10,
+      "sustained_raw_confirmation_samples": 2100,
+      "total_checksummed_files": 487
     },
-    "experiment_id": "EXP-2026-009",
+    "experiment_id": "EXP-2026-014",
     "machine": "AWS Graviton4 / c8g.4xlarge / 16 cores",
     "model": "Phi-4 Mini",
     "model_id": "microsoft/Phi-4-mini-instruct-onnx",
     "optimization": "KleidiAI disabled -> enabled",
-    "original_gate_passed": false,
-    "release_action": "QasimKhan5x/ArmProof@v0.7.0",
-    "release_experiment_id": "EXP-2026-004",
-    "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.7.0",
+    "release_action": "QasimKhan5x/ArmProof@v0.8.0",
+    "release_experiment_id": "EXP-2026-014",
+    "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.8.0",
     "report_path": "../report/index.html",
     "runtime": "ONNX Runtime GenAI INT4"
   },

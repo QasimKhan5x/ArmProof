@@ -20,7 +20,7 @@ Historical documents must not be treated as active requirements.
 
 ## ADR-003: ArmProof Is A PR Release Gate
 
-- Status: accepted.
+- Status: amended by ADR-011.
 - Decision: the primary workflow is a CI merge/deployment decision for an Arm
   AI optimization PR.
 - Reason: this is recurring developer work and avoids a staged application
@@ -65,7 +65,7 @@ upstream dataset's attribution terms must remain explicit.
 
 ## ADR-009: Publish The Sustained Lower Bound, Not The Short-Window Headline
 
-- Status: accepted on 2026-08-03.
+- Status: superseded by ADR-012 after serving as discovery evidence.
 - Decision: the judge-facing capacity claim is at least 2.0x sustained mixed
   traffic. Display all four tested boundaries and twenty outcomes; derive the
   lower bound from the optimized passing boundary and baseline failing boundary.
@@ -85,6 +85,37 @@ upstream dataset's attribution terms must remain explicit.
 - Reason: the submission needs to demonstrate that ArmProof is not coupled to
   Phi-4 or ONNX Runtime while preserving the single measured reference and its
   causal boundaries.
+
+## ADR-011: Connect The Release Gate To A Real Product Action
+
+- Status: accepted on 2026-08-04.
+- Decision: SurgeDesk is the primary demo surface. A real support request uses
+  the control lane, the evidence audit authorizes a deployment change, and the
+  next real request records the optimized lane and authorizing audit.
+- Reason: the optimization becomes understandable when it changes visible
+  product behavior. ArmProof remains the reusable community artifact behind the
+  action rather than a standalone dashboard.
+
+## ADR-012: Require Fresh One-Sided Capacity And Performix Confirmation
+
+- Status: accepted on 2026-08-04.
+- Decision: the public release consumes only the two rates frozen in
+  EXP-2026-014 and the Code Hotspots thresholds frozen in EXP-2026-013. Earlier
+  capacity and profiler runs remain discovery history.
+- Reason: the final evidence must be independent of rate selection and must use
+  a profiler recipe supported by the Graviton virtual PMU. Release-time config
+  cannot replace either preregistration's rates or thresholds.
+
+## ADR-013: Reject Capacity Evidence Missing Response-Level Source Identity
+
+- Status: accepted on 2026-08-04.
+- Decision: EXP-2026-012 remains rejected even though its capacity outcomes
+  matched the frozen rates. EXP-2026-014 reruns the same rates, workload, model,
+  runtime and SLO after adding the required source-artifact hash to every
+  successful response.
+- Reason: endpoint labels and matching model identities do not satisfy the
+  preregistered source-provenance rule. The public result must pass the same
+  analyzer shipped to judges.
 
 ## Pending Decisions
 

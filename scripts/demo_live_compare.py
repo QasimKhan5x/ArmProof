@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Race one request across prepared KleidiAI control and treatment endpoints."""
+"""Preflight one request through each configured Graviton endpoint."""
 
 from __future__ import annotations
 
 import argparse
 import json
 import sys
+import urllib.request
 import uuid
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Callable, NamedTuple, Sequence
+from urllib.parse import urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,6 +26,44 @@ class LiveResult(NamedTuple):
     backend: str
     latency_ms: float
     output: str
+
+
+def _health_url(endpoint: str) -> str:
+    parsed = urlsplit(endpoint)
+    return parsed._replace(path="/health", query="", fragment="").geturl()
+
+
+def verify_live_identities(
+    baseline_endpoint: str, optimized_endpoint: str, timeout: float
+) -> dict[str, object]:
+    payloads = []
+    for endpoint in (baseline_endpoint, optimized_endpoint):
+        with urllib.request.urlopen(_health_url(endpoint), timeout=timeout) as response:
+            payload = json.load(response)
+        if not isinstance(payload, dict) or payload.get("ready") is not True:
+            raise ValueError("endpoint health document is not ready")
+        payloads.append(payload)
+    baseline, optimized = payloads
+    matched = (
+        "model_identity", "source_artifact_sha256", "runtime", "runtime_version",
+        "threads", "architecture", "cpu_affinity",
+    )
+    if any(baseline.get(field) != optimized.get(field) for field in matched):
+        raise ValueError("endpoint model, runtime, thread, or CPU identity differs")
+    if (
+        baseline.get("backend") != "kleidiai-disabled"
+        or optimized.get("backend") != "kleidiai-enabled"
+        or baseline.get("optimization_control", {}).get("mlas.disable_kleidiai") != "1"
+        or optimized.get("optimization_control", {}).get("mlas.disable_kleidiai") != "0"
+    ):
+        raise ValueError("endpoint KleidiAI controls do not form the matched pair")
+    return {
+        field: baseline[field]
+        for field in (
+            "source_artifact_sha256", "runtime", "runtime_version", "threads",
+            "architecture", "cpu_affinity",
+        )
+    }
 
 
 def _request(
@@ -71,23 +110,18 @@ def compare_live_requests(
     timeout: float = 60,
     on_complete: Callable[[LiveResult], None] | None = None,
 ) -> tuple[LiveResult, LiveResult]:
-    """Issue the same prompt concurrently and retain control/treatment order."""
+    """Issue the same prompt sequentially and retain control/treatment order."""
     prompt = build_prompt(text, categories)
     jobs = (
         (baseline_endpoint, "KleidiAI disabled", "kleidiai-disabled"),
         (optimized_endpoint, "KleidiAI enabled", "kleidiai-enabled"),
     )
     completed: dict[str, LiveResult] = {}
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        futures = {
-            executor.submit(_request, endpoint, label, backend, prompt, timeout): label
-            for endpoint, label, backend in jobs
-        }
-        for future in as_completed(futures):
-            row = future.result()
-            completed[row.label] = row
-            if on_complete is not None:
-                on_complete(row)
+    for endpoint, label, backend in jobs:
+        row = _request(endpoint, label, backend, prompt, timeout)
+        completed[row.label] = row
+        if on_complete is not None:
+            on_complete(row)
     return completed["KleidiAI disabled"], completed["KleidiAI enabled"]
 
 
@@ -113,7 +147,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.timeout <= 0:
         parser.error("--timeout must be positive")
 
-    print("MATCHED GRAVITON ENDPOINT CHECK", flush=True)
+    print("LIVE GRAVITON ENDPOINT PREFLIGHT", flush=True)
     print(f"Customer request: {args.message}", flush=True)
 
     def show(row: LiveResult) -> None:
@@ -124,6 +158,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
 
     try:
+        identity = verify_live_identities(
+            args.baseline_endpoint, args.optimized_endpoint, args.timeout
+        )
+        print(
+            f"Matched runtime: {identity['runtime']} {identity['runtime_version']} · "
+            f"{identity['architecture']} · {identity['threads']} threads · "
+            f"source={str(identity['source_artifact_sha256'])[:12]}…",
+            flush=True,
+        )
         baseline, optimized = compare_live_requests(
             args.baseline_endpoint,
             args.optimized_endpoint,
@@ -136,9 +179,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"live comparison failed: {exc}", file=sys.stderr)
         return 1
 
-    ratio = baseline.latency_ms / optimized.latency_ms
-    print(f"Warm-up latency ratio: {ratio:.2f}x", flush=True)
-    print("Published capacity source: EXP-2026-009 sustained audit (>=2.0x).", flush=True)
+    print(
+        "READY matched endpoint identities verified; request latency is a warm-up observation.",
+        flush=True,
+    )
     return 0
 
 

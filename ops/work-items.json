@@ -1,8 +1,8 @@
 {
   "schema_version": "2.0.0",
-  "updated_at": "2026-08-04",
+  "updated_at": "2026-08-05",
   "spec_gate": {
-    "version": "1.2.0",
+    "version": "1.3.0",
     "status": "approved",
     "work_item": "CTX-001"
   },
@@ -289,8 +289,8 @@
       "status": "completed",
       "dependencies": ["REPRO-001"],
       "context": ["docs/SURGEDESK_DEMO.md", "docs/DEMO_AND_SUBMISSION.md"],
-      "deliverables": ["Human-confirmed two-stage support triage", "Equal-load customer-outcome replay", "Optional live Graviton gateway", "Matched live comparison", "ArmProof release-proof handoff"],
-      "verification": ["Queue guard exceeds 85% on a disjoint holdout", "Visible values derive from accepted evidence", "Recorded, illustrative-live and sustained evidence cannot be confused", "Endpoint labels fail closed", "Desktop and 320px browser workflows pass"],
+      "deliverables": ["Human-confirmed two-stage support triage", "Optional live Graviton gateway", "Streamed raw-evidence audit", "Identity-bound optimized-lane activation", "Downloadable ArmProof adoption starter"],
+      "verification": ["Queue guard exceeds 85% on a disjoint holdout", "Visible values derive from accepted evidence", "Live requests and previously collected sustained evidence cannot be confused", "Endpoint labels fail closed", "Desktop and 320px browser workflows pass"],
       "evidence": [
         "surgedesk/",
         "scripts/build_surgedesk_demo.py --verify",
@@ -301,7 +301,7 @@
         "tests/ui/surgedesk.spec.mjs",
         "scripts/demo_live_compare.py",
         "tests/test_demo_live_compare.py",
-        "submission/LIVE_REQUEST_RUNBOOK.md"
+        "submission/DEMO_SCRIPT.md"
       ]
     },
     {
@@ -327,14 +327,12 @@
       "deliverables": ["Tagged release", "Demo video", "Submission copy", "Public evidence bundle"],
       "verification": ["Demo uses real recorded evidence", "Every numerical claim links to a bundle", "Installation and validation steps work from the release"],
       "evidence": [
-        "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.7.0",
-        "GitHub CI 30684464229 passed on native Arm64, x86 and report-browser jobs",
-        "GitHub example Action 30684494688 passed and uploaded the offline report",
+        "v0.8.0 release candidate with EXP-2026-014 and EXP-2026-013 as the canonical capacity and Performix evidence",
         "Clean virtual-environment install and fail-closed armproof init dry run passed 2026-08-04",
         "examples/llama-cpp-http-slo real Arm64 Qwen2.5 smoke receipt",
-        "132 Python tests and 11 Playwright workflows passed 2026-08-04",
+        "186 Python tests, 5 JavaScript logic tests and 8 Playwright workflows passed 2026-08-05",
         "Matched Arm Performix native exports are mandatory in reference CI",
-        "GitHub CI 30907040846 passed on native Arm64, x86 and report-browser jobs"
+        "EXP-2026-014 passed all ten frozen release claims; cumulative AWS estimate USD 13.4872; final inventory empty"
       ]
     }
   ]

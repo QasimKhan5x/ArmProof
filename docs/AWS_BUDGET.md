@@ -1,19 +1,16 @@
 # AWS Budget And Lifecycle
 
-## Budget
+## Final Budget
 
-- Target additional spend: USD 2-4.
-- Hard project ceiling: USD 15 total across all feasibility and product runs.
-- Prior spend carried into the Performix plan: USD 10.7878.
-- Primary instance: one `c8g.4xlarge` in `us-east-1`.
-- Capacity run: 60-90 minutes expected, two-hour hard stop.
-- Final reproduction: one additional bounded session.
-- Current cumulative evidence estimate before EXP-2026-010: USD 10.7878.
-- EXP-2026-010 ceiling: 150 minutes on one `c8g.4xlarge`, at most about
-  USD 1.61 compute plus bounded storage, keeping the project below USD 15.
-- Actual Performix sessions: USD 0.0740 for EXP-2026-010 and USD 0.0781 for
-  EXP-2026-011. Current cumulative estimate: USD 10.9399. Both instances were
-  terminated and the final inventory is empty.
+- Hard project ceiling: USD 15 across all feasibility and product runs.
+- Primary machine: `c8g.4xlarge` in `us-east-1`.
+- Final conservative cumulative estimate: USD 13.4872.
+- Accepted EXP-2026-013 Performix session: USD 0.0607. Its failed cold-import
+  attempt cost USD 0.0393 and remains in the registry.
+- Accepted EXP-2026-014 capacity confirmation: USD 1.0503.
+- Every experiment used a plan-specific runtime and cost ceiling. All instances
+  were terminated, temporary storage was removed, and the final inventory is
+  empty.
 
 Prices must be refreshed before launch and recorded in the spend ledger.
 

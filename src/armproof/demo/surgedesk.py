@@ -5,7 +5,6 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
-import math
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, Callable
@@ -13,10 +12,9 @@ from typing import Any, Callable
 from armproof import __version__
 from armproof.contracts import parse_contract
 from armproof.demo.queue_guard import QueueGuard, queue_for_intent
-from armproof.evidence import comparison_to_dict, verify_and_derive
-from armproof.evidence.sustained_audit import derive_sustained_audit
-from armproof.evidence.performix import verify_performix_archive
-from armproof.policy import decision_to_dict
+from armproof.evidence import comparison_to_dict, get_evidence_adapter, verify_and_derive
+from armproof.evidence.supporting import derive_supporting_optimization
+from armproof.evidence.publication import verify_preregistration_publication
 
 
 DEMO_CASE_IDS = (
@@ -82,6 +80,10 @@ def _claim_rows(contract: Any, decision: dict[str, Any]) -> list[dict[str, Any]]
         "arm-execution": "Executed Arm path",
         "arm-cycle-attribution": "KleidiAI cycle attribution",
         "perf-sample-integrity": "Profiler sample integrity",
+        "raw-quality-output-count": "Raw quality outputs",
+        "arm-control-zero": "KleidiAI absent in control profile",
+        "arm-treatment-share": "KleidiAI share in treatment profile",
+        "performix-sample-count": "Performix profile samples",
     }
     results = {row["claim_id"]: row for row in decision["claims"]}
     return [
@@ -124,61 +126,81 @@ def build_surgedesk_payload(
     reference_config = _load_json(
         root / "examples/armproof-reference/armproof.json"
     )
-    performix_config = reference_config["evidence"]["performix"]
-    accepted_evidence = root / "ops/evidence/EXP-2026-004/accepted/evidence"
-    sustained_contract = parse_contract(
-        _load_json(root / "examples/armproof-reference/sustained-contract.json")
+    confirmation_plan = _load_json(
+        root / "examples/armproof-reference" / reference_config["evidence"]["preregistration"]
     )
-    sustained = derive_sustained_audit(
-        root / "ops/evidence/EXP-2026-009/evidence.tar.gz",
-        expected_sha256="f22e647aabe40eefd2abc5548306f40e2a5558ce1a85bc31c18319e6e51d78da",
-        contract=sustained_contract,
-        workload_manifest=root / "data/banking77/generated/manifest.json",
-        on_stage=on_audit_stage,
-    )
-    configured_perf_share = float(performix_config["linux_perf_kai_cycle_share"])
-    if not math.isclose(
-        configured_perf_share,
-        sustained.enabled_kai_cycle_share,
-        rel_tol=1e-9,
-        abs_tol=1e-9,
-    ):
-        raise ValueError(
-            "configured Linux perf share disagrees with the sustained archive"
+    application_evidence = root / "ops/evidence/EXP-2026-004/accepted/evidence"
+    confirmed_contract = parse_contract(
+        _load_json(
+            root / "examples/armproof-reference" / reference_config["contract"]
         )
-    performix = verify_performix_archive(
-        root / "examples/armproof-reference" / performix_config["archive"],
-        expected_archive_sha256=performix_config["archive_sha256"],
-        expected_experiment_id=performix_config["experiment_id"],
-        disabled_run_id=performix_config["disabled_run_id"],
-        enabled_run_id=performix_config["enabled_run_id"],
-        linux_perf_share=sustained.enabled_kai_cycle_share,
-        maximum_share_difference=performix_config["maximum_share_difference"],
     )
-    performix_binding = performix.get("identity_binding")
-    if not isinstance(performix_binding, dict) or (
-        performix_binding.get("runtime_sha256")
-        != sustained.comparison.baseline.runtime_sha256
-        or performix_binding.get("workload_ref")
-        != "data/banking77/generated/traffic-mixed.jsonl"
-        or "c8g.4xlarge" not in str(performix_binding.get("environment_ref"))
-    ):
-        raise ValueError("Performix evidence does not match the sustained release")
+    release_adapter = get_evidence_adapter(reference_config["evidence"]["adapter"])
+    if on_audit_stage is None:
+        release = release_adapter.verify(
+            confirmed_contract,
+            reference_config["evidence"],
+            root / "examples/armproof-reference",
+        )
+    else:
+        release = release_adapter.verify(
+            confirmed_contract,
+            reference_config["evidence"],
+            root / "examples/armproof-reference",
+            on_stage=on_audit_stage,
+        )
+    release_summary = dict(release.summary)
+    performix = dict(release.performix or {})
+    publication_config = reference_config.get("publication_proof")
+    if not isinstance(publication_config, dict):
+        raise ValueError("reference release has no preregistration publication proof")
+    reference_base = root / "examples/armproof-reference"
+    publication = verify_preregistration_publication(
+        reference_base / publication_config["record"],
+        preregistration_path=(
+            reference_base / reference_config["evidence"]["preregistration"]
+        ),
+        project_bundle_path=(
+            reference_base / publication_config["project_bundle"]
+        ),
+        evidence_archive_path=(
+            reference_base / reference_config["evidence"]["archive"]
+        ),
+        expected_evidence_archive_sha256=reference_config["evidence"][
+            "archive_sha256"
+        ],
+        repository_path=root,
+    )
+    discovery_config = _load_json(
+        root / "examples/armproof-reference/discovery-evidence.json"
+    )
+    discovery_contract = parse_contract(
+        _load_json(
+            root / "examples/armproof-reference" / discovery_config["contract"]
+        )
+    )
+    discovery = get_evidence_adapter(
+        discovery_config["evidence"]["adapter"]
+    ).verify(
+        discovery_contract,
+        discovery_config["evidence"],
+        root / "examples/armproof-reference",
+    )
     contract = parse_contract(
         _load_json(root / "examples/armproof-reference/contract.json")
     )
-    verified = verify_and_derive(
+    migration_verified = verify_and_derive(
         contract,
-        accepted_evidence,
-        accepted_evidence / "SHA256SUMS",
+        application_evidence,
+        application_evidence / "SHA256SUMS",
         root / "data/banking77/generated/manifest.json",
         root / "ops/evidence/EXP-2026-005/accepted/evidence",
         root / "ops/evidence/EXP-2026-005/accepted/evidence/SHA256SUMS",
     )
-    decision = decision_to_dict(sustained.decision)
-    checksum_result = verified.checksums
-    evidence = accepted_evidence / "capacity/experiment"
-    summary = dict(verified.summary)
+    decision = release_summary["decision"]
+    checksum_result = migration_verified.checksums
+    evidence = application_evidence / "capacity/experiment"
+    summary = dict(migration_verified.summary)
     quality_enabled = _load_json(evidence / "quality/kleidiai-enabled.json")
     quality_disabled = _load_json(evidence / "quality/kleidiai-disabled.json")
     quality_cases = {
@@ -251,11 +273,21 @@ def build_surgedesk_payload(
     for row in routing_cases:
         row["scenario_role"] = role_by_request.get(row["request_id"])
 
-    deployment = _load_json(root / "ops/evidence/result-first/EXP-2026-002/summary.json")["summary"]
-    accepted_experiment = _load_json(accepted_evidence / "experiment.json")
+    deployment = derive_supporting_optimization(
+        root / "ops/evidence/result-first/EXP-2026-002",
+        root / "examples/armproof-reference/supporting-evidence-lock.json",
+    )
+    application_experiment = _load_json(application_evidence / "experiment.json")
     reproduction_evidence = root / "ops/evidence/EXP-2026-005/accepted/evidence"
     reproduction_experiment = _load_json(reproduction_evidence / "experiment.json")
     runtime_lock = _load_json(root / "examples/phi4-graviton/runtime-lock.json")
+    live_runtime = _load_json(root / "examples/phi4-graviton/live-runtime.json")
+    if live_runtime["runtime_lock_sha256"] != _sha256(
+        root / "examples/phi4-graviton/runtime-lock.json"
+    ):
+        raise ValueError("live runtime identity is not bound to the release lock")
+    if live_runtime["source_artifact_sha256"] != release.comparison.treatment.artifact_sha256:
+        raise ValueError("live runtime model identity is not bound to the release")
     model_id = runtime_lock["model_int4"]["id"]
     model_name = (
         model_id.rsplit("/", 1)[-1]
@@ -263,7 +295,7 @@ def build_surgedesk_payload(
         .replace("-mini", " Mini")
     )
     runtime_name = "ONNX Runtime GenAI INT4"
-    comparison = comparison_to_dict(verified.comparison)
+    comparison = comparison_to_dict(migration_verified.comparison)
     computed_guard_accuracy = guard_queue_correct / quality_enabled["total"]
     if comparison["metrics"].get("guard_queue_accuracy") != computed_guard_accuracy:
         raise ValueError("ArmProof queue-quality claim differs from recomputed result")
@@ -271,65 +303,19 @@ def build_surgedesk_payload(
         "maximum_relative_difference"
     ]
 
+    confirmed_mix = release_summary["mixes"]["mixed"]
     mixes = {
         "mixed": {
-            "baseline_sustainable_rps": sustained.baseline_pass_rps,
-            "baseline_fail_rps": sustained.baseline_fail_rps,
-            "optimized_sustainable_rps": sustained.treatment_pass_rps,
-            "optimized_probe_rps": sustained.treatment_fail_rps,
-            "tested_pass_point_ratio": sustained.tested_pass_point_ratio,
-            "minimum_capacity_ratio": sustained.minimum_capacity_ratio,
-            "confirmations_per_treatment": sustained.confirmations,
-            "confirmation_seconds": sustained.confirmation_seconds,
-            "baseline_pass_p95_ms": sustained.baseline_pass_p95_ms,
-            "optimized_pass_p95_ms": sustained.treatment_pass_p95_ms,
-            "optimized_probe_p95_ms": sustained.treatment_fail_probe_p95_ms,
-            "optimized_probe_failures": sustained.treatment_failures_at_fail_probe,
-            "optimized_probe_passes": (
-                sustained.confirmations - sustained.treatment_failures_at_fail_probe
+            "baseline_fail_rps": confirmed_mix["ratio"]["baseline_median"],
+            "optimized_sustainable_rps": confirmed_mix["ratio"]["treatment_median"],
+            "minimum_capacity_ratio": confirmed_mix["ratio"]["ratio"],
+            "confirmations_per_treatment": len(
+                release_summary["trial_matrix"][0]["outcomes"]
             ),
-            "trial_matrix": [
-                {
-                    "treatment": "KleidiAI disabled",
-                    "boundary": "Known sustainable",
-                    "rate_rps": sustained.baseline_pass_rps,
-                    "outcomes": [
-                        "pass" if passed else "fail"
-                        for passed in sustained.baseline_pass_trial_passed
-                    ],
-                    "p95_ms": list(sustained.baseline_pass_p95_ms),
-                },
-                {
-                    "treatment": "KleidiAI disabled",
-                    "boundary": "First failing probe",
-                    "rate_rps": sustained.baseline_fail_rps,
-                    "outcomes": [
-                        "pass" if passed else "fail"
-                        for passed in sustained.baseline_fail_probe_trial_passed
-                    ],
-                    "p95_ms": list(sustained.baseline_fail_probe_p95_ms),
-                },
-                {
-                    "treatment": "KleidiAI enabled",
-                    "boundary": "Known sustainable",
-                    "rate_rps": sustained.treatment_pass_rps,
-                    "outcomes": [
-                        "pass" if passed else "fail"
-                        for passed in sustained.treatment_pass_trial_passed
-                    ],
-                    "p95_ms": list(sustained.treatment_pass_p95_ms),
-                },
-                {
-                    "treatment": "KleidiAI enabled",
-                    "boundary": "Next probe",
-                    "rate_rps": sustained.treatment_fail_rps,
-                    "outcomes": [
-                        "pass" if passed else "fail"
-                        for passed in sustained.treatment_fail_probe_trial_passed
-                    ],
-                    "p95_ms": list(sustained.treatment_fail_probe_p95_ms),
-                },
-            ],
+            "confirmation_seconds": release_summary["confirmation_seconds"],
+            "baseline_fail_p95_ms": release_summary["trial_matrix"][0]["p95_ms"],
+            "optimized_pass_p95_ms": release_summary["trial_matrix"][1]["p95_ms"],
+            "trial_matrix": release_summary["trial_matrix"],
         }
     }
 
@@ -341,10 +327,25 @@ def build_surgedesk_payload(
         "product": {
             "name": "SurgeDesk",
             "description": "Human-confirmed support triage on an Arm-optimized cloud AI service.",
-            "demo_mode": "accepted_evidence_load",
+            "demo_mode": "live_gateway_with_verified_release_evidence",
         },
         "routing_cases": routing_cases,
-        "capacity": {"slo_ms": 10_000, "mixes": mixes},
+        "capacity": {
+            "slo_ms": float(confirmation_plan["acceptance"]["maximum_p95_ms"]),
+            "mixes": mixes,
+            "rate_selection": {
+                "experiment_id": discovery.summary["experiment_id"],
+                "confirmation_experiment_id": confirmation_plan["experiment_id"],
+                "publication": publication,
+                "trial_matrix": discovery.summary["trial_matrix"],
+                "interpretation": (
+                    "Discovery located the one-sided capacity bounds. The Git object for "
+                    f"{confirmation_plan['experiment_id']} contains the exact final plan "
+                    "and predates the recorded AWS launch time. It froze both rates, all "
+                    "ten 500-second windows, and every pass rule used here."
+                ),
+            },
+        },
         "quality": {
             "baseline_accuracy_percent": quality_disabled["accuracy"] * 100,
             "optimized_accuracy_percent": quality_enabled["accuracy"] * 100,
@@ -370,39 +371,44 @@ def build_surgedesk_payload(
         },
         "proof": {
             "decision": "PASS" if decision["passed"] else "BLOCK",
-            "decision_source": "derived_from_versioned_sustained_contract",
-            "adapter_id": "kleidiai-sustained-v1",
-            "contract_id": sustained_contract.contract_id,
-            "claims": _claim_rows(sustained_contract, decision),
+            "decision_source": "derived_from_preregistered_confirmation",
+            "adapter_id": release.adapter,
+            "contract_id": confirmed_contract.contract_id,
+            "claims": _claim_rows(confirmed_contract, decision),
             "verified_claims": sum(
                 claim["status"] == "pass" for claim in decision["claims"]
             ),
-            "instance": sustained.comparison.treatment.controls["instance"],
-            "threads": sustained.comparison.treatment.controls["threads"],
-            "kleidiai_enabled_callchains": sustained.comparison.arm_path_treatment_observed,
-            "kleidiai_disabled_callchains": sustained.comparison.arm_path_baseline_observed,
+            "instance": release.comparison.treatment.controls["instance"],
+            "threads": release.comparison.treatment.controls["threads"],
+            "live_deployment_identity": live_runtime,
+            "kleidiai_enabled_callchains": release.comparison.arm_path_treatment_observed,
+            "kleidiai_disabled_callchains": release.comparison.arm_path_baseline_observed,
             "kleidiai_cycle_callchain_share_percent": (
-                sustained.enabled_kai_cycle_share * 100
+                release_summary["arm_attribution"][
+                    "linux_perf_enabled_kai_cycle_share"
+                ] * 100
             ),
             "artifact_reduction_percent": deployment["disk_reduction_percent"],
             "peak_pss_reduction_percent": deployment["peak_pss_reduction_percent"],
             "weighted_pss_reduction_percent": deployment["weighted_pss_reduction_percent"],
-            "migration_bf16_quality_correct": deployment["quality"]["bf16_correct"],
-            "migration_int4_quality_correct": deployment["quality"]["int4_correct"],
-            "migration_quality_total": deployment["quality"]["total"],
+            "migration_bf16_quality_correct": deployment["migration_bf16_quality_correct"],
+            "migration_int4_quality_correct": deployment["migration_int4_quality_correct"],
+            "migration_quality_total": deployment["migration_quality_total"],
             "migration_quality_delta_pp": (
-                deployment["quality"]["int4_correct"]
-                - deployment["quality"]["bf16_correct"]
-            ) / deployment["quality"]["total"] * 100,
-            "direct_speedup_min": min(deployment["kleidiai_shape_gains"]),
-            "direct_speedup_max": max(deployment["kleidiai_shape_gains"]),
+                deployment["migration_int4_quality_correct"]
+                - deployment["migration_bf16_quality_correct"]
+            ) / deployment["migration_quality_total"] * 100,
+            "direct_speedup_min": min(deployment["direct_shape_gains"]),
+            "direct_speedup_max": max(deployment["direct_shape_gains"]),
+            "direct_shape_gains": deployment["direct_shape_gains"],
             "reproduction_max_relative_difference_percent": observed_reproduction_difference * 100,
             "reproduction_experiment_id": reproduction_experiment["experiment_id"],
             "performix": {
                 "experiment_id": performix["experiment_id"],
                 "scope_note": (
                     "ArmProof re-derived this matched Code Hotspots pair from "
-                    "native Performix exports and cross-checked it against Linux perf."
+                    "native Performix exports. Linux perf supplies separate "
+                    "cycle-attribution evidence with a different denominator."
                 ),
                 "engine_version": performix["enabled"]["engine_version"],
                 "cpu": performix["enabled"]["cpu_names"][0],
@@ -412,12 +418,9 @@ def build_surgedesk_payload(
                 "enabled_kai_sample_share_percent": (
                     performix["enabled"]["kai_sample_share"] * 100
                 ),
-                "linux_perf_cycle_share_percent": (
-                    performix["linux_perf_kai_cycle_share"] * 100
-                ),
-                "absolute_share_difference_pp": (
-                    performix["absolute_share_difference"] * 100
-                ),
+                "linux_perf_cycle_share_percent": release_summary[
+                    "arm_attribution"
+                ]["linux_perf_enabled_kai_cycle_share"] * 100,
                 "enabled_function_samples": performix["enabled"][
                     "total_function_samples"
                 ],
@@ -431,41 +434,46 @@ def build_surgedesk_payload(
                 ],
                 "pmu_capability_note": (
                     f"Code Hotspots was available on the "
-                    f"{sustained.comparison.treatment.controls['instance']} virtual PMU; "
+                    f"{release.comparison.treatment.controls['instance']} virtual PMU; "
                     "counter-heavy recipes were capability-gated and excluded."
                 ),
             },
         },
         "provenance": {
-            "experiment_id": sustained.experiment_id,
-            "release_experiment_id": accepted_experiment["experiment_id"],
-            "original_gate_passed": sustained.original_gate_passed,
-            "corrected_claim_passed": sustained.corrected_claim_passed,
+            "experiment_id": release_summary["experiment_id"],
+            "release_experiment_id": release_summary["experiment_id"],
+            "application_evaluation_experiment_id": application_experiment[
+                "experiment_id"
+            ],
             "claim_boundary": {
-                "released_lower_ratio": sustained.minimum_capacity_ratio,
+                "released_lower_ratio": release_summary["minimum_capacity_ratio"],
                 "released_lower_formula": (
-                    f"{sustained.treatment_pass_rps:.2f} / "
-                    f"{sustained.baseline_fail_rps:.2f}"
+                    f"{mixes['mixed']['optimized_sustainable_rps']:.2f} / "
+                    f"{mixes['mixed']['baseline_fail_rps']:.2f}"
                 ),
+                "preregistration_publication": publication,
             },
             "evidence": {
                 "checksum_verified": checksum_result.passed,
                 "checksummed_files": checksum_result.checked,
-                "reproduction_checksum_verified": verified.reproduction_checksums.passed,
-                "reproduction_checksummed_files": verified.reproduction_checksums.checked,
+                "reproduction_checksum_verified": migration_verified.reproduction_checksums.passed,
+                "reproduction_checksummed_files": migration_verified.reproduction_checksums.checked,
                 "sustained_archive_verified": True,
-                "sustained_archive_sha256": sustained.archive_sha256,
-                "sustained_internal_checksums_verified": (
-                    sustained.internal_checksums_verified
-                ),
-                "sustained_checksummed_files": sustained.internal_checksummed_files,
-                "sustained_raw_confirmation_files": sustained.raw_confirmation_files,
-                "sustained_raw_confirmation_samples": sustained.raw_confirmation_samples,
-                "sustained_matched_control_verified": sustained.matched_control_verified,
+                "sustained_archive_sha256": release_summary["archive_sha256"],
+                "sustained_internal_checksums_verified": True,
+                "sustained_checksummed_files": release_summary["internal_checksummed_files"],
+                "raw_quality_checksummed_files": release_summary[
+                    "raw_quality_checksummed_files"
+                ],
+                "sustained_raw_confirmation_files": release_summary["raw_confirmation_files"],
+                "sustained_raw_confirmation_samples": release_summary["raw_confirmation_samples"],
+                "raw_quality_outputs": release_summary["raw_quality_outputs"],
+                "sustained_matched_control_verified": release_summary["matched_control_verified"],
                 "total_checksummed_files": (
-                    checksum_result.checked + verified.reproduction_checksums.checked
-                    + sustained.internal_checksummed_files
+                    checksum_result.checked + migration_verified.reproduction_checksums.checked
+                    + release.checksums.checked
                     + performix["internal_checksums"]["checked"]
+                    + deployment["checksummed_files"]
                 ),
                 "performix_archive_verified": True,
                 "performix_archive_sha256": performix["archive_sha256"],
@@ -474,7 +482,7 @@ def build_surgedesk_payload(
                     "checked"
                 ],
                 "comparison": "matched_control",
-                "only_changed_control": sustained.only_changed_control,
+                "only_changed_control": release_summary["only_changed_control"],
             },
             "dataset": "BANKING77",
             "dataset_license": "CC-BY-4.0",
@@ -487,13 +495,8 @@ def build_surgedesk_payload(
             "release_url": release_url,
             "release_action": f"QasimKhan5x/ArmProof@{release_tag}",
             "contract_sha256": _sha256(
-                root / "examples/armproof-reference/sustained-contract.json"
+                root / "examples/armproof-reference" / reference_config["contract"]
             ),
         },
     }
-    if on_audit_stage is not None:
-        on_audit_stage("contract", {
-            "claims_verified": payload["proof"]["verified_claims"],
-            "passed": payload["proof"]["decision"] == "PASS",
-        })
     return payload

@@ -6,6 +6,7 @@ import {
   createWorkspace,
   findRecordedCase,
   resolveTicket,
+  resolveTicketToQueue,
   selectRecordedCase,
 } from "../../surgedesk/model.mjs";
 
@@ -45,6 +46,24 @@ test("correcting a known misroute uses the expected human queue", () => {
   assert.equal(resolved.resolved[0].review_status, "corrected");
   assert.equal(resolved.resolved[0].final_queue, reviewCase.expected_queue);
   assert.equal(resolved.resolved[0].final_intent, reviewCase.expected_intent);
+});
+
+
+test("an operator can choose the final queue for a live suggestion", () => {
+  const liveCase = {
+    ...data.routing_cases[0],
+    mode: "live_model_output",
+    expected_queue: null,
+    expected_intent: null,
+    expected_procedure: null,
+  };
+  const selected = selectRecordedCase(createWorkspace(data), liveCase);
+  const resolved = resolveTicketToQueue(selected, "Manual review");
+
+  assert.equal(resolved.resolved[0].review_status, "corrected");
+  assert.equal(resolved.resolved[0].final_queue, "Manual review");
+  assert.equal(resolved.resolved[0].final_intent, null);
+  assert.match(resolved.resolved[0].procedure, /No procedure assigned/);
 });
 
 

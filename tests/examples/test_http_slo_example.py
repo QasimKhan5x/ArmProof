@@ -25,6 +25,8 @@ class HttpSloExampleTests(unittest.TestCase):
             output = Path(directory) / "kit"
             config = module.build(output)
             with redirect_stdout(io.StringIO()):
+                (output / "evidence/SHA256SUMS").unlink()
+                self.assertEqual(main(["seal", str(config)]), 0)
                 self.assertEqual(main(["ci", str(config)]), 0)
 
             decision = json.loads(

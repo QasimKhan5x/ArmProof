@@ -15,10 +15,21 @@ environment bindings that match the normalized comparison.
 
 ### `kleidiai-sustained-v1`
 
-The release adapter used by the current reference project. It verifies the
+The historical EXP-2026-009 adapter. It verifies the
 immutable sustained-capacity and Performix archives, re-derives every capacity
 and quality metric from 4,200 request outcomes, and binds the observed Neoverse
 kernel path to the same model, runtime, workload, machine and thread count.
+
+### `kleidiai-confirmed-v2`
+
+The current reference release adapter. It requires byte-for-byte copies of the
+committed EXP-2026-014 capacity and EXP-2026-013 Performix preregistrations. It
+re-derives ten fixed-rate windows, verifies 1,540 original model outputs,
+checks the frozen workload and treatment identities, and reads native Performix
+Code Hotspots exports. Capacity rates and profiler thresholds come from the
+committed plans; the release config cannot replace them after collection.
+EXP-2026-012 is retained as a rejected predecessor because it omitted the
+required source-artifact hash from successful response identities.
 
 ### `http-slo-v1`
 

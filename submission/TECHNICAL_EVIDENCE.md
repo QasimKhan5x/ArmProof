@@ -1,72 +1,72 @@
 # Technical Evidence Map
 
-This is the shortest path from each submission claim to its authoritative
-artifact. The prose submission is never the source of truth.
+This page maps each public result to the raw artifact and code that verifies it.
+The submission text and screenshots are summaries; the release command derives
+its decision again from the files below.
 
-## Environment
+## Measured Environment
 
-- AWS `c8g.4xlarge`, Graviton4, CPU-only, 16 vCPUs.
-- Phi-4 Mini.
-- PyTorch BF16 reference.
-- ONNX Runtime GenAI INT4 treatment.
-- Matched Arm control: identical INT4 model/runtime with
-  `mlas.disable_kleidiai=1`.
-- Capacity objective: p95 at or below 10 seconds.
+- AWS `c8g.4xlarge`: 16 Graviton4 Neoverse V2 cores, CPU only
+- Phi-4 Mini INT4 served with the pinned ONNX Runtime GenAI Arm64 build
+- 16 inference threads
+- BANKING77 mixed request stream and 770-message quality set
+- Response-time rule: p95 at or below 10 seconds, zero errors, at least 95%
+  delivery of the offered request rate
+- Control: `mlas.disable_kleidiai=1`
+- Treatment: `mlas.disable_kleidiai=0`
 
-See [`examples/phi4-graviton/runtime-lock.json`](../examples/phi4-graviton/runtime-lock.json),
-[`examples/phi4-graviton/passing-deployment.json`](../examples/phi4-graviton/passing-deployment.json)
-and the accepted
-[`environment.json`](../ops/evidence/EXP-2026-004/accepted/evidence/capacity/experiment/environment.json).
+The model files, runtime, workload, machine shape, thread count and response-time
+rule are fixed across the control and treatment.
 
-## Claim Ledger
+## Confirmatory Release Evidence
 
-| Claim | Comparison | Result | Authoritative artifact |
+| Result | Frozen comparison | Required result | Authoritative artifacts |
 |---|---|---:|---|
-| Artifact size | INT4 versus BF16 | 35.92% smaller | [`summary.json`](../ops/evidence/result-first/EXP-2026-002/summary.json) |
-| Peak PSS | INT4 versus BF16 | 55.34% lower | [`summary.json`](../ops/evidence/result-first/EXP-2026-002/summary.json) |
-| Time-weighted PSS | INT4 versus BF16 | 59.66% lower | [`summary.json`](../ops/evidence/result-first/EXP-2026-002/summary.json) |
-| Direct Arm speed | KleidiAI enabled versus disabled, same INT4 runtime | 1.72x-2.59x | [`summary.json`](../ops/evidence/result-first/EXP-2026-002/summary.json) |
-| Arm execution | Enabled and disabled perf callchains | 68.53% enabled `kai_*` cycle share, 0% disabled, zero lost samples | SHA-256 locked [`EXP-2026-009 archive`](../ops/evidence/EXP-2026-009/evidence.tar.gz) |
-| Independent Arm execution | Matched Arm Performix 1.20 Code Hotspots native exports | 67.02% enabled `kai_*` function-sample share, 0% disabled; 1.51 pp from Linux perf | SHA-256 locked [`EXP-2026-010 archive`](../ops/evidence/EXP-2026-010/evidence.tar.gz) and [`performix.py`](../src/armproof/evidence/performix.py) |
-| Sustained fixed-SLO capacity | Enabled versus disabled, 4,200 raw requests across twenty 500-second windows | At least 2.0x sustainable capacity | [`EXP-2026-009 result`](../ops/evidence/EXP-2026-009/RESULT.md) and immutable archive |
-| Original exact bracket | Enabled 0.60 r/s failure probe | Rejected: one of five windows passed by 72 ms | Preserved in the same archive; no exact bracket emitted |
-| Large-set quality | Enabled versus disabled, 770 requests | -0.390 pp accuracy; -0.673 pp macro F1 | Quality rows in the SHA-256 locked [`EXP-2026-009 archive`](../ops/evidence/EXP-2026-009/evidence.tar.gz) |
-| Schema validity | Both normalized treatments | 100% | Re-derived from the same quality rows |
-| Short-window reproduction | Fresh c8g.4xlarge versus earlier accepted grid | 0% difference for all mixes | [`reproduction-comparison.json`](../ops/evidence/EXP-2026-005/reproduction-comparison.json) |
-| Operational routing | Queue guard on disjoint holdout | 86.75%, +12.34 pp | [`data.json`](../surgedesk/data.json) |
+| Sustainable capacity | Five 500-second control windows at 0.28 requests/s; five treatment windows at 0.56 requests/s | Every control fails, every treatment passes; at least 2.0x lower bound | [`EXP-2026-014 plan`](../ops/experiments/EXP-2026-014.json), [`analysis lock`](../ops/experiments/EXP-2026-014-analysis.json), [`protocol`](../ops/aws/sustained-006/protocol.json), [`evidence`](../ops/evidence/EXP-2026-014/) |
+| Capacity request volume | Ten frozen windows | 2,100 raw HTTP outcomes | EXP-2026-014 confirmation JSONL files and [`confirmed_audit.py`](../src/armproof/evidence/confirmed_audit.py) |
+| Output quality | 770 original outputs from each treatment | Accuracy and macro-F1 loss no greater than one percentage point; at least 99% schema-valid | [`EXP-2026-003 raw quality evidence`](../ops/evidence/EXP-2026-003/attempt-002/evidence/capacity/quality-batch), its locked ledger, and [`raw_quality.py`](../src/armproof/evidence/raw_quality.py) |
+| Arm execution | Matched Performix Code Hotspots profiles | No `kai_*` samples in control; at least 50% in treatment; at least 100,000 function samples per profile | [`EXP-2026-013 plan`](../ops/experiments/EXP-2026-013.json), [`evidence`](../ops/evidence/EXP-2026-013/), and [`performix.py`](../src/armproof/evidence/performix.py) |
+| Release decision | Ten required claims | All ten pass | [`confirmed contract`](../examples/armproof-reference/confirmed-contract.json), [`release config`](../examples/armproof-reference/armproof.json), and [`confirmed adapter`](../src/armproof/evidence/adapters.py) |
 
-The broader `EXP-2026-010` multi-recipe gate was rejected because the VM did
-not expose enough PMU counters for every planned recipe. The release uses only
-its completed matched Code Hotspots pair for the narrower execution-attribution
-claim; it does not present the broader experiment as accepted.
+The capacity and Performix plans match Git objects whose recorded times precede
+the recorded AWS launch times. The adapter requires byte-for-byte copies of
+those plans from the evidence archives. Capacity rates and profiler thresholds
+are read from the plans, so the release config cannot lower them.
+The capacity analysis starts latency at each scheduled send rather than at
+worker dispatch and rejects completions after the 500-second window plus the
+ten-second SLO drain. EXP-2026-014's plan and analysis lock match the Git object
+and both returned archives. This is integrity and recorded chronology evidence,
+not independent proof of when the commit became public or when AWS launched the
+instance.
 
-## Causal Boundaries
+EXP-2026-012 matched the same frozen capacity outcomes but omitted the
+`source_artifact_sha256` field later required by the hardened release analyzer.
+That archive is rejected. EXP-2026-014 froze the exact response schema before
+provisioning and changes no rate, workload, SLO, model
+or runtime parameter; it repeats the confirmation with complete response-level
+identity binding.
 
-- Do not attribute BF16-to-INT4 size or memory reductions to KleidiAI.
-- Do not attribute the queue guard's quality gain to Arm.
-- The Arm-specific comparison is KleidiAI enabled versus disabled inside the
-  otherwise identical INT4 deployment.
-- Capacity claims are scoped to the pinned model, runtime, workload,
-  `c8g.4xlarge` and 10-second p95 objective.
-- EXP009 retained classification rows rather than raw generated token strings
-  for its reused quality pass. The adapter binds every row to the frozen
-  BANKING77 request ID and label and re-derives all aggregates, but does not
-  claim to reparse unavailable token strings.
-- The contract stores the complete runnable service recipes and the adapter
-  validates them against its pinned invocation. EXP009 did not separately
-  capture the process argv, so executed-treatment attribution comes from
-  checked session configs, per-response backend labels and perf callchains,
-  not from an argv-attestation claim.
-- ArmProof means verified against the declared contract, not Arm certified.
-- The 4.9 GB model is not copied into Git. EXP009 records the model digest
-  computed during evidence collection; the live service independently hashes
-  its local files at startup. Repository checksums protect the captured record
-  after collection but are not remote attestation of the original AWS host.
-- The native Performix archive carries the same runtime-lock digest as EXP009,
-  and its workload, model revision, matched environment and control records are
-  checked before its attribution can support the release.
+## Supporting Optimization Measurements
 
-## Reproduce The Portable Reference Action
+These measurements were established earlier and remain separate comparisons:
+
+| Result | Comparison | Measured improvement | Artifact |
+|---|---|---:|---|
+| Direct inference | KleidiAI enabled versus disabled, same INT4 runtime | 1.72x to 2.59x across four batch/prompt shapes | [`EXP-2026-002 raw measurements`](../ops/evidence/result-first/EXP-2026-002/) and [`supporting evidence lock`](../examples/armproof-reference/supporting-evidence-lock.json) |
+| Model files | Public INT4 deployment versus BF16 reference | 35.92% smaller | Same summary |
+| Peak proportional set size | INT4 versus BF16 | 55.34% lower | Same summary |
+| Time-weighted proportional set size | INT4 versus BF16 | 59.66% lower | Same summary |
+| Operational routing | Queue guard versus direct LLM-to-queue mapping on a disjoint 770-message holdout | 86.75% accuracy, +12.34 percentage points | [`queue_guard.py`](../src/armproof/demo/queue_guard.py) and generated [`data.json`](../surgedesk/data.json) |
+
+The INT4 footprint results describe the model migration. The two-times capacity
+claim isolates the KleidiAI setting inside the already-quantized deployment.
+The routing guard is a SurgeDesk product feature and is not attributed to Arm.
+SurgeDesk recalculates the median from five raw repetitions for each fixed
+shape. It calculates the size and PSS reductions from locked aggregate fields
+in the BF16 and INT4 measurement files. The fixed-shape speed range is labeled
+exploratory supporting evidence.
+
+## What The Verifier Recomputes
 
 ```bash
 python3.12 -m venv .venv
@@ -74,46 +74,43 @@ python3.12 -m venv .venv
 .venv/bin/armproof ci examples/armproof-reference/armproof.json
 ```
 
-Expected exit code: `0`. The command verifies 69 checksummed files in the
-sustained archive and 35 in the Performix bundle, re-derives 4,200 request outcomes, quality and
-native Performix attribution, binds treatment identities to the contract,
-and then regenerates `verification.json`, `comparison.json`, `decision.json`
-and the offline report. A supplied normalized comparison is not accepted.
-This is ArmProof's reusable nine-claim EXP009 sustained workflow and the same
-adapter used by SurgeDesk.
+The command:
 
-Test integrity and fail-closed behavior:
+1. checks the locked outer archive digests and every internal ledger entry;
+2. requires the archived EXP-2026-014 and EXP-2026-013 plans to equal the committed files;
+3. verifies that all raw capacity rows use the two preregistered rates;
+4. recalculates scheduled-to-finished latency and bounded completion for every capacity window;
+5. reparses 1,540 original model outputs and recalculates quality;
+6. checks the model, runtime, workload, Arm machine and treatment identity carried by every successful capacity response;
+7. reads function samples and symbols from the native Performix exports;
+8. keeps Performix function samples and Linux perf cycle samples in separate units;
+9. recalculates model-size and memory percentages from locked aggregate fields,
+   and fixed-shape medians from raw repetitions in four hash-locked files;
+10. evaluates all ten required claims; and
+11. writes `verification.json`, `comparison.json`, `decision.json`, `summary.json`
+    and an offline HTML report.
 
-```bash
-python3.12 scripts/demo_release_gate.py
+Exit `0` approves the measured treatment. Exit `2` means at least one required
+claim failed or remained unknown. Exit `1` means the evidence or configuration
+was invalid.
 
-armproof verify \
-  --contract examples/fixture-fail/contract.json \
-  --comparison examples/fixture-fail/comparison.json
+## Evidence Scope
 
-armproof verify \
-  --contract examples/fixture-unknown/contract.json \
-  --comparison examples/fixture-unknown/comparison.json
-```
+The SHA-256 ledgers detect changes after collection. They do not independently
+attest who controlled the original AWS host. The evidence bundle therefore also
+records the Arm machine, runtime lock, source-model fingerprint, workload,
+treatment configs, response backend labels, native profiler exports and
+preregistered plans. A publication record binds the exact EXP-2026-014 plan
+bytes in the prelaunch project bundle and measurement archive to a Git object
+in this checkout. The Git object time predates the recorded AWS launch time;
+that launch time remains experiment metadata rather than independent cloud
+attestation. The live gateway rechecks the model and runtime identity before
+activation.
 
-Expected exit code for both fixtures: `2`.
+Performix reports function-sample share. Linux perf reports sampled-cycle
+attribution. ArmProof presents both but never compares the percentages as if
+they used the same denominator.
 
-## Verify Raw Evidence
-
-```bash
-shasum -a 256 ops/evidence/EXP-2026-009/evidence.tar.gz
-PYTHONPATH=src python3.12 -m unittest tests.evidence.test_sustained_audit -v
-```
-
-The expected sustained archive digest is
-`f22e647aabe40eefd2abc5548306f40e2a5558ce1a85bc31c18319e6e51d78da`.
-The archive contains a 69-entry guest ledger and the long-window raw rows.
-Empty, changed, duplicate, missing or out-of-root ledger entries fail.
-The ledgers prove repository consistency after capture, not independent
-attestation of who produced the original measurements.
-
-The expected Performix archive digest is
-`28d411e40de38f3ad4a455bbfa09524dee8b44d6e44eb4d3b599e01635789148`.
-Its 35-entry guest ledger binds the native exports, run metadata, target facts
-and readiness records. See [`docs/PERFORMIX.md`](../docs/PERFORMIX.md) for the
-matched experiment and the two-counter cloud PMU limitation.
+Historical discovery and rejected experiments remain under [`ops/evidence`](../ops/evidence/)
+and [`ops/experiments`](../ops/experiments/). They explain how the final rates
+were selected; they cannot approve the current release.

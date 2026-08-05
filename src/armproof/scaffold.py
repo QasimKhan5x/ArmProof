@@ -191,6 +191,24 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
             "output": "report",
         },
     )
+    boundary_paths = {
+        treatment: {
+            outcome: [
+                f"requests/{treatment}-{outcome}-{index}.jsonl"
+                for index in range(1, 4)
+            ]
+            for outcome in ("pass", "fail")
+        }
+        for treatment in ("baseline", "treatment")
+    }
+    identity_source_paths = {
+        "artifact": "evidence/identity-sources/artifact.ref",
+        "runtime": "evidence/identity-sources/runtime.lock",
+        "environment": "evidence/identity-sources/environment.json",
+        "workload_manifest": "evidence/identity-sources/workload-manifest.json",
+        "capacity_workload": "evidence/identity-sources/capacity.jsonl",
+        "quality_workload": "evidence/identity-sources/quality.jsonl",
+    }
     _write_json(
         output / "collection-plan.json",
         {
@@ -203,6 +221,17 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
             "minimum_boundary_confirmations": 3,
             "minimum_requests_per_confirmation": 2,
             "request_schedule_tolerance_percent": 5,
+            "expected_evidence_layout": {
+                "protocol": "evidence/protocol.json",
+                "identity_manifest": "evidence/identities.json",
+                "profile_manifest": "evidence/profiles/manifest.json",
+                "baseline_profile": "evidence/baseline.perf",
+                "treatment_profile": "evidence/treatment.perf",
+                "quality_baseline": "evidence/quality/baseline-samples.jsonl",
+                "quality_treatment": "evidence/quality/treatment-samples.jsonl",
+                "identity_sources": identity_source_paths,
+                "boundaries": boundary_paths,
+            },
             "required_outputs": [
                 "distinct cadence-valid passing and failing request rows for both treatments",
                 "observed identity manifest",
@@ -210,6 +239,83 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
                 "baseline and treatment raw quality response samples",
                 "protocol.json and SHA256SUMS",
             ],
+        },
+    )
+
+    templates = output / "templates"
+    template_sources = {
+        "artifact": "identity-sources/artifact.ref",
+        "runtime": "identity-sources/runtime.lock",
+        "workload": "identity-sources/workload-manifest.json",
+        "environment": "identity-sources/environment.json",
+    }
+    observed_identities = {
+        lane: {
+            "treatment_id": treatment_id,
+            "sources": template_sources,
+            "controls": {"armproof.arm_acceleration_enabled": enabled},
+        }
+        for lane, treatment_id, enabled in (
+            ("baseline", "baseline", "false"),
+            ("treatment", "optimized", "true"),
+        )
+    }
+    _write_json(
+        templates / "identities.json",
+        {"schema_version": "1.0.0", **observed_identities},
+    )
+    _write_json(
+        templates / "protocol.json",
+        {
+            "schema_version": "1.0.0",
+            "comparison_id": "replace-http-slo-comparison",
+            "measurement_seconds": 60.0,
+            "p95_slo_ms": 10_000.0,
+            "max_error_rate": 0.01,
+            "minimum_delivery_ratio": 0.95,
+            "minimum_requests_per_file": 2,
+            "baseline_treatment_id": "baseline",
+            "treatment_treatment_id": "optimized",
+            "identity_manifest": "identities.json",
+            "capacity_workload": "identity-sources/capacity.jsonl",
+            "boundaries": boundary_paths,
+            "arm_attribution": {
+                "baseline_profile": "baseline.perf",
+                "treatment_profile": "treatment.perf",
+                "profile_manifest": "profiles/manifest.json",
+                "symbol_regex": "kai_",
+            },
+            "quality": {
+                "workload": "identity-sources/quality.jsonl",
+                "baseline_samples": "quality/baseline-samples.jsonl",
+                "treatment_samples": "quality/treatment-samples.jsonl",
+            },
+        },
+    )
+    command_payload = json.dumps(
+        ["replace-with-service-command", "--endpoint", endpoint],
+        separators=(",", ":"),
+    ).encode("utf-8")
+    profile_common = {
+        **common,
+        "command_sha256": hashlib.sha256(command_payload).hexdigest(),
+    }
+    _write_json(
+        templates / "profile-manifest.json",
+        {
+            "schema_version": "1.0.0",
+            "profiler": "linux-perf",
+            "event": "cycles:P",
+            "runs": {
+                lane: {
+                    "treatment_id": identity["treatment_id"],
+                    "report": f"{lane}.perf",
+                    "report_sha256": "replace-after-profile-capture",
+                    **profile_common,
+                    "controls": identity["controls"],
+                }
+                for lane, identity in observed_identities.items()
+            },
         },
     )
 
@@ -234,9 +340,47 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
         "- [ ] Capture positive and negative Arm execution profiles separately.\n"
         "- [ ] Bind parser-ready profiler reports to the treatment identities.\n"
         "- [ ] Collect raw HTTP quality responses from the same labeled dataset.\n"
-        "- [ ] Build `evidence/SHA256SUMS` after collection.\n"
+        "- [ ] Copy the three JSON templates into the exact evidence paths and replace every placeholder.\n"
+        "- [ ] Run `armproof seal armproof.json` after collection.\n"
         "- [ ] After editing `contract.json`, update `contract-sha256` in the workflow.\n"
         "- [ ] Run `armproof ci armproof.json`; missing evidence must block.\n",
+        encoding="utf-8",
+    )
+    (output / "EVIDENCE_LAYOUT.md").write_text(
+        "# Evidence Layout\n\n"
+        "`collection-plan.json` contains these paths as machine-readable JSON. "
+        "Collect each file from matched baseline and treatment runs; never reuse "
+        "one confirmation under more than one name.\n\n"
+        "```text\n"
+        "evidence/\n"
+        "  protocol.json\n"
+        "  identities.json\n"
+        "  baseline.perf\n"
+        "  treatment.perf\n"
+        "  profiles/manifest.json\n"
+        "  quality/baseline-samples.jsonl\n"
+        "  quality/treatment-samples.jsonl\n"
+        "  requests/{baseline,treatment}-{pass,fail}-{1,2,3}.jsonl\n"
+        "  identity-sources/artifact.ref\n"
+        "  identity-sources/runtime.lock\n"
+        "  identity-sources/environment.json\n"
+        "  identity-sources/workload-manifest.json\n"
+        "  identity-sources/capacity.jsonl\n"
+        "  identity-sources/quality.jsonl\n"
+        "```\n\n"
+        "Start from `templates/protocol.json`, `templates/identities.json`, and "
+        "`templates/profile-manifest.json`; copy them to the paths above and "
+        "replace every placeholder with values from the measured runs. Copy the "
+        "generated identity sources and workloads into the exact filenames shown.\n\n"
+        "Use `armproof capacity` and `armproof quality` for request and quality "
+        "rows. Add parser-ready profiler reports and their identity-bound manifest, "
+        "then run:\n\n"
+        "```bash\n"
+        "armproof seal armproof.json\n"
+        "armproof ci armproof.json\n"
+        "```\n\n"
+        "The templates use the exact parser shape. A complete measured example "
+        "is executable under `examples/http-slo/` in the ArmProof repository.\n",
         encoding="utf-8",
     )
     (output / "README.md").write_text(
@@ -246,6 +390,21 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
         "`ADOPTION_CHECKLIST.md`, use the fixed-SLO collector, then place raw "
         "files under `evidence/`. Until that evidence is complete and "
         "checksum-bound, `armproof ci armproof.json` fails closed.\n\n"
+        "## Check The Empty Starter\n\n"
+        "```bash\n"
+        "python3.12 -m venv .venv\n"
+        f".venv/bin/python -m pip install git+https://github.com/QasimKhan5x/ArmProof.git@v{__version__}\n"
+        ".venv/bin/armproof ci armproof.json\n"
+        "```\n\n"
+        "The last command must fail because the starter has no measurements. "
+        "Follow `EVIDENCE_LAYOUT.md` and `ADOPTION_CHECKLIST.md`. After collection:\n\n"
+        "```bash\n"
+        ".venv/bin/armproof seal armproof.json\n"
+        ".venv/bin/armproof ci armproof.json\n"
+        "```\n\n"
+        "Replace both workload templates and the identity-source placeholders "
+        "before collecting evidence. The `templates/` directory contains exact "
+        "parser-ready JSON shapes; the collection plan names every required output.\n\n"
         "See the complete executable shape in the upstream "
         "`examples/http-slo/` directory.\n",
         encoding="utf-8",
@@ -258,7 +417,15 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
             "collection-plan.json",
             "workload.jsonl",
             "quality.jsonl",
+            "identity-sources/artifact.ref",
+            "identity-sources/runtime.lock",
+            "identity-sources/environment.json",
+            "identity-sources/workload-manifest.json",
+            "templates/protocol.json",
+            "templates/identities.json",
+            "templates/profile-manifest.json",
             "ADOPTION_CHECKLIST.md",
+            "EVIDENCE_LAYOUT.md",
             "README.md",
             ".github/workflows/armproof.yml",
         )

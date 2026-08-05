@@ -14,7 +14,7 @@
 - [x] Free local judging path without AWS credentials.
 - [x] Public GitHub Pages workflow and judge URLs.
 - [x] Devpost image selection and captions.
-- [x] Under-three-minute recording script.
+- [x] Under-three-minute recording and setup runbook.
 - [x] GitHub detects the root license as MIT.
 - [x] Challenge-period creation and meaningful-update statement is explicit in
   the README and Devpost copy.
@@ -36,15 +36,16 @@
 
 ## Final Claim Audit
 
-- [ ] Every percentage identifies its comparison.
-- [ ] KleidiAI claims use the matched INT4 enabled/disabled control.
-- [ ] BF16-to-INT4 claims are not presented as KleidiAI gains.
-- [ ] Queue-guard quality is not presented as an Arm speedup.
-- [ ] Recorded evidence is labeled and not called live inference.
-- [ ] ArmProof is not described as Arm certification.
-- [ ] Release Proof visibly shows matched Arm Performix 0% versus 67.02%
-  attribution and the narration calls it core causal evidence.
-- [ ] The at-least-2x result is scoped to the pinned Graviton4 deployment and SLO.
-- [ ] All four sustained boundaries and their twenty trial outcomes are visible.
-- [ ] The demo uses the local audit endpoint so archive verification happens
+- [x] Every percentage identifies its comparison.
+- [x] KleidiAI claims use the matched INT4 enabled/disabled control.
+- [x] BF16-to-INT4 claims are not presented as KleidiAI gains.
+- [x] Queue-guard quality is not presented as an Arm speedup.
+- [x] Recorded evidence is labeled and not called live inference.
+- [x] ArmProof is not described as Arm certification.
+- [x] Release Proof visibly shows zero `kai_*` samples in the Performix control,
+  the measured treatment share, and at least 100,000 samples per profile.
+- [x] The at-least-2x result is scoped to the pinned Graviton4 deployment and SLO.
+- [x] All ten preregistered capacity windows are visible: five control failures
+  at 0.28 requests/s and five treatment passes at 0.56 requests/s.
+- [x] The demo uses the local audit endpoint so archive verification happens
   during recording.

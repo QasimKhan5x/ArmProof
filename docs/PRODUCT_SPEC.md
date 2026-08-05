@@ -2,7 +2,7 @@
 
 Status: **APPROVED**
 
-Version: **1.2.0**
+Version: **1.3.0**
 
 Approved by: Qasim Khan
 
@@ -35,10 +35,11 @@ capacity gain without violating the quality contract.
 
 ## Reference Application
 
-SurgeDesk must present one continuous workflow: human-confirm a banking route,
-send a short matched burst to identity-checked Arm64 treatments, re-verify the sustained
-archive, and open the ArmProof release decision. Every capacity result must
-derive from the canonical EXP009 archive. Edited free-form text must never be
+SurgeDesk must present one continuous workflow: human-confirm a real banking
+request on the control service, re-derive the EXP-2026-014 release from raw
+capacity and quality rows, inspect native Arm attribution, identity-match and
+activate the measured treatment, route a second real request through it, and
+generate a reusable ArmProof starter. Edited free-form text must never be
 represented as recorded model inference.
 
 The routing path is two-stage: Phi-4 Mini proposes a fine-grained intent and a
@@ -85,7 +86,8 @@ but it must not publish an unmeasured optimization or capacity claim.
 armproof capacity --endpoint URL --workload WORKLOAD [policy options]
 armproof quality --endpoint URL --dataset DATASET [policy options]
 armproof verify --contract CONTRACT --comparison COMPARISON
-armproof report --decision DECISION --summary SUMMARY --output REPORT
+armproof report --decision DECISION --summary SUMMARY --comparison COMPARISON \
+  --verification VERIFICATION --output REPORT
 armproof ci armproof.json
 armproof init --endpoint URL --output DIRECTORY
 ```
@@ -129,6 +131,8 @@ generation run on any GitHub runner.
   contradicting the accepted Linux profiler attribution fails the reference
   Arm contract.
 - The report and GitHub Check agree with the machine-readable decision.
+- A passing report is impossible without a verification receipt cryptographically
+  bound to its decision, comparison and summary.
 
 ### Cloud Gate
 
@@ -154,8 +158,8 @@ generation run on any GitHub runner.
   one command and receives explicit fail-closed next steps rather than
   synthetic passing evidence.
 - The quality boundary and human-confirmation requirement remain visible.
-- The short matched request burst and confirmed capacity evidence remain
-  visually and verbally distinct.
+- Live product requests and the previously collected confirmation evidence
+  remain visually and verbally distinct.
 
 ## Boundaries
 

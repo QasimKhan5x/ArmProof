@@ -30,38 +30,45 @@
     },
     {
       "claim_id": "sustained-window-count",
-      "observed": 20.0,
+      "observed": 10.0,
       "reason_code": "threshold_met",
       "status": "pass",
-      "threshold": 20.0
+      "threshold": 10.0
     },
     {
       "claim_id": "sustained-request-count",
-      "observed": 4200.0,
+      "observed": 2100.0,
       "reason_code": "threshold_met",
       "status": "pass",
-      "threshold": 4200.0
+      "threshold": 2100.0
     },
     {
-      "claim_id": "arm-execution",
-      "observed": 1.0,
+      "claim_id": "raw-quality-output-count",
+      "observed": 1540.0,
       "reason_code": "threshold_met",
       "status": "pass",
-      "threshold": 1.0
+      "threshold": 1540.0
     },
     {
-      "claim_id": "arm-cycle-attribution",
-      "observed": 0.6853,
+      "claim_id": "arm-control-zero",
+      "observed": 0.0,
+      "reason_code": "threshold_met",
+      "status": "pass",
+      "threshold": 0.0
+    },
+    {
+      "claim_id": "arm-treatment-share",
+      "observed": 0.673518470835091,
       "reason_code": "threshold_met",
       "status": "pass",
       "threshold": 0.5
     },
     {
-      "claim_id": "perf-sample-integrity",
-      "observed": 0.0,
+      "claim_id": "performix-sample-count",
+      "observed": 365062.0,
       "reason_code": "threshold_met",
       "status": "pass",
-      "threshold": 0.0
+      "threshold": 100000.0
     }
   ],
   "passed": true,

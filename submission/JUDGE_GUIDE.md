@@ -1,44 +1,31 @@
 # Judge Guide
 
-The project can be evaluated without AWS credentials, paid infrastructure or
-model downloads. Accepted evidence, normalized decisions, a static report and
-the product demo are checked into the public repository.
+The checked-in evidence can be evaluated without AWS credentials, paid
+infrastructure or model downloads.
 
-## 60-Second Path
+## 60-Second Product Path
 
-1. Open https://qasimkhan5x.github.io/ArmProof/surgedesk/#triage.
-2. Load a support request, inspect the model and guarded queues, and confirm the
-   route.
-3. Open **Capacity audit** and click **Verify measured experiment**. GitHub Pages
-   opens the checked-in audit receipt; the local runbook performs a fresh
-   archive derivation. The four-row trial matrix exposes every result and
-   derives the at-least-2x lower bound from boundaries that agreed in all five
-   500-second trials.
-4. Open **Release gate**. Inspect the core Arm Performix causal experiment,
-   claim ledger, optimization path, exact deployment and reusable GitHub
-   Action. This view shows 0% versus 67.02% measured `kai_*` function samples
-   while Linux perf separately shows 68.53% cycle attribution.
+1. Open <https://qasimkhan5x.github.io/ArmProof/surgedesk/#triage>.
+2. Inspect one clearly labeled stored BANKING77 model response, choose the final
+   support queue and route the ticket.
+3. Open **Capacity evidence** and click **Open checked-in evidence**. The page shows
+   the two rates chosen before the final test, five outcomes per service and
+   the `0.56 / 0.28 = at least 2.0x` lower bound.
+4. Open **Release** to inspect the sustainable-capacity result, Arm Performix
+   profile and identity-bound deployment activation. Expand technical details
+   for the exploratory fixed-shape result, quality limits and GitHub Action.
 
-The public page is an evidence-backed application, not a live AWS dependency.
-Recorded output is labeled. Edited text is rejected rather than presented as
-model inference.
+The public page uses checked-in evidence. The demo video adds the live path: a
+real request on the standard service, a newly recalculated release decision,
+activation of the matching optimized service and a second real request.
 
-## Local Product
+## Recompute The Release
 
 Prerequisite: Python 3.12.
 
 ```bash
 git clone https://github.com/QasimKhan5x/ArmProof.git
 cd ArmProof
-python3.12 scripts/build_surgedesk_demo.py --verify
-python3.12 scripts/serve_surgedesk.py --port 8765
-```
-
-Open http://127.0.0.1:8765/surgedesk/.
-
-## Validate The Reusable Artifact
-
-```bash
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -e .
 .venv/bin/armproof ci examples/armproof-reference/armproof.json
@@ -47,37 +34,70 @@ python3.12 -m venv .venv
 Expected behavior:
 
 - exit `0`;
-- all 69 sustained and 35 native Performix checksummed evidence files verify;
-- 4,200 raw request outcomes are re-derived and nine required claims pass;
-- an offline report and machine-readable decision are written; and
-- the reference passing deployment remains linked to that reference decision.
+- all capacity, raw quality and Arm Performix checksum entries verify;
+- 2,100 traffic outcomes and 1,540 raw model outputs used for the separate
+  quality comparison are re-evaluated;
+- the two measured treatment identities bind to the confirmed contract;
+- all ten required claims pass; and
+- the command writes a machine-readable decision and offline report.
 
-To see a release blocked:
+## Run SurgeDesk Locally
 
 ```bash
-python3.12 scripts/demo_release_gate.py
+python3.12 scripts/build_surgedesk_demo.py --verify
+python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
-The script alters only a temporary archive copy. Expected output is a valid
-nine-claim pass followed by a digest block before metric derivation.
-The same one-byte check is available as a button in the local Release gate
-view, so judges can inspect the block without leaving the application.
+Open <http://127.0.0.1:8765/surgedesk/>.
 
-Scaffold a new HTTP classification endpoint without generating passing evidence:
+`build_surgedesk_demo.py --verify` independently derives the JSON used by the
+page and compares it byte for byte with the checked-in payload. The local
+**Verify measured experiment** action runs the same analysis again and displays
+the newly recalculated result.
+
+## Inspect The Arm Work
+
+The shortest artifact path is:
+
+```text
+ops/experiments/EXP-2026-014.json       final capacity preregistration
+examples/armproof-reference/preregistration-publication.json plan bytes and recorded chronology
+ops/evidence/EXP-2026-014/              ten identity-bound 500-second windows
+ops/experiments/EXP-2026-013.json       final Performix preregistration
+ops/evidence/EXP-2026-013/              native Code Hotspots exports
+examples/armproof-reference/            confirmed contract and release config
+src/armproof/evidence/confirmed_audit.py raw capacity derivation
+src/armproof/evidence/raw_quality.py     raw output quality derivation
+src/armproof/evidence/performix.py       native Performix parser
+src/armproof/evidence/adapters.py        reusable release adapter
+```
+
+The capacity comparison changes one declared runtime control,
+`mlas.disable_kleidiai`. Model files, ONNX Runtime build, workload, 16 threads,
+instance type and SLO remain fixed. Performix must observe zero `kai_*` samples
+in the control and at least 50% in the treatment, with at least 100,000 function
+samples per profile. `kai_*` names are functions supplied by KleidiAI. The
+service-level objective (SLO) requires 95% of responses within ten seconds,
+zero errors and at least 95% completion of scheduled traffic.
+
+## Reuse The Gate
 
 ```bash
-armproof init \
+.venv/bin/armproof init \
   --endpoint http://127.0.0.1:8000/infer \
   --output /tmp/my-arm-service
-armproof ci /tmp/my-arm-service/armproof.json
+.venv/bin/armproof ci /tmp/my-arm-service/armproof.json
 ```
 
-The first command creates seven adoption files. The second intentionally exits
-`1` until real checksum-bound evidence is collected. The tested
-`examples/llama-cpp-http-slo/` bridge demonstrates that the same endpoint
-contract works with llama.cpp; it is a compatibility smoke, not a benchmark.
+The generated project contains no invented measurements and lists the raw
+request, quality, profiler and identity evidence that must be collected. The
+initial `ci` call demonstrates that the empty starter is blocked. After
+collection, run `armproof seal /tmp/my-arm-service/armproof.json`; sealing
+creates a ledger, while `ci` still rejects incomplete evidence.
+External adapters are
+discovered through Python entry points and listed with `armproof adapters`.
 
-## Full Test Suite
+## Full Validation
 
 ```bash
 make check
@@ -87,23 +107,13 @@ npm run test:logic
 npm run test:ui
 ```
 
-Public CI runs the core suite on native Arm64 and x86 and runs the product and
-report browser workflows at desktop, tablet and mobile sizes.
+The browser suite covers desktop, tablet and 320-pixel mobile layouts. The
+backend suite includes a real localhost HTTP flow through control routing,
+fresh audit, deployment-identity comparison, promotion and optimized routing.
 
-## Rebuild The Graviton Reference
+## Evidence Boundary
 
-The full service is optional for judging because it requires the pinned model
-and an Arm cloud machine. The reproducible recipe is documented in
-[`examples/phi4-graviton/README.md`](../examples/phi4-graviton/README.md).
-Runtime identities are pinned in `runtime-lock.json`; treatment overlays are
-created by `scripts/prepare_phi4_variants.py`; `scripts/run_cap_001.py` runs
-the frozen capacity protocol; and the passing deployment is captured in
-`passing-deployment.json` plus `deploy/armproof-phi4.service`.
-
-## Trust Boundary
-
-ArmProof verifies declared claims for a pinned deployment. The authoritative
-CI path is `ledgers + raw evidence -> derived comparison -> identity binding ->
-policy`; a caller-authored normalized comparison cannot enter `armproof ci`.
-It is not an Arm certification authority, and its repository checksums are not
-independent attestation of the original evidence producer.
+ArmProof evaluates this repository's versioned contract. SHA-256 ledgers detect
+changes after evidence collection, while the AWS environment capture and
+profiler exports document the measured host. Arm certification remains outside
+the tool's scope.

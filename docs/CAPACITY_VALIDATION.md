@@ -1,72 +1,72 @@
-# Fixed-SLO Capacity Validation
+# Capacity Validation
 
-## Status
+The public service claim comes from the preregistered EXP-2026-014 confirmation.
 
-Short-window gate completed by `EXP-2026-004` on 2026-07-31. Public sustained
-claim superseded by long-window audit `EXP-2026-009` on 2026-08-03.
+## Service Rule
 
-## Question
+A window passes when all three conditions hold:
 
-Does the existing KleidiAI acceleration produce materially higher sustainable
-cloud-service throughput at the same p95 SLO?
+- 95th-percentile response time is at or below 10 seconds;
+- no request errors occur; and
+- accepted request rate reaches at least 95% of the offered rate.
 
-## Treatments
+The open-loop client schedules requests independently of response completion.
+The release verifier measures from `scheduled_ns` through `finished_ns`, so
+client dispatch delay is included. A completion after the 500-second window
+plus the ten-second SLO drain is counted as a failed request. These rules are
+frozen in [`EXP-2026-014-analysis.json`](../ops/experiments/EXP-2026-014-analysis.json).
 
-- Phi-4 Mini INT4 ONNX Runtime GenAI with KleidiAI disabled.
-- Identical model, runtime, service, thread settings and workload with
-  KleidiAI enabled.
+## Frozen Confirmation
 
-PyTorch BF16 is retained for whole-deployment memory, size and quality context,
-not the Arm causal throughput comparison.
+Before the instance launched, [`EXP-2026-014`](../ops/experiments/EXP-2026-014.json)
+and its [`protocol`](../ops/aws/sustained-006/protocol.json) fixed one possible
+success outcome:
 
-## Workload
+| Lane | Offered rate | Independent windows | Required outcome |
+|---|---:|---:|---|
+| KleidiAI disabled | 0.28 requests/s | 5 x 500 seconds | all fail |
+| KleidiAI enabled | 0.56 requests/s | 5 x 500 seconds | all pass |
 
-- Public licensed task data.
-- Frozen short, long and mixed prompt mixes.
-- Deterministic generation and output parser.
-- At least 500 quality requests; 1,000 preferred.
-- At least five capacity runs per treatment and mix.
+The two treatments use the same source model, INT4 files, runtime, API, 16
+threads, workload and server. Each window starts a fresh service process and is
+warmed before measurement. Treatment order alternates by repetition.
 
-## Primary Gate
+The ten windows contain 2,100 raw request outcomes. A control pass, treatment
+failure, missing row, cadence mismatch, response-identity mismatch, quality
+breach or treatment-config mismatch rejects the release. The verifier does not
+search for replacement rates.
 
-- Minimum: 1.5x sustainable accepted throughput at the same p95 SLO in at
-  least two of three traffic mixes.
-- Preferred headline: 1.7x.
-- Lower 95% confidence bound above 1.15x.
-- No quality difference between the enabled and disabled identical-runtime
-  treatments.
-- `kai_*` present only when enabled.
+## Derivation
 
-## Secondary Gates
+The conservative capacity lower bound is:
 
-- Non-profiler ArmProof overhead below 5%.
-- No unexplained treatment configuration difference.
-- Complete raw bundle and terminated AWS resources.
-- Repetition validity and error rates satisfy the benchmark protocol.
+```text
+treatment passing rate / control failing rate
+0.56 / 0.28 = at least 2.0x
+```
 
-## Short-Window Outcome
+Because the control fails at 0.28 requests/s, its sustainable rate is below
+0.28 under this response-time rule. Because the treatment passes at 0.56, its
+sustainable rate is at least 0.56. The ratio is therefore a lower bound rather
+than an estimate of either lane's exact maximum.
 
-- `PASS`: 3.0x short, 2.5x long and 3.0x mixed fixed-SLO capacity.
-- Quality: -0.390 pp accuracy and -0.673 pp macro F1; 100% schema validity.
-- Attribution: `kai_*` observed only in the enabled profile.
-- Repetitions: five passing and five failing boundary confirmations for every
-  treatment and traffic mix.
-- Integrity: all 141 guest checksums verify after evidence relocation.
-- Cleanup: no paid resources remain; session cost USD 0.7057.
+[`confirmed_audit.py`](../src/armproof/evidence/confirmed_audit.py) reopens the
+archive, requires its experiment and protocol to equal the committed files,
+forces every lane to its frozen rate, reconstructs every request summary from
+timestamps and responses, and evaluates the release contract.
 
-`EXP-2026-003` remains inconclusive because its nominal and actual offered
-rates differed. Its raw results were not promoted into the accepted claim.
+## Discovery History
 
-## Decisive Sustained Outcome
+EXP-2026-004 through EXP-2026-009 explored candidate grids, process isolation
+and longer windows. EXP-2026-009 found the standard service passing five of five
+windows at 0.24 requests/s and failing five of five at 0.28. The optimized
+service passed five of five at 0.56, while its 0.60 probe was mixed. The final
+experiment therefore froze only the 0.28 standard failure and 0.56 optimized
+pass; it did not claim an exact optimized upper boundary. Discovery evidence
+remains visible under `ops/evidence/`, but it cannot approve the current release.
 
-`EXP-2026-009` used isolated processes and five 500-second confirmations at
-every frozen pass/fail boundary. Disabled 0.24 r/s and enabled 0.56 r/s passed
-all five; disabled 0.28 r/s failed all five. The defensible public result is
-therefore at least 2.0x sustainable capacity with a 2.33x tested pass-point
-ratio. The preregistered exact 2.0x-2.5x bracket was rejected because enabled
-0.60 r/s passed one of five windows. No exact maximum-capacity estimate is made.
-
-## Cost Boundary
-
-One `c8g.4xlarge`, expected 60-90 minutes, hard stop at two hours, with a USD 2
-compute target and the repository-wide cloud ceiling enforced.
+EXP-2026-012 then tested those same two rates and matched the intended capacity
+outcomes, but its successful responses omitted the source-artifact hash required
+by its analysis lock. ArmProof rejected that archive. EXP-2026-014 changes no
+performance parameter; it repeats the same test with the complete response
+identity and is the only capacity archive consumed by the release.

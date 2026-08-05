@@ -1,7 +1,7 @@
 import {
   createWorkspace,
   findRecordedCase,
-  resolveTicket,
+  resolveTicketToQueue,
   selectRecordedCase,
 } from "./model.mjs";
 
@@ -13,9 +13,16 @@ const elements = Object.fromEntries(
 let data;
 let workspace;
 let inferenceMode = "recorded";
-let matchedSurgeAvailable = false;
+let matchedLanesAvailable = false;
 let auditAvailable = false;
 let proofState = "recorded";
+let proofClaims = [];
+let deploymentStatus = {
+  active_lane: null,
+  release_ready: false,
+  audit_experiment_id: null,
+  promoted_at: null,
+};
 
 const VIEW_TO_HASH = {
   workspace: "triage",
@@ -38,6 +45,13 @@ function formatMs(value) {
 }
 
 
+function liveServiceLabel(lane) {
+  return lane === "optimized"
+    ? "Optimized service · KleidiAI on"
+    : "Standard service · KleidiAI off";
+}
+
+
 function formatClaimValue(metric, value) {
   if (["accuracy_delta_pp", "macro_f1_delta_pp"].includes(metric)) return `${value.toFixed(3)} pp`;
   if (["schema_valid_rate", "enabled_kai_cycle_callchain_share"].includes(metric)) return `${(value * 100).toFixed(2)}%`;
@@ -51,7 +65,7 @@ function renderProofClaims() {
   const tbody = elements["proof-claims"];
   tbody.replaceChildren();
   const operators = { gte: "≥", lte: "≤", gt: ">", lt: "<", eq: "=" };
-  data.proof.claims.forEach((claim) => {
+  proofClaims.forEach((claim) => {
     const row = document.createElement("tr");
     const values = [
       claim.label,
@@ -85,9 +99,11 @@ function renderProofClaims() {
 
 function renderProofDecision(state, detail = "") {
   proofState = state;
+  if (state === "recorded") proofClaims = data.proof.claims;
   const header = elements["proof-decision-title"].closest(".proof-decision");
   const mark = header.querySelector(".decision-mark");
   header.classList.toggle("failed", state === "failed");
+  elements["environment-status"].classList.toggle("failed", state === "failed");
   if (state === "fresh") {
     setText("proof-decision-source", "Verified during this session");
     setText("proof-decision-title", "Fresh audit approved the conservative Graviton boundary");
@@ -120,7 +136,7 @@ function renderProofDecision(state, detail = "") {
 }
 
 
-function activateView(view, { focus = true, updateHash = true } = {}) {
+function activateView(view, { focus = true, updateHash = true, focusHeading = false, scroll = true } = {}) {
   if (!(view in VIEW_TO_HASH)) return;
   document.querySelectorAll("[role=tab]").forEach((tab) => {
     const selected = tab.dataset.view === view;
@@ -130,8 +146,17 @@ function activateView(view, { focus = true, updateHash = true } = {}) {
   document.querySelectorAll(".view").forEach((panel) => {
     panel.hidden = panel.id !== `view-${view}`;
   });
-  if (updateHash) history.replaceState(null, "", `#${VIEW_TO_HASH[view]}`);
-  if (focus) document.querySelector(`[data-view="${view}"]`)?.focus({ preventScroll: true });
+  const nextHash = `#${VIEW_TO_HASH[view]}`;
+  if (updateHash && location.hash !== nextHash) history.pushState(null, "", nextHash);
+  const panel = elements[`view-${view}`];
+  if (scroll) panel.scrollIntoView({ block: "start" });
+  if (focusHeading) {
+    const heading = panel.querySelector("h1, h2");
+    heading?.setAttribute("tabindex", "-1");
+    heading?.focus({ preventScroll: true });
+  } else if (focus) {
+    document.querySelector(`[data-view="${view}"]`)?.focus({ preventScroll: true });
+  }
 }
 
 
@@ -170,26 +195,38 @@ function renderReview() {
   setText(
     "inference-source",
     active.mode === "live_model_output"
-      ? `${active.backend} · ${formatMs(active.inference_ms)}`
+      ? `${liveServiceLabel(active.deployment_lane)} · `
+        + `${formatMs(active.inference_ms)} inference · ${formatMs(active.gateway_latency_ms)} end to end`
+        + (active.release_audit_id ? ` · activated by ${active.release_audit_id}` : "")
       : `Recorded ${data.provenance.model} INT4`,
   );
   setText("review-priority", active.priority);
   elements["review-priority"].className = `priority-badge ${active.priority.toLowerCase()}`;
+  const runtime = active.runtime_identity;
+  const liveReceipt = active.mode === "live_model_output" && runtime;
+  elements["live-request-receipt"].hidden = !liveReceipt;
+  if (liveReceipt) {
+    const observed = new Date(active.observed_at);
+    setText("live-request-id", active.request_id);
+    setText(
+      "live-observed-at",
+      Number.isNaN(observed.getTime()) ? active.observed_at : observed.toLocaleTimeString([], { hour12: false }),
+    );
+    setText("live-arm-runtime", `${runtime.architecture} · ${runtime.threads} threads · ${runtime.runtime_version}`);
+    setText("live-control", `mlas.disable_kleidiai=${runtime.optimization_control["mlas.disable_kleidiai"]}`);
+  }
   if (active.mode === "live_model_output") {
     elements["review-warning"].textContent = active.guard_overrode
-      ? `The queue guard changed the live LLM route from ${active.llm_queue} to ${active.guard_queue}. Human validation is required.`
+      ? `The routing guard changed the live model route from ${active.llm_queue} to ${active.guard_queue}. Human validation is required.`
       : "This is a live two-stage suggestion with no benchmark label. Human validation is required.";
-    elements["correct-route"].hidden = true;
   } else if (!active.queue_correct) {
     elements["review-warning"].textContent = `The guarded queue differs from the benchmark queue (${active.expected_queue}). Correct it before routing.`;
-    elements["correct-route"].hidden = false;
   } else if (active.guard_overrode) {
-    elements["review-warning"].textContent = `The queue guard changed the LLM route from ${active.llm_queue} to ${active.guard_queue}, matching the held-out benchmark. Human approval is still required.`;
-    elements["correct-route"].hidden = true;
+    elements["review-warning"].textContent = `The routing guard changed the model route from ${active.llm_queue} to ${active.guard_queue}, matching the held-out benchmark. Human approval is still required.`;
   } else {
     elements["review-warning"].textContent = "The two-stage route matches the held-out benchmark. Human approval is still required.";
-    elements["correct-route"].hidden = true;
   }
+  elements["final-queue"].value = active.queue;
 }
 
 
@@ -200,7 +237,7 @@ function renderReviewedTickets() {
     const row = document.createElement("tr");
     row.className = "empty-row";
     const cell = document.createElement("td");
-    cell.colSpan = 4;
+    cell.colSpan = 5;
     cell.textContent = "No tickets reviewed in this demo session.";
     row.append(cell);
     elements["reviewed-tickets"].append(row);
@@ -211,27 +248,56 @@ function renderReviewedTickets() {
   workspace.resolved.forEach((ticket) => {
     const row = document.createElement("tr");
     const request = document.createElement("td");
+    const served = document.createElement("td");
     const queue = document.createElement("td");
     const status = document.createElement("td");
     const runbook = document.createElement("td");
     request.textContent = ticket.source_text;
+    if (ticket.mode === "live_model_output" && ticket.runtime_identity) {
+      const label = document.createElement("strong");
+      label.textContent = `${liveServiceLabel(ticket.deployment_lane)} · ${formatMs(ticket.gateway_latency_ms)} observed`;
+      const receipt = document.createElement("small");
+      const observed = new Date(ticket.observed_at);
+      const observedAt = Number.isNaN(observed.getTime())
+        ? ticket.observed_at
+        : observed.toLocaleTimeString([], { hour12: false });
+      receipt.className = "ticket-receipt";
+      receipt.textContent = `${ticket.request_id} · ${observedAt} · `
+        + `${ticket.runtime_identity.architecture}/${ticket.runtime_identity.threads} threads · `
+        + `mlas.disable_kleidiai=${ticket.runtime_identity.optimization_control["mlas.disable_kleidiai"]}`
+        + (ticket.release_audit_id ? ` · ${ticket.release_audit_id}` : "");
+      served.append(label, receipt);
+    } else {
+      served.textContent = "Recorded evidence";
+    }
     queue.textContent = ticket.final_queue;
     status.textContent = ticket.review_status === "confirmed" ? "Confirmed" : "Corrected";
     status.className = `review-state ${ticket.review_status}`;
     runbook.textContent = ticket.procedure;
     runbook.className = "runbook-cell";
-    row.append(request, queue, status, runbook);
+    row.append(request, served, queue, status, runbook);
     elements["reviewed-tickets"].append(row);
   });
   labelResponsiveTable(elements["reviewed-tickets"].closest("table"));
   elements["review-complete"].hidden = Boolean(workspace.active);
   const latest = workspace.resolved[0];
+  const optimizedTicket = workspace.resolved.some(
+    (ticket) => ticket.deployment_lane === "optimized" && ticket.release_audit_id,
+  );
+  elements["adoption-handoff"].hidden = !optimizedTicket;
   setText(
     "review-complete-title",
     latest.review_status === "corrected"
       ? `Corrected to ${latest.final_queue}`
       : `Routed to ${latest.final_queue}`,
   );
+}
+
+
+function revealVerifiedProof() {
+  for (const id of ["optimization-summary", "performix-proof", "proof-details", "release-gate"]) {
+    elements[id].hidden = false;
+  }
 }
 
 
@@ -277,9 +343,13 @@ async function routeSelectedMessage(event) {
       elements["intake-error"].hidden = true;
       renderWorkspace();
       elements["review-panel"].scrollIntoView({ behavior: "smooth", block: "nearest" });
+      elements["review-title"].setAttribute("tabindex", "-1");
+      elements["review-title"].focus({ preventScroll: true });
     } catch (error) {
       elements["intake-error"].textContent = `Live route failed: ${error.message}`;
       elements["intake-error"].hidden = false;
+      elements["intake-error"].setAttribute("tabindex", "-1");
+      elements["intake-error"].focus();
     } finally {
       elements["route-request"].disabled = false;
       elements["route-request"].textContent = "Run live route";
@@ -296,6 +366,8 @@ async function routeSelectedMessage(event) {
   workspace = selectRecordedCase(workspace, recordedCase);
   renderWorkspace();
   elements["review-panel"].scrollIntoView({ behavior: "smooth", block: "nearest" });
+  elements["review-title"].setAttribute("tabindex", "-1");
+  elements["review-title"].focus({ preventScroll: true });
 }
 
 
@@ -304,15 +376,20 @@ function setInferenceMode(mode) {
   const live = mode === "live";
   elements["sample-select"].disabled = live;
   elements["scenario-picker"].hidden = live;
-  setText("environment-label", live ? "Live matched Arm64 endpoint" : "Recorded Graviton evidence");
+  setText(
+    "environment-label",
+    live
+      ? `${deploymentStatus.active_lane === "optimized" ? "Optimized service · KleidiAI on" : "Standard service · KleidiAI off"}`
+      : "Recorded Graviton evidence",
+  );
   elements["workspace-mode"].textContent = live
     ? "Live matched Arm64 inference"
     : `${data.provenance.dataset} recorded output`;
   elements["intake-note"].textContent = live
     ? "This message is sent through the identity-checked Arm64 inference endpoint and local queue guard."
     : "Select an evidence-backed request to load its recorded model output.";
-  elements["route-request"].textContent = live ? "Run live route" : "Load model suggestion";
-  elements["customer-message"].readOnly = false;
+  elements["route-request"].textContent = live ? "Run live route" : "Inspect stored output";
+  elements["customer-message"].readOnly = !live;
   if (live) {
     elements["customer-message"].value = "";
     elements["customer-message"].placeholder = "Enter a support request for the live Arm64 service";
@@ -332,38 +409,26 @@ async function configureLiveMode() {
     const response = await fetch("./live-status.json", { cache: "no-store" });
     if (!response.ok) return;
     const status = await response.json();
-    if (status.live_available) {
+    if (status.live_available && status.matched_lanes_available) {
       elements["live-mode"].disabled = false;
       elements["live-mode-hint"].textContent = "Connected to the configured Arm inference endpoint.";
       elements["live-mode-label"].classList.add("available");
     }
-    matchedSurgeAvailable = Boolean(status.matched_surge_available);
+    matchedLanesAvailable = Boolean(status.matched_lanes_available);
     auditAvailable = Boolean(status.audit_available);
-    elements["tamper-check"].disabled = !auditAvailable;
-    if (status.lanes) {
-      setText("baseline-live-cores", `Cores ${status.lanes.baseline.core_group}`);
-      setText("optimized-live-cores", `Cores ${status.lanes.optimized.core_group}`);
-    }
-    if (matchedSurgeAvailable && status.matched_identity) {
-      const identity = status.matched_identity;
+    deploymentStatus = { ...deploymentStatus, ...(status.deployment || {}) };
+    if (status.lanes?.baseline && status.lanes?.optimized) {
       setText(
-        "live-match-proof",
-        `Runtime-verified match: model ${identity.model_identity.slice(0, 12)}… · `
-        + `${identity.runtime} ${identity.runtime_version} · ${identity.threads_per_lane} threads per lane · `
-        + `${identity.architecture} · compared runtime control ${identity.changed_control}: `
-        + `${identity.baseline_control} → ${identity.optimized_control}.`,
+        "promotion-candidate-lane",
+        `${status.lanes.optimized.backend} · cores ${status.lanes.optimized.core_group}`,
       );
-    } else {
-      setText(
-        "live-match-proof",
-        `Matched run unavailable: ${status.matched_status || "endpoint identity was not verified"}.`,
-      );
+      const activeConfig = status.lanes[deploymentStatus.active_lane];
+      if (activeConfig) {
+        deploymentStatus.backend = activeConfig.backend;
+        deploymentStatus.core_group = activeConfig.core_group;
+      }
     }
-    setText(
-      "surge-live-status",
-      matchedSurgeAvailable ? "Matched Arm endpoints connected" : "Matched endpoints not connected",
-    );
-    elements["run-live-surge"].disabled = !matchedSurgeAvailable;
+    renderDeploymentStatus();
     if (!auditAvailable) {
       elements["load-experiment"].textContent = "Open checked-in evidence";
       elements["evidence-load-note"].textContent =
@@ -371,17 +436,134 @@ async function configureLiveMode() {
     }
   } catch {
     // Static hosting intentionally remains in recorded-evidence mode.
-    setText("surge-live-status", "Matched endpoints unavailable");
-    setText("live-match-proof", "Runtime identity probes are unavailable on this static page.");
   }
 }
 
 
-function review(decision) {
-  workspace = resolveTicket(workspace, decision);
+function renderDeploymentStatus() {
+  const active = deploymentStatus.active_lane;
+  const connected = matchedLanesAvailable && Boolean(active);
+  const optimized = active === "optimized";
+  const freshAudit = proofState === "fresh" && deploymentStatus.release_ready;
+  const publicEvidence = !matchedLanesAvailable && !auditAvailable;
+  setText("promotion-eyebrow", "Live release action");
+  setText("promotion-current-label", "Serving now");
+  setText("promotion-candidate-label", "Candidate");
+  setText("promotion-audit-label", "Required evidence");
+  elements["promote-route"].hidden = false;
+  elements["open-required-audit"].textContent = "Open required capacity audit";
+  setText(
+    "workspace-serving",
+    !connected
+      ? "Recorded model result"
+      : optimized
+        ? "Optimized service · KleidiAI on"
+        : "Standard service · KleidiAI off",
+  );
+  setText(
+    "workspace-candidate",
+    connected
+      ? "Optimized service · KleidiAI on"
+      : publicEvidence
+        ? "Optimized treatment · measured"
+        : "Connect both matched Arm64 services",
+  );
+  setText(
+    "workspace-release-status",
+    optimized
+      ? `${deploymentStatus.audit_experiment_id} approved and active`
+      : freshAudit
+        ? `${deploymentStatus.audit_experiment_id} approved; ready to activate`
+      : publicEvidence
+        ? `${data.provenance.experiment_id} passed the checked-in release policy`
+        : "Waiting for the measured release check",
+  );
+  setText(
+    "promotion-current-lane",
+    !connected
+      ? "No matched live route connected"
+      : `${deploymentStatus.backend} · cores ${deploymentStatus.core_group}`,
+  );
+  setText(
+    "promotion-audit-status",
+    freshAudit
+      ? `${deploymentStatus.audit_experiment_id} verified now`
+      : "Fresh audit required",
+  );
+  if (publicEvidence) {
+    setText("promotion-eyebrow", "Recorded release decision");
+    setText("promotion-current-label", "Baseline");
+    setText("promotion-current-lane", "KleidiAI disabled · measured");
+    setText("promotion-candidate-label", "Released candidate");
+    setText("promotion-candidate-lane", "KleidiAI enabled · measured");
+    setText("promotion-audit-label", "Release evidence");
+    setText("promotion-audit-status", `${data.provenance.experiment_id} · 10/10 claims passed`);
+    setText("promotion-title", "The optimized candidate cleared the checked-in release policy");
+    setText(
+      "promotion-detail",
+      "The repository receipt binds the matched Graviton treatments, sustained traffic outcomes, quality rows and Arm profiles. Live routing remains unavailable on this public page.",
+    );
+    elements["promote-route"].hidden = true;
+    elements["open-required-audit"].hidden = false;
+    elements["open-required-audit"].textContent = "Inspect capacity evidence";
+    elements["route-next-request"].hidden = true;
+  } else if (optimized) {
+    setText("promotion-title", "The verified optimized service is handling live requests");
+    setText(
+      "promotion-detail",
+      "The gateway changed its active route only after the measured release check passed and both service identities were checked again.",
+    );
+    elements["promote-route"].disabled = true;
+    elements["promote-route"].textContent = "Optimized service active";
+    elements["route-next-request"].hidden = false;
+    elements["open-required-audit"].hidden = true;
+  } else if (freshAudit && matchedLanesAvailable) {
+    setText("promotion-title", "The measured optimized service is ready for live traffic");
+    setText(
+      "promotion-detail",
+      "The release check passed. Activation will recheck both Arm service identities, then switch traffic from the standard service to the optimized service.",
+    );
+    elements["promote-route"].disabled = false;
+    elements["promote-route"].textContent = "Activate verified optimized service";
+    elements["route-next-request"].hidden = true;
+    elements["open-required-audit"].hidden = true;
+  } else {
+    setText("promotion-title", connected
+      ? "The standard service is handling support requests"
+      : "Connect both matched Arm64 lanes to activate a release");
+    setText(
+      "promotion-detail",
+      connected
+        ? "Run the measured release check before routing live requests to the optimized service."
+        : "The public evidence remains inspectable, but changing the live route requires both identity-checked endpoints and a fresh local audit.",
+    );
+    elements["promote-route"].disabled = true;
+    elements["promote-route"].textContent = connected
+      ? "Verify the measured experiment first"
+      : "Matched live lanes required";
+    elements["route-next-request"].hidden = true;
+    elements["open-required-audit"].hidden = false;
+  }
+}
+
+
+function review() {
+  workspace = resolveTicketToQueue(workspace, elements["final-queue"].value);
   renderWorkspace();
+  setText(
+    "review-complete-detail",
+    inferenceMode === "live" && deploymentStatus.active_lane !== "optimized"
+      ? "This ticket used the standard service. Review the measured optimized release before switching traffic."
+      : "Decision recorded in the audit trail.",
+  );
   elements["tab-workspace"].classList.add("completed");
-  elements["review-complete"].querySelector("button").focus();
+  if (workspace.resolved.length > 1) {
+    elements["recent-title"].setAttribute("tabindex", "-1");
+    elements["recent-title"].scrollIntoView({ block: "start" });
+    elements["recent-title"].focus({ preventScroll: true });
+  } else {
+    elements["review-complete"].querySelector("button").focus();
+  }
 }
 
 
@@ -393,6 +575,16 @@ function populateCases() {
     elements["sample-select"].append(option);
   });
   loadSelectedSample();
+}
+
+
+function populateFinalQueues() {
+  Object.keys(workspace.queue_counts).forEach((queue) => {
+    const option = document.createElement("option");
+    option.value = queue;
+    option.textContent = queue;
+    elements["final-queue"].append(option);
+  });
 }
 
 
@@ -420,10 +612,75 @@ function populateScenarios() {
 }
 
 
+function renderAuditStage(stage, detail, elapsedMs) {
+  const labels = {
+    quality: () => `${detail.raw_model_outputs.toLocaleString()} raw model outputs checked for quality`,
+    performix: () => `${(detail.disabled_function_samples + detail.enabled_function_samples).toLocaleString()} Performix function samples parsed`,
+    archive: () => `${detail.checksummed_files} capacity files matched the frozen plan`,
+    requests: () => `${detail.raw_request_outcomes.toLocaleString()} traffic outcomes reconstructed from ${detail.confirmation_files} windows`,
+    policy: () => `${detail.claims_evaluated} release rules evaluated · ${detail.passed ? "passed" : "blocked"}`,
+  };
+  const item = document.createElement("li");
+  const text = document.createElement("strong");
+  const timing = document.createElement("time");
+  text.textContent = labels[stage] ? labels[stage]() : stage;
+  timing.textContent = `${elapsedMs.toFixed(0)} ms`;
+  timing.dateTime = `PT${(elapsedMs / 1000).toFixed(3)}S`;
+  item.dataset.stage = stage;
+  item.append(text, timing);
+  elements["audit-progress"].append(item);
+  setText("evidence-load-note", text.textContent);
+}
+
+
+async function streamVerifiedAudit() {
+  const response = await fetch("/api/audit-stream", { method: "POST" });
+  if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let receipt = null;
+
+  async function consume(line) {
+    if (!line.trim()) return;
+    const event = JSON.parse(line);
+    if (event.type === "stage") {
+      renderAuditStage(event.stage, event.detail, Number(event.elapsed_ms));
+    }
+    if (event.type === "result") receipt = event.receipt;
+    if (event.type === "error") throw new Error(event.error);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+  }
+
+  while (true) {
+    const { value, done } = await reader.read();
+    buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() || "";
+    for (const line of lines) await consume(line);
+    if (done) break;
+  }
+  await consume(buffer);
+  if (!receipt) throw new Error("audit stream ended without a release decision");
+  return receipt;
+}
+
+
 async function loadVerifiedExperiment() {
   if (!auditAvailable) {
     elements["load-experiment"].disabled = true;
-    showRepositoryEvidence();
+    try {
+      showRepositoryEvidence();
+    } catch (error) {
+      elements["audit-receipt"].hidden = true;
+      elements["experiment-results"].hidden = true;
+      elements["load-experiment"].disabled = false;
+      elements["load-experiment"].textContent = "Retry checked-in evidence";
+      setText("evidence-load-note", `Checked-in evidence is incomplete: ${error.message}`);
+      elements["evidence-loader"].classList.add("failed");
+      setText("evidence-seal", "×");
+      renderProofDecision("failed", `The checked-in evidence could not be rendered: ${error.message}`);
+    }
     return;
   }
   const expected = data.provenance.evidence;
@@ -432,115 +689,86 @@ async function loadVerifiedExperiment() {
     `Verifying ${expected.sustained_raw_confirmation_samples.toLocaleString()} outcomes…`;
   elements["evidence-load-note"].textContent =
     "Reading the archive, recomputing all long windows, and evaluating the contract.";
-  resetAuditProgress();
+  setText("evidence-seal", "…");
+  elements["audit-receipt"].hidden = true;
+  elements["reveal-experiment-results"].hidden = true;
+  elements["audit-progress"].replaceChildren();
+  elements["audit-progress"].hidden = false;
   try {
-    const response = await fetch("/api/audit-stream", { method: "POST" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const receipt = await readAuditStream(response);
+    const receipt = await streamVerifiedAudit();
     const valid =
       receipt.passed
       && receipt.experiment_id === data.provenance.experiment_id
       && receipt.claims_verified === data.proof.verified_claims
+      && Array.isArray(receipt.claims)
+      && receipt.claims.length === receipt.claims_verified
+      && receipt.claims.every((claim) => claim.status === "pass")
       && receipt.raw_request_outcomes === expected.sustained_raw_confirmation_samples
+      && receipt.raw_quality_outputs === expected.raw_quality_outputs
       && receipt.confirmation_files === expected.sustained_raw_confirmation_files
       && receipt.archive_sha256 === expected.sustained_archive_sha256
       && receipt.matched_control;
     if (!valid) throw new Error("audit receipt does not match the loaded release data");
+    proofClaims = receipt.claims;
     renderAuditResult(receipt);
+    revealVerifiedProof();
     renderProofDecision(
       "fresh",
       `${receipt.claims_verified} required claims passed after ${receipt.raw_request_outcomes.toLocaleString()} outcomes were re-derived in ${receipt.elapsed_ms.toFixed(0)} ms.`,
     );
+    deploymentStatus = {
+      ...deploymentStatus,
+      release_ready: true,
+      audit_experiment_id: receipt.experiment_id,
+    };
+    renderDeploymentStatus();
     setText(
       "audit-archive-result",
       `${receipt.archive_sha256.slice(0, 12)}… · ${receipt.elapsed_ms.toFixed(0)} ms total`,
     );
     setText(
       "audit-request-result",
-      `${receipt.raw_request_outcomes.toLocaleString()} outcomes across ${receipt.confirmation_files} files`,
+      `${receipt.raw_request_outcomes.toLocaleString()} capacity requests · ${receipt.raw_quality_outputs.toLocaleString()} model outputs`,
     );
-    setText("audit-control-result", "Matched identities; declared treatment control verified");
+    setText("audit-control-result", "Same model and runtime; only the KleidiAI setting changed");
     setText("audit-claim-result", `${receipt.claims_verified}/${receipt.claims_verified} required claims passed`);
-    elements["experiment-results"].hidden = false;
+    elements["audit-receipt"].hidden = false;
+    setText("audit-receipt-time", `Completed from local evidence in ${receipt.elapsed_ms.toFixed(0)} ms`);
     elements["load-experiment"].textContent = "Measured experiment verified";
     elements["evidence-load-note"].textContent =
       `${receipt.adapter} recomputed the release decision from the immutable archive in ${receipt.elapsed_ms.toFixed(0)} ms.`;
     elements["evidence-loader"].classList.add("loaded");
+    setText("evidence-seal", "✓");
     elements["tab-surge"].classList.add("completed");
-    elements["experiment-results"].scrollIntoView({ behavior: "smooth", block: "start" });
+    elements["reveal-experiment-results"].hidden = false;
+    elements["reveal-experiment-results"].focus({ preventScroll: true });
   } catch (error) {
+    console.error(error);
     elements["load-experiment"].disabled = false;
     elements["load-experiment"].textContent = "Retry measured experiment";
     elements["evidence-load-note"].textContent = `Verification blocked: ${error.message}`;
+    elements["evidence-load-note"].setAttribute("tabindex", "-1");
+    elements["evidence-load-note"].focus();
     elements["evidence-loader"].classList.add("failed");
+    setText("evidence-seal", "×");
     renderProofDecision("failed", `The current audit did not approve: ${error.message}`);
   }
 }
 
 
-function resetAuditProgress() {
-  elements["audit-progress"].hidden = false;
-  const rows = [...elements["audit-progress"].querySelectorAll("li")];
-  rows.forEach((row, index) => {
-    row.className = index === 0 ? "active" : "";
-    row.querySelector("small").textContent = "Waiting…";
-  });
-  elements["audit-archive-result"].textContent = "Hashing the archive…";
-}
-
-
-function updateAuditStage(stage, detail) {
-  const order = ["archive", "requests", "controls", "contract"];
-  const index = order.indexOf(stage);
-  if (index < 0) throw new Error(`unknown audit stage: ${stage}`);
-  const row = elements["audit-progress"].querySelector(`[data-audit-stage="${stage}"]`);
-  row.className = "complete";
-  if (stage === "archive") {
-    setText("audit-archive-result", `${detail.archive_sha256.slice(0, 12)}… · ${detail.checksummed_files} files`);
-  } else if (stage === "requests") {
-    setText("audit-request-result", `${detail.raw_request_outcomes.toLocaleString()} outcomes across ${detail.confirmation_files} files`);
-  } else if (stage === "controls") {
-    setText("audit-control-result", detail.matched_control ? `Matched; treatment control ${detail.only_changed_control} verified` : "Control mismatch");
-  } else {
-    setText("audit-claim-result", `${detail.claims_verified}/${detail.claims_verified} required claims passed`);
-  }
-  const next = elements["audit-progress"].querySelector(`[data-audit-stage="${order[index + 1]}"]`);
-  if (next) next.className = "active";
-}
-
-
-async function readAuditStream(response) {
-  if (!response.body) throw new Error("audit stream is unavailable");
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let receipt = null;
-  while (true) {
-    const { value, done } = await reader.read();
-    buffer += decoder.decode(value || new Uint8Array(), { stream: !done });
-    const lines = buffer.split("\n");
-    buffer = lines.pop() || "";
-    for (const line of lines) {
-      if (!line.trim()) continue;
-      const event = JSON.parse(line);
-      if (event.type === "stage") updateAuditStage(event.stage, event.detail);
-      if (event.type === "result") receipt = event.receipt;
-      if (event.type === "error") throw new Error(event.error);
-    }
-    if (done) break;
-  }
-  if (!receipt) throw new Error("audit finished without a result receipt");
-  return receipt;
+function revealConfirmedResult() {
+  elements["experiment-results"].hidden = false;
+  elements["reveal-experiment-results"].hidden = true;
+  elements["rate-selection-title"].scrollIntoView({ behavior: "smooth", block: "start" });
+  elements["rate-selection-title"].setAttribute("tabindex", "-1");
+  elements["rate-selection-title"].focus({ preventScroll: true });
 }
 
 
 function showRepositoryEvidence() {
   const mixed = data.capacity.mixes.mixed;
   const evidence = data.provenance.evidence;
-  elements["audit-progress"].hidden = false;
-  elements["audit-progress"].querySelectorAll("li").forEach((row) => {
-    row.className = "complete";
-  });
+  elements["audit-receipt"].hidden = false;
   renderAuditResult({
     passed: data.proof.decision === "PASS",
     claims_verified: data.proof.verified_claims,
@@ -551,33 +779,47 @@ function showRepositoryEvidence() {
       minimum_ratio: mixed.minimum_capacity_ratio,
       confirmations: mixed.confirmations_per_treatment,
       confirmation_seconds: mixed.confirmation_seconds,
-    },
-    original_gate: {
-      passed: data.provenance.original_gate_passed,
-      required_probe_failures: mixed.confirmations_per_treatment,
-      observed_probe_failures: mixed.optimized_probe_failures,
-      observed_probe_passes: mixed.optimized_probe_passes,
-      probe_rps: mixed.optimized_probe_rps,
-      exact_lower_ratio: mixed.minimum_capacity_ratio,
-      exact_upper_ratio: mixed.optimized_probe_rps / mixed.baseline_sustainable_rps,
+      rate_selection: data.capacity.rate_selection,
     },
     arm: {
       performix_disabled_sample_share_percent: data.proof.performix.disabled_kai_sample_share_percent,
       performix_enabled_sample_share_percent: data.proof.performix.enabled_kai_sample_share_percent,
       linux_perf_cycle_share_percent: data.proof.kleidiai_cycle_callchain_share_percent,
       kernel: data.proof.performix.kernel_family,
+      engine_version: data.proof.performix.engine_version,
+      cpu: data.proof.performix.cpu,
+      enabled_function_samples: data.proof.performix.enabled_function_samples,
+      scope_note: data.proof.performix.scope_note,
+      pmu_capability_note: data.proof.performix.pmu_capability_note,
+    },
+    supporting: {
+      direct_speedup_min: data.proof.direct_speedup_min,
+      direct_speedup_max: data.proof.direct_speedup_max,
+      direct_shape_gains: data.proof.direct_shape_gains,
+      artifact_reduction_percent: data.proof.artifact_reduction_percent,
+      peak_pss_reduction_percent: data.proof.peak_pss_reduction_percent,
+      migration_quality_delta_pp: data.proof.migration_quality_delta_pp,
+      migration_int4_quality_correct: data.proof.migration_int4_quality_correct,
+      migration_bf16_quality_correct: data.proof.migration_bf16_quality_correct,
+      migration_quality_total: data.proof.migration_quality_total,
     },
   });
+  revealVerifiedProof();
   setText("audit-archive-result", `${evidence.sustained_archive_sha256.slice(0, 12)}… · repository receipt`);
-  setText("audit-request-result", `${evidence.sustained_raw_confirmation_samples.toLocaleString()} recorded outcomes across ${evidence.sustained_raw_confirmation_files} files`);
-  setText("audit-control-result", "Matched identities; declared treatment control verified");
+  setText("audit-request-result", `${evidence.sustained_raw_confirmation_samples.toLocaleString()} capacity requests · ${evidence.raw_quality_outputs.toLocaleString()} model outputs`);
+  setText("audit-control-result", "Same model and runtime; only the KleidiAI setting changed");
   setText("audit-claim-result", `${data.proof.verified_claims}/${data.proof.verified_claims} claims in the checked-in decision`);
+  setText("audit-receipt-time", "Loaded from the published repository receipt");
   elements["experiment-results"].hidden = false;
   elements["load-experiment"].textContent = "Repository evidence opened";
   elements["evidence-load-note"].textContent =
     "GitHub Pages loaded the checked-in audit receipt. The local runbook recomputes the archive during the demo.";
   elements["evidence-loader"].classList.add("loaded");
+  setText("evidence-seal", "✓");
   renderProofDecision("recorded");
+  elements["capacity-title"].setAttribute("tabindex", "-1");
+  elements["capacity-title"].scrollIntoView({ block: "start" });
+  elements["capacity-title"].focus({ preventScroll: true });
 }
 
 
@@ -597,12 +839,19 @@ function renderTrialMatrix(trials) {
       mark.className = `trial-outcome ${outcome}`;
       mark.textContent = outcome === "pass" ? "Pass" : "Fail";
       mark.title = `${formatMs(trial.p95_ms[index])} p95`;
-      cell.append(mark);
+      const p95 = document.createElement("small");
+      p95.className = "trial-p95";
+      p95.textContent = `p95 ${formatMs(trial.p95_ms[index])}`;
+      const dispatch = trial.max_dispatch_ms?.[index];
+      if (dispatch !== undefined) {
+        p95.title = `Maximum client dispatch delay ${formatMs(dispatch)}`;
+      }
+      cell.append(mark, p95);
       row.append(cell);
     });
     const interpretation = document.createElement("td");
     const passCount = trial.outcomes.filter((outcome) => outcome === "pass").length;
-    interpretation.textContent = `${passCount}/5 passed · ${trial.boundary}`;
+    interpretation.textContent = `${passCount}/${trial.outcomes.length} passed · ${trial.boundary}`;
     row.append(interpretation);
     body.append(row);
   });
@@ -610,182 +859,231 @@ function renderTrialMatrix(trials) {
 }
 
 
+function renderRateSelection(selection) {
+  setText("rate-selection-copy", selection.interpretation);
+  setText("rate-discovery-id", `Discovery: ${selection.experiment_id}`);
+  setText(
+    "rate-confirmation-id",
+    `Frozen confirmation: ${selection.confirmation_experiment_id} · commit ${selection.publication.git_commit.slice(0, 7)}`,
+  );
+  elements["rate-confirmation-id"].href = selection.publication.public_commit_url;
+  elements["rate-selection-grid"].replaceChildren();
+  selection.trial_matrix.forEach((trial) => {
+    const item = document.createElement("div");
+    const label = document.createElement("span");
+    const value = document.createElement("strong");
+    const passCount = trial.outcomes.filter((outcome) => outcome === "pass").length;
+    label.textContent = trial.treatment.replace("KleidiAI disabled", "Standard service").replace("KleidiAI enabled", "Optimized service");
+    value.textContent = `${trial.rate_rps.toFixed(2)} r/s · ${passCount}/${trial.outcomes.length} passed`;
+    item.append(label, value);
+    elements["rate-selection-grid"].append(item);
+  });
+}
+
+
+function renderLatencyConsequence(trials) {
+  const container = elements["latency-consequence-groups"];
+  container.replaceChildren();
+  const maximumSeconds = Math.max(
+    10,
+    ...trials.flatMap((trial) => trial.p95_ms.map((value) => value / 1000)),
+  );
+  trials.forEach((trial) => {
+    const group = document.createElement("article");
+    const heading = document.createElement("div");
+    const title = document.createElement("strong");
+    const summary = document.createElement("span");
+    const bars = document.createElement("div");
+    const passing = trial.outcomes.every((outcome) => outcome === "pass");
+    title.textContent = trial.treatment.replace("KleidiAI disabled", "Standard service").replace("KleidiAI enabled", "Optimized service");
+    summary.textContent = `${trial.rate_rps.toFixed(2)} r/s · ${passing ? "all five within target" : "all five missed target"}`;
+    heading.append(title, summary);
+    bars.className = "latency-trial-bars";
+    bars.style.setProperty("--slo-position", `${(10 / maximumSeconds) * 100}%`);
+    trial.p95_ms.forEach((value, index) => {
+      const row = document.createElement("div");
+      const label = document.createElement("span");
+      const track = document.createElement("div");
+      const bar = document.createElement("i");
+      const measured = document.createElement("b");
+      label.textContent = `Trial ${index + 1}`;
+      track.className = "latency-track";
+      bar.className = passing ? "within" : "missed";
+      bar.style.width = `${Math.max(2, (value / 1000 / maximumSeconds) * 100)}%`;
+      measured.textContent = `${(value / 1000).toFixed(2)} s`;
+      track.append(bar);
+      row.append(label, track, measured);
+      bars.append(row);
+    });
+    const target = document.createElement("small");
+    target.textContent = "Vertical marker: 10-second p95 target";
+    group.append(heading, bars, target);
+    container.append(group);
+  });
+}
+
+
 function renderAuditResult(receipt) {
   const capacity = receipt.capacity;
   const arm = receipt.arm;
-  const originalGate = receipt.original_gate;
+  const supporting = receipt.supporting;
   setText(
     "confirmation-count",
-    `${capacity.confirmations} trials × 4 boundaries × ${capacity.confirmation_seconds}s`,
+    `${capacity.confirmations} trials × 2 frozen rates × ${capacity.confirmation_seconds}s`,
   );
-  setText("equation-treatment", `${capacity.optimized_pass_rps.toFixed(2)} r/s optimized pass`);
-  setText("equation-baseline", `${capacity.baseline_fail_rps.toFixed(2)} r/s baseline fail`);
+  setText("equation-treatment", `Optimized capacity ≥ ${capacity.optimized_pass_rps.toFixed(2)} r/s`);
+  setText("equation-baseline", `Standard capacity < ${capacity.baseline_fail_rps.toFixed(2)} r/s`);
   setText("headline-ratio", `≥${capacity.minimum_ratio.toFixed(2)}×`);
-  setText("original-gate-status", originalGate.passed ? "PASSED" : "REJECTED");
-  setText(
-    "original-gate-explanation",
-    `The exact ${originalGate.exact_lower_ratio.toFixed(1)}×–${originalGate.exact_upper_ratio.toFixed(1)}× bracket required all `
-    + `${originalGate.required_probe_failures} optimized windows at ${originalGate.probe_rps.toFixed(2)} r/s to fail. `
-    + `${originalGate.observed_probe_passes} passed, so that preregistered claim was rejected. `
-    + "The release below evaluates a separate, narrower lower-bound claim supported by every confirmation window.",
-  );
   setText(
     "capacity-explanation",
-    `KleidiAI enabled passed all five windows at ${capacity.optimized_pass_rps.toFixed(2)} r/s. `
-    + `KleidiAI disabled failed all five at ${capacity.baseline_fail_rps.toFixed(2)} r/s. `
-    + "Using the failing baseline probe makes the published ratio a lower bound.",
+    `Discovery tests located each service's capacity boundary. Before the recorded confirmation-server launch, `
+    + `the release contract froze ${capacity.baseline_fail_rps.toFixed(2)} r/s just above the standard service's observed limit `
+    + `and ${capacity.optimized_pass_rps.toFixed(2)} r/s for the optimized service. `
+    + `All ${capacity.confirmations} standard windows failed and all ${capacity.confirmations} optimized windows passed. `
+    + `That places standard capacity below ${capacity.baseline_fail_rps.toFixed(2)} r/s and optimized capacity at or above `
+    + `${capacity.optimized_pass_rps.toFixed(2)} r/s. The published result is the conservative lower bound shown here.`,
   );
   setText("reveal-disabled-sample-share", `${arm.performix_disabled_sample_share_percent.toFixed(0)}%`);
   setText("reveal-enabled-sample-share", `${arm.performix_enabled_sample_share_percent.toFixed(2)}%`);
   setText("reveal-cycle-share", `${arm.linux_perf_cycle_share_percent.toFixed(2)}%`);
   setText("reveal-kernel", arm.kernel);
+  setText("direct-speedup", `${supporting.direct_speedup_min.toFixed(2)}–${supporting.direct_speedup_max.toFixed(2)}× faster`);
+  setText(
+    "direct-shapes",
+    `All ${supporting.direct_shape_gains.length} fixed shapes improved: ${supporting.direct_shape_gains.map((value) => `${value.toFixed(2)}×`).join(" · ")}`,
+  );
+  setText("summary-capacity", `≥${capacity.minimum_ratio.toFixed(2)}×`);
+  setText("summary-performix", `${arm.performix_enabled_sample_share_percent.toFixed(2)}%`);
+  setText("capacity-range", `≥${capacity.minimum_ratio.toFixed(2)}× sustainable capacity under the fixed response-time rule`);
+  setText("artifact-reduction", `${supporting.artifact_reduction_percent.toFixed(2)}% smaller`);
+  setText("memory-reduction", `${supporting.peak_pss_reduction_percent.toFixed(2)}% lower peak PSS`);
+  setText(
+    "migration-quality",
+    `${supporting.migration_quality_delta_pp >= 0 ? "+" : ""}${supporting.migration_quality_delta_pp.toFixed(2)} pp `
+      + `(${supporting.migration_int4_quality_correct}/${supporting.migration_quality_total} vs `
+      + `${supporting.migration_bf16_quality_correct}/${supporting.migration_quality_total})`,
+  );
+  setText("performix-version", `Arm Performix ${arm.engine_version} · ${arm.cpu}`);
+  setText("performix-disabled-share", `${arm.performix_disabled_sample_share_percent.toFixed(0)}%`);
+  setText("performix-enabled-share", `${arm.performix_enabled_sample_share_percent.toFixed(2)}%`);
+  setText("performix-sample-count", `${arm.enabled_function_samples.toLocaleString()} measured function samples`);
+  setText("performix-linux-share", `${arm.linux_perf_cycle_share_percent.toFixed(2)}%`);
+  setText("performix-kernel", arm.kernel);
+  setText("performix-scope-note", arm.scope_note);
+  setText("performix-capability-note", arm.pmu_capability_note);
   setText("surge-release-decision", receipt.passed ? "PASS" : "BLOCK");
   setText(
     "conclusion-copy",
     `${receipt.claims_verified} required claims passed: capacity, quality, evidence volume, matched Arm execution, and profiler integrity.`,
   );
   renderTrialMatrix(capacity.trial_matrix);
+  renderLatencyConsequence(capacity.trial_matrix);
+  renderRateSelection(capacity.rate_selection);
 }
 
 
-function initializeLiveSlots() {
-  ["baseline", "optimized"].forEach((lane) => {
-    const container = elements[`${lane}-live-slots`];
-    container.replaceChildren();
-    for (let sequence = 1; sequence <= 3; sequence += 1) {
-      const tile = document.createElement("div");
-      tile.className = "live-request waiting";
-      tile.dataset.sequence = String(sequence);
-      const number = document.createElement("span");
-      number.textContent = `Request ${sequence}`;
-      const result = document.createElement("strong");
-      result.textContent = "Waiting";
-      const detail = document.createElement("small");
-      detail.textContent = "—";
-      tile.append(number, result, detail);
-      container.append(tile);
-    }
-  });
-}
-
-
-function updateLiveTile(lane, result) {
-  const tile = elements[`${lane}-live-slots`].querySelector(
-    `[data-sequence="${result.sequence}"]`,
-  );
-  tile.className = "live-request complete";
-  tile.querySelector("strong").textContent = formatMs(result.gateway_latency_ms);
-  tile.querySelector("small").textContent =
-    `${result.backend} · ${result.core_group} · ${result.suggested_label}`;
-  tile.title = `${result.request_id} started ${result.gateway_started_at}`;
-}
-
-
-function updateLiveFailure(lane, sequence, message) {
-  const tile = elements[`${lane}-live-slots`].querySelector(
-    `[data-sequence="${sequence}"]`,
-  );
-  tile.className = "live-request failed";
-  tile.querySelector("strong").textContent = "Failed";
-  tile.querySelector("small").textContent = message;
-}
-
-
-async function runLiveMiniSurge(event) {
-  event.preventDefault();
-  if (!matchedSurgeAvailable) return;
-  const text = elements["surge-message"].value.trim();
-  if (!text) return;
-  initializeLiveSlots();
-  elements["live-surge-result"].hidden = true;
-  elements["run-live-surge"].disabled = true;
-  elements["run-live-surge"].textContent = "Sending six live requests…";
-  setText("baseline-live-summary", "Three requests in flight");
-  setText("optimized-live-summary", "Three requests in flight");
-  const runId = crypto.randomUUID().replaceAll("-", "").slice(0, 12);
-  const started = performance.now();
-  const outcomes = { baseline: [], optimized: [] };
-  const tasks = ["baseline", "optimized"].flatMap((lane) =>
-    [1, 2, 3].map(async (sequence) => {
-      const response = await fetch(`/api/surge/${lane}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, run_id: runId, sequence }),
-      });
-      const result = await response.json();
-      if (!response.ok) throw Object.assign(new Error(result.error || `HTTP ${response.status}`), { lane, sequence });
-      outcomes[lane].push(result);
-      updateLiveTile(lane, result);
-    }),
-  );
-  const settled = await Promise.allSettled(tasks);
-  settled.filter((result) => result.status === "rejected").forEach((result) => {
-    updateLiveFailure(result.reason.lane, result.reason.sequence, result.reason.message);
-  });
-  const elapsed = performance.now() - started;
-  ["baseline", "optimized"].forEach((lane) => {
-    const rows = outcomes[lane];
+async function promoteOptimizedLane() {
+  elements["promote-route"].disabled = true;
+  elements["promote-route"].textContent = "Rechecking both Arm lanes…";
+  elements["promotion-result"].textContent = "";
+  try {
+    const response = await fetch("/api/promote", { method: "POST" });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.detail || payload.error || `HTTP ${response.status}`);
+    deploymentStatus = { ...deploymentStatus, ...payload };
+    renderDeploymentStatus();
     setText(
-      `${lane}-live-summary`,
-      `${rows.length}/3 completed${rows.length === 3 ? " · runtime identity verified" : ""}`,
+      "promotion-result",
+      `${payload.backend} on cores ${payload.core_group} is now serving the live support route. `
+      + `Its source-model fingerprint ${payload.runtime_identity.source_artifact_sha256.slice(0, 12)}… `
+      + `and ${payload.runtime_identity.runtime} ${payload.runtime_identity.runtime_version} matched the audited deployment.`,
     );
-  });
-  const complete = outcomes.baseline.length === 3 && outcomes.optimized.length === 3;
-  if (complete) {
-    elements["live-surge-result"].textContent =
-      `Live run ${runId}: all six matched requests completed in ${formatMs(elapsed)}. `
-      + "Per-request latency is shown above; capacity is evaluated by the long-window audit below.";
-  } else {
-    elements["live-surge-result"].textContent =
-      `Live run ${runId} finished with ${settled.filter((result) => result.status === "rejected").length} failed gateway calls.`;
-  }
-  elements["live-surge-result"].hidden = false;
-  elements["run-live-surge"].disabled = false;
-  elements["run-live-surge"].textContent = "Run matched request check again";
-}
-
-
-async function previewScaffold() {
-  elements["preview-scaffold"].disabled = true;
-  elements["preview-scaffold"].textContent = "Generating…";
-  try {
-    const response = await fetch("/api/scaffold-preview", { method: "POST" });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
-    elements["scaffold-preview"].textContent =
-      `$ ${payload.command}\n\n${payload.files.map((file) => `created  ${file}`).join("\n")}\n\nBLOCK until evidence exists\nNext: ${payload.next}`;
-    elements["scaffold-preview"].hidden = false;
-    elements["preview-scaffold"].textContent = "Preview ready";
+    setText("environment-label", "Verified optimized Arm64 lane serving");
+    setText(
+      "promotion-model-hash",
+      `${payload.runtime_identity.source_artifact_sha256.slice(0, 16)}…`,
+    );
+    setText(
+      "promotion-runtime-match",
+      `${payload.runtime_identity.runtime} ${payload.runtime_identity.runtime_version} · matched`,
+    );
+    setText(
+      "promotion-arm-match",
+      `${payload.runtime_identity.architecture} · ${payload.runtime_identity.threads_per_lane} threads per lane`,
+    );
+    setText(
+      "promotion-control-match",
+      `${payload.runtime_identity.changed_control}: ${payload.runtime_identity.baseline_control} → ${payload.runtime_identity.optimized_control}`,
+    );
+    elements["promotion-identity"].hidden = false;
+    elements["tab-proof"].classList.add("completed");
   } catch (error) {
-    elements["scaffold-preview"].textContent = `Generation failed: ${error.message}`;
-    elements["scaffold-preview"].hidden = false;
-    elements["preview-scaffold"].disabled = false;
-    elements["preview-scaffold"].textContent = "Retry starter kit preview";
+    elements["promotion-result"].textContent = `Activation blocked: ${error.message}`;
+    elements["promote-route"].disabled = false;
+    elements["promote-route"].textContent = "Retry optimized-lane activation";
   }
 }
 
 
-async function runTamperCheck() {
-  elements["tamper-check"].disabled = true;
-  elements["tamper-check"].textContent = "Changing a temporary copy…";
-  elements["tamper-result"].hidden = true;
+function routeNextLiveRequest() {
+  activateView("workspace");
+  elements["live-mode"].checked = true;
+  setInferenceMode("live");
+}
+
+
+async function generateAdoptionKit() {
+  elements["generate-adoption-kit"].disabled = true;
+  elements["generate-adoption-kit"].textContent = "Generating and validating starter…";
+  setText("adoption-status", "Creating the files with ArmProof now.");
   try {
-    const response = await fetch("/api/tamper-check", { method: "POST" });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
-    elements["tamper-result"].textContent =
-      `${payload.decision}  ${payload.reason}\n`
-      + `expected  ${payload.expected_sha256.slice(0, 16)}…\n`
-      + `observed  ${payload.observed_sha256.slice(0, 16)}…\n`
-      + `${payload.mutation} · ${payload.elapsed_ms.toFixed(0)} ms`;
-    elements["tamper-result"].hidden = false;
-    elements["tamper-check"].textContent = "Altered evidence blocked";
+    const response = auditAvailable
+      ? await fetch("/api/adoption", { method: "POST" })
+      : await fetch("./adoption.json", { cache: "no-store" });
+    const receipt = await response.json();
+    if (!response.ok) throw new Error(receipt.error || `HTTP ${response.status}`);
+    setText("adoption-files", `${receipt.generated_files.length} files · ${receipt.generated_files.join(", ")}`);
+    setText(
+      "adoption-gate",
+      `${receipt.validation_status} · ${receipt.validation_detail}`,
+    );
+    setText("adoption-contract", `${receipt.contract_sha256.slice(0, 16)}…`);
+    setText("adoption-workflow", receipt.workflow.trim());
+    const download = elements["adoption-download"];
+    if (receipt.archive_base64) {
+      const bytes = Uint8Array.from(
+        atob(receipt.archive_base64),
+        (character) => character.charCodeAt(0),
+      );
+      download.href = URL.createObjectURL(new Blob([bytes], { type: "application/zip" }));
+    } else {
+      download.href = receipt.archive_href;
+    }
+    download.download = receipt.archive_name;
+    download.hidden = false;
+    elements["adoption-result"].hidden = false;
+    setText(
+      "adoption-status",
+      "Starter structure validated. It remains blocked until the new service collects and seals its own measured evidence.",
+    );
+    elements["generate-adoption-kit"].textContent = "Collection starter generated";
+    elements["adoption-result"].setAttribute("tabindex", "-1");
+    elements["adoption-result"].focus();
   } catch (error) {
-    elements["tamper-result"].textContent = `Tamper test failed: ${error.message}`;
-    elements["tamper-result"].hidden = false;
-    elements["tamper-check"].disabled = false;
-    elements["tamper-check"].textContent = "Retry one-byte evidence test";
+    elements["generate-adoption-kit"].disabled = false;
+    elements["generate-adoption-kit"].textContent = "Retry starter generation";
+    setText("adoption-status", `Starter generation unavailable: ${error.message}. The repository includes the same executable example under examples/http-slo/.`);
   }
+}
+
+
+function openAdoptionKit() {
+  activateView("proof", { focusHeading: true });
+  elements["proof-details"].open = true;
+  elements["reuse-title"].setAttribute("tabindex", "-1");
+  elements["reuse-title"].scrollIntoView({ behavior: "smooth", block: "start" });
+  elements["reuse-title"].focus({ preventScroll: true });
+  generateAdoptionKit();
 }
 
 
@@ -794,13 +1092,16 @@ function renderRedesignEvidence() {
   const proof = data.proof;
   const evidence = data.provenance.evidence;
   setText("guard-accuracy", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
-  setText("guard-evaluation-size", `Held out, ${data.quality.guard_evaluation_cases.toLocaleString()} requests`);
+  setText(
+    "guard-evaluation-size",
+    `${data.quality.guard_evaluation_cases.toLocaleString()} held-out requests · separate application evaluation`,
+  );
   setText("guard-gain", `+${data.quality.guard_queue_gain_pp.toFixed(2)} pp`);
   setText("guard-split", `${data.quality.guard_training_cases} train / ${data.quality.guard_evaluation_cases} held out`);
   setText("schema-valid", `${data.quality.schema_valid_percent.toFixed(0)}%`);
   setText("evidence-experiment-id", data.provenance.experiment_id);
   setText("evidence-checksum-status", `${evidence.sustained_checksummed_files} checksummed files · ${evidence.sustained_raw_confirmation_samples.toLocaleString()} outcomes`);
-  setText("evidence-comparison", "Matched INT4 treatments; one runtime flag differs");
+  setText("evidence-comparison", "Same INT4 model and runtime; only the KleidiAI setting differs");
   setText("experiment-machine", proof.instance);
   setText("experiment-model", `${data.provenance.model} INT4`);
   setText("experiment-slo", `p95 ≤ ${(data.capacity.slo_ms / 1000).toFixed(0)} seconds`);
@@ -809,13 +1110,6 @@ function renderRedesignEvidence() {
   setText("arm-reveal-control", evidence.only_changed_control);
   setText("proof-evidence-count", `${evidence.sustained_checksummed_files} sustained + ${evidence.performix_checksummed_files} Performix checksums`);
   setText("proof-derived-claims", `${proof.verified_claims} contract claims evaluated from ${evidence.sustained_raw_confirmation_samples.toLocaleString()} request outcomes; missing inputs block release.`);
-  setText("artifact-reduction", `${proof.artifact_reduction_percent.toFixed(2)}% smaller`);
-  setText("memory-reduction", `${proof.peak_pss_reduction_percent.toFixed(2)}% lower peak PSS`);
-  setText(
-    "migration-quality",
-    `${proof.migration_quality_delta_pp >= 0 ? "+" : ""}${proof.migration_quality_delta_pp.toFixed(2)} pp (${proof.migration_int4_quality_correct}/${proof.migration_quality_total} vs ${proof.migration_bf16_quality_correct}/${proof.migration_quality_total})`,
-  );
-  setText("capacity-range", `≥${mixed.minimum_capacity_ratio.toFixed(2)}× sustainable capacity under the fixed SLO`);
   setText("deployment-instance", proof.instance);
   setText("deployment-threads", proof.threads);
   setText("deployment-runtime", data.provenance.runtime);
@@ -828,25 +1122,13 @@ function renderRedesignEvidence() {
   setText("release-action", data.provenance.release_action);
   setText("release-contract-sha", data.provenance.contract_sha256);
   elements["release-link"].href = data.provenance.release_url;
-  const performix = proof.performix;
-  setText("performix-version", `Arm Performix ${performix.engine_version} · ${performix.cpu}`);
-  setText("performix-disabled-share", `${performix.disabled_kai_sample_share_percent.toFixed(0)}%`);
-  setText("performix-enabled-share", `${performix.enabled_kai_sample_share_percent.toFixed(2)}%`);
-  setText("performix-sample-count", `${performix.enabled_function_samples.toLocaleString()} measured function samples`);
-  setText("performix-linux-share", `${performix.linux_perf_cycle_share_percent.toFixed(2)}%`);
-  setText("performix-kernel", performix.kernel_family);
-  setText("performix-scope-note", performix.scope_note);
-  setText("performix-capability-note", performix.pmu_capability_note);
   setText("queue-accuracy", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
   setText("queue-gain", `+${data.quality.guard_queue_gain_pp.toFixed(2)} percentage points`);
   setText("absolute-accuracy", `${data.quality.optimized_accuracy_percent.toFixed(2)}%`);
-  setText("reuse-action", `uses: ${data.provenance.release_action}`);
-  elements["reuse-action-copy"].dataset.copy = `uses: ${data.provenance.release_action}`;
   setText(
     "evidence-chain-counts",
     `Verify ${evidence.sustained_checksummed_files} sustained and ${evidence.performix_checksummed_files} Performix checksummed evidence files.`,
   );
-  initializeLiveSlots();
 }
 
 
@@ -864,22 +1146,28 @@ function bindInteractions() {
     });
   });
   document.querySelectorAll("[data-go-proof]").forEach((button) => {
-    button.addEventListener("click", () => activateView("proof"));
+    button.addEventListener("click", () => activateView("proof", { focusHeading: true }));
   });
   document.querySelectorAll("[data-go-surge]").forEach((button) => {
-    button.addEventListener("click", () => activateView("surge"));
+    button.addEventListener("click", () => {
+      activateView("surge", { focusHeading: true });
+    });
   });
   document.querySelectorAll("[data-case-id]").forEach((button) => {
     button.addEventListener("click", () => selectScenario(button.dataset.caseId));
   });
   elements["sample-select"].addEventListener("change", loadSelectedSample);
   elements["intake-form"].addEventListener("submit", routeSelectedMessage);
-  elements["confirm-route"].addEventListener("click", () => review("confirm"));
-  elements["correct-route"].addEventListener("click", () => review("correct"));
+  elements["confirm-route"].addEventListener("click", review);
   elements["load-experiment"].addEventListener("click", loadVerifiedExperiment);
-  elements["surge-form"].addEventListener("submit", runLiveMiniSurge);
-  elements["preview-scaffold"].addEventListener("click", previewScaffold);
-  elements["tamper-check"].addEventListener("click", runTamperCheck);
+  elements["reveal-experiment-results"].addEventListener("click", revealConfirmedResult);
+  elements["promote-route"].addEventListener("click", promoteOptimizedLane);
+  elements["route-next-request"].addEventListener("click", routeNextLiveRequest);
+  elements["open-required-audit"].addEventListener("click", () => {
+    activateView("surge", { focusHeading: true });
+  });
+  elements["open-adoption-kit"].addEventListener("click", openAdoptionKit);
+  elements["generate-adoption-kit"].addEventListener("click", generateAdoptionKit);
   document.querySelectorAll('input[name="inference-mode"]').forEach((radio) => {
     radio.addEventListener("change", () => setInferenceMode(radio.value));
   });
@@ -895,7 +1183,7 @@ function bindInteractions() {
   });
   window.addEventListener("hashchange", () => {
     const view = HASH_TO_VIEW[location.hash.slice(1)];
-    if (view) activateView(view, { focus: false, updateHash: false });
+    if (view) activateView(view, { focus: false, focusHeading: true, updateHash: false });
   });
 }
 
@@ -911,6 +1199,7 @@ async function main() {
     setText("rail-model", data.provenance.model);
     setText("intent-model-label", `${data.provenance.model} intent`);
     populateCases();
+    populateFinalQueues();
     populateScenarios();
     renderWorkspace();
     renderRedesignEvidence();
@@ -918,7 +1207,7 @@ async function main() {
     bindInteractions();
     document.querySelectorAll("table[data-mobile-cards]").forEach(labelResponsiveTable);
     const initialView = HASH_TO_VIEW[location.hash.slice(1)] ?? "workspace";
-    activateView(initialView, { focus: false });
+    activateView(initialView, { focus: false, scroll: false });
     await configureLiveMode();
   } catch (error) {
     console.error(error);

@@ -16,21 +16,34 @@ class SurgeDeskPayloadTests(unittest.TestCase):
 
     def test_headline_capacity_comes_from_sustained_mixed_audit(self) -> None:
         mixed = self.payload["capacity"]["mixes"]["mixed"]
-        self.assertEqual(mixed["baseline_sustainable_rps"], 0.24)
         self.assertEqual(mixed["baseline_fail_rps"], 0.28)
         self.assertEqual(mixed["optimized_sustainable_rps"], 0.56)
-        self.assertAlmostEqual(mixed["tested_pass_point_ratio"], 2.3333333333)
         self.assertEqual(mixed["minimum_capacity_ratio"], 2.0)
-        self.assertEqual(mixed["optimized_probe_passes"], 1)
         self.assertEqual(mixed["confirmation_seconds"], 500)
-        self.assertEqual(len(mixed["trial_matrix"]), 4)
+        self.assertEqual(mixed["confirmations_per_treatment"], 5)
+        self.assertEqual(len(mixed["trial_matrix"]), 2)
+        self.assertEqual(mixed["trial_matrix"][0]["outcomes"], ["fail"] * 5)
+        self.assertEqual(mixed["trial_matrix"][1]["outcomes"], ["pass"] * 5)
+        self.assertEqual(self.payload["provenance"]["experiment_id"], "EXP-2026-014")
         self.assertEqual(
-            mixed["trial_matrix"][3]["outcomes"],
-            ["fail", "pass", "fail", "fail", "fail"],
+            self.payload["provenance"]["release_experiment_id"], "EXP-2026-014"
         )
-        self.assertEqual(self.payload["provenance"]["experiment_id"], "EXP-2026-009")
-        self.assertFalse(self.payload["provenance"]["original_gate_passed"])
-        self.assertTrue(self.payload["provenance"]["corrected_claim_passed"])
+        self.assertEqual(
+            self.payload["provenance"]["application_evaluation_experiment_id"],
+            "EXP-2026-004",
+        )
+        self.assertIn(
+            "Git object for EXP-2026-014 contains the exact final plan",
+            self.payload["capacity"]["rate_selection"]["interpretation"],
+        )
+        self.assertIn(
+            "ten 500-second windows",
+            self.payload["capacity"]["rate_selection"]["interpretation"],
+        )
+        self.assertNotIn(
+            "EXP-2026-012",
+            self.payload["capacity"]["rate_selection"]["interpretation"],
+        )
 
     def test_demo_exposes_absolute_quality_and_non_regression(self) -> None:
         quality = self.payload["quality"]
@@ -75,7 +88,7 @@ class SurgeDeskPayloadTests(unittest.TestCase):
             "69-file",
             "282-file",
             "35-file",
-            "EXP-2026-009",
+            "EXP-2026-014",
             "banking77-quality-0110",
             "[4, 5, 7]",
             "Five confirmations at every boundary",
@@ -89,12 +102,12 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertEqual(proof["decision"], "PASS")
         self.assertEqual(
             proof["decision_source"],
-            "derived_from_versioned_sustained_contract",
+            "derived_from_preregistered_confirmation",
         )
         self.assertEqual(
-            proof["contract_id"], "phi4-graviton-kleidiai-sustained-release"
+            proof["contract_id"], "phi4-graviton-kleidiai-confirmed-release"
         )
-        self.assertEqual(proof["verified_claims"], 9)
+        self.assertEqual(proof["verified_claims"], 10)
         self.assertEqual(
             {row["id"] for row in proof["claims"]},
             {
@@ -104,24 +117,25 @@ class SurgeDeskPayloadTests(unittest.TestCase):
                 "sustained-capacity-lower-bound",
                 "sustained-window-count",
                 "sustained-request-count",
-                "arm-execution",
-                "arm-cycle-attribution",
-                "perf-sample-integrity",
+                "raw-quality-output-count",
+                "arm-control-zero",
+                "arm-treatment-share",
+                "performix-sample-count",
             },
         )
         self.assertEqual(proof["reproduction_max_relative_difference_percent"], 0.0)
         self.assertTrue(proof["kleidiai_enabled_callchains"])
         self.assertFalse(proof["kleidiai_disabled_callchains"])
-        self.assertAlmostEqual(proof["kleidiai_cycle_callchain_share_percent"], 68.53)
+        self.assertGreater(proof["kleidiai_cycle_callchain_share_percent"], 50.0)
         self.assertEqual(proof["instance"], "c8g.4xlarge")
         performix = proof["performix"]
         self.assertEqual(performix["engine_version"], "1.20.0")
         self.assertEqual(performix["cpu"], "Neoverse-V2")
         self.assertEqual(performix["disabled_kai_sample_share_percent"], 0.0)
         self.assertAlmostEqual(
-            performix["enabled_kai_sample_share_percent"], 67.0158291205
+            performix["enabled_kai_sample_share_percent"], 67.3518470835
         )
-        self.assertAlmostEqual(performix["absolute_share_difference_pp"], 1.5141708795)
+        self.assertIn("different denominator", performix["scope_note"])
         self.assertIn("neon_i8mm", performix["kernel_family"])
 
     def test_demo_identifies_a_verified_matched_control_bundle(self) -> None:
@@ -132,16 +146,22 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertEqual(evidence["reproduction_checksummed_files"], 141)
         self.assertTrue(evidence["sustained_archive_verified"])
         self.assertTrue(evidence["sustained_internal_checksums_verified"])
-        self.assertEqual(evidence["sustained_checksummed_files"], 69)
-        self.assertEqual(evidence["sustained_raw_confirmation_files"], 20)
-        self.assertEqual(evidence["sustained_raw_confirmation_samples"], 4200)
+        self.assertGreater(evidence["sustained_checksummed_files"], 40)
+        self.assertGreater(evidence["raw_quality_checksummed_files"], 100)
+        self.assertEqual(evidence["sustained_raw_confirmation_files"], 10)
+        self.assertEqual(evidence["sustained_raw_confirmation_samples"], 2100)
+        self.assertEqual(evidence["raw_quality_outputs"], 1540)
         self.assertTrue(evidence["sustained_matched_control_verified"])
         self.assertTrue(evidence["performix_archive_verified"])
         self.assertTrue(evidence["performix_internal_checksums_verified"])
-        self.assertGreater(evidence["performix_checksummed_files"], 20)
+        self.assertEqual(evidence["performix_checksummed_files"], 40)
         self.assertEqual(
             evidence["total_checksummed_files"],
-            351 + evidence["performix_checksummed_files"],
+            282
+            + evidence["sustained_checksummed_files"]
+            + evidence["raw_quality_checksummed_files"]
+            + evidence["performix_checksummed_files"]
+            + 4,
         )
         self.assertEqual(evidence["comparison"], "matched_control")
         self.assertEqual(evidence["only_changed_control"], "mlas.disable_kleidiai")

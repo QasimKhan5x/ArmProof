@@ -11,7 +11,7 @@ from dataclasses import asdict, replace
 from importlib.metadata import entry_points
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Mapping, Protocol
+from typing import Any, Callable, Mapping, Protocol
 
 from armproof.contracts import Contract, validate_comparison_identities
 from armproof.domain import CausalScope, Comparison, TreatmentIdentity
@@ -29,7 +29,10 @@ from armproof.evidence.performix import (
     verify_performix_archive,
     verify_performix_execution_archive,
 )
-from armproof.evidence.confirmed_audit import derive_minimum_capacity_audit
+from armproof.evidence.confirmed_audit import (
+    derive_minimum_capacity_audit,
+    validate_confirmed_contract_claims,
+)
 from armproof.evidence.raw_quality import verify_raw_quality_evidence
 from armproof.policy.statistics import estimate_capacity_bracket
 from armproof.policy import decision_to_dict
@@ -72,7 +75,10 @@ class KleidiAICapacityAdapter:
     adapter_id = ADAPTER_ID
 
     def verify(
-        self, contract: Contract, config: Mapping[str, Any], base: Path
+        self,
+        contract: Contract,
+        config: Mapping[str, Any],
+        base: Path,
     ) -> VerifiedEvidence:
         fields = {
             "adapter", "root", "checksums", "workload_manifest", "reproduction",
@@ -412,8 +418,8 @@ class HttpSloAdapter:
         if not ledger.is_file():
             raise ValueError(
                 "No measured evidence found. Complete ADOPTION_CHECKLIST.md, "
-                "place the collected files under evidence/, generate "
-                "evidence/SHA256SUMS, then rerun armproof ci."
+                "place the collected files under evidence/, run armproof seal "
+                "armproof.json, then rerun armproof ci."
             )
         checksums = verify_checksum_ledger(ledger, root)
         if not checksums.passed:
@@ -882,7 +888,12 @@ class KleidiAIConfirmedAdapter:
     adapter_id = "kleidiai-confirmed-v2"
 
     def verify(
-        self, contract: Contract, config: Mapping[str, Any], base: Path
+        self,
+        contract: Contract,
+        config: Mapping[str, Any],
+        base: Path,
+        *,
+        on_stage: Callable[[str, dict[str, Any]], None] | None = None,
     ) -> VerifiedEvidence:
         fields = {
             "adapter", "archive", "archive_sha256", "preregistration", "analysis_lock",
@@ -910,6 +921,11 @@ class KleidiAIConfirmedAdapter:
             expected_artifact_sha256=next(iter(declared_artifacts)),
             expected_runtime_sha256=next(iter(declared_runtimes)),
         )
+        if on_stage is not None:
+            on_stage("quality", {
+                "raw_model_outputs": raw_quality.disabled_rows + raw_quality.enabled_rows,
+                "checksummed_files": raw_quality.checksummed_files,
+            })
 
         performix = config["performix"]
         performix_fields = {
@@ -936,12 +952,17 @@ class KleidiAIConfirmedAdapter:
             or len(performix_preregistration["treatments"]) != 2
         ):
             raise ValueError("confirmed Performix preregistration is invalid")
-        repository_root = base.parents[1]
         declared_workload = performix_preregistration.get("workload_ref")
+        actual_workload = _path(base, config["workload"], "workload").resolve()
+        declared_workload_path = (
+            Path(declared_workload) if isinstance(declared_workload, str) else None
+        )
         if (
-            not isinstance(declared_workload, str)
-            or (repository_root / declared_workload).resolve()
-            != _path(base, config["workload"], "workload").resolve()
+            declared_workload_path is None
+            or declared_workload_path.is_absolute()
+            or len(declared_workload_path.parts) > len(actual_workload.parts)
+            or actual_workload.parts[-len(declared_workload_path.parts):]
+            != declared_workload_path.parts
         ):
             raise ValueError(
                 "confirmed Performix workload differs from the capacity release"
@@ -964,9 +985,39 @@ class KleidiAIConfirmedAdapter:
                 _path(base, config["workload"], "workload")
             ),
         )
+        if on_stage is not None:
+            on_stage("performix", {
+                "disabled_function_samples": performix_profile["disabled"][
+                    "total_function_samples"
+                ],
+                "enabled_function_samples": performix_profile["enabled"][
+                    "total_function_samples"
+                ],
+                "enabled_kai_sample_share": performix_profile["enabled"][
+                    "kai_sample_share"
+                ],
+            })
         declared_treatments = {
             row["id"]: row for row in performix_preregistration["treatments"]
         }
+
+        capacity_preregistration = _json(
+            _path(base, config["preregistration"], "preregistration")
+        )
+        protocol_lock = _json(
+            _path(base, config["protocol_lock"], "protocol_lock")
+        )
+        capacity_acceptance = capacity_preregistration.get("acceptance")
+        if not isinstance(capacity_acceptance, Mapping):
+            raise ValueError("confirmed capacity preregistration has no acceptance policy")
+        validate_confirmed_contract_claims(
+            contract,
+            experiment_id=str(capacity_preregistration.get("experiment_id")),
+            acceptance=capacity_acceptance,
+            protocol=protocol_lock,
+            performix_acceptance=acceptance,
+            raw_quality_output_count=raw_quality.disabled_rows + raw_quality.enabled_rows,
+        )
 
         def normalized_profile_command(command: str) -> tuple[str, ...]:
             parts = shlex.split(command)
@@ -1014,7 +1065,13 @@ class KleidiAIConfirmedAdapter:
                 raw_quality.disabled_rows + raw_quality.enabled_rows
             ),
             performix_profile=performix_profile,
+            on_stage=on_stage,
         )
+        if on_stage is not None:
+            on_stage("policy", {
+                "claims_evaluated": len(audit.decision.claims),
+                "passed": audit.decision.passed,
+            })
         performix_profile = {
             **performix_profile,
             "linux_perf_separate_kai_cycle_share": audit.enabled_kai_cycle_share,
@@ -1050,6 +1107,7 @@ class KleidiAIConfirmedAdapter:
             "passed": audit.decision.passed,
             "archive_sha256": audit.archive_sha256,
             "internal_checksummed_files": audit.internal_checksummed_files,
+            "raw_quality_checksummed_files": raw_quality.checksummed_files,
             "raw_confirmation_files": audit.raw_confirmation_files,
             "raw_confirmation_samples": audit.raw_confirmation_samples,
             "raw_quality_outputs": audit.raw_quality_outputs,
@@ -1059,11 +1117,11 @@ class KleidiAIConfirmedAdapter:
             "minimum_capacity_ratio": audit.minimum_capacity_ratio,
             "capacity_display": {
                 "description": (
-                    "Preregistered treatment pass rate divided by the "
-                    "preregistered failing control rate."
+                    "Conservative lower bound: preregistered treatment pass rate "
+                    "divided by the preregistered failing control rate."
                 ),
-                "baseline_label": "Control fails",
-                "treatment_label": "Treatment passes",
+                "baseline_label": "Baseline fails",
+                "treatment_label": "Optimized passes",
             },
             "mixes": {
                 "mixed": {

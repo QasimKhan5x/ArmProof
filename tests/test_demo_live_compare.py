@@ -24,6 +24,29 @@ class _Endpoint:
             def log_message(self, format: str, *args: object) -> None:
                 return
 
+            def do_GET(self) -> None:
+                if self.path != "/health":
+                    self.send_error(404)
+                    return
+                control = "1" if owner.backend == "kleidiai-disabled" else "0"
+                body = json.dumps({
+                    "ready": True,
+                    "backend": owner.backend,
+                    "model_identity": "a" * 64,
+                    "source_artifact_sha256": "b" * 64,
+                    "runtime": "onnxruntime-genai",
+                    "runtime_version": "0.15.0.dev0",
+                    "threads": 16,
+                    "architecture": "aarch64",
+                    "cpu_affinity": list(range(16)),
+                    "optimization_control": {"mlas.disable_kleidiai": control},
+                }).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
             def do_POST(self) -> None:
                 import time
 
@@ -72,11 +95,14 @@ class LiveComparisonTests(unittest.TestCase):
         cls.module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cls.module)
 
-    def test_races_the_same_request_and_reports_both_backends(self) -> None:
+    def test_sends_the_same_request_and_reports_both_backends(self) -> None:
         with (
             _Endpoint(0.12, "kleidiai-disabled") as baseline,
             _Endpoint(0.02, "kleidiai-enabled") as optimized,
         ):
+            identity = self.module.verify_live_identities(
+                baseline.url, optimized.url, timeout=2
+            )
             rows = self.module.compare_live_requests(
                 baseline.url,
                 optimized.url,
@@ -86,6 +112,7 @@ class LiveComparisonTests(unittest.TestCase):
             )
 
         self.assertEqual([row.label for row in rows], ["KleidiAI disabled", "KleidiAI enabled"])
+        self.assertEqual(identity["source_artifact_sha256"], "b" * 64)
         self.assertEqual(rows[0].backend, "kleidiai-disabled")
         self.assertEqual(rows[1].backend, "kleidiai-enabled")
         self.assertGreater(rows[0].latency_ms, rows[1].latency_ms)

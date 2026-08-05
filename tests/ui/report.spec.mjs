@@ -42,19 +42,21 @@ for (const viewport of [
     await page.goto(reportUrl);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Measured capacity, verified before merge.');
     await expect(page.locator('.mix')).toHaveCount(1);
-    await expect(page.locator('.claim')).toHaveCount(9);
+    await expect(page.locator('.claim')).toHaveCount(10);
     await expect(page.locator('#min-ratio')).toHaveText('2.0x');
     await expect(page.locator('#capacity-description')).toContainText('Conservative lower bound');
     await expect(page.locator('.bar-row').nth(0)).toContainText('Baseline fail');
     await expect(page.locator('.bar-row').nth(1)).toContainText('Optimized pass');
     await expect(page.locator('#reproduction-note')).toBeHidden();
     await page.getByRole('tab', { name: 'Evidence & provenance' }).click();
-    await expect(page.locator('#verification-detail')).toContainText('104 files verified');
-    await expect(page.locator('#verification-detail')).toContainText('sustained and native Arm Performix bundles');
+    await expect(page.locator('#verification-detail')).toContainText('files verified');
+    await expect(page.locator('#verification-detail')).toContainText('capacity, raw quality, deployment measurements and native Arm Performix bundles');
+    await expect(page.locator('#verification-detail')).toContainText('Git object ab22cc0 contains the exact plan');
+    await expect(page.locator('#verification-detail')).toContainText('recorded instance launch');
     await expect(page.locator('#performix-section')).toBeVisible();
     await expect(page.locator('#performix-disabled')).toContainText('0%');
-    await expect(page.locator('#performix-enabled')).toContainText('67.02%');
-    await expect(page.locator('#performix-crosscheck')).toContainText('1.51 pp');
+    await expect(page.locator('#performix-enabled')).toContainText('67.35%');
+    await expect(page.locator('#performix-crosscheck')).toContainText('different units');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
     expect(await page.evaluate(() => [...document.querySelectorAll('body *')].filter(element => element.scrollWidth > element.clientWidth + 1).map(element => element.className))).toEqual([]);
     await mkdir('build/screenshots', { recursive: true });
@@ -64,6 +66,9 @@ for (const viewport of [
     await expect(page.locator('#history')).toContainText('EXP-2026-009');
     await expect(page.locator('#history')).toContainText('Original exact bracket rejected');
     await expect(page.locator('#history')).toContainText('EXP-2026-010');
+    await expect(page.locator('#history')).toContainText('EXP-2026-012');
+    await expect(page.locator('#history')).toContainText('missing source-artifact identity');
+    await expect(page.locator('#history')).toContainText('EXP-2026-014');
     await expect(page.locator('#provenance tr')).toHaveCount(4);
     expect(messages).toEqual([]);
     if (viewport.name === 'desktop') {

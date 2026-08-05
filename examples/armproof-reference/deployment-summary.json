@@ -17,7 +17,10 @@
     {"id": "EXP-2026-005", "status": "passed", "note": "Fresh instance confirmed every tested capacity-grid boundary"},
     {"id": "EXP-2026-009", "status": "failed", "note": "Original exact bracket rejected; a separate conservative >=2.0x lower bound was established"},
     {"id": "EXP-2026-010", "status": "failed", "note": "All-recipe Performix gate rejected; the completed Code Hotspots pair supports only its narrower attribution claim"},
-    {"id": "EXP-2026-011", "status": "failed", "note": "Counter-heavy cloud recipe set rejected on the two-counter virtual PMU"}
+    {"id": "EXP-2026-011", "status": "failed", "note": "Counter-heavy cloud recipe set rejected on the two-counter virtual PMU"},
+    {"id": "EXP-2026-012", "status": "failed", "note": "Capacity outcomes matched, but the release was rejected for missing source-artifact identity in successful responses"},
+    {"id": "EXP-2026-013", "status": "passed", "note": "Preregistered matched Performix Code Hotspots profiles bound execution to the Neoverse I8MM path"},
+    {"id": "EXP-2026-014", "status": "passed", "note": "Preregistered identity-bound confirmation established the >=2.0x sustained-capacity lower bound across all ten 500-second windows"}
   ],
   "reproduction": {
     "experiment_id": "EXP-2026-005",

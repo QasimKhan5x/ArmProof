@@ -16,29 +16,31 @@
       "environment_sha256": "61dd1bade37725e8520c61cfd8414e4c0f1a11663df12abcdceeef999c58bc06",
       "runtime_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
       "treatment_id": "kleidiai-disabled",
-      "workload_sha256": "b9dcaf4f73abf4c686f64fb6182fae6acb62bb01710b9ff681a0f42d6bf75f92"
+      "workload_sha256": "86b756c46ef2c647ddd779ccc4dd6bafd2aad0c261f4e24cf6177c224a1e1118"
     },
     "causal_scope": "arm_acceleration",
-    "comparison_id": "exp-2026-009-sustained",
+    "comparison_id": "exp-2026-014-confirmed",
     "evidence_kinds": [
-      "arm_callchains",
       "artifact_hashes",
       "boundary_confirmations",
       "environment_identity",
+      "performix_code_hotspots",
       "quality_rows",
+      "raw_model_outputs",
       "request_samples",
       "runtime_lock",
       "workload_manifest"
     ],
     "metrics": {
       "accuracy_delta_pp": -0.38961038961038974,
-      "enabled_kai_callchains_observed": 1.0,
-      "enabled_kai_cycle_callchain_share": 0.6853,
-      "lost_perf_samples": 0.0,
       "macro_f1_delta_pp": -0.6726444303255752,
       "minimum_capacity_ratio": 2.0,
-      "raw_confirmation_files": 20.0,
-      "raw_confirmation_samples": 4200.0,
+      "performix_disabled_kai_share": 0.0,
+      "performix_enabled_kai_share": 0.673518470835091,
+      "performix_minimum_profile_samples": 365062.0,
+      "raw_confirmation_files": 10.0,
+      "raw_confirmation_samples": 2100.0,
+      "raw_quality_outputs": 1540.0,
       "schema_valid_rate": 1.0
     },
     "schema_version": "1.0.0",
@@ -54,7 +56,7 @@
       "environment_sha256": "61dd1bade37725e8520c61cfd8414e4c0f1a11663df12abcdceeef999c58bc06",
       "runtime_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
       "treatment_id": "kleidiai-enabled",
-      "workload_sha256": "b9dcaf4f73abf4c686f64fb6182fae6acb62bb01710b9ff681a0f42d6bf75f92"
+      "workload_sha256": "86b756c46ef2c647ddd779ccc4dd6bafd2aad0c261f4e24cf6177c224a1e1118"
     }
   },
   "decision": {
@@ -89,38 +91,45 @@
       },
       {
         "claim_id": "sustained-window-count",
-        "observed": 20.0,
+        "observed": 10.0,
         "reason_code": "threshold_met",
         "status": "pass",
-        "threshold": 20.0
+        "threshold": 10.0
       },
       {
         "claim_id": "sustained-request-count",
-        "observed": 4200.0,
+        "observed": 2100.0,
         "reason_code": "threshold_met",
         "status": "pass",
-        "threshold": 4200.0
+        "threshold": 2100.0
       },
       {
-        "claim_id": "arm-execution",
-        "observed": 1.0,
+        "claim_id": "raw-quality-output-count",
+        "observed": 1540.0,
         "reason_code": "threshold_met",
         "status": "pass",
-        "threshold": 1.0
+        "threshold": 1540.0
       },
       {
-        "claim_id": "arm-cycle-attribution",
-        "observed": 0.6853,
+        "claim_id": "arm-control-zero",
+        "observed": 0.0,
+        "reason_code": "threshold_met",
+        "status": "pass",
+        "threshold": 0.0
+      },
+      {
+        "claim_id": "arm-treatment-share",
+        "observed": 0.673518470835091,
         "reason_code": "threshold_met",
         "status": "pass",
         "threshold": 0.5
       },
       {
-        "claim_id": "perf-sample-integrity",
-        "observed": 0.0,
+        "claim_id": "performix-sample-count",
+        "observed": 365062.0,
         "reason_code": "threshold_met",
         "status": "pass",
-        "threshold": 0.0
+        "threshold": 100000.0
       }
     ],
     "passed": true,
@@ -170,12 +179,32 @@
         "id": "EXP-2026-011",
         "note": "Counter-heavy cloud recipe set rejected on the two-counter virtual PMU",
         "status": "failed"
+      },
+      {
+        "id": "EXP-2026-012",
+        "note": "Capacity outcomes matched, but the release was rejected for missing source-artifact identity in successful responses",
+        "status": "failed"
+      },
+      {
+        "id": "EXP-2026-013",
+        "note": "Preregistered matched Performix Code Hotspots profiles bound execution to the Neoverse I8MM path",
+        "status": "passed"
+      },
+      {
+        "id": "EXP-2026-014",
+        "note": "Preregistered identity-bound confirmation established the >=2.0x sustained-capacity lower bound across all ten 500-second windows",
+        "status": "passed"
       }
     ],
+    "metric_source": {
+      "checksummed_files": 4,
+      "derivation": "locked_aggregate_footprint_and_raw_timing_repetitions",
+      "experiment_id": "EXP-2026-002"
+    },
     "metrics": {
       "disk_reduction_percent": 35.91724249132322,
       "maximum_kleidiai_speedup": 2.5870578477345356,
-      "minimum_kleidiai_speedup": 1.7170141477125784,
+      "minimum_kleidiai_speedup": 1.7170141477125782,
       "peak_pss_reduction_percent": 55.336785335288766,
       "weighted_pss_reduction_percent": 59.66032309469201
     },
@@ -226,20 +255,38 @@
       "id": "EXP-2026-011",
       "note": "Counter-heavy cloud recipe set rejected on the two-counter virtual PMU",
       "status": "failed"
+    },
+    {
+      "id": "EXP-2026-012",
+      "note": "Capacity outcomes matched, but the release was rejected for missing source-artifact identity in successful responses",
+      "status": "failed"
+    },
+    {
+      "id": "EXP-2026-013",
+      "note": "Preregistered matched Performix Code Hotspots profiles bound execution to the Neoverse I8MM path",
+      "status": "passed"
+    },
+    {
+      "id": "EXP-2026-014",
+      "note": "Preregistered identity-bound confirmation established the >=2.0x sustained-capacity lower bound across all ten 500-second windows",
+      "status": "passed"
     }
   ],
   "summary": {
-    "adapter": "kleidiai-sustained-v1",
-    "archive_sha256": "f22e647aabe40eefd2abc5548306f40e2a5558ce1a85bc31c18319e6e51d78da",
+    "adapter": "kleidiai-confirmed-v2",
+    "archive_sha256": "c4f94870eece68081c54411eedc24e17ae3b6d541afb94daee7ed86577a1bb06",
     "arm_attribution": {
-      "disabled_kai_cycle_share": 0.0,
-      "enabled_kai_cycle_share": 0.6853,
-      "lost_perf_samples": 0
+      "linux_perf_disabled_kai_cycle_share": 0.0,
+      "linux_perf_enabled_kai_cycle_share": 0.6790999999999999,
+      "linux_perf_lost_samples": 0,
+      "performix_disabled_kai_sample_share": 0.0,
+      "performix_enabled_kai_sample_share": 0.673518470835091,
+      "performix_minimum_profile_samples": 365062
     },
     "capacity_display": {
-      "baseline_label": "Baseline fail",
-      "description": "Conservative lower bound from the optimized known-sustainable rate divided by the baseline first-failing probe.",
-      "treatment_label": "Optimized pass"
+      "baseline_label": "Baseline fails",
+      "description": "Conservative lower bound: preregistered treatment pass rate divided by the preregistered failing control rate.",
+      "treatment_label": "Optimized passes"
     },
     "confirmation_seconds": 500,
     "decision": {
@@ -274,56 +321,61 @@
         },
         {
           "claim_id": "sustained-window-count",
-          "observed": 20.0,
+          "observed": 10.0,
           "reason_code": "threshold_met",
           "status": "pass",
-          "threshold": 20.0
+          "threshold": 10.0
         },
         {
           "claim_id": "sustained-request-count",
-          "observed": 4200.0,
+          "observed": 2100.0,
           "reason_code": "threshold_met",
           "status": "pass",
-          "threshold": 4200.0
+          "threshold": 2100.0
         },
         {
-          "claim_id": "arm-execution",
-          "observed": 1.0,
+          "claim_id": "raw-quality-output-count",
+          "observed": 1540.0,
           "reason_code": "threshold_met",
           "status": "pass",
-          "threshold": 1.0
+          "threshold": 1540.0
         },
         {
-          "claim_id": "arm-cycle-attribution",
-          "observed": 0.6853,
+          "claim_id": "arm-control-zero",
+          "observed": 0.0,
+          "reason_code": "threshold_met",
+          "status": "pass",
+          "threshold": 0.0
+        },
+        {
+          "claim_id": "arm-treatment-share",
+          "observed": 0.673518470835091,
           "reason_code": "threshold_met",
           "status": "pass",
           "threshold": 0.5
         },
         {
-          "claim_id": "perf-sample-integrity",
-          "observed": 0.0,
+          "claim_id": "performix-sample-count",
+          "observed": 365062.0,
           "reason_code": "threshold_met",
           "status": "pass",
-          "threshold": 0.0
+          "threshold": 100000.0
         }
       ],
       "passed": true,
       "schema_version": "1.0.0"
     },
-    "experiment_id": "EXP-2026-009",
-    "internal_checksummed_files": 69,
+    "experiment_id": "EXP-2026-014",
+    "internal_checksummed_files": 50,
     "matched_control_verified": true,
     "minimum_capacity_ratio": 2.0,
     "mixes": {
       "mixed": {
         "disabled_boundary": [
-          0.24,
           0.28
         ],
         "enabled_boundary": [
-          0.56,
-          0.6
+          0.56
         ],
         "ratio": {
           "baseline_median": 0.28,
@@ -340,32 +392,21 @@
       "macro_f1_delta_pp": -0.6726444303255752,
       "schema_valid_rate": 1.0
     },
-    "raw_confirmation_files": 20,
-    "raw_confirmation_samples": 4200,
+    "raw_confirmation_files": 10,
+    "raw_confirmation_samples": 2100,
+    "raw_quality_checksummed_files": 111,
+    "raw_quality_outputs": 1540,
     "schema_version": "1.0.0",
-    "tested_pass_point_ratio": 2.3333333333333335,
     "trial_matrix": [
       {
-        "boundary": "known sustainable",
-        "outcomes": [
-          "pass",
-          "pass",
-          "pass",
-          "pass",
-          "pass"
+        "boundary": "preregistered failing control rate",
+        "max_dispatch_ms": [
+          2.414747,
+          3.143784,
+          2.365,
+          3.025653,
+          3.163576
         ],
-        "p95_ms": [
-          8331.46282,
-          8241.560369,
-          8428.073218,
-          8362.083283,
-          8292.810668
-        ],
-        "rate_rps": 0.24,
-        "treatment": "KleidiAI disabled"
-      },
-      {
-        "boundary": "first failing probe",
         "outcomes": [
           "fail",
           "fail",
@@ -374,17 +415,24 @@
           "fail"
         ],
         "p95_ms": [
-          58960.120524,
-          58187.366381,
-          59287.382817,
-          59048.016977,
-          58659.50801
+          59311.178856,
+          60904.386374,
+          60144.229696,
+          59650.557467,
+          59804.253449
         ],
         "rate_rps": 0.28,
         "treatment": "KleidiAI disabled"
       },
       {
-        "boundary": "known sustainable",
+        "boundary": "preregistered passing treatment rate",
+        "max_dispatch_ms": [
+          3.305797,
+          3.333289,
+          3.200229,
+          3.298681,
+          3.254334
+        ],
         "outcomes": [
           "pass",
           "pass",
@@ -393,48 +441,35 @@
           "pass"
         ],
         "p95_ms": [
-          3295.10353,
-          3279.866876,
-          3293.478156,
-          3305.65856,
-          3292.177148
+          3346.5036,
+          3350.138929,
+          3337.658983,
+          3343.913765,
+          3335.516618
         ],
         "rate_rps": 0.56,
-        "treatment": "KleidiAI enabled"
-      },
-      {
-        "boundary": "next probe",
-        "outcomes": [
-          "fail",
-          "pass",
-          "fail",
-          "fail",
-          "fail"
-        ],
-        "p95_ms": [
-          10338.03675,
-          9927.676582,
-          10137.207889,
-          13130.901494,
-          11224.422493
-        ],
-        "rate_rps": 0.6,
         "treatment": "KleidiAI enabled"
       }
     ]
   },
   "verification": {
-    "adapter": "kleidiai-sustained-v1",
+    "adapter": "kleidiai-confirmed-v2",
+    "artifact_bindings": {
+      "comparison_sha256": "21051a4d3327da8f4f20eb61eb829798181042dd2001a7876e413c64ba2af543",
+      "contract_sha256": "5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369",
+      "decision_sha256": "827525a1b358045f0f48d08b5798d803606ded375da453deb09eb51384ad6fe7",
+      "summary_sha256": "71ea6e99c612b4007cbeddb05f760f8b6b3d734964cd16cd32d07cf5ec8612db"
+    },
     "checksums": {
-      "checked": 69,
+      "checked": 161,
       "mismatched": [],
       "missing": [],
       "passed": true
     },
     "comparison_source": "derived_from_raw_evidence",
     "performix": {
-      "absolute_share_difference": 0.015141708795253783,
-      "archive_sha256": "28d411e40de38f3ad4a455bbfa09524dee8b44d6e44eb4d3b599e01635789148",
+      "archive_sha256": "9301e9da951ce8b294b8b1a2153a2d333017cbeecef73ab5d930b90bde2d7d4e",
+      "comparison_note": "Performix function-sample share is evaluated on its own units; Linux perf cycle attribution is separate corroborating evidence.",
       "disabled": {
         "command": "/opt/armproof/venv/bin/python scripts/profile_ort.py --model /opt/armproof/variants/kleidiai-disabled --workload data/banking77/generated/traffic-mixed.jsonl --repetitions 3",
         "cpu_names": [
@@ -444,8 +479,8 @@
         "kai_function_samples": 0,
         "kai_sample_share": 0.0,
         "kai_symbols": [],
-        "run_id": "cbb01b949717",
-        "total_function_samples": 947888
+        "run_id": "51e4d24b6c03",
+        "total_function_samples": 944847
       },
       "enabled": {
         "command": "/opt/armproof/venv/bin/python scripts/profile_ort.py --model /opt/armproof/variants/kleidiai-enabled --workload data/banking77/generated/traffic-mixed.jsonl --repetitions 3",
@@ -453,21 +488,21 @@
           "Neoverse-V2"
         ],
         "engine_version": "1.20.0",
-        "kai_function_samples": 246698,
-        "kai_sample_share": 0.6701582912047462,
+        "kai_function_samples": 245876,
+        "kai_sample_share": 0.673518470835091,
         "kai_symbols": [
-          "kai_get_dst_offset_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_neon_i8mm",
-          "kai_get_mr_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_neon_i8mm",
+          "kai_get_lhs_packed_offset_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_neon_i8mm",
+          "kai_get_rhs_packed_offset_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_neon_i8mm",
           "kai_kernel_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_opt32_neon_i8mm",
           "kai_run_lhs_quant_pack_qai8dxp_f32",
           "kai_run_matmul_clamp_f32_qai8dxp4x8_qsi4c32p4x8_16x4x32_neon_i8mm",
           "kai_run_rhs_pack_nxk_qsi4c32p_qsu4c32s1s0"
         ],
-        "run_id": "2bf254d4391b",
-        "total_function_samples": 368119
+        "run_id": "2a6259add5fe",
+        "total_function_samples": 365062
       },
       "evidence_source": "native_arm_performix_code_hotspots_exports",
-      "experiment_id": "EXP-2026-010",
+      "experiment_id": "EXP-2026-013",
       "identity_binding": {
         "environment_ref": "AWS Graviton4 c8g.4xlarge, Ubuntu 24.04 Arm64, CPU-only, pinned runtime lock",
         "machine": {
@@ -484,20 +519,43 @@
           "OMP_PROC_BIND": "close"
         },
         "model_ref": "microsoft/Phi-4-mini-instruct-onnx@fc04c8f93df696602fd9f300a30d1bf2e3081347#cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4",
+        "model_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
         "runtime_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
-        "uname": "Linux ip-172-31-35-11 6.17.0-1019-aws #19~24.04.1-Ubuntu SMP Tue Jun 23 18:34:05 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux",
-        "workload_ref": "data/banking77/generated/traffic-mixed.jsonl"
+        "uname": "Linux ip-172-31-36-137 6.17.0-1019-aws #19~24.04.1-Ubuntu SMP Tue Jun 23 18:34:05 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux",
+        "workload_ref": "data/banking77/generated/traffic-mixed.jsonl",
+        "workload_sha256": "86b756c46ef2c647ddd779ccc4dd6bafd2aad0c261f4e24cf6177c224a1e1118"
       },
       "internal_checksums": {
-        "checked": 35,
+        "checked": 40,
         "passed": true
       },
-      "linux_perf_kai_cycle_share": 0.6853,
-      "maximum_share_difference": 0.05,
+      "linux_perf_separate_kai_cycle_share": 0.6790999999999999,
+      "linux_perf_separate_lost_samples": 0,
+      "minimum_enabled_share": 0.5,
+      "minimum_total_samples": 100000,
       "passed": true,
       "schema_version": "1.0.0"
     },
+    "preregistration_publication": {
+      "chronology_scope": "Git commit and plan bytes verified in this checkout; instance launch time is recorded experiment metadata, not independent cloud attestation.",
+      "experiment_id": "EXP-2026-014",
+      "git_commit": "ab22cc055881c5e8bae35dd6e4d919f0b407971e",
+      "git_commit_time": "2026-08-05T00:57:09+02:00",
+      "git_commit_verified_in_checkout": true,
+      "instance_launch_time": "2026-08-04T22:58:28+00:00",
+      "instance_launch_time_source": "recorded_experiment_metadata",
+      "measurement_started_at": "2026-08-04T22:58:48+00:00",
+      "plan_embedded_in_measurement_archive": true,
+      "plan_embedded_in_project_bundle": true,
+      "preregistration_sha256": "534933500ac1c8af473d0b649be30bcae285743e616513dbdeeae0cce0935e84",
+      "public_commit_url": "https://github.com/QasimKhan5x/ArmProof/commit/ab22cc055881c5e8bae35dd6e4d919f0b407971e"
+    },
     "reproduction_checksums": null,
-    "schema_version": "1.0.0"
+    "schema_version": "1.0.0",
+    "supporting_evidence": {
+      "checksummed_files": 4,
+      "derivation": "locked_aggregate_footprint_and_raw_timing_repetitions",
+      "experiment_id": "EXP-2026-002"
+    }
   }
 }

@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "runtime_lock_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
+  "source_artifact_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
+  "runtime": "onnxruntime-genai",
+  "runtime_version": "0.15.0.dev0",
+  "architecture": "aarch64",
+  "threads": 16,
+  "instance_type": "c8g.4xlarge",
+  "controls": {
+    "baseline": {"mlas.disable_kleidiai": "1"},
+    "optimized": {"mlas.disable_kleidiai": "0"}
+  }
+}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import math
 import shutil
 from pathlib import Path
@@ -19,6 +20,10 @@ def _object(path: Path) -> dict[str, Any]:
 def _copy_input(source: Path, destination: Path) -> None:
     if source.resolve() != destination.resolve():
         shutil.copyfile(source, destination)
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _validated_summary_ratios(summary: Mapping[str, Any]) -> dict[str, float]:
@@ -92,13 +97,30 @@ def generate_report(
     _validate_comparison_summary(comparison, summary, ratios)
     deployment = _object(deployment_summary_path) if deployment_summary_path else None
     verification = _object(verification_path) if verification_path else None
+    if decision["passed"] and (comparison is None or verification is None):
+        raise ValueError(
+            "a passing report requires derived comparison and verification artifacts"
+        )
     if verification is not None:
+        if comparison_path is None:
+            raise ValueError("verification receipt requires a comparison artifact")
         primary = verification.get("checksums", {})
+        bindings = verification.get("artifact_bindings", {})
         reproduction = verification.get("reproduction_checksums")
         performix = verification.get("performix")
         if (
             verification.get("schema_version") != "1.0.0"
             or verification.get("comparison_source") != "derived_from_raw_evidence"
+            or not isinstance(bindings, dict)
+            or bindings.get("comparison_sha256") != _sha256(comparison_path)
+            or bindings.get("summary_sha256") != _sha256(summary_path)
+            or bindings.get("decision_sha256") != _sha256(decision_path)
+            or not isinstance(bindings.get("contract_sha256"), str)
+            or len(bindings["contract_sha256"]) != 64
+            or any(
+                character not in "0123456789abcdef"
+                for character in bindings["contract_sha256"]
+            )
             or primary.get("passed") is not True
             or not isinstance(primary.get("checked"), int)
             or isinstance(primary.get("checked"), bool)
@@ -129,10 +151,24 @@ def generate_report(
             raise ValueError("verification receipt is not a passing raw-evidence receipt")
     if deployment is not None:
         required = {"disk_reduction_percent", "peak_pss_reduction_percent"}
+        supporting = verification.get("supporting_evidence") if verification else None
+        metric_source = deployment.get("metric_source")
         if deployment.get("schema_version") != "1.0.0" or not required.issubset(
             deployment.get("metrics", {})
+        ) or (
+            not isinstance(supporting, dict)
+            or not isinstance(metric_source, dict)
+            or supporting.get("experiment_id") != deployment.get("experiment_id")
+            or metric_source.get("experiment_id") != deployment.get("experiment_id")
+            or supporting.get("checksummed_files") != metric_source.get("checksummed_files")
+            or supporting.get("derivation")
+            != "locked_aggregate_footprint_and_raw_timing_repetitions"
+            or metric_source.get("derivation")
+            != "locked_aggregate_footprint_and_raw_timing_repetitions"
         ):
-            raise ValueError("deployment summary is not an ArmProof 1.0 artifact")
+            raise ValueError(
+                "deployment summary is not bound to rederived supporting evidence"
+            )
     payload = {
         "decision": decision,
         "summary": summary,
@@ -200,12 +236,12 @@ const data=JSON.parse(document.getElementById('report-data').textContent);const 
 const title=document.getElementById('decision-title');title.textContent=decision.passed?'Verified':'Blocked';title.parentElement.style.borderColor=decision.passed?'var(--green)':'var(--red)';document.getElementById('decision-subtitle').textContent=decision.passed?'All required claims passed':'Required claims did not pass';
 if(!decision.passed){document.getElementById('report-headline').textContent='Optimization evidence blocked before merge.';document.getElementById('report-lead').textContent='The declared Arm optimization contract did not pass. Review the failed or unknown claims before deploying this treatment.';}
 const display=summary.capacity_display||{};if(display.description)document.getElementById('capacity-description').textContent=display.description;const mixes=document.getElementById('mixes');let ratios=[];for(const [name,row] of Object.entries(summary.mixes)){const base=row.ratio.baseline_median,opt=row.ratio.treatment_median,ratio=row.ratio.ratio;ratios.push(ratio);const max=Math.max(base,opt);const el=document.createElement('article');el.className='mix';el.innerHTML=`<div class="mix-head"><h3>${esc(name)}</h3><span class="ratio">${ratio.toFixed(1)}x</span></div><div class="bar-row"><span>${esc(display.baseline_label||'Baseline')}</span><div class="track"><div class="bar" style="width:${base/max*100}%"></div></div><b>${base.toFixed(2)}</b></div><div class="bar-row"><span>${esc(display.treatment_label||'Treatment')}</span><div class="track"><div class="bar enabled" style="width:${opt/max*100}%"></div></div><b>${opt.toFixed(2)}</b></div>`;mixes.appendChild(el)}if(ratios.length)document.getElementById('min-ratio').textContent=Math.min(...ratios).toFixed(1)+'x';if(summary.quality_comparison)document.getElementById('schema-rate').textContent=(summary.quality_comparison.schema_valid_rate*100).toFixed(0)+'%';
-if(comparison){const share=comparison.metrics.enabled_kai_cycle_callchain_share??comparison.metrics.enabled_arm_cycle_share;if(Number.isFinite(share))document.getElementById('arm-cycle-share').textContent=(share*100).toFixed(2)+'%';}
+if(comparison){const share=comparison.metrics.performix_enabled_kai_share??comparison.metrics.enabled_kai_cycle_callchain_share??comparison.metrics.enabled_arm_cycle_share;if(Number.isFinite(share))document.getElementById('arm-cycle-share').textContent=(share*100).toFixed(2)+'%';}
 if(deployment){const disk=deployment.metrics.disk_reduction_percent,pss=deployment.metrics.peak_pss_reduction_percent;document.getElementById('disk-reduction').textContent=disk.toFixed(1)+'%';document.getElementById('pss-reduction').textContent=pss.toFixed(1)+'%';document.getElementById('deployment-detail').textContent=`${disk.toFixed(1)}% less disk and ${pss.toFixed(1)}% lower peak PSS`;if(deployment.reproduction&&verification&&verification.reproduction_checksums){const note=document.getElementById('reproduction-note');note.textContent=`A fresh-instance confirmation matched all ${deployment.reproduction.mixes_reproduced} tested capacity ratios with ${(deployment.reproduction.maximum_relative_difference*100).toFixed(0)}% relative difference.`;note.hidden=false;}}else{document.getElementById('deployment-section').hidden=true;}
 const claims=document.getElementById('claims');for(const row of decision.claims){const el=document.createElement('div');el.className='claim';const symbol=row.status==='pass'?'✓':'!';el.innerHTML=`<span class="check ${esc(row.status)}">${symbol}</span><div><b>${esc(row.claim_id.replaceAll('-',' '))}</b><br><code>${esc(row.reason_code)}</code></div><code>${row.observed===null?'unknown':Number(row.observed).toFixed(2)} / ${Number(row.threshold)}</code>`;claims.appendChild(el)}
 const history=document.getElementById('history');for(const row of data.history){const el=document.createElement('div');el.className='event';const status=document.createElement('span');status.className='status';if(['passed','failed','inconclusive'].includes(row.status))status.classList.add(row.status);status.textContent=row.status;const id=document.createElement('b');id.textContent=row.id;const note=document.createElement('span');note.textContent=row.note;el.append(status,id,note);history.appendChild(el)}
 if(!data.history.length)document.getElementById('history-section').hidden=true;const experiment=summary.experiment_id||(comparison&&comparison.comparison_id)||'ArmProof comparison';const instance=comparison&&comparison.treatment.controls.instance||'Arm target';document.getElementById('report-context').textContent=`${experiment} / ${instance}`;
-if(verification){const profile=verification.performix;const reproduced=Boolean(verification.reproduction_checksums);const checked=verification.checksums.checked+(reproduced?verification.reproduction_checksums.checked:0)+(profile?profile.internal_checksums.checked:0);const scope=profile&&reproduced?'capacity, reproduction and native Arm Performix bundles':profile?'sustained and native Arm Performix bundles':reproduced?'primary and fresh-instance confirmation bundles':'the evidence bundle';document.getElementById('verification-detail').textContent=`${checked} files verified across ${scope}. The comparison and decision were derived from bound evidence, not accepted as input.`;if(profile){document.getElementById('performix-section').hidden=false;document.getElementById('performix-detail').textContent=`Arm Performix ${profile.enabled.engine_version} measured matched Code Hotspots runs on ${profile.enabled.cpu_names.join(', ')}.`;document.getElementById('performix-disabled').textContent=`${(profile.disabled.kai_sample_share*100).toFixed(0)}% measured kai_* function samples`;document.getElementById('performix-enabled').textContent=`${(profile.enabled.kai_sample_share*100).toFixed(2)}% measured kai_* function samples`;document.getElementById('performix-crosscheck').textContent=`${(profile.absolute_share_difference*100).toFixed(2)} pp from Linux perf attribution`;}}
+if(verification){const profile=verification.performix;const reproduced=Boolean(verification.reproduction_checksums);const supporting=verification.supporting_evidence;const publication=verification.preregistration_publication;const checked=verification.checksums.checked+(reproduced?verification.reproduction_checksums.checked:0)+(profile?profile.internal_checksums.checked:0)+(supporting?supporting.checksummed_files:0);const scope=profile&&supporting?'capacity, raw quality, deployment measurements and native Arm Performix bundles':profile?'capacity, raw quality and native Arm Performix bundles':reproduced?'primary and fresh-instance confirmation bundles':'the evidence bundle';const publicationText=publication?` Git object ${publication.git_commit.slice(0,7)} contains the exact plan; its time predates the recorded instance launch.`:'';document.getElementById('verification-detail').textContent=`${checked} files verified across ${scope}. The comparison and decision were derived from bound evidence.${publicationText}`;if(profile){document.getElementById('performix-section').hidden=false;document.getElementById('performix-detail').textContent=`Arm Performix ${profile.enabled.engine_version} measured matched Code Hotspots runs on ${profile.enabled.cpu_names.join(', ')}.`;document.getElementById('performix-disabled').textContent=`${(profile.disabled.kai_sample_share*100).toFixed(0)}% measured kai_* function samples`;document.getElementById('performix-enabled').textContent=`${(profile.enabled.kai_sample_share*100).toFixed(2)}% measured kai_* function samples`;const perfShare=profile.linux_perf_separate_kai_cycle_share;document.getElementById('performix-crosscheck').textContent=Number.isFinite(perfShare)?`Linux perf separately measured ${(perfShare*100).toFixed(2)}% cycle attribution; the two profilers use different units.`:'The release gate evaluates Performix function samples in their native units.';}}
 const prov=document.getElementById('provenance');if(comparison){for(const [name,value] of [['Model artifact',comparison.baseline.artifact_sha256],['Runtime lock',comparison.baseline.runtime_sha256],['Workload',comparison.baseline.workload_sha256],['Environment',comparison.baseline.environment_sha256]]){const tr=document.createElement('tr');const a=document.createElement('td');a.textContent=name;const b=document.createElement('td');const code=document.createElement('code');code.textContent=value;b.appendChild(code);tr.append(a,b);prov.appendChild(tr)}}
 for(const tab of document.querySelectorAll('.tab'))tab.addEventListener('click',()=>{for(const item of document.querySelectorAll('.tab'))item.setAttribute('aria-selected',String(item===tab));for(const panel of document.querySelectorAll('.view'))panel.hidden=panel.id!==tab.getAttribute('aria-controls')});
 </script>

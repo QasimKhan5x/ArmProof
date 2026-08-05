@@ -1,15 +1,18 @@
 {
-  "adapter": "kleidiai-sustained-v1",
-  "archive_sha256": "f22e647aabe40eefd2abc5548306f40e2a5558ce1a85bc31c18319e6e51d78da",
+  "adapter": "kleidiai-confirmed-v2",
+  "archive_sha256": "c4f94870eece68081c54411eedc24e17ae3b6d541afb94daee7ed86577a1bb06",
   "arm_attribution": {
-    "disabled_kai_cycle_share": 0.0,
-    "enabled_kai_cycle_share": 0.6853,
-    "lost_perf_samples": 0
+    "linux_perf_disabled_kai_cycle_share": 0.0,
+    "linux_perf_enabled_kai_cycle_share": 0.6790999999999999,
+    "linux_perf_lost_samples": 0,
+    "performix_disabled_kai_sample_share": 0.0,
+    "performix_enabled_kai_sample_share": 0.673518470835091,
+    "performix_minimum_profile_samples": 365062
   },
   "capacity_display": {
-    "baseline_label": "Baseline fail",
-    "description": "Conservative lower bound from the optimized known-sustainable rate divided by the baseline first-failing probe.",
-    "treatment_label": "Optimized pass"
+    "baseline_label": "Baseline fails",
+    "description": "Conservative lower bound: preregistered treatment pass rate divided by the preregistered failing control rate.",
+    "treatment_label": "Optimized passes"
   },
   "confirmation_seconds": 500,
   "decision": {
@@ -44,56 +47,61 @@
       },
       {
         "claim_id": "sustained-window-count",
-        "observed": 20.0,
+        "observed": 10.0,
         "reason_code": "threshold_met",
         "status": "pass",
-        "threshold": 20.0
+        "threshold": 10.0
       },
       {
         "claim_id": "sustained-request-count",
-        "observed": 4200.0,
+        "observed": 2100.0,
         "reason_code": "threshold_met",
         "status": "pass",
-        "threshold": 4200.0
+        "threshold": 2100.0
       },
       {
-        "claim_id": "arm-execution",
-        "observed": 1.0,
+        "claim_id": "raw-quality-output-count",
+        "observed": 1540.0,
         "reason_code": "threshold_met",
         "status": "pass",
-        "threshold": 1.0
+        "threshold": 1540.0
       },
       {
-        "claim_id": "arm-cycle-attribution",
-        "observed": 0.6853,
+        "claim_id": "arm-control-zero",
+        "observed": 0.0,
+        "reason_code": "threshold_met",
+        "status": "pass",
+        "threshold": 0.0
+      },
+      {
+        "claim_id": "arm-treatment-share",
+        "observed": 0.673518470835091,
         "reason_code": "threshold_met",
         "status": "pass",
         "threshold": 0.5
       },
       {
-        "claim_id": "perf-sample-integrity",
-        "observed": 0.0,
+        "claim_id": "performix-sample-count",
+        "observed": 365062.0,
         "reason_code": "threshold_met",
         "status": "pass",
-        "threshold": 0.0
+        "threshold": 100000.0
       }
     ],
     "passed": true,
     "schema_version": "1.0.0"
   },
-  "experiment_id": "EXP-2026-009",
-  "internal_checksummed_files": 69,
+  "experiment_id": "EXP-2026-014",
+  "internal_checksummed_files": 50,
   "matched_control_verified": true,
   "minimum_capacity_ratio": 2.0,
   "mixes": {
     "mixed": {
       "disabled_boundary": [
-        0.24,
         0.28
       ],
       "enabled_boundary": [
-        0.56,
-        0.6
+        0.56
       ],
       "ratio": {
         "baseline_median": 0.28,
@@ -110,32 +118,21 @@
     "macro_f1_delta_pp": -0.6726444303255752,
     "schema_valid_rate": 1.0
   },
-  "raw_confirmation_files": 20,
-  "raw_confirmation_samples": 4200,
+  "raw_confirmation_files": 10,
+  "raw_confirmation_samples": 2100,
+  "raw_quality_checksummed_files": 111,
+  "raw_quality_outputs": 1540,
   "schema_version": "1.0.0",
-  "tested_pass_point_ratio": 2.3333333333333335,
   "trial_matrix": [
     {
-      "boundary": "known sustainable",
-      "outcomes": [
-        "pass",
-        "pass",
-        "pass",
-        "pass",
-        "pass"
+      "boundary": "preregistered failing control rate",
+      "max_dispatch_ms": [
+        2.414747,
+        3.143784,
+        2.365,
+        3.025653,
+        3.163576
       ],
-      "p95_ms": [
-        8331.46282,
-        8241.560369,
-        8428.073218,
-        8362.083283,
-        8292.810668
-      ],
-      "rate_rps": 0.24,
-      "treatment": "KleidiAI disabled"
-    },
-    {
-      "boundary": "first failing probe",
       "outcomes": [
         "fail",
         "fail",
@@ -144,17 +141,24 @@
         "fail"
       ],
       "p95_ms": [
-        58960.120524,
-        58187.366381,
-        59287.382817,
-        59048.016977,
-        58659.50801
+        59311.178856,
+        60904.386374,
+        60144.229696,
+        59650.557467,
+        59804.253449
       ],
       "rate_rps": 0.28,
       "treatment": "KleidiAI disabled"
     },
     {
-      "boundary": "known sustainable",
+      "boundary": "preregistered passing treatment rate",
+      "max_dispatch_ms": [
+        3.305797,
+        3.333289,
+        3.200229,
+        3.298681,
+        3.254334
+      ],
       "outcomes": [
         "pass",
         "pass",
@@ -163,32 +167,13 @@
         "pass"
       ],
       "p95_ms": [
-        3295.10353,
-        3279.866876,
-        3293.478156,
-        3305.65856,
-        3292.177148
+        3346.5036,
+        3350.138929,
+        3337.658983,
+        3343.913765,
+        3335.516618
       ],
       "rate_rps": 0.56,
-      "treatment": "KleidiAI enabled"
-    },
-    {
-      "boundary": "next probe",
-      "outcomes": [
-        "fail",
-        "pass",
-        "fail",
-        "fail",
-        "fail"
-      ],
-      "p95_ms": [
-        10338.03675,
-        9927.676582,
-        10137.207889,
-        13130.901494,
-        11224.422493
-      ],
-      "rate_rps": 0.6,
       "treatment": "KleidiAI enabled"
     }
   ]

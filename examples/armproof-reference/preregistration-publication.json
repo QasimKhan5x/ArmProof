@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-014",
+  "preregistration_sha256": "534933500ac1c8af473d0b649be30bcae285743e616513dbdeeae0cce0935e84",
+  "project_bundle_sha256": "bde113a3ea0911fc761895fe68c043f3f81ed5cc5a8e8bf9d86b8a6c73112fb9",
+  "evidence_archive_sha256": "c4f94870eece68081c54411eedc24e17ae3b6d541afb94daee7ed86577a1bb06",
+  "git_commit": "ab22cc055881c5e8bae35dd6e4d919f0b407971e",
+  "git_commit_time": "2026-08-05T00:57:09+02:00",
+  "instance_launch_time": "2026-08-04T22:58:28+00:00",
+  "public_commit_url": "https://github.com/QasimKhan5x/ArmProof/commit/ab22cc055881c5e8bae35dd6e4d919f0b407971e"
+}

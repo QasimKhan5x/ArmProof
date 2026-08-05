@@ -1,46 +1,39 @@
-# SurgeDesk Three-Minute Demo
+# Three-Minute Demo And Recording Runbook
 
-This is the complete setup, recording, and cleanup runbook. The video stays in
-one browser window. Its two live moments are six matched Graviton requests and
-a fresh ArmProof audit of the sustained evidence archive.
+This document contains the complete setup, preflight, recording sequence and
+cleanup. The browser begins with an empty live request. During the recording,
+you type two customer messages, route the first through the control deployment,
+activate the audited Arm treatment, and route the second through that treatment.
 
-Target recording length: **2:45 to 2:58**.
+Target length: **2:35 to 2:50**. Keep ten seconds of margin for live inference.
 
-## 1. Validate The Repository
+Use the narration as a rehearsal guide and speak in your normal words while
+recording. The screen actions and factual boundaries are the parts that must
+remain exact.
 
-Run from the repository root on the recording Mac:
+## 1. Check The Repository
+
+Run on the recording Mac from the repository root:
 
 ```bash
-PYTHONPATH=src python3.12 -m unittest discover -s tests
+make check
 npm run test:logic
+npm run test:ui
+PYTHONPATH=src python3.12 -m armproof.cli ci \
+  examples/armproof-reference/armproof.json
 ```
 
-Expected ending:
+Expected result: the Python, logic and browser suites pass, and ArmProof exits
+with code `0` after approving every required claim in the confirmed contract.
 
-```text
-OK
-# pass 4
-# fail 0
-```
+## 2. Prepare A Graviton4 Host
 
-The canonical release check should report the same result shown in SurgeDesk:
+Use Ubuntu 24.04 Arm64 on one AWS `c8g.4xlarge`. On the Mac, set these values:
 
-```bash
-python3.12 scripts/demo_release_gate.py
-```
-
-Expected output:
-
-```text
-PASS    9/9 claims from 4,200 raw request outcomes
-RELEASE at least 2.00x sustainable capacity
-BLOCK   altered archive refused before derivation
-```
-
-## 2. Prepare One Graviton4 Instance
-
-Use an Ubuntu 24.04 Arm64 `c8g.4xlarge` in `us-east-1`. Set the values returned
-by EC2, then upload the pinned runtime bundle already present beside this repo:
+This owner-only path requires authenticated AWS credentials, `c8g.4xlarge`
+quota in the selected region, an SSH key, port-22 access from the recording
+Mac, and the pinned runtime bundle produced during project setup. Judges can
+verify the checked-in evidence without AWS access or this bundle.
 
 ```bash
 export GRAVITON_HOST=ubuntu@YOUR_PUBLIC_DNS_NAME
@@ -49,80 +42,49 @@ export RUNTIME_BUNDLE="$(cd .. && pwd)/result-first-bakeoff/evidence/checkpoints
 
 test -f "$RUNTIME_BUNDLE"
 ssh "$GRAVITON_HOST" 'uname -m'
+```
+
+Expected output from `uname -m`: `aarch64`.
+
+Upload the pinned runtime and clone the project:
+
+```bash
 scp "$RUNTIME_BUNDLE" "$GRAVITON_HOST:~/runtime-checkpoints.tar.gz"
+ssh "$GRAVITON_HOST" '
+  if [ -d ~/ArmProof/.git ]; then
+    git -C ~/ArmProof pull --ff-only
+  else
+    git clone https://github.com/QasimKhan5x/ArmProof.git ~/ArmProof
+  fi
+  ~/ArmProof/scripts/prepare_live_demo_host.sh
+'
 ```
 
-Expected: `uname -m` prints `aarch64` and `scp` reaches `100%`.
+The final line must begin with `READY` and show the source-model SHA-256 plus
+`threads=16`. The setup script compares the downloaded model fingerprint with
+the artifact identity in the release before creating either treatment.
 
-On the Graviton host:
+## 3. Start The Two Exact Treatment Configurations
+
+Open two terminals on the Mac and leave these commands running.
+
+Terminal A:
 
 ```bash
-if [ -d ~/ArmProof/.git ]; then
-  git -C ~/ArmProof pull --ff-only
-else
-  git clone https://github.com/QasimKhan5x/ArmProof.git ~/ArmProof
-fi
-cd ~/ArmProof
-
-sudo apt-get update -qq
-sudo apt-get install -y -qq python3-venv curl
-python3.12 -m venv ~/armproof-venv
-~/armproof-venv/bin/pip install -q --upgrade pip
-~/armproof-venv/bin/pip install -q -r ops/aws/cap-001/requirements.txt
-
-mkdir -p ~/runtime-checkpoints ~/models
-tar -xzf ~/runtime-checkpoints.tar.gz -C ~/runtime-checkpoints
-(cd ~/runtime-checkpoints && sha256sum -c SHA256SUMS)
-~/armproof-venv/bin/pip install -q --force-reinstall --no-deps \
-  ~/runtime-checkpoints/onnxruntime-1.29.0-cp312-cp312-linux_aarch64.whl \
-  ~/runtime-checkpoints/onnxruntime_genai-0.15.0.dev0-cp312-cp312-linux_aarch64.whl
-
-~/armproof-venv/bin/hf download microsoft/Phi-4-mini-instruct-onnx \
-  --revision fc04c8f93df696602fd9f300a30d1bf2e3081347 \
-  --include 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/*' \
-  --local-dir ~/models/onnx-repo
-
-PYTHONPATH=src ~/armproof-venv/bin/python scripts/prepare_phi4_variants.py \
-  --source ~/models/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4 \
-  --output-root ~/models/armproof-variants \
-  --threads 8
+ssh -t "$GRAVITON_HOST" '~/ArmProof/scripts/run_live_demo_lane.sh baseline'
 ```
 
-Expected: every `sha256sum` row ends in `OK`, and
-`~/models/armproof-variants` contains `kleidiai-disabled` and
-`kleidiai-enabled`.
-
-## 3. Start The Matched Services
-
-Open two SSH terminals and leave both commands running.
-
-Graviton terminal A, cores `0-7`:
+Terminal B:
 
 ```bash
-cd ~/ArmProof
-taskset -c 0-7 env OMP_NUM_THREADS=8 PYTHONPATH=src \
-  ~/armproof-venv/bin/python -m armproof.reference.phi4 \
-  --backend ort-int4 \
-  --model ~/models/armproof-variants/kleidiai-disabled \
-  --label kleidiai-disabled \
-  --port 8001 --threads 8 --max-inflight 1
+ssh -t "$GRAVITON_HOST" '~/ArmProof/scripts/run_live_demo_lane.sh optimized'
 ```
 
-Graviton terminal B, cores `8-15`:
+Both services use all 16 Graviton4 cores because the long capacity experiment
+also used 16 threads. The gateway sends ordinary product traffic to one active
+lane at a time.
 
-```bash
-cd ~/ArmProof
-taskset -c 8-15 env OMP_NUM_THREADS=8 PYTHONPATH=src \
-  ~/armproof-venv/bin/python -m armproof.reference.phi4 \
-  --backend ort-int4 \
-  --model ~/models/armproof-variants/kleidiai-enabled \
-  --label kleidiai-enabled \
-  --port 8002 --threads 8 --max-inflight 1
-```
-
-## 4. Connect The Browser
-
-Open an SSH tunnel on the recording Mac and leave it running:
+Open a third terminal for the tunnel:
 
 ```bash
 ssh -N \
@@ -131,23 +93,9 @@ ssh -N \
   "$GRAVITON_HOST"
 ```
 
-In another local terminal, inspect both runtime identities:
+## 4. Preflight The Live Endpoints
 
-```bash
-curl -s http://127.0.0.1:18001/health | jq '{backend,architecture,cpu_affinity,runtime,runtime_version,model_identity,optimization_control,threads}'
-curl -s http://127.0.0.1:18002/health | jq '{backend,architecture,cpu_affinity,runtime,runtime_version,model_identity,optimization_control,threads}'
-```
-
-Expected: both rows show the same 64-character `model_identity`, runtime
-version, and eight threads. Their affinity lists are disjoint, and the only
-configuration difference is the declared control:
-
-```json
-{"backend":"kleidiai-disabled","architecture":"aarch64","cpu_affinity":[0,1,2,3,4,5,6,7],"runtime":"onnxruntime-genai","model_identity":"<same digest>","optimization_control":{"mlas.disable_kleidiai":"1"},"threads":8}
-{"backend":"kleidiai-enabled","architecture":"aarch64","cpu_affinity":[8,9,10,11,12,13,14,15],"runtime":"onnxruntime-genai","model_identity":"<same digest>","optimization_control":{"mlas.disable_kleidiai":"0"},"threads":8}
-```
-
-Warm both models once:
+From the repository root on the Mac:
 
 ```bash
 python3.12 scripts/demo_live_compare.py \
@@ -155,149 +103,117 @@ python3.12 scripts/demo_live_compare.py \
   --optimized-endpoint http://127.0.0.1:18002/infer
 ```
 
-Both backend names must appear. The individual latency ratio can vary because
-this is one warm-up request.
+Expected ending:
 
-Start the demo gateway:
+```text
+READY matched endpoint identities verified; request latency is a warm-up observation.
+```
+
+Start a fresh gateway after the preflight. A new process resets the active lane
+to the control and clears all release state:
 
 ```bash
 python3.12 scripts/serve_surgedesk.py \
   --port 8765 \
   --baseline-endpoint http://127.0.0.1:18001/infer \
-  --optimized-endpoint http://127.0.0.1:18002/infer
+  --optimized-endpoint http://127.0.0.1:18002/infer \
+  --baseline-cores 0-15 \
+  --optimized-cores 0-15
 ```
 
-Expected:
+Open <http://127.0.0.1:8765/surgedesk/#triage>. Select **Live Arm64
+inference**, confirm that the message box is empty, then return focus to the
+browser address bar. Do not enter either recording message during setup.
+
+## 5. Record The Video
+
+Record at 1440×900 or 1920×1080 with browser zoom at 100%. Hide bookmarks,
+notifications and unrelated tabs. Keep terminals and AWS consoles outside the
+capture. The sequence below takes about **2:45** at a natural speaking pace.
+
+Use this customer message both times:
 
 ```text
-SurgeDesk: http://127.0.0.1:8765/surgedesk/
-Live route: configured; enabled after runtime identity probe
-Matched request check: configured; enabled after matched identity probes
+My card was stolen while I am travelling. Freeze it and help me replace it.
 ```
 
-Open [http://127.0.0.1:8765/surgedesk/](http://127.0.0.1:8765/surgedesk/).
-At 100% zoom, confirm that **Live matched Arm64 endpoint** is selectable and the
-capacity tab says **Matched Arm endpoints connected**.
+### 0:00-0:32 - Handle A Real Request
 
-## 5. Stage The Browser
+Start on the empty live request form. Type the message and click **Run live
+route**. Point to the fresh request ID, timestamp, `aarch64 · 16 threads`, and
+`mlas.disable_kleidiai=1` receipt. Choose **Account security**, then click
+**Route ticket**.
 
-1. Open **1. Support workflow** and select **Live matched Arm64 endpoint**.
-2. Enter: `My card was stolen and I need it frozen now`.
-3. Leave the request unsubmitted.
-4. Close unrelated tabs, hide notifications, and start recording.
+> This customer message just ran through Phi-4 on our 16-core Graviton4
+> service. SurgeDesk identified the issue, found the card-security procedure,
+> and left the final queue to the support agent. The receipt shows the real
+> Arm64 request and the standard KleidiAI-off configuration that served it.
 
-## 6. Record The Video
+### 0:32-1:18 - Establish The Operational Problem
 
-### 0:00-0:12
+Click **Review measured upgrade**, **Verify measured experiment**, then **Open confirmed result**. The local audit usually completes in about a second; point
+to its five completed stages, 2,100 request outcomes and 1,540 model outputs.
+Scroll to **What the support queue experienced**, then the capacity equation.
 
-**Show:** The live request ready in SurgeDesk.
+> During sustained traffic, every standard-service trial missed our ten-second
+> target: p95 response time reached about a minute at 0.28 requests per second.
+> With only KleidiAI changed, all five optimized trials stayed near 3.35 seconds
+> while accepting 0.56 requests per second. These frozen rates establish the
+> conservative result shown here: at least twice the sustainable capacity.
 
-**Say:**
+### 1:18-1:50 - Show Why The Gain Is Arm-Specific
 
-> SurgeDesk is a banking-support triage service running Phi-4 Mini INT4 on one
-> Graviton4 server. I’ll route one live request, then show exactly why the
-> optimized service was approved for more traffic.
+Scroll to **Evidence that KleidiAI ran**, then click **Review and activate the optimized service** and **Activate verified optimized service**. Point to the
+model fingerprint, runtime, Arm shape, and `1 → 0` control change.
 
-### 0:12-0:32
+> Both lanes use the same INT4 model, runtime, workload, server and 16 threads.
+> Performix found no KleidiAI samples in the control and 67.35 percent in the
+> treatment, including the Neoverse I8MM kernel. The live identities match the
+> measured release, so SurgeDesk can switch lanes.
 
-**Do:** Click **Run live route**. When the suggestion appears, point briefly to
-the live backend and queue, then click **Confirm route** and **Open platform
-capacity audit**.
+### 1:50-2:17 - Close The Loop With The Same Request
 
-**Say:**
+Click **Route the next live request**, paste the same customer message, and
+click **Run live route**. Point to the new request ID, timestamp and
+`mlas.disable_kleidiai=0`. Choose **Account security**, click **Route ticket**,
+and show both entries in the ticket history.
 
-> The model proposes the issue and procedure, a small routing guard chooses the
-> security queue, and the support agent confirms the action. Now I’m handing the
-> deployment question to the platform engineer.
+> The same request now came back from the optimized Arm lane. Its new receipt
+> records KleidiAI on, and the ticket history ties the serving change to the
+> EXP-2026-014 audit that approved it.
 
-### 0:32-0:55
+### 2:17-2:45 - Give The Mechanism To Another Developer
 
-**Do:** On **2. Capacity audit**, leave the same customer message in place and
-click **Run matched request check**. Let all six tiles finish.
+Click **Carry this release gate to another service**. Point to **Structure
+valid**, the contract digest, workflow and download link.
 
-**Say:**
+> ArmProof now generates a complete starter for another HTTP AI service,
+> including exact evidence templates, representative workloads, a collection
+> plan and a GitHub Action. It remains blocked until that developer collects and
+> seals their own measurements, so nobody can inherit our result by accident.
 
-> Each service hashed its local model files at startup. The gateway has matched
-> those hashes, the ONNX Runtime version and eight threads per lane, while
-> keeping their CPU affinities disjoint. It checks the identity again on every
-> response. This short request check proves the live setup. The long audit below
-> carries the capacity claim.
+Stop recording on the generated workflow and download link.
 
-### 0:55-1:35
+## 6. Recording Accuracy
 
-**Do:** Click **Verify measured experiment**. Wait for the audit to finish,
-then point to the four completed checks, the trial rows and the equation.
+- The two support messages are live model inference and are entered during the video.
+- The ten 500-second windows were collected before recording. The video reruns
+  their verification from the checked-in archive.
+- The capacity claim comes from the preregistered confirmation rates. Earlier
+  discovery runs remain in the repository history and do not approve this release.
+- INT4 size and memory results describe the BF16-to-INT4 migration. The
+  two-times capacity result isolates KleidiAI within the matched INT4 runtime.
+- Performix function samples and Linux perf cycle samples are reported as
+  separate measurements.
+- Human operators choose the final support queue. The queue guard is an
+  application feature rather than part of the Arm speed claim.
+- ArmProof evaluates this project's contract and evidence; it is not an Arm
+  certification service.
 
-**Say:**
+## 7. Stop The Paid Host
 
-> The original experiment tried to establish an exact two-to-two-point-five
-> times capacity bracket. That required all five optimized runs at 0.60 requests
-> per second to fail. One passed, so the preregistered bracket was rejected.
-> These twenty 500-second windows took nearly three hours; what ran just now was
-> the audit. It checked the archive and recomputed all 4,200 outcomes. Every
-> control run failed at 0.28, and every optimized run passed at 0.56. ArmProof
-> therefore evaluates a different, narrower claim: 0.56 divided by the failing
-> 0.28 baseline proves at least twice the sustainable traffic.
-
-### 1:35-1:58
-
-**Do:** Point to **Causal Arm evidence**, then open **3. Release gate** and stop
-on the Performix panel.
-
-**Say:**
-
-> The capacity test changed one declared runtime control. Arm Performix found
-> no KleidiAI function samples in the control and 67.02 percent in the treatment,
-> including the Neoverse I8MM kernel. Linux perf independently measured 68.53
-> percent of cycles in that call chain.
-
-### 1:58-2:22
-
-**Do:** Scroll to **The same fail-closed method runs in pull requests** and
-click **Test a one-byte evidence change**.
-
-**Say:**
-
-> I’ll change one byte in a temporary copy of the evidence bundle. The digest no
-> longer matches, so ArmProof stops before calculating any metric and blocks the
-> release. The same check runs as a GitHub Action on an optimization pull request.
-
-### 2:22-2:43
-
-**Do:** Scroll to **Adoption path** and click **Generate a starter kit preview**.
-
-**Say:**
-
-> Another Arm developer can generate the same contract, evidence layout,
-> profiler manifest and pull-request check for a bounded HTTP classification
-> service. The new gate starts blocked and opens only after real measurements
-> satisfy the project’s own thresholds.
-
-### 2:43-2:52
-
-**Say:**
-
-> SurgeDesk shows the user outcome. ArmProof makes the Arm optimization
-> reviewable, reproducible and safe to release.
-
-Stop recording.
-
-## 7. Accuracy Rules
-
-- The live tiles illustrate one short request burst. The sustained audit proves
-  capacity.
-- The loaded archive contains recorded measurement evidence; the verification
-  itself runs during the video.
-- The BF16-to-INT4 footprint gains and the KleidiAI capacity gain have separate
-  causal scopes.
-- The queue guard improves application routing and is separate from the Arm
-  optimization.
-- ArmProof verifies the submitted contract and evidence. It does not represent
-  official Arm certification.
-
-## 8. Stop AWS
-
-Press `Ctrl-C` in the two service terminals, tunnel, and local gateway. Then:
+Stop both service terminals, the SSH tunnel and the local gateway with
+`Ctrl-C`, then terminate the instance:
 
 ```bash
 aws ec2 terminate-instances \

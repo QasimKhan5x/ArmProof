@@ -25,6 +25,8 @@ from armproof.evidence import (
     verify_checksum_ledger,
 )
 from armproof.policy import decision_to_dict, evaluate_claims
+from armproof.evidence.supporting import verified_deployment_summary
+from armproof.evidence.publication import verify_preregistration_publication
 from armproof.quality import evaluate_quality, load_quality_cases, quality_to_dict
 from armproof.report import generate_report
 from armproof.scaffold import create_scaffold
@@ -49,6 +51,17 @@ def _json_object(path: Path) -> dict:
     if not isinstance(payload, dict):
         raise ValueError(f"{path} must contain a JSON object")
     return payload
+
+
+def _file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _git_root(start: Path) -> Path | None:
+    for candidate in (start, *start.parents):
+        if (candidate / ".git").exists():
+            return candidate
+    return None
 
 
 def _evaluate(contract_path: Path, comparison_paths: Sequence[Path]) -> dict:
@@ -96,6 +109,11 @@ def build_parser() -> argparse.ArgumentParser:
     init = subparsers.add_parser("init", help="scaffold a fail-closed HTTP adoption kit")
     init.add_argument("--endpoint", required=True)
     init.add_argument("--output", type=Path, required=True)
+    seal = subparsers.add_parser(
+        "seal", help="write a deterministic SHA-256 ledger for collected evidence"
+    )
+    seal.add_argument("config", type=Path)
+    seal.add_argument("--source-prefix", default="/opt/armproof/evidence")
     ci = subparsers.add_parser("ci", help="evaluate and report from one ArmProof config")
     ci.add_argument("config", type=Path)
     ci.add_argument("--output", type=Path)
@@ -152,6 +170,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"Created {len(paths)} files in {args.output.resolve()}")
         print("Next: open ADOPTION_CHECKLIST.md and replace the workload and identities.")
         return 0
+    if args.command == "seal":
+        return _run_seal(args)
     if args.command == "ci":
         return _run_ci(args)
     try:
@@ -168,11 +188,53 @@ def main(argv: Sequence[str] | None = None) -> int:
     return 0 if decision["passed"] else 2
 
 
+def _run_seal(args: argparse.Namespace) -> int:
+    """Hash collected evidence without implying that the evidence passes policy."""
+    try:
+        config = _json_object(args.config)
+        evidence = config.get("evidence")
+        if not isinstance(evidence, dict):
+            raise ValueError("config evidence must be an object")
+        root_value = evidence.get("root")
+        ledger_value = evidence.get("checksums")
+        if not isinstance(root_value, str) or not isinstance(ledger_value, str):
+            raise ValueError("seal requires evidence root and checksums paths")
+        base = args.config.resolve().parent
+        root = (base / root_value).resolve()
+        ledger = (base / ledger_value).resolve()
+        if not root.is_dir():
+            raise ValueError(f"evidence root does not exist: {root}")
+        if not ledger.is_relative_to(root):
+            raise ValueError("checksum ledger must be inside the evidence root")
+        prefix = args.source_prefix.rstrip("/")
+        if not prefix.startswith("/") or not prefix:
+            raise ValueError("source prefix must be an absolute POSIX path")
+        rows: list[str] = []
+        for path in sorted(root.rglob("*")):
+            if path == ledger or path.is_dir():
+                continue
+            if path.is_symlink() or not path.is_file():
+                raise ValueError(f"evidence contains an unsupported path: {path}")
+            relative = path.relative_to(root).as_posix()
+            rows.append(f"{_file_sha256(path)}  {prefix}/{relative}")
+        if not rows:
+            raise ValueError("evidence root contains no files to seal")
+        ledger.parent.mkdir(parents=True, exist_ok=True)
+        ledger.write_text("\n".join(rows) + "\n", encoding="utf-8")
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"armproof: {exc}", file=sys.stderr)
+        return 1
+    print(f"Sealed {len(rows)} evidence files in {ledger}")
+    print(f"Next: armproof ci {args.config}")
+    return 0
+
+
 def _run_ci(args: argparse.Namespace) -> int:
     try:
         config = _json_object(args.config)
         allowed = {
-            "schema_version", "contract", "evidence", "deployment_summary", "output",
+            "schema_version", "contract", "evidence", "deployment_summary",
+            "supporting_evidence", "publication_proof", "output",
         }
         required = {"schema_version", "contract", "evidence"}
         if set(config) - allowed or not required <= set(config) or config["schema_version"] != "1.0.0":
@@ -200,10 +262,57 @@ def _run_ci(args: argparse.Namespace) -> int:
         verified = get_evidence_adapter(adapter_id).verify(
             contract, evidence_config, base
         )
+        publication_value = config.get("publication_proof")
+        publication = None
+        if publication_value is not None:
+            if (
+                not isinstance(publication_value, dict)
+                or set(publication_value) != {"record", "project_bundle"}
+                or not all(
+                    isinstance(publication_value[field], str)
+                    and publication_value[field]
+                    for field in ("record", "project_bundle")
+                )
+                or not all(
+                    isinstance(evidence_config.get(field), str)
+                    for field in ("preregistration", "archive", "archive_sha256")
+                )
+            ):
+                raise ValueError("config publication_proof is invalid")
+            publication = verify_preregistration_publication(
+                base / publication_value["record"],
+                preregistration_path=base / evidence_config["preregistration"],
+                project_bundle_path=base / publication_value["project_bundle"],
+                evidence_archive_path=base / evidence_config["archive"],
+                expected_evidence_archive_sha256=evidence_config["archive_sha256"],
+                repository_path=_git_root(base),
+            )
         deployment_value = config.get("deployment_summary")
         if deployment_value is not None and not isinstance(deployment_value, str):
             raise ValueError("config deployment_summary must be a path")
-        deployment_path = base / deployment_value if deployment_value else None
+        supporting_value = config.get("supporting_evidence")
+        if deployment_value is not None and supporting_value is None:
+            raise ValueError(
+                "config deployment_summary requires hash-locked supporting_evidence"
+            )
+        if supporting_value is not None and (
+            not isinstance(supporting_value, dict)
+            or set(supporting_value) != {"root", "lock"}
+            or not all(
+                isinstance(supporting_value[field], str) and supporting_value[field]
+                for field in ("root", "lock")
+            )
+        ):
+            raise ValueError("config supporting_evidence requires root and lock paths")
+        deployment = None
+        supporting = None
+        source_deployment_path = base / deployment_value if deployment_value else None
+        if source_deployment_path is not None and supporting_value is not None:
+            deployment, supporting = verified_deployment_summary(
+                source_deployment_path,
+                evidence_root=base / supporting_value["root"],
+                lock_path=base / supporting_value["lock"],
+            )
         configured_output = config.get("output", "armproof-report")
         if not isinstance(configured_output, str) or not configured_output:
             raise ValueError("config output must be a non-empty path")
@@ -220,6 +329,10 @@ def _run_ci(args: argparse.Namespace) -> int:
             json.dumps(dict(verified.summary), indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
+        decision_path = output / "decision.json"
+        decision_path.write_text(
+            json.dumps(decision, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
         verification_path = output / "verification.json"
         verification_path.write_text(
             json.dumps(
@@ -227,6 +340,12 @@ def _run_ci(args: argparse.Namespace) -> int:
                     "schema_version": "1.0.0",
                     "adapter": verified.adapter,
                     "comparison_source": "derived_from_raw_evidence",
+                    "artifact_bindings": {
+                        "contract_sha256": _file_sha256(contract_path),
+                        "comparison_sha256": _file_sha256(comparison_path),
+                        "summary_sha256": _file_sha256(summary_path),
+                        "decision_sha256": _file_sha256(decision_path),
+                    },
                     "checksums": {
                         "passed": verified.checksums.passed,
                         "checked": verified.checksums.checked,
@@ -243,16 +362,30 @@ def _run_ci(args: argparse.Namespace) -> int:
                         if verified.reproduction_checksums is not None else None
                     ),
                     "performix": dict(verified.performix) if verified.performix else None,
+                    "supporting_evidence": (
+                        {
+                            "experiment_id": supporting["experiment_id"],
+                            "checksummed_files": supporting["checksummed_files"],
+                            "derivation": (
+                                "locked_aggregate_footprint_and_raw_timing_repetitions"
+                            ),
+                        }
+                        if supporting is not None else None
+                    ),
+                    "preregistration_publication": publication,
                 },
                 indent=2,
                 sort_keys=True,
             ) + "\n",
             encoding="utf-8",
         )
-        decision_path = output / "decision.json"
-        decision_path.write_text(
-            json.dumps(decision, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-        )
+        deployment_path = None
+        if deployment is not None:
+            deployment_path = output / "deployment-summary.json"
+            deployment_path.write_text(
+                json.dumps(deployment, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
         generate_report(
             decision_path,
             summary_path,

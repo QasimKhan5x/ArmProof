@@ -62,3 +62,38 @@ export function resolveTicket(workspace, decision) {
     queue_counts: queueCounts,
   };
 }
+
+
+export function resolveTicketToQueue(workspace, finalQueue) {
+  if (!workspace.active) {
+    throw new Error("No ticket is awaiting review");
+  }
+  if (!Object.hasOwn(workspace.queue_counts, finalQueue)) {
+    throw new Error(`Unknown support queue: ${finalQueue}`);
+  }
+  const corrected = finalQueue !== workspace.active.queue;
+  const usesBenchmarkCorrection = corrected && finalQueue === workspace.active.expected_queue;
+  const ticket = {
+    ...workspace.active,
+    review_status: corrected ? "corrected" : "confirmed",
+    final_queue: finalQueue,
+    final_intent: usesBenchmarkCorrection
+      ? workspace.active.expected_intent
+      : corrected
+      ? null
+      : workspace.active.suggested_intent,
+    procedure: usesBenchmarkCorrection
+      ? workspace.active.expected_procedure
+      : corrected
+      ? "No procedure assigned. The selected queue must review the request before any customer action."
+      : workspace.active.suggested_procedure,
+  };
+  const queueCounts = { ...workspace.queue_counts };
+  queueCounts[finalQueue] += 1;
+  return {
+    ...workspace,
+    active: null,
+    resolved: [ticket, ...workspace.resolved],
+    queue_counts: queueCounts,
+  };
+}

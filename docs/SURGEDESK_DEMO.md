@@ -1,102 +1,96 @@
-# SurgeDesk Demo Guide
+# SurgeDesk Product And Demo Guide
 
-## Purpose
+SurgeDesk connects a practical support workflow to the deployment decision for
+an Arm-optimized cloud model.
 
-SurgeDesk turns the accepted Phi-4 Mini Graviton experiment into a practical
-support-operations workflow. The public page exposes checked-in evidence
-without AWS access; the local gateway adds live matched Arm64 requests and
-fresh archive verification for the video.
-
-## Run
+## Public Evidence Mode
 
 ```bash
 python3.12 scripts/build_surgedesk_demo.py --verify
 python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
-Open `http://127.0.0.1:8765/surgedesk/`.
+Open <http://127.0.0.1:8765/surgedesk/>.
 
-The triage screen exposes three deterministic evidence paths:
+Recorded examples are read-only and labeled as stored model outputs. A support
+agent chooses the final queue, including manual review, before a ticket enters
+the audit trail. The public site exposes the checked-in release receipt and
+native profiler results without an AWS dependency.
 
-- **Straight-through:** the model and queue guard agree.
-- **Guard intervention:** the guard repairs an incorrect direct LLM route.
-- **Human correction:** the operator catches a guard error.
+## Live Product Flow
 
-Direct links are available at `#triage`, `#surge`, and `#proof`.
-
-## Workflow
-
-1. **Triage:** inspect the held-out `86.75%` queue result, load a recorded
-   Phi-4 intent, observe the queue guard rescue or error, then confirm or
-   correct the proposed route.
-2. **Capacity audit:** hand off from the support operator to the platform
-   engineer, confirm two matched live Arm lanes, run the canonical audit, and
-   inspect all twenty 500-second windows. The short request check is not used
-   as performance evidence. The stable
-   optimized pass at 0.56 r/s divided by the stable baseline failure at 0.28
-   r/s proves at least 2.0x sustainable capacity. The 0.60 r/s optimized probe
-   remains visible as a mixed result.
-3. **Release gate:** inspect the matched Arm Performix causal experiment,
-   nine-claim sustained ledger, authoritative
-   verify-derive-bind-decide path, executed Arm path, quality boundary, exact
-   deployment and reusable GitHub Action.
-
-## Evidence Provenance
-
-`scripts/build_surgedesk_demo.py` calls
-`src/armproof/demo/surgedesk.py`, which uses ArmProof's shared
-verify-derive-bind-decide architecture with the EXP009 sustained adapter, then joins:
-
-- accepted BANKING77 quality inputs and recorded Phi-4 outputs;
-- four sustained boundaries with five long-window outcomes each;
-- a queue guard trained on 2,310 disjoint examples and evaluated on the frozen
-  770-case quality set;
-- the conservative sustained mixed-traffic lower bound and unstable next probe;
-- quality, artifact size, PSS and direct KleidiAI summaries; and
-- separately labeled short-window reproduction history plus enabled/disabled
-  callchain evidence.
-
-The generated `surgedesk/data.json` is checked into the repository for an
-offline demo and clearly labeled as a recorded receipt. `--verify`
-byte-compares it with a fresh derivation and fails CI if it drifts. When the
-local gateway is running, the audit button streams actual derivation stages and
-changes the proof state from **Recorded pass** to **Verified now** only after
-the current audit succeeds.
-
-## Integrity Boundary
-
-- The sample picker replays recorded model outputs and is labeled accordingly.
-- Editing a message disables lookup and produces an explicit error.
-- Operational five-destination accuracy is 86.75%; fine-grained 77-intent accuracy is
-  46.49%. The app therefore requires human confirmation.
-- All claims are scoped to the pinned Phi-4 Mini workload, ONNX Runtime GenAI
-  INT4 runtime and AWS Graviton4 `c8g.4xlarge`.
-- The repository SHA-256 ledgers detect post-capture modification; they are not
-  independent attestation of who produced the original evidence.
-
-## Live Matched Arm64 Mode
-
-Forward both measured services to localhost, then run:
+The recording path connects two exact 16-thread Graviton4 treatment services:
 
 ```bash
 python3.12 scripts/serve_surgedesk.py --port 8765 \
   --baseline-endpoint http://127.0.0.1:18001/infer \
-  --optimized-endpoint http://127.0.0.1:18002/infer
+  --optimized-endpoint http://127.0.0.1:18002/infer \
+  --baseline-cores 0-15 \
+  --optimized-cores 0-15
 ```
 
-The **Live matched Arm64 endpoint** control becomes available only after the gateway
-reads both health records. It requires Arm64 architecture, the same
-content-derived model identity, runtime version and thread count; exact
-disjoint CPU affinities; and opposite values of `mlas.disable_kleidiai`.
-Before each matched request, the gateway reads both health records again and
-requires the inference response to carry the same runtime fingerprint. The
-gateway accepts only bounded text, builds the
-frozen intent prompt, calls the trusted endpoint with a 60-second timeout, and
-applies the same local queue guard. Without verified endpoints, live mode
-remains disabled and the public recorded-evidence path stays available.
+The state transition is:
 
-The release-gate view can alter one byte in a temporary archive copy and run
-the real outer-digest check. The repository evidence is never modified.
+1. A free-form customer message runs through the control service.
+2. The operator chooses the final support queue.
+3. ArmProof verifies the preregistered capacity, raw quality and Performix evidence.
+4. The gateway probes both services and compares them with the audited deployment.
+5. The route changes to the treatment only after the audit and identity checks pass.
+6. A second free-form message returns through the treatment and records the audit ID.
+7. ArmProof generates and validates a downloadable starter for another service.
+
+The complete host setup, expected outputs and narration are in
+[`submission/DEMO_SCRIPT.md`](../submission/DEMO_SCRIPT.md).
+
+## Evidence Shown In The App
+
+The capacity view reads the `EXP-2026-014` confirmation archive and shows the
+two rates committed before collection:
+
+- control: five failures at 0.28 requests/s;
+- treatment: five passes at 0.56 requests/s;
+- window length: 500 seconds;
+- raw request outcomes: 2,100; and
+- released lower bound: at least 2.0x.
+
+The proof view leads with:
+
+- Arm Performix `kai_*` function-sample shares for both treatments;
+- the observed Neoverse I8MM kernel family;
+- Linux perf cycle attribution as a separate measurement;
+- the release claims and thresholds; and
+- the GitHub Action and adapter path under expandable technical detail.
+
+The expandable detail also includes the exploratory direct-inference range
+across four fixed input shapes and labels it separately from confirmed capacity.
+
+The application page stays focused on support routing and deployment
+activation. The detailed ledger and adoption material remain available for a
+judge or developer who wants to inspect them.
+
+## Identity Binding
+
+The two live lanes must expose:
+
+- the same content-derived model identity;
+- the source-artifact SHA-256 declared by the release;
+- ONNX Runtime GenAI at the pinned version;
+- Arm64 architecture;
+- 16 threads on the declared core set; and
+- opposite values for `mlas.disable_kleidiai`.
+
+Each inference response repeats the probed identity. Promotion compares the
+matched live identity with the deployment identity returned by the fresh audit.
+An optimized endpoint that merely matches another endpoint cannot bypass this
+comparison.
+
+## Quality Boundary
+
+The fine-grained BANKING77 intent accuracy is 46.49% for the optimized lane,
+so SurgeDesk is an assistive workflow. The five-queue guard reached 86.75% on a
+disjoint development holdout, and a person chooses the final queue. Selecting a
+different queue removes the intent-mapped procedure unless that queue corresponds to
+the known benchmark correction.
 
 ## Validate
 
@@ -106,7 +100,6 @@ npm run test:logic
 npm run test:ui
 ```
 
-The browser suite covers guided scenarios, confirmation, correction,
-edited-text rejection, matched live lanes, fresh audit verification, adoption
-scaffolding, proof visibility, console errors and responsive tables down to
-320 pixels.
+The suite covers raw evidence derivation, identity-bound gateway promotion,
+human correction, browser history and focus, responsive layouts and the full
+localhost HTTP transition from control to treatment.
