@@ -6,8 +6,9 @@ execute KleidiAI functions on Graviton4?
 
 ## Frozen Experiment
 
-[`EXP-2026-013`](../ops/experiments/EXP-2026-013.json) was committed before its
-AWS instance was created. It fixes:
+[`EXP-2026-013`](../ops/experiments/EXP-2026-013.json) is bound to a Git commit
+whose time precedes the AWS launch time recorded in the experiment metadata.
+This is inspectable chronology, not independent AWS attestation. The plan fixes:
 
 - AWS Graviton4 `c8g.4xlarge`, 16 Neoverse V2 cores;
 - Arm Performix 1.20 Code Hotspots at normal sampling;

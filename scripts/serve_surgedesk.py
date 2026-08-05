@@ -233,6 +233,7 @@ def _audit_receipt(payload: dict[str, Any], elapsed_ms: float) -> dict[str, Any]
             "minimum_ratio": mixed["minimum_capacity_ratio"],
             "confirmations": mixed["confirmations_per_treatment"],
             "confirmation_seconds": mixed["confirmation_seconds"],
+            "slo_ms": payload["capacity"]["slo_ms"],
             "rate_selection": payload["capacity"]["rate_selection"],
         },
         "arm": {

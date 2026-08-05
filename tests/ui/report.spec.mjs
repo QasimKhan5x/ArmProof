@@ -52,7 +52,12 @@ for (const viewport of [
     await expect(page.locator('#verification-detail')).toContainText('files verified');
     await expect(page.locator('#verification-detail')).toContainText('capacity, raw quality, deployment measurements and native Arm Performix bundles');
     await expect(page.locator('#verification-detail')).toContainText('Git object ab22cc0 contains the exact plan');
-    await expect(page.locator('#verification-detail')).toContainText('recorded instance launch');
+    await expect(page.locator('#verification-detail')).toContainText(
+      'launch time recorded in experiment metadata',
+    );
+    await expect(page.locator('#verification-detail')).toContainText(
+      'not independent AWS attestation',
+    );
     await expect(page.locator('#performix-section')).toBeVisible();
     await expect(page.locator('#performix-disabled')).toContainText('0%');
     await expect(page.locator('#performix-enabled')).toContainText('67.35%');

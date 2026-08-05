@@ -2,7 +2,7 @@
 
 This document contains the complete setup, preflight, recording sequence and
 cleanup. The browser begins with an empty live request. During the recording,
-you type two customer messages, route the first through the control deployment,
+you enter two customer messages, route the first through the control deployment,
 activate the audited Arm treatment, and route the second through that treatment.
 
 Target length: **2:35 to 2:50**. Keep ten seconds of margin for live inference.

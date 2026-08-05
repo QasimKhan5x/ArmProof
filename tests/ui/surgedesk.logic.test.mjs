@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
+  describeCapacity,
   createWorkspace,
   findRecordedCase,
   resolveTicket,
@@ -73,4 +74,25 @@ test("free-form text is not passed off as recorded model inference", () => {
     findRecordedCase(data.routing_cases, data.routing_cases[1].source_text)?.request_id,
     data.routing_cases[1].request_id,
   );
+});
+
+
+test("capacity presentation follows the supplied experiment protocol", () => {
+  const description = describeCapacity({
+    slo_ms: 7_500,
+    confirmation_seconds: 240,
+    confirmations: 3,
+    trial_matrix: [
+      { outcomes: ["fail", "fail", "fail"] },
+      { outcomes: ["pass", "pass", "pass"] },
+    ],
+  });
+
+  assert.equal(description.slo_seconds, 7.5);
+  assert.equal(description.window_seconds, 240);
+  assert.equal(description.rate_count, 2);
+  assert.equal(description.windows_per_rate, 3);
+  assert.equal(description.total_windows, 6);
+  assert.equal(description.outcomeSummary(["fail", "fail", "fail"]), "all 3 missed target");
+  assert.equal(description.outcomeSummary(["pass", "pass", "pass"]), "all 3 within target");
 });

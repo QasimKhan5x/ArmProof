@@ -29,8 +29,9 @@ at least 0.56. That establishes the conservative lower bound
 
 Both sides use the same Phi-4 Mini INT4 files, ONNX Runtime build, 16 threads,
 workload, server and response-time rule. The only change is whether KleidiAI is
-enabled. The test plan and pass rules were committed before the confirmation
-server was created.
+enabled. Git commit `ab22cc0` contains the exact final plan, and its commit time
+precedes the instance-launch time recorded in the experiment metadata. That is
+a reproducible chronology check, not independent AWS attestation.
 
 Earlier tests located the standard service between 0.24 and 0.28 requests per
 second. The optimized service passed at 0.56, while 0.60 produced mixed results.
@@ -170,7 +171,7 @@ endpoint compatibility; it does not claim a llama.cpp performance result.
 Use ArmProof in GitHub Actions:
 
 ```yaml
-- uses: QasimKhan5x/ArmProof@v0.8.1
+- uses: QasimKhan5x/ArmProof@v0.8.2
   with:
     config: armproof.json
     contract-sha256: REPLACE_WITH_THE_PROTECTED_CONTRACT_DIGEST

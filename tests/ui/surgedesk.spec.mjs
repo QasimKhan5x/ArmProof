@@ -72,8 +72,13 @@ test("a live ticket causes the audit, activation, and optimized second route", a
   await expect(page.locator("#trial-matrix-body tr").nth(0).locator(".fail")).toHaveCount(5);
   await expect(page.locator("#trial-matrix-body tr").nth(1).locator(".pass")).toHaveCount(5);
   await expect(page.locator("#latency-consequence-groups article")).toHaveCount(2);
-  await expect(page.locator("#latency-consequence-groups article").nth(0)).toContainText("all five missed target");
-  await expect(page.locator("#latency-consequence-groups article").nth(1)).toContainText("all five within target");
+  await expect(page.locator("#latency-consequence-groups article").nth(0)).toContainText("all 5 missed target");
+  await expect(page.locator("#latency-consequence-groups article").nth(1)).toContainText("all 5 within target");
+  await expect(page.locator("#trial-matrix-head th")).toHaveCount(8);
+  await expect(page.locator("#latency-window-label")).toHaveText("p95 from every 500-second trial");
+  await expect(page.locator("#summary-capacity-context")).toHaveText(
+    "Same c8g.4xlarge server and 10-second p95 SLO",
+  );
   await expect(page.locator("#headline-ratio")).toHaveText("≥2.00×");
   await expect(page.locator("#rate-confirmation-id")).toContainText("EXP-2026-014");
   await expect(page.locator("#rate-confirmation-id")).toHaveAttribute("href", /\/commit\//);
@@ -121,7 +126,7 @@ test("a live ticket causes the audit, activation, and optimized second route", a
   await expect(page.locator("#proof-details")).toHaveAttribute("open", "");
   await expect(page.locator("#adoption-result")).toBeVisible();
   await expect(page.locator("#adoption-gate")).toContainText("STRUCTURE VALID");
-  await expect(page.locator("#adoption-workflow")).toContainText("QasimKhan5x/ArmProof@v0.8.1");
+  await expect(page.locator("#adoption-workflow")).toContainText("QasimKhan5x/ArmProof@v0.8.2");
   await expect(page.locator("#adoption-download")).toHaveAttribute("download", "armproof-service-starter.zip");
   await expect(page.locator("#adoption-download")).toHaveAttribute("href", /^blob:/);
   expect(await overflowingElements(page)).toEqual([]);

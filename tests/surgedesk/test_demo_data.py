@@ -37,7 +37,7 @@ class SurgeDeskPayloadTests(unittest.TestCase):
             self.payload["capacity"]["rate_selection"]["interpretation"],
         )
         self.assertIn(
-            "ten 500-second windows",
+            "10 windows of 500 seconds each",
             self.payload["capacity"]["rate_selection"]["interpretation"],
         )
         self.assertNotIn(
@@ -92,6 +92,11 @@ class SurgeDeskPayloadTests(unittest.TestCase):
             "banking77-quality-0110",
             "[4, 5, 7]",
             "Five confirmations at every boundary",
+            "all five within target",
+            "all five missed target",
+            "10-second p95 target",
+            "ten seconds",
+            "500-second trial",
         )
         for literal in forbidden:
             self.assertNotIn(literal, html)

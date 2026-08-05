@@ -8,6 +8,40 @@ const QUEUES = [
 ];
 
 
+export function describeCapacity(capacity) {
+  const trialMatrix = capacity.trial_matrix ?? [];
+  const observedCounts = trialMatrix.map((trial) => trial.outcomes?.length ?? 0);
+  if (trialMatrix.length === 0 || observedCounts.some((count) => count === 0)) {
+    throw new Error("Capacity receipt is missing confirmation outcomes");
+  }
+  const windowsPerRate = capacity.confirmations ?? observedCounts[0] ?? 0;
+  if (observedCounts.some((count) => count !== windowsPerRate)) {
+    throw new Error("Capacity receipt has inconsistent confirmation counts");
+  }
+  const sloSeconds = Number(capacity.slo_ms) / 1000;
+  if (!Number.isFinite(sloSeconds) || sloSeconds <= 0) {
+    throw new Error("Capacity receipt is missing a valid p95 SLO");
+  }
+  const windowSeconds = Number(capacity.confirmation_seconds);
+  if (!Number.isFinite(windowSeconds) || windowSeconds <= 0) {
+    throw new Error("Capacity receipt is missing a valid confirmation duration");
+  }
+  return {
+    rate_count: trialMatrix.length,
+    windows_per_rate: windowsPerRate,
+    total_windows: observedCounts.reduce((total, count) => total + count, 0),
+    window_seconds: windowSeconds,
+    slo_seconds: sloSeconds,
+    outcomeSummary(outcomes) {
+      const passed = outcomes.filter((outcome) => outcome === "pass").length;
+      if (passed === outcomes.length) return `all ${outcomes.length} within target`;
+      if (passed === 0) return `all ${outcomes.length} missed target`;
+      return `${passed}/${outcomes.length} within target`;
+    },
+  };
+}
+
+
 export function createWorkspace(data) {
   return {
     active: null,

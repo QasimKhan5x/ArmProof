@@ -1,5 +1,6 @@
 import {
   createWorkspace,
+  describeCapacity,
   findRecordedCase,
   resolveTicketToQueue,
   selectRecordedCase,
@@ -46,9 +47,16 @@ function formatMs(value) {
 
 
 function liveServiceLabel(lane) {
-  return lane === "optimized"
-    ? "Optimized service · KleidiAI on"
-    : "Standard service · KleidiAI off";
+  const trials = data?.capacity?.mixes?.mixed?.trial_matrix ?? [];
+  const treatment = trials[lane === "optimized" ? 1 : 0]?.treatment ?? "measured configuration";
+  const conciseTreatment = treatment.replace("disabled", "off").replace("enabled", "on");
+  return `${lane === "optimized" ? "Optimized" : "Standard"} service · ${conciseTreatment}`;
+}
+
+
+function matchedComparisonText() {
+  return `Same ${data.provenance.model} model and ${data.provenance.runtime}; only `
+    + `${data.provenance.evidence.only_changed_control} changed`;
 }
 
 
@@ -198,7 +206,7 @@ function renderReview() {
       ? `${liveServiceLabel(active.deployment_lane)} · `
         + `${formatMs(active.inference_ms)} inference · ${formatMs(active.gateway_latency_ms)} end to end`
         + (active.release_audit_id ? ` · activated by ${active.release_audit_id}` : "")
-      : `Recorded ${data.provenance.model} INT4`,
+      : `Recorded ${data.provenance.model} · ${data.provenance.runtime}`,
   );
   setText("review-priority", active.priority);
   elements["review-priority"].className = `priority-badge ${active.priority.toLowerCase()}`;
@@ -379,7 +387,7 @@ function setInferenceMode(mode) {
   setText(
     "environment-label",
     live
-      ? `${deploymentStatus.active_lane === "optimized" ? "Optimized service · KleidiAI on" : "Standard service · KleidiAI off"}`
+      ? liveServiceLabel(deploymentStatus.active_lane)
       : "Recorded Graviton evidence",
   );
   elements["workspace-mode"].textContent = live
@@ -457,15 +465,15 @@ function renderDeploymentStatus() {
     !connected
       ? "Recorded model result"
       : optimized
-        ? "Optimized service · KleidiAI on"
-        : "Standard service · KleidiAI off",
+        ? liveServiceLabel("optimized")
+        : liveServiceLabel("baseline"),
   );
   setText(
     "workspace-candidate",
     connected
-      ? "Optimized service · KleidiAI on"
+      ? liveServiceLabel("optimized")
       : publicEvidence
-        ? "Optimized treatment · measured"
+        ? `${data.capacity.mixes.mixed.trial_matrix[1].treatment} · measured`
         : "Connect both matched Arm64 services",
   );
   setText(
@@ -493,15 +501,18 @@ function renderDeploymentStatus() {
   if (publicEvidence) {
     setText("promotion-eyebrow", "Recorded release decision");
     setText("promotion-current-label", "Baseline");
-    setText("promotion-current-lane", "KleidiAI disabled · measured");
+    setText("promotion-current-lane", `${data.capacity.mixes.mixed.trial_matrix[0].treatment} · measured`);
     setText("promotion-candidate-label", "Released candidate");
-    setText("promotion-candidate-lane", "KleidiAI enabled · measured");
+    setText("promotion-candidate-lane", `${data.capacity.mixes.mixed.trial_matrix[1].treatment} · measured`);
     setText("promotion-audit-label", "Release evidence");
-    setText("promotion-audit-status", `${data.provenance.experiment_id} · 10/10 claims passed`);
+    setText(
+      "promotion-audit-status",
+      `${data.provenance.experiment_id} · ${data.proof.verified_claims}/${data.proof.verified_claims} claims passed`,
+    );
     setText("promotion-title", "The optimized candidate cleared the checked-in release policy");
     setText(
       "promotion-detail",
-      "The repository receipt binds the matched Graviton treatments, sustained traffic outcomes, quality rows and Arm profiles. Live routing remains unavailable on this public page.",
+      `The repository receipt binds the matched ${data.provenance.machine} treatments, sustained traffic outcomes, quality rows and Arm profiles. Live routing remains unavailable on this public page.`,
     );
     elements["promote-route"].hidden = true;
     elements["open-required-audit"].hidden = false;
@@ -730,7 +741,7 @@ async function loadVerifiedExperiment() {
       "audit-request-result",
       `${receipt.raw_request_outcomes.toLocaleString()} capacity requests · ${receipt.raw_quality_outputs.toLocaleString()} model outputs`,
     );
-    setText("audit-control-result", "Same model and runtime; only the KleidiAI setting changed");
+    setText("audit-control-result", matchedComparisonText());
     setText("audit-claim-result", `${receipt.claims_verified}/${receipt.claims_verified} required claims passed`);
     elements["audit-receipt"].hidden = false;
     setText("audit-receipt-time", `Completed from local evidence in ${receipt.elapsed_ms.toFixed(0)} ms`);
@@ -779,6 +790,7 @@ function showRepositoryEvidence() {
       minimum_ratio: mixed.minimum_capacity_ratio,
       confirmations: mixed.confirmations_per_treatment,
       confirmation_seconds: mixed.confirmation_seconds,
+      slo_ms: data.capacity.slo_ms,
       rate_selection: data.capacity.rate_selection,
     },
     arm: {
@@ -807,7 +819,7 @@ function showRepositoryEvidence() {
   revealVerifiedProof();
   setText("audit-archive-result", `${evidence.sustained_archive_sha256.slice(0, 12)}… · repository receipt`);
   setText("audit-request-result", `${evidence.sustained_raw_confirmation_samples.toLocaleString()} capacity requests · ${evidence.raw_quality_outputs.toLocaleString()} model outputs`);
-  setText("audit-control-result", "Same model and runtime; only the KleidiAI setting changed");
+  setText("audit-control-result", matchedComparisonText());
   setText("audit-claim-result", `${data.proof.verified_claims}/${data.proof.verified_claims} claims in the checked-in decision`);
   setText("audit-receipt-time", "Loaded from the published repository receipt");
   elements["experiment-results"].hidden = false;
@@ -824,6 +836,21 @@ function showRepositoryEvidence() {
 
 
 function renderTrialMatrix(trials) {
+  const header = elements["trial-matrix-head"];
+  const headerRow = document.createElement("tr");
+  const trialCount = Math.max(...trials.map((trial) => trial.outcomes.length));
+  [
+    "Treatment",
+    "Tested rate",
+    ...Array.from({ length: trialCount }, (_, index) => `Trial ${index + 1}`),
+    "Interpretation",
+  ].forEach((label) => {
+    const cell = document.createElement("th");
+    cell.scope = "col";
+    cell.textContent = label;
+    headerRow.append(cell);
+  });
+  header.replaceChildren(headerRow);
   const body = elements["trial-matrix-body"];
   body.replaceChildren();
   trials.forEach((trial) => {
@@ -881,11 +908,11 @@ function renderRateSelection(selection) {
 }
 
 
-function renderLatencyConsequence(trials) {
+function renderLatencyConsequence(trials, description) {
   const container = elements["latency-consequence-groups"];
   container.replaceChildren();
   const maximumSeconds = Math.max(
-    10,
+    description.slo_seconds,
     ...trials.flatMap((trial) => trial.p95_ms.map((value) => value / 1000)),
   );
   trials.forEach((trial) => {
@@ -896,10 +923,10 @@ function renderLatencyConsequence(trials) {
     const bars = document.createElement("div");
     const passing = trial.outcomes.every((outcome) => outcome === "pass");
     title.textContent = trial.treatment.replace("KleidiAI disabled", "Standard service").replace("KleidiAI enabled", "Optimized service");
-    summary.textContent = `${trial.rate_rps.toFixed(2)} r/s · ${passing ? "all five within target" : "all five missed target"}`;
+    summary.textContent = `${trial.rate_rps.toFixed(2)} r/s · ${description.outcomeSummary(trial.outcomes)}`;
     heading.append(title, summary);
     bars.className = "latency-trial-bars";
-    bars.style.setProperty("--slo-position", `${(10 / maximumSeconds) * 100}%`);
+    bars.style.setProperty("--slo-position", `${(description.slo_seconds / maximumSeconds) * 100}%`);
     trial.p95_ms.forEach((value, index) => {
       const row = document.createElement("div");
       const label = document.createElement("span");
@@ -916,7 +943,7 @@ function renderLatencyConsequence(trials) {
       bars.append(row);
     });
     const target = document.createElement("small");
-    target.textContent = "Vertical marker: 10-second p95 target";
+    target.textContent = `Vertical marker: ${description.slo_seconds}-second p95 target`;
     group.append(heading, bars, target);
     container.append(group);
   });
@@ -925,11 +952,28 @@ function renderLatencyConsequence(trials) {
 
 function renderAuditResult(receipt) {
   const capacity = receipt.capacity;
+  const description = describeCapacity(capacity);
   const arm = receipt.arm;
   const supporting = receipt.supporting;
   setText(
     "confirmation-count",
-    `${capacity.confirmations} trials × 2 frozen rates × ${capacity.confirmation_seconds}s`,
+    `${description.windows_per_rate} trials × ${description.rate_count} frozen rates × ${description.window_seconds}s`,
+  );
+  setText(
+    "trial-matrix-title",
+    `${description.rate_count} frozen rates across ${description.total_windows} long confirmation windows`,
+  );
+  setText(
+    "latency-consequence-title",
+    `Every window compared against the ${description.slo_seconds}-second response target`,
+  );
+  setText(
+    "latency-window-label",
+    `p95 from every ${description.window_seconds}-second trial`,
+  );
+  setText(
+    "summary-capacity-context",
+    `Same ${data.proof.instance} server and ${description.slo_seconds}-second p95 SLO`,
   );
   setText("equation-treatment", `Optimized capacity ≥ ${capacity.optimized_pass_rps.toFixed(2)} r/s`);
   setText("equation-baseline", `Standard capacity < ${capacity.baseline_fail_rps.toFixed(2)} r/s`);
@@ -977,7 +1021,7 @@ function renderAuditResult(receipt) {
     `${receipt.claims_verified} required claims passed: capacity, quality, evidence volume, matched Arm execution, and profiler integrity.`,
   );
   renderTrialMatrix(capacity.trial_matrix);
-  renderLatencyConsequence(capacity.trial_matrix);
+  renderLatencyConsequence(capacity.trial_matrix, description);
   renderRateSelection(capacity.rate_selection);
 }
 
@@ -1101,9 +1145,9 @@ function renderRedesignEvidence() {
   setText("schema-valid", `${data.quality.schema_valid_percent.toFixed(0)}%`);
   setText("evidence-experiment-id", data.provenance.experiment_id);
   setText("evidence-checksum-status", `${evidence.sustained_checksummed_files} checksummed files · ${evidence.sustained_raw_confirmation_samples.toLocaleString()} outcomes`);
-  setText("evidence-comparison", "Same INT4 model and runtime; only the KleidiAI setting differs");
+  setText("evidence-comparison", matchedComparisonText());
   setText("experiment-machine", proof.instance);
-  setText("experiment-model", `${data.provenance.model} INT4`);
+  setText("experiment-model", `${data.provenance.model} · ${data.provenance.runtime}`);
   setText("experiment-slo", `p95 ≤ ${(data.capacity.slo_ms / 1000).toFixed(0)} seconds`);
   setText("experiment-control", evidence.only_changed_control);
   setText("arm-reveal-threads", proof.threads);

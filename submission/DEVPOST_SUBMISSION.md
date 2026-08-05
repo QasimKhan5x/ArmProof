@@ -14,7 +14,7 @@
 
 **Technical report:** https://qasimkhan5x.github.io/ArmProof/report/
 
-**Release:** https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.8.1
+**Release:** https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.8.2
 
 **Video:** ADD THE PUBLIC YOUTUBE OR VIMEO URL AFTER RECORDING
 
@@ -171,8 +171,10 @@ confirmation.
 3. We ran the same bounded HTTP service on CPU-only AWS Graviton4.
 4. We collected direct inference, memory, fixed-rate capacity, quality, Linux
    perf and Arm Performix evidence in separately scoped experiments.
-5. We committed the final capacity and Performix acceptance rules before their
-   AWS resources were created.
+5. We bound the final capacity and Performix rules to Git commits whose times
+   precede the AWS launch times recorded in the experiment metadata. This makes
+   the chronology inspectable, but we do not present it as independent AWS
+   attestation.
 6. We wrote adapters that reopen the immutable archives and derive decisions
    from raw rows and native profiler exports.
 7. We connected that decision to a stateful gateway: control route, fresh

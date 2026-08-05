@@ -22,5 +22,5 @@
   ],
   "validation_detail": "5 required claims parsed; GitHub Action bound to this contract digest; measured evidence still required",
   "validation_status": "STRUCTURE VALID",
-  "workflow": "name: ArmProof\non: [push, pull_request]\njobs:\n  verify:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7\n        with:\n          fetch-depth: 0\n      - uses: QasimKhan5x/ArmProof@v0.8.1\n        with:\n          config: armproof.json\n          contract-sha256: 1a2161ce3c1912475a3df40ecef24324728e4352061d63d9b73c12c7563af02c\n"
+  "workflow": "name: ArmProof\non: [push, pull_request]\njobs:\n  verify:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7\n        with:\n          fetch-depth: 0\n      - uses: QasimKhan5x/ArmProof@v0.8.2\n        with:\n          config: armproof.json\n          contract-sha256: 1a2161ce3c1912475a3df40ecef24324728e4352061d63d9b73c12c7563af02c\n"
 }

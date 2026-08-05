@@ -62,7 +62,7 @@
 
           <section class="live-deployment-strip" aria-label="Current AI deployment">
             <div><span>Serving this request</span><strong id="workspace-serving">Stored model output</strong></div>
-            <div><span>Measured upgrade</span><strong id="workspace-candidate">KleidiAI on</strong></div>
+            <div><span>Measured upgrade</span><strong id="workspace-candidate">Measured candidate</strong></div>
             <div><span>Upgrade status</span><strong id="workspace-release-status">Run the measured release check</strong></div>
           </section>
 
@@ -220,13 +220,13 @@
             <div class="section-heading">
               <div>
                 <p class="eyebrow">Preregistered long confirmation windows</p>
-                <h2 id="trial-matrix-title">The two rates committed before the recorded instance launch</h2>
+                <h2 id="trial-matrix-title">Frozen confirmation rates</h2>
               </div>
               <span id="confirmation-count" class="source-chip">—</span>
             </div>
             <div class="table-wrap">
               <table class="trial-matrix" data-mobile-cards>
-                <thead><tr><th>Treatment</th><th>Tested rate</th><th>Trial 1</th><th>Trial 2</th><th>Trial 3</th><th>Trial 4</th><th>Trial 5</th><th>Interpretation</th></tr></thead>
+                <thead id="trial-matrix-head"></thead>
                 <tbody id="trial-matrix-body"></tbody>
               </table>
             </div>
@@ -236,9 +236,9 @@
             <div class="section-heading">
               <div>
                 <p class="eyebrow">What the support queue experienced</p>
-                <h2 id="latency-consequence-title">Control responses missed ten seconds; optimized responses stayed near three</h2>
+                <h2 id="latency-consequence-title">Response time across every confirmation window</h2>
               </div>
-              <span class="source-chip">p95 from every 500-second trial</span>
+              <span id="latency-window-label" class="source-chip">Measured p95 by trial</span>
             </div>
             <div id="latency-consequence-groups" class="latency-consequence-groups"></div>
           </section>
@@ -314,7 +314,7 @@
         </section>
 
         <section id="optimization-summary" class="optimization-summary" aria-label="Measured Arm optimization results" hidden>
-          <div><span>Sustainable traffic</span><strong id="summary-capacity">—</strong><small>Same Graviton4 server and 10-second p95 SLO</small></div>
+          <div><span>Sustainable traffic</span><strong id="summary-capacity">—</strong><small id="summary-capacity-context">Same measured server and response-time rule</small></div>
           <div><span>Arm execution</span><strong id="summary-performix">—</strong><small>Performix function samples in <code>kai_*</code></small></div>
         </section>
 
@@ -370,7 +370,7 @@
             <div><p class="eyebrow">Arm optimization path</p><h2 id="stack-title">Same service, one Arm setting changed</h2></div>
           </div>
           <ol class="stack-path arm-stack-path">
-            <li><span>1</span><div><strong id="stack-model">—</strong><small>Same INT4 model and BANKING77 workload</small></div></li>
+            <li><span>1</span><div><strong id="stack-model">—</strong><small>Same model files and BANKING77 workload</small></div></li>
             <li><span>2</span><div><strong id="stack-runtime">—</strong><small>Same runtime lock, instance, threads, and SLO</small></div></li>
             <li><span>3</span><div><strong>Enable KleidiAI</strong><small>Change only <code>mlas.disable_kleidiai</code></small></div></li>
             <li><span>4</span><div><strong id="stack-machine">—</strong><small id="capacity-range">—</small></div></li>

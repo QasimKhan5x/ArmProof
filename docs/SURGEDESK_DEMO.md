@@ -45,7 +45,8 @@ The complete host setup, expected outputs and narration are in
 ## Evidence Shown In The App
 
 The capacity view reads the `EXP-2026-014` confirmation archive and shows the
-two rates committed before collection:
+two rates frozen in Git before the launch time recorded by the experiment. The
+launch time is experiment metadata, not independent AWS attestation:
 
 - control: five failures at 0.28 requests/s;
 - treatment: five passes at 0.56 requests/s;

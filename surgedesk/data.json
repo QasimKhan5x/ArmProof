@@ -80,7 +80,7 @@
     "rate_selection": {
       "confirmation_experiment_id": "EXP-2026-014",
       "experiment_id": "EXP-2026-009",
-      "interpretation": "Discovery located the one-sided capacity bounds. The Git object for EXP-2026-014 contains the exact final plan and predates the recorded AWS launch time. It froze both rates, all ten 500-second windows, and every pass rule used here.",
+      "interpretation": "Discovery located the one-sided capacity bounds. The Git object for EXP-2026-014 contains the exact final plan and its commit time precedes the launch time recorded in experiment metadata. It froze both rates, 10 windows of 500 seconds each, and every pass rule used here.",
       "publication": {
         "chronology_scope": "Git commit and plan bytes verified in this checkout; instance launch time is recorded experiment metadata, not independent cloud attestation.",
         "experiment_id": "EXP-2026-014",
@@ -383,9 +383,9 @@
     "model": "Phi-4 Mini",
     "model_id": "microsoft/Phi-4-mini-instruct-onnx",
     "optimization": "KleidiAI disabled -> enabled",
-    "release_action": "QasimKhan5x/ArmProof@v0.8.1",
+    "release_action": "QasimKhan5x/ArmProof@v0.8.2",
     "release_experiment_id": "EXP-2026-014",
-    "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.8.1",
+    "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.8.2",
     "report_path": "../report/index.html",
     "runtime": "ONNX Runtime GenAI INT4"
   },

@@ -322,6 +322,11 @@ def build_surgedesk_payload(
     release_url = f"https://github.com/QasimKhan5x/ArmProof/releases/tag/v{__version__}"
     release_tag = release_url.rsplit("/", 1)[-1]
 
+    confirmation_windows = sum(
+        len(trial["outcomes"]) for trial in release_summary["trial_matrix"]
+    )
+    confirmation_seconds = release_summary["confirmation_seconds"]
+
     payload = {
         "schema_version": "1.0.0",
         "product": {
@@ -341,8 +346,10 @@ def build_surgedesk_payload(
                 "interpretation": (
                     "Discovery located the one-sided capacity bounds. The Git object for "
                     f"{confirmation_plan['experiment_id']} contains the exact final plan "
-                    "and predates the recorded AWS launch time. It froze both rates, all "
-                    "ten 500-second windows, and every pass rule used here."
+                    "and its commit time precedes the launch time recorded in experiment "
+                    "metadata. It froze both rates, "
+                    f"{confirmation_windows} windows of {confirmation_seconds} seconds each, "
+                    "and every pass rule used here."
                 ),
             },
         },
