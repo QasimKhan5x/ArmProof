@@ -147,13 +147,23 @@ class DeploymentState:
                 compared != required
                 or observed_identity.get("optimization_control") != expected_control
             ):
-                self.active_lane = "baseline"
-                self.audit_experiment_id = None
-                self.release_ready = False
-                self.promoted_at = None
-                self.audited_deployment = None
+                self._revoke_optimized_route_unlocked()
                 raise ValueError("optimized route drifted from audited release")
             return self.audit_experiment_id
+
+    def revoke_optimized_route(self) -> None:
+        """Return to the standard lane when the active candidate cannot be trusted."""
+        with self._lock:
+            self._revoke_optimized_route_unlocked()
+
+    def _revoke_optimized_route_unlocked(self) -> None:
+        if self.active_lane != "optimized":
+            return
+        self.active_lane = "baseline"
+        self.audit_experiment_id = None
+        self.release_ready = False
+        self.promoted_at = None
+        self.audited_deployment = None
 
     def snapshot(self) -> dict[str, Any]:
         with self._lock:
@@ -771,6 +781,7 @@ def handler_for(
                         return
                     route_probe = _probe_lane(route_config)
                     if not route_probe[0]:
+                        deployment.revoke_optimized_route()
                         self._json(
                             HTTPStatus.CONFLICT,
                             {"error": "route_runtime_identity_changed"},
@@ -786,6 +797,7 @@ def handler_for(
                         expected_backend=str(route_config["expected_backend"]),
                     )
                     if not _response_identity_matches(upstream, route_probe[2]):
+                        deployment.revoke_optimized_route()
                         self._json(
                             HTTPStatus.CONFLICT,
                             {"error": "route_inference_identity_mismatch"},

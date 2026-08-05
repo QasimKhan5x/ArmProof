@@ -15,6 +15,7 @@
     "identity-sources/runtime.lock",
     "identity-sources/workload-manifest.json",
     "quality.jsonl",
+    "refresh_bindings.py",
     "templates/identities.json",
     "templates/profile-manifest.json",
     "templates/protocol.json",
@@ -24,5 +25,5 @@
   "initial_ci_reason": "no measured evidence found",
   "validation_detail": "Fresh ArmProof CI exited 1 because measured evidence is absent; the Action is bound to this contract digest",
   "validation_status": "BLOCKED",
-  "workflow": "name: ArmProof\non: [push, pull_request]\njobs:\n  verify:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7\n        with:\n          fetch-depth: 0\n      - uses: QasimKhan5x/ArmProof@v0.9.0\n        with:\n          config: armproof.json\n          contract-sha256: 1a2161ce3c1912475a3df40ecef24324728e4352061d63d9b73c12c7563af02c\n"
+  "workflow": "name: ArmProof\non: [push, pull_request]\njobs:\n  verify:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7\n        with:\n          fetch-depth: 0\n      - uses: QasimKhan5x/ArmProof@d7a4a27eed96de9173bb393183b81c12727e5d8c # v0.9.0\n        with:\n          config: armproof.json\n          contract-sha256: 1a2161ce3c1912475a3df40ecef24324728e4352061d63d9b73c12c7563af02c\n"
 }

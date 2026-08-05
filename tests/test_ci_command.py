@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import json
 import io
+import hashlib
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -81,9 +84,34 @@ class CiCommandTests(unittest.TestCase):
             workflow = (output / ".github/workflows/armproof.yml").read_text(
                 encoding="utf-8"
             )
-            self.assertIn("QasimKhan5x/ArmProof@v0.9.0", workflow)
+            self.assertIn(
+                "QasimKhan5x/ArmProof@d7a4a27eed96de9173bb393183b81c12727e5d8c # v0.9.0",
+                workflow,
+            )
             self.assertIn("fetch-depth: 0", workflow)
-            self.assertIn("Created 16 files", stdout.getvalue())
+            self.assertIn("Created 17 files", stdout.getvalue())
+
+            original_contract_digest = hashlib.sha256(
+                (output / "contract.json").read_bytes()
+            ).hexdigest()
+            (output / "identity-sources/artifact.ref").write_text(
+                "owner/model@new-revision\n", encoding="utf-8"
+            )
+            subprocess.run(
+                [sys.executable, str(output / "refresh_bindings.py")],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            refreshed_contract_digest = hashlib.sha256(
+                (output / "contract.json").read_bytes()
+            ).hexdigest()
+            self.assertNotEqual(original_contract_digest, refreshed_contract_digest)
+            refreshed_workflow = (output / ".github/workflows/armproof.yml").read_text()
+            self.assertIn(
+                f"contract-sha256: {refreshed_contract_digest}", refreshed_workflow
+            )
+            self.assertTrue((output / "evidence/profiles/manifest.json").is_file())
 
             with redirect_stderr(io.StringIO()) as stderr:
                 self.assertEqual(main(["ci", str(output / "armproof.json")]), 1)

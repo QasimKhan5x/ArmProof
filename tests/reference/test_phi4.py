@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from armproof.reference.phi4 import (
+    OrtInt4Backend,
     _aws_instance_type,
     _ort_model_identity,
     _verify_runtime_artifact_ledger,
@@ -22,6 +23,20 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class Phi4ReferenceTests(unittest.TestCase):
+    def test_runtime_ledger_is_verified_before_runtime_import(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            ledger = Path(directory) / "SHA256SUMS"
+            ledger.write_text("invalid ledger\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "runtime artifact ledger is malformed"):
+                OrtInt4Backend(
+                    Path(directory) / "missing-model",
+                    "optimized",
+                    runtime_artifact_ledger=ledger,
+                    runtime_artifact_ledger_sha256=hashlib.sha256(
+                        ledger.read_bytes()
+                    ).hexdigest(),
+                )
+
     def test_instance_type_comes_from_aws_imdsv2(self) -> None:
         with patch(
             "armproof.reference.phi4.urllib.request.urlopen",
@@ -41,13 +56,20 @@ class Phi4ReferenceTests(unittest.TestCase):
             ledger = root / "SHA256SUMS"
             digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
             ledger.write_text(f"{digest}  {wheel.name}\n", encoding="utf-8")
+            ledger_digest = hashlib.sha256(ledger.read_bytes()).hexdigest()
             self.assertEqual(
-                _verify_runtime_artifact_ledger(ledger),
-                hashlib.sha256(ledger.read_bytes()).hexdigest(),
+                _verify_runtime_artifact_ledger(ledger, ledger_digest),
+                ledger_digest,
             )
+            with self.assertRaisesRegex(ValueError, "accepted digest"):
+                _verify_runtime_artifact_ledger(ledger, "0" * 64)
+            with self.assertRaisesRegex(ValueError, "missing required files"):
+                _verify_runtime_artifact_ledger(
+                    ledger, ledger_digest, ("required-runtime.whl",)
+                )
             wheel.write_bytes(b"changed")
             with self.assertRaisesRegex(ValueError, "runtime artifact checksum mismatch"):
-                _verify_runtime_artifact_ledger(ledger)
+                _verify_runtime_artifact_ledger(ledger, ledger_digest)
 
     def test_reference_imports_in_a_fresh_interpreter(self) -> None:
         result = subprocess.run(

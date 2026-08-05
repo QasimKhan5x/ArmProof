@@ -161,6 +161,7 @@ dd { margin: 4px 0 0; font-weight: 700; overflow-wrap: anywhere; }
 .inline-adoption-receipt div + div { border-left: 1px solid #b8dcd3; }
 .inline-adoption-receipt dt { color: var(--teal-dark); font-size: 9px; font-weight: 850; text-transform: uppercase; }
 .inline-adoption-receipt dd { margin-top: 3px; font-size: 12px; }
+.return-to-cutover { grid-column: 2; justify-self: end; }
 .shadow-comparison { margin: 16px 0; border: 1px solid var(--line-strong); border-top: 4px solid var(--teal-dark); background: #fff; }
 .shadow-comparison > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
 .shadow-comparison h2 { margin: 2px 0 4px; font-size: 19px; }
@@ -607,6 +608,7 @@ code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
   .adoption-handoff { grid-template-columns: 1fr; align-items: stretch; }
   .inline-adoption-receipt { grid-column: auto; grid-template-columns: 1fr; }
   .inline-adoption-receipt div + div { border-top: 1px solid #b8dcd3; border-left: 0; }
+  .return-to-cutover { grid-column: auto; justify-self: stretch; }
   .shadow-comparison > header { flex-direction: column; }
   .shadow-lanes { grid-template-columns: 1fr; }
   .shadow-lane + .shadow-lane { border-top: 1px solid var(--line); border-left: 0; }

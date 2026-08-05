@@ -10,6 +10,9 @@ from urllib.parse import urlparse
 from armproof import __version__
 
 
+ACTION_COMMIT = "d7a4a27eed96de9173bb393183b81c12727e5d8c"
+
+
 def _write_json(path: Path, payload: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -326,9 +329,97 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
         "  verify:\n    runs-on: ubuntu-latest\n    steps:\n"
         "      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7\n"
         "        with:\n          fetch-depth: 0\n"
-        f"      - uses: QasimKhan5x/ArmProof@v{__version__}\n"
+        f"      - uses: QasimKhan5x/ArmProof@{ACTION_COMMIT} # v{__version__}\n"
         "        with:\n          config: armproof.json\n"
         f"          contract-sha256: {_sha256(output / 'contract.json')}\n",
+        encoding="utf-8",
+    )
+    (output / "refresh_bindings.py").write_text(
+        '''#!/usr/bin/env python3
+"""Refresh starter identities after replacing placeholders and before collection."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+import shutil
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parent
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def write(path: Path, payload: dict) -> None:
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\\n", encoding="utf-8")
+
+
+workload_manifest = ROOT / "identity-sources/workload-manifest.json"
+write(workload_manifest, {
+    "capacity_workload_sha256": sha256(ROOT / "workload.jsonl"),
+    "quality_workload_sha256": sha256(ROOT / "quality.jsonl"),
+})
+common = {
+    "artifact_sha256": sha256(ROOT / "identity-sources/artifact.ref"),
+    "runtime_sha256": sha256(ROOT / "identity-sources/runtime.lock"),
+    "workload_sha256": sha256(workload_manifest),
+    "environment_sha256": sha256(ROOT / "identity-sources/environment.json"),
+}
+contract_path = ROOT / "contract.json"
+contract = load(contract_path)
+for treatment in contract["treatments"]:
+    treatment.update(common)
+write(contract_path, contract)
+
+evidence_root = ROOT / "evidence"
+(evidence_root / "identity-sources").mkdir(parents=True, exist_ok=True)
+(evidence_root / "profiles").mkdir(parents=True, exist_ok=True)
+(evidence_root / "quality").mkdir(parents=True, exist_ok=True)
+(evidence_root / "requests").mkdir(parents=True, exist_ok=True)
+for source, destination in (
+    ("templates/protocol.json", "evidence/protocol.json"),
+    ("templates/identities.json", "evidence/identities.json"),
+    ("identity-sources/artifact.ref", "evidence/identity-sources/artifact.ref"),
+    ("identity-sources/runtime.lock", "evidence/identity-sources/runtime.lock"),
+    ("identity-sources/environment.json", "evidence/identity-sources/environment.json"),
+    ("identity-sources/workload-manifest.json", "evidence/identity-sources/workload-manifest.json"),
+    ("workload.jsonl", "evidence/identity-sources/capacity.jsonl"),
+    ("quality.jsonl", "evidence/identity-sources/quality.jsonl"),
+):
+    shutil.copyfile(ROOT / source, ROOT / destination)
+
+profile_path = ROOT / "templates/profile-manifest.json"
+profile = load(profile_path)
+treatments = {row["id"]: row for row in contract["treatments"]}
+for run in profile["runs"].values():
+    treatment = treatments[run["treatment_id"]]
+    run.update(common)
+    command = json.dumps(treatment["command"], separators=(",", ":")).encode("utf-8")
+    run["command_sha256"] = hashlib.sha256(command).hexdigest()
+    report = evidence_root / run["report"]
+    if report.is_file():
+        run["report_sha256"] = sha256(report)
+write(profile_path, profile)
+write(evidence_root / "profiles/manifest.json", profile)
+
+workflow_path = ROOT / ".github/workflows/armproof.yml"
+workflow = workflow_path.read_text(encoding="utf-8")
+workflow = re.sub(
+    r"contract-sha256: [0-9a-f]{64}",
+    f"contract-sha256: {sha256(contract_path)}",
+    workflow,
+)
+workflow_path.write_text(workflow, encoding="utf-8")
+print("Refreshed evidence layout, identities, commands, contract, and workflow digests.")
+''',
         encoding="utf-8",
     )
     (output / "ADOPTION_CHECKLIST.md").write_text(
@@ -336,14 +427,15 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
         "- [ ] Replace the sample workload with representative requests.\n"
         "- [ ] Pin model, runtime, environment and service commands.\n"
         "- [ ] Set a service-level objective and claim threshold before testing.\n"
+        "- [ ] Run `python3 refresh_bindings.py` after replacing placeholders and before collecting evidence.\n"
         "- [ ] Collect at least three passing and failing boundary confirmations.\n"
         "- [ ] Keep confirmation files distinct and preserve open-loop timestamps.\n"
         "- [ ] Capture positive and negative Arm execution profiles separately.\n"
         "- [ ] Bind parser-ready profiler reports to the treatment identities.\n"
         "- [ ] Collect raw HTTP quality responses from the same labeled dataset.\n"
-        "- [ ] Copy the three JSON templates into the exact evidence paths and replace every placeholder.\n"
+        "- [ ] Rerun `python3 refresh_bindings.py` after profiler capture to bind report hashes.\n"
         "- [ ] Run `armproof seal armproof.json` after collection.\n"
-        "- [ ] After editing `contract.json`, update `contract-sha256` in the workflow.\n"
+        "- [ ] If the contract changes again, rerun `python3 refresh_bindings.py`.\n"
         "- [ ] Run `armproof ci armproof.json`; missing evidence must block.\n",
         encoding="utf-8",
     )
@@ -369,19 +461,28 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
         "  identity-sources/capacity.jsonl\n"
         "  identity-sources/quality.jsonl\n"
         "```\n\n"
-        "Start from `templates/protocol.json`, `templates/identities.json`, and "
-        "`templates/profile-manifest.json`; copy them to the paths above and "
-        "replace every placeholder with values from the measured runs. Copy the "
-        "generated identity sources and workloads into the exact filenames shown.\n\n"
-        "Use `armproof capacity` and `armproof quality` for request and quality "
-        "rows. Add parser-ready profiler reports and their identity-bound manifest, "
-        "then run:\n\n"
+        "Edit the workload, identity sources, service commands, protocol rates, "
+        "and claim limits first. `python3 refresh_bindings.py` creates the evidence "
+        "directories, copies the templates and source files, and recalculates every "
+        "embedded digest.\n\n"
+        "Collect each lane and boundary three times with `armproof capacity`. For "
+        "each run, copy its `requests-rps-<rate>.jsonl` file to the corresponding "
+        "`evidence/requests/<lane>-<pass-or-fail>-<1-3>.jsonl` path shown above. "
+        "Run `armproof quality` once against each lane and copy each "
+        "`quality-samples.jsonl` to `evidence/quality/<lane>-samples.jsonl`. "
+        "Capture each service under representative load with `perf record -e "
+        "cycles:P -g -p <pid> -- sleep 60`, then render parser-ready reports with "
+        "`perf report --stdio` into `evidence/baseline.perf` and "
+        "`evidence/treatment.perf`. Rerun `python3 refresh_bindings.py` to hash "
+        "those reports, then run:\n\n"
         "```bash\n"
         "armproof seal armproof.json\n"
         "armproof ci armproof.json\n"
         "```\n\n"
-        "The templates use the exact parser shape. A complete measured example "
-        "is executable under `examples/http-slo/` in the ArmProof repository.\n",
+        "The exact flags are listed by `armproof capacity --help` and `armproof quality --help`; "
+        "the generated `collection-plan.json` is the machine-readable checklist. "
+        "A complete passing parser example is executable under `examples/http-slo/` "
+        "in the ArmProof repository and is explicitly labeled synthetic.\n",
         encoding="utf-8",
     )
     (output / "README.md").write_text(
@@ -404,7 +505,8 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
         ".venv/bin/armproof ci armproof.json\n"
         "```\n\n"
         "Replace both workload templates and the identity-source placeholders "
-        "before collecting evidence. The `templates/` directory contains exact "
+        "before collecting evidence, then run `python3 refresh_bindings.py` to "
+        "update every embedded identity and workflow digest. The `templates/` directory contains exact "
         "parser-ready JSON shapes; the collection plan names every required output.\n\n"
         "See the complete executable shape in the upstream "
         "`examples/http-slo/` directory.\n",
@@ -425,6 +527,7 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
             "templates/protocol.json",
             "templates/identities.json",
             "templates/profile-manifest.json",
+            "refresh_bindings.py",
             "ADOPTION_CHECKLIST.md",
             "EVIDENCE_LAYOUT.md",
             "README.md",

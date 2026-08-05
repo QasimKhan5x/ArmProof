@@ -19,6 +19,7 @@ class SubmissionStoryTests(unittest.TestCase):
             "Switch live traffic to optimized service",
             "My card is about to expire",
             "Generate a starter for another service",
+            "Return to released service",
         )
         positions = [script.index(moment) for moment in moments]
         self.assertEqual(positions, sorted(positions))

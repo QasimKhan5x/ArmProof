@@ -28,13 +28,19 @@ on AWS, not locally.
 ```bash
 export GRAVITON_HOST=ubuntu@YOUR_PUBLIC_DNS_NAME
 export INSTANCE_ID=i-YOUR_INSTANCE_ID
-export RUNTIME_BUNDLE="$(cd .. && pwd)/result-first-bakeoff/evidence/checkpoints/runtime-checkpoints.tar.gz"
+export RUNTIME_BUNDLE="$PWD/runtime-checkpoints.tar.gz"
+export RUNTIME_BUNDLE_SHA256=400a1c9d9050f4fc73836f51e1b8745f462ff305408c992fccd9dcbe78513984
 
-test -f "$RUNTIME_BUNDLE"
+if [ ! -f "$RUNTIME_BUNDLE" ]; then
+  curl -fL \
+    https://github.com/QasimKhan5x/ArmProof/releases/download/v0.9.0/runtime-checkpoints.tar.gz \
+    -o "$RUNTIME_BUNDLE"
+fi
+echo "$RUNTIME_BUNDLE_SHA256  $RUNTIME_BUNDLE" | shasum -a 256 -c -
 ssh "$GRAVITON_HOST" 'uname -m'
 ```
 
-Expected output: `aarch64`.
+Expected output includes `runtime-checkpoints.tar.gz: OK` and `aarch64`.
 
 Upload the pinned runtime bundle and prepare the two model variants:
 
@@ -137,11 +143,11 @@ optimization**.
 
 Say:
 
-> SurgeDesk helps a bank operator route support messages. The standard service
-> is serving; the Arm-optimized candidate remains blocked. I am sending one real
-> message to the serving route and then to the candidate as a shadow copy. Both
-> propose Account security, and these timings came from Graviton just now. One
-> request is only illustrative, so the candidate still cannot serve customers.
+> SurgeDesk routes banking support messages. A faster Arm candidate is waiting,
+> but a bank cannot switch production because one request looks good. ArmProof
+> keeps it blocked while I send this stolen-card message to the standard service
+> and an optimized shadow. Both choose Account security. These timings came from
+> Graviton just now; the shadow still cannot serve customers.
 
 ### 0:38-1:18 — Turn Measurements Into A Release Decision
 
@@ -151,13 +157,11 @@ and application-quality cell. Leave the blocked predecessor collapsed.
 
 Say:
 
-> A promising request cannot change production. ArmProof hashes the evidence and
-> rebuilds ten 500-second traffic tests. At 0.28 requests per
-> second, the standard service missed the ten-second response target in every
-> run. The optimized service passed every run at 0.56, twice the load,
-> establishing at least twice the sustainable capacity. Operational queue
-> accuracy is 86.75 percent. The 77-intent score changed by 0.39 points, inside
-> the release limit; an operator confirms every route.
+> ArmProof now hashes the saved request rows from ten long Graviton traffic runs
+> and recalculates the release. At 0.28 requests per second, the standard service
+> missed the ten-second p95 limit in all five runs. The optimized service passed
+> all five at twice the load: 0.56 requests per second, or 2,016 offered messages
+> an hour. Routing quality remained inside the one-point release limit.
 
 ### 1:18-1:52 — Show Why Arm Made The Difference, Then Switch
 
@@ -168,11 +172,10 @@ point to the route receipt and the AWS/Arm placement row.
 Say:
 
 > The model, workload, runtime, machine, and 16-core placement stayed fixed; only
-> KleidiAI changed. Arm Performix found no KleidiAI functions in the standard
-> profile and 245,876 samples in the optimized profile, including the Arm matrix
-> kernel. The gateway matches model and source hashes, verifies the runtime-wheel
-> ledger, reads the AWS instance type, and checks active cores. The optimized
-> service is now live.
+> the KleidiAI runtime setting changed. Arm Performix found no KleidiAI functions
+> in the standard profile and attributed 67 percent of the optimized profile to
+> KleidiAI, including the Neoverse I8MM matrix kernel. The gateway rechecks the
+> model, runtime files, AWS instance, and active cores before switching traffic.
 
 ### 1:52-2:30 — Prove The New Route With A Different Live Request
 
@@ -194,18 +197,19 @@ Say:
 > request before release, the optimized request after release, and the measured
 > two-times capacity bound that authorized the change.
 
-### 2:30-2:55 — End With The Community Artifact
+### 2:30-2:58 — Hand Off The Tool, Then End On The Released Service
 
-Click **Generate a starter for another service**. Point to `16 files`, `BLOCKED`,
-and `no measured evidence found`. Hold this final state until `2:55`.
+Click **Generate a starter for another service**. Point to `17 files`, `BLOCKED`,
+and `no measured evidence found`. Then click **Return to released service** and
+hold the cutover summary and both routed tickets until `2:58`.
 
 Say:
 
-> ArmProof is reusable outside SurgeDesk. This button just created a 16-file
-> starter and ran its first CI check. It starts blocked because a new project has
-> no measurements yet. Once a developer collects capacity, quality, identity,
-> and profiler evidence, the same release engine evaluates that service's own
-> contract.
+> This button created ArmProof's contract, collection plan, and pull-request
+> check for another service. That project starts blocked because it has no
+> measurements; SurgeDesk earned release from its own evidence. The result is a
+> measured Arm optimization changing a live service, with the same guardrail
+> ready for another Arm developer.
 
 ## 6. Accuracy Boundaries
 

@@ -161,8 +161,11 @@ cd my-arm-service
 ../.venv/bin/armproof ci armproof.json
 ```
 
-The 16-file starter includes exact protocol, identity and profiler-manifest
+The 17-file starter includes exact protocol, identity and profiler-manifest
 templates as well as the workloads, collection plan and GitHub Action. The
+generated Action is pinned to the reviewed ArmProof commit behind this release.
+Its binding helper recalculates workload, model, runtime, environment, service
+command, profiler-report, contract and workflow digests after placeholders are replaced.
 initial check fails until the developer collects real request rows, profiler
 output and observed identities. After collection,
 `armproof seal armproof.json` creates the deterministic checksum ledger and
@@ -236,7 +239,9 @@ host. The live service verifies the pinned wheel ledger, reads its instance type
 from AWS IMDSv2, and reports actual CPU affinity. The gateway checks those values
 and content-derived model identities before promotion and on every optimized
 response. This is deployment validation rather than hardware-backed remote
-attestation.
+attestation, and it assumes the operator controls the host. The checksum-pinned
+Arm64 runtime bundle used by the live recipe is published with the `v0.9.0`
+GitHub release; model weights still download from their pinned upstream revision.
 
 SurgeDesk and ArmProof were created and meaningfully developed from July 29
 through August 5, 2026, during the challenge period. The Git history contains

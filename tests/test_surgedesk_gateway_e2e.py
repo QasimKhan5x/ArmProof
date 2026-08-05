@@ -160,6 +160,19 @@ class SurgeDeskGatewayEndToEndTests(unittest.TestCase):
             self.assertEqual(status["deployment_lane"], "baseline")
             self.assertIsNone(status["release_audit_id"])
 
+            optimized_identity["model_identity"] = MODEL_SHA
+            receipt = _request(root, "/api/audit")
+            self.assertTrue(receipt["passed"])
+            self.assertEqual(_request(root, "/api/promote")["active_lane"], "optimized")
+            optimized_identity["architecture"] = "x86_64"
+            with self.assertRaises(urllib.error.HTTPError) as context:
+                _request(root, "/api/route", {"text": message})
+            self.assertEqual(context.exception.code, HTTPStatus.CONFLICT)
+            optimized_identity["architecture"] = "aarch64"
+            status = _request(root, "/api/route", {"text": message})
+            self.assertEqual(status["deployment_lane"], "baseline")
+            self.assertIsNone(status["release_audit_id"])
+
 
 if __name__ == "__main__":
     unittest.main()

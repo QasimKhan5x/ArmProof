@@ -43,14 +43,14 @@ cannot approve this release.
 ## Verification State
 
 - `armproof ci examples/armproof-reference/armproof.json` passes and generates the public report from raw evidence.
-- 192 Python tests pass; one optional localhost-connectivity test is skipped by design.
+- 193 Python tests pass; one optional localhost-connectivity test is skipped by design.
 - 6 JavaScript behavior tests pass.
 - 8 Playwright workflows pass across desktop, tablet, and 320-pixel mobile.
 - The real localhost end-to-end test runs a control-plus-shadow comparison,
   recalculates the audit, binds deployment data, activates the optimized lane,
   routes the next request through it, and proves post-release drift fails closed.
 - Static UI source contains no measured result literals, fake timers, tampering scene, or rejected 2.5x claim.
-- The generated adoption ZIP contains 16 files, an explicit evidence layout and a GitHub Action bound to its parsed contract digest; `armproof seal` creates the portable evidence ledger after collection.
+- The generated adoption ZIP contains 17 files, a digest-refresh helper, an explicit evidence layout and a GitHub Action pinned to the reviewed release commit and bound to its parsed contract digest; `armproof seal` creates the portable evidence ledger after collection.
 - AWS cumulative evidence cost is estimated at `$13.4872`; the final inventory is empty.
 
 ## Demo Boundary

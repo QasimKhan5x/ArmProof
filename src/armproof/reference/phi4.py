@@ -102,11 +102,19 @@ def _aws_instance_type(timeout: float = 2.0) -> str:
     return instance_type
 
 
-def _verify_runtime_artifact_ledger(path: Path) -> str:
+def _verify_runtime_artifact_ledger(
+    path: Path,
+    expected_sha256: str,
+    required_artifacts: tuple[str, ...] = (),
+) -> str:
     """Verify the pinned runtime artifacts and return the ledger digest."""
     if not path.is_file():
         raise FileNotFoundError(path)
+    observed_ledger_sha256 = _sha256_file(path)
+    if observed_ledger_sha256 != expected_sha256:
+        raise ValueError("runtime artifact ledger differs from the accepted digest")
     entries = 0
+    artifact_names: set[str] = set()
     for line in path.read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
@@ -119,10 +127,17 @@ def _verify_runtime_artifact_ledger(path: Path) -> str:
             raise ValueError("runtime artifact ledger escapes its directory")
         if not artifact.is_file() or _sha256_file(artifact) != expected:
             raise ValueError(f"runtime artifact checksum mismatch: {relative.strip()}")
+        artifact_names.add(artifact.name)
         entries += 1
     if entries == 0:
         raise ValueError("runtime artifact ledger is empty")
-    return _sha256_file(path)
+    missing = set(required_artifacts) - artifact_names
+    if missing:
+        raise ValueError(
+            "runtime artifact ledger is missing required files: "
+            + ", ".join(sorted(missing))
+        )
+    return observed_ledger_sha256
 
 
 def _model_item_fingerprint(path: Path) -> dict[str, Any]:
@@ -205,11 +220,36 @@ class OrtInt4Backend:
         *,
         runtime_lock: Path | None = None,
         runtime_artifact_ledger: Path | None = None,
+        runtime_artifact_ledger_sha256: str | None = None,
         expected_instance_type: str | None = None,
     ) -> None:
-        import onnxruntime_genai as og
+        runtime_lock_sha256 = (
+            _sha256_file(runtime_lock) if runtime_lock is not None else None
+        )
+        if (runtime_artifact_ledger is None) != (runtime_artifact_ledger_sha256 is None):
+            raise ValueError("runtime artifact ledger and accepted digest must be supplied together")
+        runtime_ledger_sha256 = None
+        if runtime_artifact_ledger is not None and runtime_artifact_ledger_sha256 is not None:
+            runtime_ledger_sha256 = _verify_runtime_artifact_ledger(
+                runtime_artifact_ledger,
+                runtime_artifact_ledger_sha256,
+                (
+                    "onnxruntime-1.29.0-cp312-cp312-linux_aarch64.whl",
+                    "onnxruntime_genai-0.15.0.dev0-cp312-cp312-linux_aarch64.whl",
+                ),
+            )
+        observed_instance_type = None
+        if expected_instance_type is not None:
+            observed_instance_type = _aws_instance_type()
+            if observed_instance_type != expected_instance_type:
+                raise ValueError(
+                    "AWS instance type differs from the expected deployment: "
+                    f"{observed_instance_type} != {expected_instance_type}"
+                )
 
         model_identity, source_artifact_sha256, control, threads = _ort_model_identity(model_path)
+        import onnxruntime_genai as og
+
         self.og = og
         self.model = og.Model(str(model_path))
         self.tokenizer = og.Tokenizer(self.model)
@@ -222,19 +262,11 @@ class OrtInt4Backend:
             "optimization_control": {"mlas.disable_kleidiai": control},
             "threads": threads,
         }
-        if runtime_lock is not None:
-            self.health_metadata["runtime_lock_sha256"] = _sha256_file(runtime_lock)
-        if runtime_artifact_ledger is not None:
-            self.health_metadata["runtime_artifact_ledger_sha256"] = (
-                _verify_runtime_artifact_ledger(runtime_artifact_ledger)
-            )
-        if expected_instance_type is not None:
-            observed_instance_type = _aws_instance_type()
-            if observed_instance_type != expected_instance_type:
-                raise ValueError(
-                    "AWS instance type differs from the expected deployment: "
-                    f"{observed_instance_type} != {expected_instance_type}"
-                )
+        if runtime_lock_sha256 is not None:
+            self.health_metadata["runtime_lock_sha256"] = runtime_lock_sha256
+        if runtime_ledger_sha256 is not None:
+            self.health_metadata["runtime_artifact_ledger_sha256"] = runtime_ledger_sha256
+        if observed_instance_type is not None:
             self.health_metadata.update({
                 "instance_type": observed_instance_type,
                 "instance_identity_source": "aws-imdsv2",
@@ -410,6 +442,7 @@ def main() -> None:
     parser.add_argument("--max-inflight", type=int, default=1)
     parser.add_argument("--runtime-lock", type=Path)
     parser.add_argument("--runtime-artifact-ledger", type=Path)
+    parser.add_argument("--runtime-artifact-ledger-sha256")
     parser.add_argument("--expected-instance-type")
     args = parser.parse_args()
     if args.threads < 1 or args.max_inflight < 1:
@@ -420,6 +453,7 @@ def main() -> None:
             args.label or "ort-int4",
             runtime_lock=args.runtime_lock,
             runtime_artifact_ledger=args.runtime_artifact_ledger,
+            runtime_artifact_ledger_sha256=args.runtime_artifact_ledger_sha256,
             expected_instance_type=args.expected_instance_type,
         )
     else:

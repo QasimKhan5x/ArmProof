@@ -31,8 +31,9 @@ procedure, chooses the final queue, and routes the ticket.
 The application begins on the standard Phi-4 Mini INT4 service with KleidiAI
 off. One live message also runs as a sequential shadow copy on the optimized
 candidate, so judges can see fresh behavior from both configurations before the
-candidate is allowed to serve. SurgeDesk then recalculates a Graviton4 capacity
-test and checks an Arm Performix profile showing which code ran. Once those
+candidate is allowed to serve. SurgeDesk then recalculates the release decision
+from saved Graviton4 request rows and checks an Arm Performix profile showing
+which code ran. Once those
 checks pass, the interface switches live traffic to the optimized service. A
 different support message visibly comes back through the KleidiAI-enabled route
 with a new request ID, timestamp and release receipt.
@@ -44,7 +45,9 @@ two live Graviton endpoints for the control-to-treatment route cutover.
 On the same `c8g.4xlarge`, the optimized service sustained 0.56 requests per
 second in five 500-second windows. The control failed the same ten-second p95
 objective in all five windows at 0.28 requests per second. This establishes a
-conservative lower bound of at least twice the sustained request rate.
+conservative lower bound of at least twice the sustained request rate. The
+optimized boundary is 2,016 offered messages per hour on one 16-core VM; the
+standard configuration failed its response-time rule at 1,008 per hour.
 
 ArmProof is the reusable open-source component behind the release. It verifies
 raw request records, raw model outputs, treatment identities, quality limits
@@ -211,10 +214,11 @@ ArmProof ships with:
 - a CLI that exits successfully only when every required claim passes;
 - an offline HTML report and machine-readable decision;
 - a GitHub Action for pull-request release gates;
-- `armproof init`, which creates a blocked-by-default 16-file starter with exact protocol, identity and profiler-manifest templates for another bounded HTTP classification service;
+- `armproof init`, which creates a blocked-by-default 17-file starter with exact protocol, identity and profiler-manifest templates plus a digest-refresh helper for another bounded HTTP classification service;
 - `armproof seal`, which writes a deterministic evidence ledger after collection without approving the result;
 - a SurgeDesk handoff that generates the starter, runs its empty state through ArmProof CI to prove it blocks, and downloads the files as a ZIP;
-- a complete Graviton4 deployment recipe; and
+- a complete Graviton4 deployment recipe plus the checksum-pinned 45 MB Arm64
+  runtime bundle attached to the `v0.9.0` release; and
 - a tested llama.cpp HTTP compatibility adapter whose performance extension is documented separately.
 
 A developer can clone the repository, verify the checked-in reference without
@@ -240,6 +244,8 @@ service verifies the runtime-wheel ledger, reads the instance type from AWS
 IMDSv2, and reports its actual CPU affinity. The gateway compares those values,
 the model and source hashes, runtime lock and treatment controls with the
 accepted release before changing the route and on each optimized response.
+These checks assume an operator-controlled host. They validate deployment drift;
+they do not claim to defeat a malicious host or provide remote attestation.
 
 ## What We Learned
 

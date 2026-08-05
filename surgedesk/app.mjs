@@ -313,12 +313,10 @@ function renderReviewedTickets() {
   elements["live-cutover-summary"].hidden = !cutoverComplete;
   if (cutoverComplete) {
     elements["intake-form"].before(elements["live-cutover-summary"]);
-    const baselineControl = baselineTicket.runtime_identity.optimization_control["mlas.disable_kleidiai"];
-    const treatmentControl = treatmentTicket.runtime_identity.optimization_control["mlas.disable_kleidiai"];
     setText("cutover-before-lane", "Standard · KleidiAI off");
-    setText("cutover-before-request", `${baselineTicket.request_id} · ${formatMs(baselineTicket.gateway_latency_ms)} · raw control ${baselineControl}`);
+    setText("cutover-before-request", `${baselineTicket.final_queue} · ${baselineTicket.request_id}`);
     setText("cutover-after-lane", "Optimized · KleidiAI on");
-    setText("cutover-after-request", `${treatmentTicket.request_id} · ${formatMs(treatmentTicket.gateway_latency_ms)} · raw control ${treatmentControl}`);
+    setText("cutover-after-request", `${treatmentTicket.final_queue} · ${treatmentTicket.request_id}`);
     setText("cutover-audit", treatmentTicket.release_audit_id);
     setText(
       "cutover-capacity",
@@ -398,14 +396,10 @@ async function routeSelectedMessage(event) {
         setText("shadow-optimized-latency", formatMs(optimized.gateway_latency_ms));
         setText("shadow-baseline-result", `${baseline.suggested_label} · ${baseline.queue}`);
         setText("shadow-optimized-result", `${optimized.suggested_label} · ${optimized.queue} · shadow only`);
-        const ratio = payload.observed_latency_ratio;
-        const latencySentence = ratio >= 1
-          ? `The candidate completed this request with ${ratio.toFixed(2)}× lower observed latency.`
-          : `The candidate was ${(1 / ratio).toFixed(2)}× slower on this request.`;
         setText(
           "shadow-observation",
-          `${latencySentence} Both proposed ${payload.same_queue ? "the same" : "different"} final queue. `
-            + "This live observation is not the sustained-capacity claim.",
+          `Both configurations completed this request and proposed ${payload.same_queue ? "the same" : "different"} final queue. `
+            + "This one-request observation does not determine the release.",
         );
         workspace = selectRecordedCase(workspace, baseline);
       } else {
@@ -1056,7 +1050,7 @@ function renderAuditResult(receipt) {
   setText(
     "result-capacity-scope",
     `CPU-only generative classification on the same ${data.proof.instance}, model, runtime, workload, ${data.proof.threads} threads, and `
-      + `${description.slo_seconds}-second p95 rule. Offered rate differs intentionally to locate each capacity boundary.`,
+      + `${description.slo_seconds}-second p95 rule. The optimized boundary represents ${(capacity.optimized_pass_rps * 3600).toLocaleString()} offered messages/hour. Offered rate differs intentionally to locate each capacity boundary.`,
   );
   setText("result-control-boundary", `${capacity.baseline_fail_rps.toFixed(2)} requests/s`);
   setText("result-control-outcomes", `${controlPasses}/${controlTrial.outcomes.length} long windows passed`);
@@ -1303,6 +1297,7 @@ async function generateInlineStarter() {
     setText("inline-adoption-gate", receipt.validation_status);
     setText("inline-adoption-reason", receipt.initial_ci_reason);
     elements["inline-adoption-receipt"].hidden = false;
+    elements["return-to-cutover"].hidden = false;
     elements["generate-inline-starter"].textContent = adoptionReceiptGeneratedLive
       ? "Starter generated during this session"
       : "Included starter inspected";
@@ -1406,6 +1401,11 @@ function bindInteractions() {
     activateView("surge", { focusHeading: true });
   });
   elements["generate-inline-starter"].addEventListener("click", generateInlineStarter);
+  elements["return-to-cutover"].addEventListener("click", () => {
+    elements["live-cutover-summary"].scrollIntoView({ behavior: "smooth", block: "start" });
+    elements["live-cutover-title"].setAttribute("tabindex", "-1");
+    elements["live-cutover-title"].focus({ preventScroll: true });
+  });
   elements["generate-release-starter"].addEventListener("click", generateReleaseStarter);
   elements["generate-adoption-kit"].addEventListener("click", generateAdoptionKit);
   document.querySelectorAll('input[name="inference-mode"]').forEach((radio) => {

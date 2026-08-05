@@ -57,7 +57,8 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator("#shadow-baseline-latency")).toContainText("ms");
   await expect(page.locator("#shadow-optimized-latency")).toContainText("ms");
   await expect(page.locator("#shadow-optimized-result")).toContainText("shadow only");
-  await expect(page.locator("#shadow-observation")).toContainText("not the sustained-capacity claim");
+  await expect(page.locator("#shadow-observation")).toContainText("does not determine the release");
+  await expect(page.locator("#shadow-observation")).not.toContainText("lower observed latency");
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.locator("#shadow-comparison").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "build/screenshots/surgedesk-live-shadow.png" });
@@ -164,6 +165,8 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator("#live-cutover-summary")).toBeVisible();
   await expect(page.locator("#cutover-before-lane")).toContainText("KleidiAI off");
   await expect(page.locator("#cutover-after-lane")).toContainText("KleidiAI on");
+  await expect(page.locator("#cutover-before-request")).toContainText("Account security");
+  await expect(page.locator("#cutover-after-request")).toContainText("Cards & payments");
   await expect(page.locator("#cutover-capacity")).toContainText("≥2.0×");
   await expect(page.locator("#adoption-handoff")).toBeVisible();
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -171,12 +174,15 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await page.screenshot({ path: "build/screenshots/surgedesk-live-cutover.png" });
   await page.getByRole("button", { name: "Generate a starter for another service" }).click();
   await expect(page.locator("#inline-adoption-receipt")).toBeVisible();
-  await expect(page.locator("#inline-adoption-files")).toHaveText("16 files");
+  await expect(page.locator("#inline-adoption-files")).toHaveText("17 files");
   await expect(page.locator("#inline-adoption-gate")).toHaveText("BLOCKED");
   await expect(page.locator("#inline-adoption-reason")).toHaveText("no measured evidence found");
+  await expect(page.locator("#return-to-cutover")).toBeVisible();
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.locator("#adoption-handoff").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "build/screenshots/surgedesk-generated-starter.png" });
+  await page.getByRole("button", { name: "Return to released service" }).click();
+  await expect(page.locator("#live-cutover-title")).toBeFocused();
   expect(await overflowingElements(page)).toEqual([]);
 
   await page.setViewportSize({ width: 1440, height: 1000 });
