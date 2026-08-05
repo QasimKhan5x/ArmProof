@@ -32,7 +32,7 @@ class SurgeDeskGatewayTests(unittest.TestCase):
         self.assertIn("contract.json", receipt["generated_files"])
         self.assertIn(".github/workflows/armproof.yml", receipt["generated_files"])
         self.assertIn(
-            "QasimKhan5x/ArmProof@d7a4a27eed96de9173bb393183b81c12727e5d8c # v0.9.0",
+            "QasimKhan5x/ArmProof@6a2785eccca0e42d36fcf37919bfc83dfca3ea6a # v0.9.0",
             receipt["workflow"],
         )
         self.assertEqual(len(receipt["contract_sha256"]), 64)

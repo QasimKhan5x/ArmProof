@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 from armproof import __version__
 
 
-ACTION_COMMIT = "d7a4a27eed96de9173bb393183b81c12727e5d8c"
+ACTION_COMMIT = "6a2785eccca0e42d36fcf37919bfc83dfca3ea6a"
 
 
 def _write_json(path: Path, payload: object) -> None:

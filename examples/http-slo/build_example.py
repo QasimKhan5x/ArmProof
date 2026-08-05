@@ -12,7 +12,7 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parents[2]
 VERSION = str(tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"])
-ACTION_COMMIT = "d7a4a27eed96de9173bb393183b81c12727e5d8c"
+ACTION_COMMIT = "6a2785eccca0e42d36fcf37919bfc83dfca3ea6a"
 
 
 def _sha256(path: Path) -> str:
