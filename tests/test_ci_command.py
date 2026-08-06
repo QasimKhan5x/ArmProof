@@ -91,6 +91,17 @@ class CiCommandTests(unittest.TestCase):
             self.assertIn("fetch-depth: 0", workflow)
             self.assertIn("Created 17 files", stdout.getvalue())
 
+            tree_digest = hashlib.sha256()
+            for path in sorted(item for item in output.rglob("*") if item.is_file()):
+                tree_digest.update(path.relative_to(output).as_posix().encode("utf-8"))
+                tree_digest.update(b"\0")
+                tree_digest.update(path.read_bytes())
+                tree_digest.update(b"\0")
+            self.assertEqual(
+                tree_digest.hexdigest(),
+                "4290623e388d5a69c7ca0c882995def477c1bc4458e81ab0888d433fcd227704",
+            )
+
             original_contract_digest = hashlib.sha256(
                 (output / "contract.json").read_bytes()
             ).hexdigest()
