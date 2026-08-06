@@ -22,3 +22,7 @@ ops/experiments/*.local.jsonl
 performix/
 *.log
 !ops/evidence/**/*.log
+# AWS runners return the immutable evidence archive separately. These are
+# local inspection and launch-bundle copies, not additional evidence.
+ops/evidence/**/extracted/
+ops/evidence/**/project.tar.gz

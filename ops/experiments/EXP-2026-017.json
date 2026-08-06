@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-017",
+  "title": "Simplified Graviton memory-recipe sustained confirmation",
+  "hypothesis": "KleidiAI plus mimalloc and transparent huge pages, without the regressive ONNX Runtime thread overrides, will pass five 300-second windows at 0.62 requests/s under the unchanged 10-second p95 SLO.",
+  "status": "preregistered",
+  "decision": "pending",
+  "independent_variable": "mimalloc preload and transparent huge-page policy layered on the accepted KleidiAI runtime",
+  "controls": [
+    "same c8g.4xlarge instance shape",
+    "same Phi-4 Mini INT4 artifact and pinned Arm64 runtime",
+    "same KleidiAI-enabled model configuration",
+    "same 16 threads, mixed workload, 0.62 requests/s and 10-second p95 SLO",
+    "same output digest established by EXP-2026-015 and EXP-2026-016",
+    "no ONNX Runtime thread-pool overrides"
+  ],
+  "acceptance": [
+    "all five 300-second windows pass at 0.62 requests/s",
+    "every window has zero request errors",
+    "warmup outputs match the frozen reference digest",
+    "THP mode is restored after the run"
+  ],
+  "prior_evidence": {
+    "kleidiai_only_control": "EXP-2026-015",
+    "mechanism_isolation": "EXP-2026-016",
+    "accepted_kleidiai_capacity_boundary_requests_per_second": 0.56,
+    "frozen_output_digest": "78b613260fabd3eefbfdbb030f8366ededfe3cd8d1003db85f70eeae5f48f684"
+  },
+  "budget": {
+    "prior_project_spend_usd": 14.4716,
+    "maximum_runtime_minutes": 40,
+    "hard_project_ceiling_usd": 15.0
+  },
+  "notes": "This is a one-sided simplification confirmation. It does not re-estimate the KleidiAI-only control, which was already measured in five matched EXP-2026-015 windows. It only determines whether the cleaner mimalloc-plus-THP recipe preserves the accepted 0.62 requests/s treatment result."
+}

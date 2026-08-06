@@ -15,7 +15,7 @@ import urllib.request
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Mapping, Protocol
 
 from armproof.artifacts import fingerprint_path
 
@@ -30,7 +30,14 @@ class Backend(Protocol):
     def generate(self, prompt: str, max_new_tokens: int) -> dict[str, Any]: ...
 
 
-def create_ort_variant(source: Path, destination: Path, enabled: bool, threads: int) -> Path:
+def create_ort_variant(
+    source: Path,
+    destination: Path,
+    enabled: bool,
+    threads: int,
+    *,
+    session_overrides: Mapping[str, str | int] | None = None,
+) -> Path:
     """Create a symlink overlay changing only the declared KleidiAI control."""
     if destination.exists():
         raise FileExistsError(f"variant destination already exists: {destination}")
@@ -49,6 +56,10 @@ def create_ort_variant(source: Path, destination: Path, enabled: bool, threads: 
                 options = config["model"]["decoder"].setdefault("session_options", {})
                 options["intra_op_num_threads"] = threads
                 options["mlas.disable_kleidiai"] = "0" if enabled else "1"
+                for key, value in (session_overrides or {}).items():
+                    if key in {"intra_op_num_threads", "mlas.disable_kleidiai"}:
+                        raise ValueError(f"reserved session option override: {key}")
+                    options[key] = value
                 target.write_text(json.dumps(config, indent=2, sort_keys=True) + "\n")
             else:
                 target.symlink_to(item.resolve())

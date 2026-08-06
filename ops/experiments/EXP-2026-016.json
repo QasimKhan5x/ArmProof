@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-016",
+  "title": "Transparent-huge-page mechanism isolation",
+  "hypothesis": "The additional EXP-2026-015 gain requires transparent huge pages; THP-only, thread-plus-THP, and mimalloc-plus-THP will identify whether THP is sufficient or interacts materially with another treatment.",
+  "status": "completed",
+  "decision": "passed_mechanism_isolation",
+  "independent_variable": "THP always versus madvise, crossed with thread tuning or mimalloc",
+  "controls": [
+    "same c8g.4xlarge",
+    "same Phi-4 Mini INT4 KleidiAI-enabled artifact",
+    "same 16 threads, workload, 0.62 requests/s and 10-second p95 SLO",
+    "two alternating 60-second screens per variant",
+    "exclusive process restart and warmup before every screen"
+  ],
+  "interpretation": [
+    "THP-only matching the combined gain makes THP the sufficient mechanism",
+    "only mimalloc-plus-THP matching it indicates an allocator/page interaction",
+    "only thread-plus-THP matching it indicates a worker/page interaction",
+    "short screens identify mechanism direction but do not replace EXP-2026-015 sustained confirmation"
+  ],
+  "budget": {
+    "prior_project_spend_usd": 14.3208,
+    "maximum_runtime_minutes": 35,
+    "hard_project_ceiling_usd": 15.0
+  },
+  "result": {
+    "screen_rate_requests_per_second": 0.616667,
+    "current_median_p95_ms": 5371.252,
+    "thp_only_median_p95_ms": 4128.547,
+    "thp_only_p95_reduction_percent": 23.14,
+    "thread_thp_median_p95_ms": 4257.114,
+    "thread_thp_p95_reduction_percent": 20.74,
+    "mimalloc_thp_median_p95_ms": 3058.459,
+    "mimalloc_thp_p95_reduction_percent": 43.06,
+    "outputs_equivalent": true,
+    "evidence_ref": "ops/evidence/EXP-2026-016/evidence.tar.gz"
+  },
+  "notes": "These two 60-second screens per variant identify mechanism direction only. They show that THP contributes independently, thread tuning adds no benefit, and mimalloc interacts strongly with THP. They do not replace the five sustained confirmations in EXP-2026-015."
+}

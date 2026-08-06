@@ -121,6 +121,39 @@ class Phi4ReferenceTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "no longer matches"):
                 _ort_model_identity(enabled)
 
+    def test_variant_accepts_non_reserved_session_overrides(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source"
+            source.mkdir()
+            (source / "model.onnx").write_bytes(b"model")
+            (source / "genai_config.json").write_text(
+                json.dumps({"model": {"decoder": {"session_options": {}}}})
+            )
+            variant = create_ort_variant(
+                source,
+                root / "variant",
+                True,
+                16,
+                session_overrides={
+                    "session.intra_op.spin_duration_us": "1000",
+                    "session.intra_op.spin_backoff_max": "8",
+                },
+            )
+            options = json.loads(
+                (variant / "genai_config.json").read_text(encoding="utf-8")
+            )["model"]["decoder"]["session_options"]
+            self.assertEqual(options["session.intra_op.spin_duration_us"], "1000")
+            self.assertEqual(options["session.intra_op.spin_backoff_max"], "8")
+            with self.assertRaisesRegex(ValueError, "reserved session option"):
+                create_ort_variant(
+                    source,
+                    root / "invalid",
+                    True,
+                    16,
+                    session_overrides={"mlas.disable_kleidiai": "1"},
+                )
+
     def test_request_contract_is_bounded(self) -> None:
         self.assertEqual(validate_request({"request_id": "r", "prompt": "p"}), ("r", "p", 64))
         with self.assertRaisesRegex(ValueError, "between"):

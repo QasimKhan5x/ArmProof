@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-017",
+  "variant_set": "simplified-confirmation",
+  "screen_only": false,
+  "workload": "data/banking77/generated/traffic-mixed.jsonl",
+  "threads": 16,
+  "candidate_rps": 0.62,
+  "p95_slo_ms": 10000.0,
+  "screen_seconds": 0.0,
+  "screen_repetitions": 0,
+  "confirmation_seconds": 300.0,
+  "confirmation_repetitions": 5,
+  "minimum_screen_improvement": 0.0,
+  "max_error_rate": 0.0,
+  "minimum_delivery_ratio": 0.95,
+  "max_workers": 48,
+  "request_timeout_seconds": 60.0,
+  "warmup_requests": 5,
+  "warmup_rps": 0.5,
+  "expected_output_digest": "78b613260fabd3eefbfdbb030f8366ededfe3cd8d1003db85f70eeae5f48f684"
+}

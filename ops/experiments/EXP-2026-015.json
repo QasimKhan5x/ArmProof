@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0.0",
+  "experiment_id": "EXP-2026-015",
+  "title": "Graviton4 ONNX Runtime thread and memory tuning ablation",
+  "hypothesis": "At least one preregistered ONNX Runtime thread or memory treatment will sustain 0.62 requests/s under the unchanged 10-second p95 SLO while the current KleidiAI-enabled runtime fails, establishing at least 10.7% capacity above the accepted 0.56 requests/s boundary.",
+  "status": "completed",
+  "decision": "passed",
+  "independent_variable": "ORT worker-spin policy, mimalloc preload, and transparent huge-page policy",
+  "controls": [
+    "same c8g.4xlarge",
+    "same Phi-4 Mini INT4 artifact",
+    "KleidiAI enabled in every variant",
+    "same 16 threads",
+    "same mixed workload and 10-second p95 SLO",
+    "exclusive process restart and warmup before every window"
+  ],
+  "acceptance": [
+    "candidate passes both 120-second screens at 0.62 requests/s",
+    "candidate improves median screen p95 by at least 5% over current",
+    "selected candidate passes five 300-second confirmations at 0.62 requests/s",
+    "current runtime fails five matched confirmations at 0.62 requests/s",
+    "warmup outputs remain byte-equivalent across variants"
+  ],
+  "budget": {
+    "prior_project_spend_usd": 13.4872,
+    "maximum_runtime_minutes": 125,
+    "hard_project_ceiling_usd": 15.0
+  },
+  "result": {
+    "selected_treatment": "thread-memory",
+    "confirmation_rate_requests_per_second": 0.62,
+    "current_passes": "0/5",
+    "selected_treatment_passes": "5/5",
+    "current_median_p95_ms": 14806.35,
+    "selected_treatment_median_p95_ms": 8146.752,
+    "median_p95_reduction_percent": 44.98,
+    "capacity_gain_over_previous_accepted_boundary_percent": 10.71,
+    "outputs_equivalent": true,
+    "evidence_ref": "ops/evidence/EXP-2026-015/evidence.tar.gz"
+  },
+  "notes": "Screening was deliberately short; only a candidate clearing the frozen screen gate received long confirmation. Neutral and failed variants remain in the evidence bundle. No threshold changed after launch. EXP-2026-016 subsequently isolated the likely contributions of THP and mimalloc, but the sustained claim in this experiment applies to the exact combined thread-memory treatment tested here."
+}
