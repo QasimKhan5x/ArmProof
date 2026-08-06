@@ -477,6 +477,247 @@ def _upstream_request(
     return upstream, elapsed_ms, started_at
 
 
+def _active_route(
+    lanes: dict[str, dict[str, Any]], deployment: DeploymentState
+) -> tuple[str | None, dict[str, Any] | None]:
+    lane = deployment.snapshot()["active_lane"]
+    return (str(lane), lanes[str(lane)]) if lane in lanes else (None, None)
+
+
+def _post_audit(handler: Any, deployment: DeploymentState) -> None:
+    started = time.perf_counter()
+    payload = build_surgedesk_payload(ROOT)
+    receipt = _audit_receipt(payload, (time.perf_counter() - started) * 1000)
+    deployment.record_audit(receipt)
+    handler._json(HTTPStatus.OK, receipt)
+
+
+def _post_promote(
+    handler: Any,
+    lanes: dict[str, dict[str, Any]],
+    deployment: DeploymentState,
+) -> None:
+    lane_probes = {name: _probe_lane(config) for name, config in lanes.items()}
+    matched, reason, live_identity = _match_lane_identity(
+        lane_probes["baseline"], lane_probes["optimized"]
+    )
+    if not matched:
+        handler._json(
+            HTTPStatus.CONFLICT,
+            {"error": "matched_runtime_identity_changed", "detail": reason},
+        )
+        return
+    promoted = deployment.promote(live_identity)
+    handler._json(
+        HTTPStatus.OK,
+        {
+            **promoted,
+            "backend": lanes["optimized"]["expected_backend"],
+            "core_group": lanes["optimized"]["core_group"],
+            "runtime_identity": live_identity,
+        },
+    )
+
+
+def _post_shadow_compare(
+    handler: Any,
+    lanes: dict[str, dict[str, Any]],
+    deployment: DeploymentState,
+    guard: Any,
+    categories: list[str],
+) -> None:
+    if deployment.snapshot()["active_lane"] != "baseline":
+        handler._json(
+            HTTPStatus.CONFLICT,
+            {"error": "shadow comparison is only available before promotion"},
+        )
+        return
+    lane_probes = {name: _probe_lane(config) for name, config in lanes.items()}
+    matched, reason, _ = _match_lane_identity(
+        lane_probes["baseline"], lane_probes["optimized"]
+    )
+    if not matched:
+        handler._json(
+            HTTPStatus.CONFLICT,
+            {"error": "matched_runtime_identity_changed", "detail": reason},
+        )
+        return
+    text = handler._text(handler._body())
+    results: dict[str, Any] = {}
+    for lane_name in ("baseline", "optimized"):
+        config = lanes[lane_name]
+        upstream, elapsed_ms, _ = _upstream_request(
+            str(config["endpoint"]),
+            text=text,
+            categories=categories,
+            request_id=f"shadow-{lane_name}-{uuid.uuid4().hex[:10]}",
+            expected_backend=str(config["expected_backend"]),
+        )
+        if not _response_identity_matches(upstream, lane_probes[lane_name][2]):
+            handler._json(
+                HTTPStatus.CONFLICT,
+                {"error": f"{lane_name}_inference_identity_mismatch"},
+            )
+            return
+        result = compose_live_route(text, upstream, guard, categories)
+        result.update(
+            {
+                "gateway_latency_ms": elapsed_ms,
+                "deployment_lane": lane_name,
+                "observed_at": datetime.now(UTC).isoformat(),
+                "runtime_identity": upstream["runtime_identity"],
+                "release_audit_id": None,
+                "shadow_only": lane_name == "optimized",
+            }
+        )
+        results[lane_name] = result
+    baseline_ms = results["baseline"]["gateway_latency_ms"]
+    optimized_ms = results["optimized"]["gateway_latency_ms"]
+    handler._json(
+        HTTPStatus.OK,
+        {
+            "comparison_id": f"compare-{uuid.uuid4().hex[:12]}",
+            "execution": "sequential_shadow",
+            "serving_lane": "baseline",
+            "capacity_evidence": False,
+            "same_queue": (
+                results["baseline"]["queue"] == results["optimized"]["queue"]
+            ),
+            "observed_latency_ratio": (
+                baseline_ms / optimized_ms if optimized_ms > 0 else None
+            ),
+            "lanes": results,
+        },
+    )
+
+
+def _post_route(
+    handler: Any,
+    lanes: dict[str, dict[str, Any]],
+    deployment: DeploymentState,
+    guard: Any,
+    categories: list[str],
+) -> None:
+    active_lane, route_config = _active_route(lanes, deployment)
+    if not route_config:
+        handler._json(
+            HTTPStatus.SERVICE_UNAVAILABLE,
+            {"error": "live_endpoint_not_configured"},
+        )
+        return
+    route_probe = _probe_lane(route_config)
+    if not route_probe[0]:
+        deployment.revoke_optimized_route()
+        handler._json(
+            HTTPStatus.CONFLICT,
+            {"error": "route_runtime_identity_changed"},
+        )
+        return
+    text = handler._text(handler._body())
+    upstream, elapsed_ms, _ = _upstream_request(
+        str(route_config["endpoint"]),
+        text=text,
+        categories=categories,
+        request_id=f"surgedesk-{uuid.uuid4().hex[:12]}",
+        expected_backend=str(route_config["expected_backend"]),
+    )
+    if not _response_identity_matches(upstream, route_probe[2]):
+        deployment.revoke_optimized_route()
+        handler._json(
+            HTTPStatus.CONFLICT,
+            {"error": "route_inference_identity_mismatch"},
+        )
+        return
+    try:
+        release_audit_id = deployment.authorize_active_route(
+            str(active_lane), upstream["runtime_identity"]
+        )
+    except ValueError as exc:
+        handler._json(
+            HTTPStatus.CONFLICT,
+            {"error": "active_release_identity_drift", "detail": str(exc)},
+        )
+        return
+    result = compose_live_route(text, upstream, guard, categories)
+    result.update(
+        {
+            "gateway_latency_ms": elapsed_ms,
+            "deployment_lane": active_lane,
+            "observed_at": datetime.now(UTC).isoformat(),
+            "runtime_identity": upstream["runtime_identity"],
+            "release_audit_id": release_audit_id,
+        }
+    )
+    handler._json(HTTPStatus.OK, result)
+
+
+def _live_status_payload(
+    lanes: dict[str, dict[str, Any]], deployment: DeploymentState
+) -> dict[str, Any]:
+    lane_status = {name: _probe_lane(row) for name, row in lanes.items()}
+    matched_available, matched_reason, matched_identity = _match_lane_identity(
+        lane_status["baseline"], lane_status["optimized"]
+    )
+    _, route_config = _active_route(lanes, deployment)
+    route_available = bool(route_config and _probe_lane(route_config)[0])
+    return {
+        "live_available": route_available,
+        "matched_lanes_available": matched_available,
+        "matched_identity": matched_identity,
+        "matched_status": matched_reason,
+        "audit_available": True,
+        "mode": "live" if route_config else "recorded",
+        "deployment": deployment.snapshot(),
+        "lanes": {
+            name: {
+                "backend": row["expected_backend"],
+                "core_group": row["core_group"],
+                "verified": lane_status[name][0],
+                "status": lane_status[name][1],
+                "observed_control": lane_status[name][2]
+                .get("optimization_control", {})
+                .get("mlas.disable_kleidiai"),
+            }
+            for name, row in lanes.items()
+        },
+    }
+
+
+def _stream_audit(handler: Any, deployment: DeploymentState) -> None:
+    handler.send_response(HTTPStatus.OK.value)
+    handler.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
+    handler.send_header("Cache-Control", "no-store")
+    handler.send_header("Connection", "close")
+    handler.end_headers()
+    handler.close_connection = True
+
+    def emit(event_type: str, payload: dict[str, Any]) -> None:
+        line = json.dumps(
+            {"type": event_type, **payload}, separators=(",", ":")
+        ).encode("utf-8") + b"\n"
+        handler.wfile.write(line)
+        handler.wfile.flush()
+
+    started = time.perf_counter()
+    try:
+        payload = build_surgedesk_payload(
+            ROOT,
+            on_audit_stage=lambda stage, detail: emit(
+                "stage",
+                {
+                    "stage": stage,
+                    "detail": detail,
+                    "elapsed_ms": (time.perf_counter() - started) * 1000,
+                },
+            ),
+        )
+        receipt = _audit_receipt(payload, (time.perf_counter() - started) * 1000)
+        deployment.record_audit(receipt)
+        emit("result", {"receipt": receipt})
+    except Exception as exc:
+        emit("error", {"error": str(exc)})
+
+
 def handler_for(
     *,
     baseline_endpoint: str | None = None,
@@ -520,12 +761,6 @@ def handler_for(
         )
     )
 
-    def active_route() -> tuple[str | None, dict[str, Any] | None]:
-        lane = deployment.snapshot()["active_lane"]
-        if lane in lanes:
-            return lane, lanes[str(lane)]
-        return None, None
-
     class Handler(SimpleHTTPRequestHandler):
         def __init__(self, *args: object, **kwargs: object) -> None:
             super().__init__(*args, directory=str(ROOT / "surgedesk"), **kwargs)
@@ -562,40 +797,7 @@ def handler_for(
             self.wfile.write(body)
 
         def _audit_stream(self) -> None:
-            self.send_response(HTTPStatus.OK.value)
-            self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
-            self.send_header("Cache-Control", "no-store")
-            self.send_header("Connection", "close")
-            self.end_headers()
-            self.close_connection = True
-
-            def emit(event_type: str, payload: dict[str, Any]) -> None:
-                line = json.dumps(
-                    {"type": event_type, **payload}, separators=(",", ":")
-                ).encode("utf-8") + b"\n"
-                self.wfile.write(line)
-                self.wfile.flush()
-
-            started = time.perf_counter()
-            try:
-                payload = build_surgedesk_payload(
-                    ROOT,
-                    on_audit_stage=lambda stage, detail: emit(
-                        "stage",
-                        {
-                            "stage": stage,
-                            "detail": detail,
-                            "elapsed_ms": (time.perf_counter() - started) * 1000,
-                        },
-                    ),
-                )
-                receipt = _audit_receipt(
-                    payload, (time.perf_counter() - started) * 1000
-                )
-                deployment.record_audit(receipt)
-                emit("result", {"receipt": receipt})
-            except Exception as exc:
-                emit("error", {"error": str(exc)})
+            _stream_audit(self, deployment)
 
         def _body(self) -> dict[str, Any]:
             length = int(self.headers.get("Content-Length", "0"))
@@ -615,38 +817,7 @@ def handler_for(
 
         def do_GET(self) -> None:
             if self.path == "/surgedesk/live-status.json":
-                lane_status = {
-                    name: _probe_lane(row) for name, row in lanes.items()
-                }
-                matched_available, matched_reason, matched_identity = _match_lane_identity(
-                    lane_status["baseline"], lane_status["optimized"]
-                )
-                _, route_config = active_route()
-                route_available = bool(route_config and _probe_lane(route_config)[0])
-                self._json(
-                    HTTPStatus.OK,
-                    {
-                        "live_available": route_available,
-                        "matched_lanes_available": matched_available,
-                        "matched_identity": matched_identity,
-                        "matched_status": matched_reason,
-                        "audit_available": True,
-                        "mode": "live" if route_config else "recorded",
-                        "deployment": deployment.snapshot(),
-                        "lanes": {
-                            name: {
-                                "backend": row["expected_backend"],
-                                "core_group": row["core_group"],
-                                "verified": lane_status[name][0],
-                                "status": lane_status[name][1],
-                                "observed_control": lane_status[name][2]
-                                .get("optimization_control", {})
-                                .get("mlas.disable_kleidiai"),
-                            }
-                            for name, row in lanes.items()
-                        },
-                    },
-                )
+                self._json(HTTPStatus.OK, _live_status_payload(lanes, deployment))
                 return
             if self.path == "/":
                 self.send_response(HTTPStatus.FOUND.value)
@@ -664,162 +835,21 @@ def handler_for(
                     self._audit_stream()
                     return
                 if self.path == "/api/audit":
-                    started = time.perf_counter()
-                    payload = build_surgedesk_payload(ROOT)
-                    receipt = _audit_receipt(
-                        payload, (time.perf_counter() - started) * 1000
-                    )
-                    deployment.record_audit(receipt)
-                    self._json(
-                        HTTPStatus.OK,
-                        receipt,
-                    )
+                    _post_audit(self, deployment)
                     return
                 if self.path == "/api/adoption":
                     self._json(HTTPStatus.OK, _adoption_receipt())
                     return
                 if self.path == "/api/promote":
-                    lane_probes = {
-                        name: _probe_lane(config) for name, config in lanes.items()
-                    }
-                    matched, reason, live_identity = _match_lane_identity(
-                        lane_probes["baseline"], lane_probes["optimized"]
-                    )
-                    if not matched:
-                        self._json(
-                            HTTPStatus.CONFLICT,
-                            {"error": "matched_runtime_identity_changed", "detail": reason},
-                        )
-                        return
-                    promoted = deployment.promote(live_identity)
-                    self._json(
-                        HTTPStatus.OK,
-                        {
-                            **promoted,
-                            "backend": lanes["optimized"]["expected_backend"],
-                            "core_group": lanes["optimized"]["core_group"],
-                            "runtime_identity": live_identity,
-                        },
-                    )
+                    _post_promote(self, lanes, deployment)
                     return
                 if self.path == "/api/shadow-compare":
-                    if deployment.snapshot()["active_lane"] != "baseline":
-                        self._json(
-                            HTTPStatus.CONFLICT,
-                            {"error": "shadow comparison is only available before promotion"},
-                        )
-                        return
-                    lane_probes = {
-                        name: _probe_lane(config) for name, config in lanes.items()
-                    }
-                    matched, reason, _ = _match_lane_identity(
-                        lane_probes["baseline"], lane_probes["optimized"]
-                    )
-                    if not matched:
-                        self._json(
-                            HTTPStatus.CONFLICT,
-                            {"error": "matched_runtime_identity_changed", "detail": reason},
-                        )
-                        return
-                    payload = self._body()
-                    text = self._text(payload)
-                    results: dict[str, Any] = {}
-                    for lane_name in ("baseline", "optimized"):
-                        config = lanes[lane_name]
-                        upstream, elapsed_ms, _ = _upstream_request(
-                            str(config["endpoint"]),
-                            text=text,
-                            categories=categories,
-                            request_id=f"shadow-{lane_name}-{uuid.uuid4().hex[:10]}",
-                            expected_backend=str(config["expected_backend"]),
-                        )
-                        if not _response_identity_matches(
-                            upstream, lane_probes[lane_name][2]
-                        ):
-                            self._json(
-                                HTTPStatus.CONFLICT,
-                                {"error": f"{lane_name}_inference_identity_mismatch"},
-                            )
-                            return
-                        result = compose_live_route(text, upstream, guard, categories)
-                        result.update({
-                            "gateway_latency_ms": elapsed_ms,
-                            "deployment_lane": lane_name,
-                            "observed_at": datetime.now(UTC).isoformat(),
-                            "runtime_identity": upstream["runtime_identity"],
-                            "release_audit_id": None,
-                            "shadow_only": lane_name == "optimized",
-                        })
-                        results[lane_name] = result
-                    baseline_ms = results["baseline"]["gateway_latency_ms"]
-                    optimized_ms = results["optimized"]["gateway_latency_ms"]
-                    self._json(
-                        HTTPStatus.OK,
-                        {
-                            "comparison_id": f"compare-{uuid.uuid4().hex[:12]}",
-                            "execution": "sequential_shadow",
-                            "serving_lane": "baseline",
-                            "capacity_evidence": False,
-                            "same_queue": (
-                                results["baseline"]["queue"]
-                                == results["optimized"]["queue"]
-                            ),
-                            "observed_latency_ratio": (
-                                baseline_ms / optimized_ms if optimized_ms > 0 else None
-                            ),
-                            "lanes": results,
-                        },
+                    _post_shadow_compare(
+                        self, lanes, deployment, guard, categories
                     )
                     return
                 if self.path == "/api/route":
-                    active_lane, route_config = active_route()
-                    if not route_config:
-                        self._json(
-                            HTTPStatus.SERVICE_UNAVAILABLE,
-                            {"error": "live_endpoint_not_configured"},
-                        )
-                        return
-                    route_probe = _probe_lane(route_config)
-                    if not route_probe[0]:
-                        deployment.revoke_optimized_route()
-                        self._json(
-                            HTTPStatus.CONFLICT,
-                            {"error": "route_runtime_identity_changed"},
-                        )
-                        return
-                    payload = self._body()
-                    text = self._text(payload)
-                    upstream, elapsed_ms, _ = _upstream_request(
-                        str(route_config["endpoint"]),
-                        text=text,
-                        categories=categories,
-                        request_id=f"surgedesk-{uuid.uuid4().hex[:12]}",
-                        expected_backend=str(route_config["expected_backend"]),
-                    )
-                    if not _response_identity_matches(upstream, route_probe[2]):
-                        deployment.revoke_optimized_route()
-                        self._json(
-                            HTTPStatus.CONFLICT,
-                            {"error": "route_inference_identity_mismatch"},
-                        )
-                        return
-                    try:
-                        release_audit_id = deployment.authorize_active_route(
-                            str(active_lane), upstream["runtime_identity"]
-                        )
-                    except ValueError as exc:
-                        self._json(
-                            HTTPStatus.CONFLICT,
-                            {"error": "active_release_identity_drift", "detail": str(exc)},
-                        )
-                        return
-                    result = compose_live_route(text, upstream, guard, categories)
-                    result["gateway_latency_ms"] = elapsed_ms
-                    result["deployment_lane"] = active_lane
-                    result["observed_at"] = datetime.now(UTC).isoformat()
-                    result["runtime_identity"] = upstream["runtime_identity"]
-                    result["release_audit_id"] = release_audit_id
-                    self._json(HTTPStatus.OK, result)
+                    _post_route(self, lanes, deployment, guard, categories)
                     return
                 self._json(HTTPStatus.NOT_FOUND, {"error": "not_found"})
             except KeyError as exc:
