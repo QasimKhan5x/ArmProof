@@ -92,6 +92,8 @@ class DeploymentState:
                         "mlas.disable_kleidiai": live_identity.get("optimized_control")
                     },
                 },
+                "memory": live_identity.get("memory"),
+                "runtime_tuning": live_identity.get("runtime_tuning"),
             }
             required = {
                 key: expected[key]
@@ -101,6 +103,7 @@ class DeploymentState:
                     "runtime", "runtime_version",
                     "architecture", "threads", "cpu_affinity",
                     "instance_type", "instance_identity_source", "controls",
+                    "memory", "runtime_tuning",
                 )
             }
             if compared != required:
@@ -143,6 +146,10 @@ class DeploymentState:
             if (
                 compared != required
                 or observed_identity.get("optimization_control") != expected_control
+                or observed_identity.get("memory_configuration")
+                != expected["memory"]["optimized"]
+                or observed_identity.get("runtime_tuning")
+                != expected["runtime_tuning"]["optimized"]
             ):
                 self._revoke_optimized_route_unlocked()
                 raise ValueError("optimized route drifted from audited release")
@@ -214,6 +221,8 @@ def _probe_lane(config: dict[str, Any]) -> tuple[bool, str, dict[str, Any]]:
             or payload.get("backend") != config["expected_backend"]
             or payload.get("cpu_affinity") != expected_cores
             or observed_control != config["expected_control"]
+            or payload.get("memory_configuration") != config["expected_memory"]
+            or payload.get("runtime_tuning") != config["expected_runtime_tuning"]
             or payload.get("runtime") != "onnxruntime-genai"
             or payload.get("architecture") not in {"aarch64", "arm64"}
             or not isinstance(payload.get("runtime_version"), str)
@@ -280,6 +289,14 @@ def _match_lane_identity(
         "changed_control": "mlas.disable_kleidiai",
         "baseline_control": left["optimization_control"]["mlas.disable_kleidiai"],
         "optimized_control": right["optimization_control"]["mlas.disable_kleidiai"],
+        "memory": {
+            "baseline": left["memory_configuration"],
+            "optimized": right["memory_configuration"],
+        },
+        "runtime_tuning": {
+            "baseline": left["runtime_tuning"],
+            "optimized": right["runtime_tuning"],
+        },
     }
 
 
@@ -292,6 +309,8 @@ def _response_identity_matches(
         "runtime_artifact_ledger_sha256", "instance_type",
         "instance_identity_source", "runtime", "runtime_version", "threads",
         "architecture", "cpu_affinity", "optimization_control",
+        "memory_configuration",
+        "runtime_tuning",
     )
     return isinstance(response_identity, dict) and all(
         response_identity.get(field) == expected_health.get(field)
@@ -352,6 +371,10 @@ def _audit_receipt(payload: dict[str, Any], elapsed_ms: float) -> dict[str, Any]
             ],
             "scope_note": decision["performix"]["scope_note"],
             "pmu_capability_note": decision["performix"]["pmu_capability_note"],
+        },
+        "memory": {
+            **decision["runtime_memory"],
+            "release_conditions": decision["runtime_release_conditions"],
         },
         "supporting": {
             "direct_speedup_min": decision["direct_speedup_min"],
@@ -617,6 +640,12 @@ def _live_status_payload(
                 "observed_control": lane_status[name][2]
                 .get("optimization_control", {})
                 .get("mlas.disable_kleidiai"),
+                "observed_memory": lane_status[name][2].get(
+                    "memory_configuration"
+                ),
+                "observed_runtime_tuning": lane_status[name][2].get(
+                    "runtime_tuning"
+                ),
             }
             for name, row in lanes.items()
         },
@@ -678,6 +707,11 @@ def handler_for(
     categories = json.loads(
         (ROOT / "data/banking77/source/categories.json").read_text(encoding="utf-8")
     )
+    release_runtime = json.loads(
+        (ROOT / "examples/phi4-graviton/live-runtime.json").read_text(
+            encoding="utf-8"
+        )
+    )
     lanes = {
         "baseline": {
             "endpoint": baseline_endpoint,
@@ -685,6 +719,8 @@ def handler_for(
             "core_group": baseline_cores,
             "expected_cores": baseline_core_set,
             "expected_control": "1",
+            "expected_memory": release_runtime["memory"]["baseline"],
+            "expected_runtime_tuning": release_runtime["runtime_tuning"]["baseline"],
             "label": "KleidiAI disabled",
         },
         "optimized": {
@@ -693,6 +729,8 @@ def handler_for(
             "core_group": optimized_cores,
             "expected_cores": optimized_core_set,
             "expected_control": "0",
+            "expected_memory": release_runtime["memory"]["optimized"],
+            "expected_runtime_tuning": release_runtime["runtime_tuning"]["optimized"],
             "label": "KleidiAI enabled",
         },
     }

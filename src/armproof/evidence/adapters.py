@@ -34,6 +34,10 @@ from armproof.evidence.confirmed_audit import (
     validate_confirmed_contract_claims,
 )
 from armproof.evidence.raw_quality import verify_raw_quality_evidence
+from armproof.evidence.runtime_memory import (
+    derive_runtime_memory_audit,
+    verify_tuning_archive,
+)
 from armproof.policy.statistics import estimate_capacity_bracket
 from armproof.policy import decision_to_dict
 from armproof.profiling import parse_perf_attribution
@@ -898,9 +902,18 @@ class KleidiAIConfirmedAdapter:
         fields = {
             "adapter", "archive", "archive_sha256", "preregistration", "analysis_lock",
             "protocol_lock", "workload_manifest", "workload", "raw_quality",
-            "performix",
+            "performix", "memory_optimization",
         }
         _exact_config(config, fields, self.adapter_id)
+        memory_config = config["memory_optimization"]
+        memory_fields = {
+            "sustained_archive", "sustained_archive_sha256",
+            "isolation_archive", "isolation_archive_sha256",
+            "simplification_archive", "simplification_archive_sha256",
+            "previous_capacity_rps", "expected_output_digest",
+        }
+        if not isinstance(memory_config, Mapping) or set(memory_config) != memory_fields:
+            raise ValueError("confirmed adapter memory optimization config is invalid")
         raw_quality_config = config["raw_quality"]
         if not isinstance(raw_quality_config, Mapping) or set(raw_quality_config) != {
             "root", "checksums", "ledger_sha256", "dataset"
@@ -1067,11 +1080,6 @@ class KleidiAIConfirmedAdapter:
             performix_profile=performix_profile,
             on_stage=on_stage,
         )
-        if on_stage is not None:
-            on_stage("policy", {
-                "claims_evaluated": len(audit.decision.claims),
-                "passed": audit.decision.passed,
-            })
         performix_profile = {
             **performix_profile,
             "linux_perf_separate_kai_cycle_share": audit.enabled_kai_cycle_share,
@@ -1081,6 +1089,48 @@ class KleidiAIConfirmedAdapter:
             performix_profile, audit.comparison
         )
         _require_aws_graviton_binding(binding)
+
+        memory_archives = {
+            "sustained": verify_tuning_archive(
+                _path(base, memory_config["sustained_archive"], "memory.sustained_archive"),
+                expected_sha256=str(memory_config["sustained_archive_sha256"]),
+                expected_experiment_id="EXP-2026-015",
+            ),
+            "isolation": verify_tuning_archive(
+                _path(base, memory_config["isolation_archive"], "memory.isolation_archive"),
+                expected_sha256=str(memory_config["isolation_archive_sha256"]),
+                expected_experiment_id="EXP-2026-016",
+            ),
+            "simplification": verify_tuning_archive(
+                _path(
+                    base,
+                    memory_config["simplification_archive"],
+                    "memory.simplification_archive",
+                ),
+                expected_sha256=str(memory_config["simplification_archive_sha256"]),
+                expected_experiment_id="EXP-2026-017",
+            ),
+        }
+        memory_audit = derive_runtime_memory_audit(
+            memory_archives["sustained"],
+            memory_archives["isolation"],
+            memory_archives["simplification"],
+            previous_capacity_rps=float(memory_config["previous_capacity_rps"]),
+            expected_output_digest=str(memory_config["expected_output_digest"]),
+        )
+        if on_stage is not None:
+            on_stage("memory", {
+                "confirmation_windows": memory_audit.confirmation_windows,
+                "simplification_failures": memory_audit.simplification_failures,
+                "candidate_rps": memory_audit.candidate_rps,
+                "p95_reduction_percent": memory_audit.p95_reduction_percent,
+                "passed": memory_audit.passed,
+            })
+            on_stage("policy", {
+                "claims_evaluated": len(audit.decision.claims),
+                "runtime_release_conditions": 5,
+                "passed": audit.decision.passed and memory_audit.passed,
+            })
 
         trial_matrix = [
             {
@@ -1163,6 +1213,38 @@ class KleidiAIConfirmedAdapter:
                 ),
                 "linux_perf_lost_samples": audit.lost_perf_samples,
             },
+            "runtime_memory": {
+                "passed": memory_audit.passed,
+                "evidence_role": (
+                    "A separate whole-runtime optimization layered after the "
+                    "matched KleidiAI compute comparison."
+                ),
+                "sustained_experiment_id": memory_audit.sustained_experiment_id,
+                "isolation_experiment_id": memory_audit.isolation_experiment_id,
+                "simplification_experiment_id": memory_audit.simplification_experiment_id,
+                "candidate_rps": memory_audit.candidate_rps,
+                "previous_capacity_rps": memory_audit.previous_capacity_rps,
+                "capacity_gain_percent": memory_audit.capacity_gain_percent,
+                "baseline_p95_ms": list(memory_audit.baseline_p95_ms),
+                "optimized_p95_ms": list(memory_audit.optimized_p95_ms),
+                "baseline_median_p95_ms": memory_audit.baseline_median_p95_ms,
+                "optimized_median_p95_ms": memory_audit.optimized_median_p95_ms,
+                "p95_reduction_percent": memory_audit.p95_reduction_percent,
+                "confirmation_passes": memory_audit.confirmation_passes,
+                "confirmation_windows": memory_audit.confirmation_windows,
+                "simplification_failures": memory_audit.simplification_failures,
+                "simplification_windows": memory_audit.simplification_windows,
+                "simplification_p95_ms": list(memory_audit.simplification_p95_ms),
+                "simplification_median_p95_ms": (
+                    memory_audit.simplification_median_p95_ms
+                ),
+                "outputs_equivalent": True,
+                "output_digest": memory_audit.output_digest,
+                "recipe": dict(memory_audit.recipe),
+                "ablation_median_p95_ms": dict(memory_audit.ablation_median_p95_ms),
+                "internal_checksummed_files": memory_audit.internal_checksummed_files,
+                "archive_sha256": dict(memory_audit.archive_sha256),
+            },
             "decision": decision_to_dict(audit.decision),
         }
         return VerifiedEvidence(
@@ -1172,6 +1254,7 @@ class KleidiAIConfirmedAdapter:
                 checked=(
                     audit.internal_checksummed_files
                     + raw_quality.checksummed_files
+                    + memory_audit.internal_checksummed_files
                 ),
                 missing=(),
                 mismatched=(),

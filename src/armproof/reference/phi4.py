@@ -21,6 +21,11 @@ from armproof.artifacts import fingerprint_path
 
 CHAT = "<|user|>{}<|end|><|assistant|>"
 MAX_BODY_BYTES = 1024 * 1024
+RELEASED_RUNTIME_TUNING = {
+    "session.dynamic_block_base": "4",
+    "session.intra_op.spin_backoff_max": "8",
+    "session.intra_op.spin_duration_us": "1000",
+}
 
 
 class Backend(Protocol):
@@ -89,6 +94,25 @@ def _sha256_file(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _memory_runtime_identity(
+    *,
+    maps_path: Path = Path("/proc/self/maps"),
+    thp_path: Path = Path("/sys/kernel/mm/transparent_hugepage/enabled"),
+) -> dict[str, str]:
+    """Observe the allocator and host THP policy used by this process."""
+
+    maps = maps_path.read_text(encoding="utf-8") if maps_path.is_file() else ""
+    allocator = "mimalloc" if "libmimalloc" in maps else "system"
+    thp = "unavailable"
+    if thp_path.is_file():
+        choices = thp_path.read_text(encoding="utf-8").strip().split()
+        selected = [choice[1:-1] for choice in choices if choice.startswith("[") and choice.endswith("]")]
+        if len(selected) != 1:
+            raise ValueError("transparent huge-page policy is malformed")
+        thp = selected[0]
+    return {"allocator": allocator, "transparent_huge_pages": thp}
 
 
 def _aws_instance_type(timeout: float = 2.0) -> str:
@@ -181,14 +205,21 @@ def _model_item_fingerprint(path: Path) -> dict[str, Any]:
     }
 
 
-def _ort_model_identity(model_path: Path) -> tuple[str, str, str, int]:
-    """Identify matched variants while excluding only the declared control."""
+def _ort_model_identity(
+    model_path: Path,
+) -> tuple[str, str, str, int, dict[str, str]]:
+    """Identify one source model while reporting runtime-only controls separately."""
     config_path = model_path / "genai_config.json"
     config = json.loads(config_path.read_text(encoding="utf-8"))
     normalized = json.loads(json.dumps(config))
     options = normalized["model"]["decoder"]["session_options"]
     control = str(options.pop("mlas.disable_kleidiai"))
     threads = int(options["intra_op_num_threads"])
+    runtime_tuning = {
+        key: str(options.pop(key))
+        for key in RELEASED_RUNTIME_TUNING
+        if key in options
+    }
     source_identity = json.loads(
         (model_path / "armproof_source_identity.json").read_text(encoding="utf-8")
     )
@@ -220,7 +251,13 @@ def _ort_model_identity(model_path: Path) -> tuple[str, str, str, int]:
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
-    return hashlib.sha256(payload).hexdigest(), source_artifact_sha256, control, threads
+    return (
+        hashlib.sha256(payload).hexdigest(),
+        source_artifact_sha256,
+        control,
+        threads,
+        runtime_tuning,
+    )
 
 
 class OrtInt4Backend:
@@ -258,7 +295,13 @@ class OrtInt4Backend:
                     f"{observed_instance_type} != {expected_instance_type}"
                 )
 
-        model_identity, source_artifact_sha256, control, threads = _ort_model_identity(model_path)
+        (
+            model_identity,
+            source_artifact_sha256,
+            control,
+            threads,
+            runtime_tuning,
+        ) = _ort_model_identity(model_path)
         import onnxruntime_genai as og
 
         self.og = og
@@ -271,7 +314,9 @@ class OrtInt4Backend:
             "model_identity": model_identity,
             "source_artifact_sha256": source_artifact_sha256,
             "optimization_control": {"mlas.disable_kleidiai": control},
+            "runtime_tuning": runtime_tuning,
             "threads": threads,
+            "memory_configuration": _memory_runtime_identity(),
         }
         if runtime_lock_sha256 is not None:
             self.health_metadata["runtime_lock_sha256"] = runtime_lock_sha256

@@ -28,8 +28,13 @@ re-derives ten fixed-rate windows, verifies 1,540 original model outputs,
 checks the frozen workload and treatment identities, and reads native Performix
 Code Hotspots exports. Capacity rates and profiler thresholds come from the
 committed plans; the release config cannot replace them after collection.
-EXP-2026-012 is retained as a rejected predecessor because it omitted the
-required source-artifact hash from successful response identities.
+The adapter also verifies three independent runtime-treatment archives: the
+paired KleidiAI-only versus full-recipe sustained test, the short
+mechanism-isolation screen, and the sustained rejection of a simplified
+candidate. It releases only the complete thread-scheduling, allocator, and THP
+recipe that passed every long window, with unchanged outputs and restored host
+page policy. These conditions are a separate whole-runtime layer and do not
+alter the causal scope of the KleidiAI-only comparison.
 
 ### `http-slo-v1`
 

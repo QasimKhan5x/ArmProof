@@ -326,6 +326,7 @@ def _proof_payload(
     reproduction_experiment: dict[str, Any],
     performix: dict[str, Any],
 ) -> dict[str, Any]:
+    runtime_memory = release_summary["runtime_memory"]
     return {
         "decision": "PASS" if decision["passed"] else "BLOCK",
         "decision_source": "derived_from_preregistered_confirmation",
@@ -365,6 +366,46 @@ def _proof_payload(
         "direct_speedup_min": min(deployment["direct_shape_gains"]),
         "direct_speedup_max": max(deployment["direct_shape_gains"]),
         "direct_shape_gains": deployment["direct_shape_gains"],
+        "runtime_memory": runtime_memory,
+        "runtime_release_conditions": [
+            {
+                "id": "paired-sustained-effect",
+                "label": "Full recipe passed the sustained comparison",
+                "status": "pass",
+                "detail": (
+                    f"KleidiAI-only passed 0/{runtime_memory['confirmation_windows']}; "
+                    f"the full recipe passed {runtime_memory['confirmation_passes']}/"
+                    f"{runtime_memory['confirmation_windows']} at the same rate"
+                ),
+            },
+            {
+                "id": "short-ablation",
+                "label": "Four runtime treatments were screened",
+                "status": "pass",
+                "detail": "Two fixed-rate windows each separated THP, thread tuning, and mimalloc",
+            },
+            {
+                "id": "simplification-rejected",
+                "label": "The tempting simplification was rejected",
+                "status": "pass",
+                "detail": (
+                    f"mimalloc plus THP missed the SLO in "
+                    f"{runtime_memory['simplification_failures']}/"
+                    f"{runtime_memory['simplification_windows']} long windows"
+                ),
+            },
+            {
+                "id": "outputs-equivalent",
+                "label": "Outputs remained identical",
+                "status": "pass",
+                "digest": runtime_memory["output_digest"],
+            },
+            {
+                "id": "host-restored",
+                "label": "Host memory policy restored after collection",
+                "status": "pass",
+            },
+        ],
         "reproduction_max_relative_difference_percent": (
             observed_reproduction_difference * 100
         ),
@@ -437,6 +478,7 @@ def _provenance_payload(
     release_url: str,
     release_tag: str,
 ) -> dict[str, Any]:
+    runtime_memory = release_summary["runtime_memory"]
     return {
         "experiment_id": release_summary["experiment_id"],
         "release_experiment_id": release_summary["experiment_id"],
@@ -496,6 +538,11 @@ def _provenance_payload(
             "performix_archive_sha256": performix["archive_sha256"],
             "performix_internal_checksums_verified": True,
             "performix_checksummed_files": performix["internal_checksums"]["checked"],
+            "runtime_memory_archives_verified": True,
+            "runtime_memory_checksummed_files": runtime_memory[
+                "internal_checksummed_files"
+            ],
+            "runtime_memory_archive_sha256": runtime_memory["archive_sha256"],
             "comparison": "matched_control",
             "only_changed_control": release_summary["only_changed_control"],
         },
@@ -504,7 +551,10 @@ def _provenance_payload(
         "model": model_name,
         "model_id": model_id,
         "runtime": runtime_name,
-        "optimization": "KleidiAI disabled -> enabled",
+        "optimization": (
+            "BF16 to INT4, KleidiAI I8MM compute, then ONNX Runtime thread "
+            "scheduling, mimalloc, and transparent huge pages"
+        ),
         "machine": runtime_lock["hardware"],
         "report_path": "../report/index.html",
         "release_url": release_url,
@@ -540,6 +590,25 @@ def _runtime_evidence(
         != release.comparison.treatment.artifact_sha256
     ):
         raise ValueError("live runtime model identity is not bound to the release")
+    memory_recipe = release_summary["runtime_memory"]["recipe"]
+    expected_live_memory = {
+        "baseline": {
+            "allocator": "system",
+            "transparent_huge_pages": memory_recipe["transparent_huge_pages"],
+        },
+        "optimized": {
+            "allocator": memory_recipe["allocator"],
+            "transparent_huge_pages": memory_recipe["transparent_huge_pages"],
+        },
+    }
+    if live_runtime.get("memory") != expected_live_memory:
+        raise ValueError("live runtime memory configuration differs from the accepted recipe")
+    expected_runtime_tuning = {
+        "baseline": {},
+        "optimized": memory_recipe["onnxruntime_thread_overrides"],
+    }
+    if live_runtime.get("runtime_tuning") != expected_runtime_tuning:
+        raise ValueError("live thread tuning differs from the accepted recipe")
     live_runtime = {
         **live_runtime,
         "model_identity": release_summary["model_identity"],
@@ -702,6 +771,78 @@ def build_surgedesk_payload(
             reproduction_experiment=reproduction_experiment,
             performix=performix,
         ),
+        "optimization_journey": {
+            "final_recipe": release_summary["runtime_memory"]["recipe"],
+            "stages": [
+                {
+                    "id": "model",
+                    "sequence": 1,
+                    "label": "Fit the model to CPU serving",
+                    "change": "Move the deployment from BF16 to CPU INT4",
+                    "reason": "Reduce every worker's model and memory footprint.",
+                    "outcome": {
+                        "artifact_reduction_percent": deployment[
+                            "disk_reduction_percent"
+                        ],
+                        "peak_pss_reduction_percent": deployment[
+                            "peak_pss_reduction_percent"
+                        ],
+                    },
+                    "evidence": "checksum-bound model and deployment measurements",
+                },
+                {
+                    "id": "compute",
+                    "sequence": 2,
+                    "label": "Move INT4 compute onto Arm kernels",
+                    "change": "KleidiAI I8MM path enabled",
+                    "reason": "Use Neoverse V2 matrix instructions for the hot path.",
+                    "outcome": {
+                        "minimum_capacity_ratio": release_summary[
+                            "minimum_capacity_ratio"
+                        ],
+                        "performix_kai_sample_share_percent": (
+                            release_summary["arm_attribution"][
+                                "performix_enabled_kai_sample_share"
+                            ]
+                            * 100
+                        ),
+                    },
+                    "evidence": "matched control, sustained load, Performix and Linux perf",
+                },
+                {
+                    "id": "memory",
+                    "sequence": 3,
+                    "label": "Remove the next runtime limit",
+                    "change": "Tune scheduling, allocation, and huge pages",
+                    "reason": (
+                        "Short tests exposed promising memory treatments, then a "
+                        "sustained rejection showed that the thread settings also "
+                        "had to remain in the released recipe."
+                    ),
+                    "outcome": {
+                        "final_capacity_rps": release_summary["runtime_memory"][
+                            "candidate_rps"
+                        ],
+                        "additional_capacity_percent": release_summary[
+                            "runtime_memory"
+                        ]["capacity_gain_percent"],
+                        "p95_reduction_percent": release_summary[
+                            "runtime_memory"
+                        ]["p95_reduction_percent"],
+                        "simplification_failures": release_summary[
+                            "runtime_memory"
+                        ]["simplification_failures"],
+                        "simplification_windows": release_summary[
+                            "runtime_memory"
+                        ]["simplification_windows"],
+                    },
+                    "evidence": (
+                        "four-way short ablation, paired sustained comparison, and "
+                        "five-window simplification challenge"
+                    ),
+                },
+            ],
+        },
         "provenance": _provenance_payload(
             root=root,
             reference_config=reference_config,

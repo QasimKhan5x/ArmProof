@@ -40,6 +40,17 @@ supports KleidiAI-attributable performance claims.
 For each INT4 treatment, measure the highest confirmed tested accepted throughput under
 the same p95 SLO. Use short, long and mixed prompt traffic.
 
+### Runtime Memory Follow-Up
+
+Keep the accepted KleidiAI treatment active and test runtime-memory changes at
+one fixed stress rate. First isolate transparent huge pages, allocator preload,
+and any runtime thread overrides. Challenge a simpler candidate in at least five
+sustained windows; release it only if every long window passes, otherwise retain
+the fully sustained recipe. Preserve output digests and restore the host page
+policy after collection. This comparison may
+support a Graviton whole-runtime result; it must not be relabeled as a
+KleidiAI-only or Arm-ISA-only effect.
+
 ## Measurement Rules
 
 - Synchronize process readiness before warm-up.
@@ -53,6 +64,8 @@ the same p95 SLO. Use short, long and mixed prompt traffic.
   treatments with identical recipes, workload, duration and target. Only the
   documented KleidiAI control may differ.
 - Record throttling, interruption, timeout and partial-run status.
+- Record the allocator observed in `/proc/self/maps` and selected transparent
+  huge-page policy before, during, and after runtime-memory treatments.
 - Never drop a sample solely because it is unfavorable.
 
 ## Quality

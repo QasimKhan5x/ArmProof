@@ -9,7 +9,10 @@ MODELS="${4:-$HOME/armproof-models}"
 cd "$ROOT"
 test -f "$RUNTIME_BUNDLE"
 sudo apt-get update -qq
-sudo apt-get install -y -qq python3-venv curl
+sudo apt-get install -y -qq python3-venv curl libmimalloc-dev
+printf 'always\n' | sudo tee /sys/kernel/mm/transparent_hugepage/enabled >/dev/null
+grep -q '\[always\]' /sys/kernel/mm/transparent_hugepage/enabled
+ldconfig -p | grep -q 'libmimalloc\.so'
 python3.12 -m venv "$VENV"
 "$VENV/bin/pip" install -q --upgrade pip
 "$VENV/bin/pip" install -q -r ops/aws/cap-001/requirements.txt
@@ -26,14 +29,11 @@ tar -xzf "$RUNTIME_BUNDLE" -C "$HOME/runtime-checkpoints"
   --include 'cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/*' \
   --local-dir "$MODELS/onnx-repo"
 
-if [[ ! -e "$MODELS/variants" ]]; then
-  PYTHONPATH=src "$VENV/bin/python" scripts/prepare_phi4_variants.py \
-    --source "$MODELS/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4" \
-    --output-root "$MODELS/variants" \
-    --threads 16
-else
-  echo "Reusing existing variants after identity verification: $MODELS/variants"
-fi
+PYTHONPATH=src "$VENV/bin/python" scripts/prepare_phi4_variants.py \
+  --source "$MODELS/onnx-repo/cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4" \
+  --output-root "$MODELS/variants" \
+  --threads 16 \
+  --replace
 
 ARMPROOF_MODELS="$MODELS" PYTHONPATH=src "$VENV/bin/python" - <<'PY'
 import json
@@ -52,5 +52,9 @@ if disabled[1] != expected["source_artifact_sha256"]:
     raise SystemExit("downloaded model does not match the audited source artifact")
 if disabled[0] != release["model_identity"]:
     raise SystemExit("prepared model fingerprint does not match the accepted audit")
+if disabled[4] != expected["runtime_tuning"]["baseline"]:
+    raise SystemExit("baseline runtime tuning differs from the release recipe")
+if enabled[4] != expected["runtime_tuning"]["optimized"]:
+    raise SystemExit("optimized runtime tuning differs from the release recipe")
 print(f"READY model={disabled[0]} source={disabled[1]} threads={disabled[3]}")
 PY

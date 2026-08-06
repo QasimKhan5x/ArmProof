@@ -50,7 +50,7 @@ for (const viewport of [
     await expect(page.locator('#reproduction-note')).toBeHidden();
     await page.getByRole('tab', { name: 'Evidence & provenance' }).click();
     await expect(page.locator('#verification-detail')).toContainText('files verified');
-    await expect(page.locator('#verification-detail')).toContainText('capacity, raw quality, deployment measurements and native Arm Performix bundles');
+    await expect(page.locator('#verification-detail')).toContainText('capacity, raw quality, runtime experiments, deployment measurements and native Arm Performix bundles');
     await expect(page.locator('#verification-detail')).toContainText('Git object ab22cc0 contains the exact plan');
     await expect(page.locator('#verification-detail')).toContainText(
       'launch time recorded in experiment metadata',

@@ -222,7 +222,10 @@ class CiCommandTests(unittest.TestCase):
             receipt = json.loads(
                 (output / "verification.json").read_text(encoding="utf-8")
             )
-            self.assertEqual(receipt["checksums"]["checked"], 161)
+            self.assertEqual(
+                receipt["checksums"]["checked"],
+                161 + receipt["runtime_memory"]["internal_checksummed_files"],
+            )
             self.assertIsNone(receipt["reproduction_checksums"])
             self.assertEqual(receipt["comparison_source"], "derived_from_raw_evidence")
             self.assertTrue(receipt["performix"]["passed"])
@@ -233,6 +236,9 @@ class CiCommandTests(unittest.TestCase):
                 0.673518470835091,
             )
             self.assertGreater(receipt["performix"]["internal_checksums"]["checked"], 20)
+            self.assertTrue(receipt["runtime_memory"]["passed"])
+            self.assertEqual(receipt["runtime_memory"]["candidate_rps"], 0.62)
+            self.assertEqual(receipt["runtime_memory"]["confirmation_passes"], 5)
             publication = receipt["preregistration_publication"]
             self.assertEqual(publication["experiment_id"], "EXP-2026-014")
             self.assertTrue(publication["plan_embedded_in_measurement_archive"])

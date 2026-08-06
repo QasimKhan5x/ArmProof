@@ -19,7 +19,7 @@ native profiler results without an AWS dependency.
 
 ## Live Product Flow
 
-Connected mode uses two exact 16-thread Graviton4 services:
+Connected mode uses the standard and final 16-thread Graviton4 services:
 
 ```bash
 python3.12 scripts/serve_surgedesk.py --port 8765 \
@@ -35,7 +35,9 @@ The state transition is:
    candidate as a sequential shadow copy. The screen shows both fresh results
    without presenting one request as capacity proof.
 2. The operator chooses the final support queue from the serving result.
-3. ArmProof verifies the preregistered capacity, raw quality and Performix evidence.
+3. ArmProof verifies the preregistered capacity, raw quality, Performix, the
+   runtime-treatment screen, the sustained full recipe, and the failed
+   simplification.
 4. The gateway probes both services and compares them with the audited deployment.
 5. The route changes to the treatment only after the audit and deployment checks pass.
 6. A different free-form message runs through the treatment and records the audit ID.
@@ -59,9 +61,12 @@ launch time is experiment metadata, not independent AWS attestation:
 
 The proof view leads with:
 
+- the three-stage model, Arm-compute, and Graviton-runtime optimization journey;
 - Arm Performix `kai_*` function-sample shares for both treatments;
 - the observed Neoverse I8MM kernel family;
 - Linux perf cycle attribution as a separate measurement;
+- the short runtime-treatment screen, the paired sustained comparison, and why
+  a simpler candidate was rejected;
 - the release claims and thresholds; and
 - the GitHub Action and adapter path under expandable technical detail.
 
@@ -83,11 +88,16 @@ The two live lanes must expose:
 - ONNX Runtime GenAI at the pinned version;
 - Arm64 architecture;
 - 16 threads on the exact audited CPU set; and
-- opposite values for `mlas.disable_kleidiai`.
+- opposite values for `mlas.disable_kleidiai`;
+- the exact ONNX Runtime thread-scheduling controls on the released lane;
+- the system allocator on the standard lane and mimalloc on the released lane;
+  and
+- the selected transparent-huge-page policy required by the released recipe.
 
 Each inference response repeats the probed deployment data. Promotion compares
 the model fingerprint, source artifact, runtime lock, verified wheel ledger,
-IMDSv2 instance type, runtime, architecture, CPU placement and controls with the
+IMDSv2 instance type, runtime, architecture, CPU placement, Arm controls, thread
+tuning, and memory configuration with the
 saved-evidence validation. Every later optimized response is checked again. Drift blocks that
 response, invalidates the release and returns the gateway to the control lane.
 

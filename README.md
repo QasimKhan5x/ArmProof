@@ -28,7 +28,26 @@ python3.12 -m venv .venv
 Expected result: exit `0` with all 10 required claims approved from the
 checked-in request, quality, identity, and native Arm Performix evidence.
 
-## Measured Result
+## Measured Optimization
+
+SurgeDesk was optimized in three stages. Each stage has a different comparison,
+so the project does not attribute model compression or general runtime tuning to
+KleidiAI.
+
+| Stage | Technical change | Measured result |
+|---|---|---:|
+| Model footprint | Migrate Phi-4 Mini from BF16 to CPU INT4 | 35.92% smaller files; 55.34% lower peak PSS |
+| Arm compute | Enable ONNX Runtime's KleidiAI I8MM path on the same INT4 service | At least 2.0x sustained capacity; 67.35% of Performix function samples in `kai_*` |
+| Graviton runtime | Keep the I8MM path and tune ONNX Runtime thread scheduling, mimalloc, and transparent huge pages | 5/5 passes at 0.62 requests/s versus 0/5 for KleidiAI alone; 44.98% lower median p95 |
+
+The final stage raises the verified traffic floor from 0.56 to 0.62 requests per
+second, an additional 10.71%. More importantly, it shows how the released
+configuration was selected: a short screen favored the simpler mimalloc plus
+huge-page candidate, but that candidate failed all five long confirmation
+windows. ArmProof therefore releases the complete thread, allocator, and
+huge-page recipe that passed every sustained window.
+
+### Arm Compute Result
 
 The KleidiAI-optimized service handled **at least twice the sustained traffic**
 on the same 16-core `c8g.4xlarge`. A test window passes only when 95% of requests
@@ -59,7 +78,7 @@ Those observations selected the two final rates. EXP-2026-014 then tested only
 those committed rates and required every response to carry the complete model,
 runtime, Arm64, thread and treatment identity.
 
-For the release, ArmProof checks:
+For the compute release, ArmProof checks:
 
 - 2,100 raw request outcomes from the ten capacity windows;
 - 1,540 raw model outputs, 770 from each lane;
@@ -69,6 +88,12 @@ For the release, ArmProof checks:
   percentages and raw-repetition timing medians; and
 - Arm Performix profiles with zero KleidiAI functions in the control and at
   least 50% KleidiAI function samples in the optimized service.
+
+For the final runtime recipe, it additionally verifies 130 checksum-bound files
+across three Graviton experiments: the paired sustained comparison, a four-way
+short treatment screen, and the failed sustained simplification. It checks the
+rate, SLO, output digest, allocator, huge-page state, exact ONNX Runtime session
+options, and restoration of the host policy.
 
 An exploratory supporting test recalculates five raw repetitions for each of
 four fixed input shapes and found 1.72x to 2.59x faster direct inference. The
@@ -96,7 +121,10 @@ Phi-4 intent -> SurgeDesk procedure + queue guard -> human chooses final queue
 verify preregistered capacity + raw quality + native Performix evidence
         |
         v
-verify wheel ledger + AWS instance + model + Arm placement + treatment control
+verify sustained runtime recipe + reject the failed simplification
+        |
+        v
+verify wheels + AWS instance + model + Arm placement + deployed controls
         |
         v
 switch live traffic -> different request records optimized lane + audit ID
@@ -152,6 +180,7 @@ ArmProof provides:
 - versioned performance, quality and Arm-execution contracts;
 - a fixed-rate HTTP load generator;
 - hash-locked raw request and raw model-output verification;
+- a verifier for sustained runtime-treatment archives and failed candidates;
 - native Arm Performix Code Hotspots parsing;
 - model, runtime, workload and environment identity binding;
 - an offline report and machine-readable receipt;
@@ -202,10 +231,16 @@ Action checks the contract digest before reading evidence.
 - **Arm library:** KleidiAI v1.20 through ONNX Runtime
 - **Control:** `mlas.disable_kleidiai=1`
 - **Treatment:** `mlas.disable_kleidiai=0`
+- **Final runtime recipe:** KleidiAI enabled; ONNX Runtime dynamic block base
+  `4`, spin backoff `8`, spin duration `1000 us`; mimalloc; transparent huge
+  pages `always`
 - **Profiler:** Arm Performix 1.20 Code Hotspots, with Linux perf as a separate cycle view
 - **Workload:** frozen BANKING77 quality and mixed traffic inputs
 - **SLO:** p95 at or below 10 seconds, zero errors, at least 95% delivery
 
+The one-variable KleidiAI comparison establishes the Arm compute effect. The
+later runtime experiment deliberately begins with KleidiAI enabled and tunes
+the whole Graviton service; its result is not presented as an I8MM-only gain.
 The Performix release gate uses function samples in their native units. Linux
 perf cycle attribution is supporting evidence and is not numerically compared
 with the Performix percentage.

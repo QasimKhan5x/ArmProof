@@ -81,13 +81,16 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator("#experiment-results")).toBeHidden();
   await expect(page.locator("#optimization-summary")).toBeHidden();
   await page.getByRole("button", { name: "Recompute release decision" }).click();
-  await expect(page.locator("#audit-progress li")).toHaveCount(5);
+  await expect(page.locator("#audit-progress li")).toHaveCount(6);
   await expect(page.locator('#audit-progress li[data-stage="quality"]')).toContainText("Quality outputs checked");
   await expect(page.locator('#audit-progress li[data-stage="performix"]')).toContainText("Arm profiler evidence parsed");
   await expect(page.locator('#audit-progress li[data-stage="requests"]')).toContainText("10 500-second traffic windows");
-  await expect(page.locator("#audit-progress time")).toHaveCount(5);
+  await expect(page.locator('#audit-progress li[data-stage="memory"]')).toContainText("sustained treatment windows verified");
+  await expect(page.locator("#audit-progress time")).toHaveCount(6);
   await expect(page.locator("#audit-receipt")).toBeVisible();
-  await expect(page.locator("#opening-capacity")).toHaveText("≥2.0×");
+  await expect(page.locator("#opening-capacity")).toHaveText(
+    `≥${demoData.proof.runtime_memory.candidate_rps.toFixed(2)} r/s`,
+  );
   await expect(page.locator("#experiment-results")).toBeHidden();
   await expect(page.locator("#audit-request-result")).toContainText("2,100 capacity requests");
   await expect(page.locator("#audit-request-result")).toContainText("1,540 model outputs");
@@ -97,10 +100,10 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator("#result-treatment-outcomes")).toHaveText("5/5 long windows passed");
   await expect(page.locator("#result-quality-delta")).toContainText("86.75% queue accuracy");
   await expect(page.locator("#result-quality-scope")).toContainText("Fine-grained intent 46.49% (-0.39 pp vs standard");
-  await expect(page.locator("#rejected-run-id")).toHaveText("EXP-2026-012");
-  await expect(page.locator("#accepted-run-id")).toHaveText("EXP-2026-014");
-  await expect(page.locator(".rejected-receipt")).toContainText("source_artifact_sha256");
-  await expect(page.locator(".original-gate-disclosure")).not.toHaveAttribute("open", "");
+  await expect(page.locator("#optimization-stages > li")).toHaveCount(3);
+  await expect(page.locator("#journey-final-capacity")).toHaveText(
+    `≥${demoData.proof.runtime_memory.candidate_rps.toFixed(2)} requests/s`,
+  );
   await expect(page.locator(".experiment-method")).not.toHaveAttribute("open", "");
   await page.setViewportSize({ width: 1440, height: 900 });
   await mkdir("build/screenshots", { recursive: true });
@@ -125,7 +128,13 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await page.getByRole("button", { name: "Review and switch live traffic" }).click();
   await expect(page.locator("#optimization-summary")).toBeVisible();
   await expect(page.locator("#performix-proof")).toBeVisible();
-  await expect(page.locator("#summary-quality")).toHaveText("86.75%");
+  await expect(page.locator("#memory-proof")).toBeVisible();
+  await expect(page.locator("#summary-footprint")).toContainText("smaller");
+  await expect(page.locator("#summary-final-capacity")).toHaveText(
+    `≥${demoData.proof.runtime_memory.candidate_rps.toFixed(2)} r/s`,
+  );
+  await expect(page.locator("#memory-release-conditions li")).toHaveCount(5);
+  await expect(page.locator("#memory-release-conditions")).toContainText("simplification was rejected");
   await expect(page.locator("#performix-disabled-count")).toContainText("0 / 944,847");
   await expect(page.locator("#performix-sample-count")).toContainText("245,876 / 365,062");
   await page.getByRole("button", { name: "Switch live traffic to optimized service" }).click();
@@ -149,7 +158,7 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
     "My card is about to expire. How do I get a replacement?",
   );
   await page.getByRole("button", { name: "Run optimized live route" }).click();
-  await expect(page.locator("#inference-source")).toContainText("Optimized service · KleidiAI on");
+  await expect(page.locator("#inference-source")).toContainText("Optimized service · I8MM + tuned runtime");
   await expect(page.locator("#live-control")).toHaveText("KleidiAI on · raw flag 0");
   const secondRequestId = await page.locator("#live-request-id").textContent();
   expect(secondRequestId).not.toBe(firstRequestId);
@@ -172,10 +181,12 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   }
   await expect(page.locator("#live-cutover-summary")).toBeVisible();
   await expect(page.locator("#cutover-before-lane")).toContainText("KleidiAI off");
-  await expect(page.locator("#cutover-after-lane")).toContainText("KleidiAI on");
+  await expect(page.locator("#cutover-after-lane")).toContainText("I8MM + tuned runtime");
   await expect(page.locator("#cutover-before-request")).toContainText("Account security");
   await expect(page.locator("#cutover-after-request")).toContainText("Cards & payments");
-  await expect(page.locator("#cutover-capacity")).toContainText("≥2.0×");
+  await expect(page.locator("#cutover-capacity")).toContainText(
+    `≥${demoData.proof.runtime_memory.candidate_rps.toFixed(2)} requests/s`,
+  );
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.locator("#live-cutover-summary").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "build/screenshots/surgedesk-live-cutover.png" });

@@ -154,12 +154,56 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertIn("different denominator", performix["scope_note"])
         self.assertIn("neon_i8mm", performix["kernel_family"])
 
+    def test_runtime_memory_recipe_is_derived_and_release_gated(self) -> None:
+        memory = self.payload["proof"]["runtime_memory"]
+        self.assertTrue(memory["passed"])
+        self.assertEqual(memory["candidate_rps"], 0.62)
+        self.assertEqual(memory["previous_capacity_rps"], 0.56)
+        self.assertEqual(memory["confirmation_passes"], 5)
+        self.assertEqual(memory["confirmation_windows"], 5)
+        self.assertEqual(memory["simplification_failures"], 5)
+        self.assertEqual(memory["simplification_windows"], 5)
+        self.assertTrue(memory["outputs_equivalent"])
+        self.assertEqual(memory["recipe"]["allocator"], "mimalloc")
+        self.assertEqual(
+            memory["recipe"]["transparent_huge_pages"], "always"
+        )
+        self.assertEqual(
+            memory["recipe"]["onnxruntime_thread_overrides"],
+            {
+                "session.dynamic_block_base": "4",
+                "session.intra_op.spin_backoff_max": "8",
+                "session.intra_op.spin_duration_us": "1000",
+            },
+        )
+        self.assertEqual(
+            {row["id"] for row in self.payload["proof"]["runtime_release_conditions"]},
+            {
+                "paired-sustained-effect", "short-ablation",
+                "simplification-rejected", "outputs-equivalent", "host-restored",
+            },
+        )
+        self.assertEqual(
+            [row["id"] for row in self.payload["optimization_journey"]["stages"]],
+            ["model", "compute", "memory"],
+        )
+
     def test_live_release_identity_is_fully_bound_to_the_audit(self) -> None:
         identity = self.payload["proof"]["live_deployment_identity"]
         self.assertEqual(identity["model_identity"], "d86ae7ca1f12b2ae4abe70abb856cb9c688908477a7de653467623764ab5c687")
         self.assertEqual(identity["runtime_lock_sha256"], "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884")
         self.assertEqual(identity["instance_type"], "c8g.4xlarge")
         self.assertEqual(identity["cpu_affinity"], list(range(16)))
+        self.assertEqual(identity["memory"]["baseline"]["allocator"], "system")
+        self.assertEqual(identity["memory"]["optimized"]["allocator"], "mimalloc")
+        self.assertEqual(
+            identity["memory"]["optimized"]["transparent_huge_pages"], "always"
+        )
+        memory_recipe = self.payload["proof"]["runtime_memory"]["recipe"][
+            "onnxruntime_thread_overrides"
+        ]
+        self.assertEqual(identity["runtime_tuning"]["optimized"], memory_recipe)
+        self.assertTrue(memory_recipe)
 
     def test_demo_identifies_a_verified_matched_control_bundle(self) -> None:
         evidence = self.payload["provenance"]["evidence"]
@@ -177,6 +221,8 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertTrue(evidence["sustained_matched_control_verified"])
         self.assertTrue(evidence["performix_archive_verified"])
         self.assertTrue(evidence["performix_internal_checksums_verified"])
+        self.assertTrue(evidence["runtime_memory_archives_verified"])
+        self.assertGreater(evidence["runtime_memory_checksummed_files"], 100)
         self.assertEqual(evidence["performix_checksummed_files"], 40)
         self.assertEqual(
             evidence["total_checksummed_files"],
@@ -184,6 +230,7 @@ class SurgeDeskPayloadTests(unittest.TestCase):
             + evidence["sustained_checksummed_files"]
             + evidence["raw_quality_checksummed_files"]
             + evidence["performix_checksummed_files"]
+            + evidence["runtime_memory_checksummed_files"]
             + 4,
         )
         self.assertEqual(evidence["comparison"], "matched_control")

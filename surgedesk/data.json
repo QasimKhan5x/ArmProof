@@ -176,6 +176,59 @@
     },
     "slo_ms": 10000.0
   },
+  "optimization_journey": {
+    "final_recipe": {
+      "allocator": "mimalloc",
+      "arm_compute": "KleidiAI I8MM",
+      "onnxruntime_thread_overrides": {
+        "session.dynamic_block_base": "4",
+        "session.intra_op.spin_backoff_max": "8",
+        "session.intra_op.spin_duration_us": "1000"
+      },
+      "transparent_huge_pages": "always"
+    },
+    "stages": [
+      {
+        "change": "Move the deployment from BF16 to CPU INT4",
+        "evidence": "checksum-bound model and deployment measurements",
+        "id": "model",
+        "label": "Fit the model to CPU serving",
+        "outcome": {
+          "artifact_reduction_percent": 35.91724249132322,
+          "peak_pss_reduction_percent": 55.336785335288766
+        },
+        "reason": "Reduce every worker's model and memory footprint.",
+        "sequence": 1
+      },
+      {
+        "change": "KleidiAI I8MM path enabled",
+        "evidence": "matched control, sustained load, Performix and Linux perf",
+        "id": "compute",
+        "label": "Move INT4 compute onto Arm kernels",
+        "outcome": {
+          "minimum_capacity_ratio": 2.0,
+          "performix_kai_sample_share_percent": 67.3518470835091
+        },
+        "reason": "Use Neoverse V2 matrix instructions for the hot path.",
+        "sequence": 2
+      },
+      {
+        "change": "Tune scheduling, allocation, and huge pages",
+        "evidence": "four-way short ablation, paired sustained comparison, and five-window simplification challenge",
+        "id": "memory",
+        "label": "Remove the next runtime limit",
+        "outcome": {
+          "additional_capacity_percent": 10.714285714285698,
+          "final_capacity_rps": 0.62,
+          "p95_reduction_percent": 44.9779852025598,
+          "simplification_failures": 5,
+          "simplification_windows": 5
+        },
+        "reason": "Short tests exposed promising memory treatments, then a sustained rejection showed that the thread settings also had to remain in the released recipe.",
+        "sequence": 3
+      }
+    ]
+  },
   "product": {
     "demo_mode": "live_gateway_with_verified_release_evidence",
     "description": "Human-confirmed support triage on an Arm-optimized cloud AI service.",
@@ -321,10 +374,28 @@
       ],
       "instance_identity_source": "aws-imdsv2",
       "instance_type": "c8g.4xlarge",
+      "memory": {
+        "baseline": {
+          "allocator": "system",
+          "transparent_huge_pages": "always"
+        },
+        "optimized": {
+          "allocator": "mimalloc",
+          "transparent_huge_pages": "always"
+        }
+      },
       "model_identity": "d86ae7ca1f12b2ae4abe70abb856cb9c688908477a7de653467623764ab5c687",
       "runtime": "onnxruntime-genai",
       "runtime_artifact_ledger_sha256": "2ac3491c5ce6d6b1dc178f27568b1e6e66b9b76031bc488143e72d9e7488d8c7",
       "runtime_lock_sha256": "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884",
+      "runtime_tuning": {
+        "baseline": {},
+        "optimized": {
+          "session.dynamic_block_base": "4",
+          "session.intra_op.spin_backoff_max": "8",
+          "session.intra_op.spin_duration_us": "1000"
+        }
+      },
       "runtime_version": "0.15.0.dev0",
       "schema_version": "1.0.0",
       "source_artifact_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
@@ -353,6 +424,100 @@
     },
     "reproduction_experiment_id": "EXP-2026-005",
     "reproduction_max_relative_difference_percent": 0.0,
+    "runtime_memory": {
+      "ablation_median_p95_ms": {
+        "current": 5371.2520265,
+        "mimalloc-thp": 3058.4585425,
+        "thp-only": 4128.547281,
+        "thread-thp": 4257.1144285
+      },
+      "archive_sha256": {
+        "EXP-2026-015": "68ae8bb28e90eb9e6fb14fce83cc074f057783587ee19f8083e6963caa669a72",
+        "EXP-2026-016": "56179c8f535bdeea38a6de16e756c366fd89586614de24a72c352975637e8d57",
+        "EXP-2026-017": "19c55410275b75d23c5dfce15ed0d735e2e608ca1106a8146bce6bcb12364761"
+      },
+      "baseline_median_p95_ms": 14806.349951,
+      "baseline_p95_ms": [
+        15518.401933,
+        15416.908705,
+        14694.286548,
+        14806.349951,
+        14709.166596
+      ],
+      "candidate_rps": 0.62,
+      "capacity_gain_percent": 10.714285714285698,
+      "confirmation_passes": 5,
+      "confirmation_windows": 5,
+      "evidence_role": "A separate whole-runtime optimization layered after the matched KleidiAI compute comparison.",
+      "internal_checksummed_files": 130,
+      "isolation_experiment_id": "EXP-2026-016",
+      "optimized_median_p95_ms": 8146.752061,
+      "optimized_p95_ms": [
+        8214.897562,
+        7852.885417,
+        8146.752061,
+        8307.808137,
+        8100.180609
+      ],
+      "output_digest": "78b613260fabd3eefbfdbb030f8366ededfe3cd8d1003db85f70eeae5f48f684",
+      "outputs_equivalent": true,
+      "p95_reduction_percent": 44.9779852025598,
+      "passed": true,
+      "previous_capacity_rps": 0.56,
+      "recipe": {
+        "allocator": "mimalloc",
+        "arm_compute": "KleidiAI I8MM",
+        "onnxruntime_thread_overrides": {
+          "session.dynamic_block_base": "4",
+          "session.intra_op.spin_backoff_max": "8",
+          "session.intra_op.spin_duration_us": "1000"
+        },
+        "transparent_huge_pages": "always"
+      },
+      "simplification_experiment_id": "EXP-2026-017",
+      "simplification_failures": 5,
+      "simplification_median_p95_ms": 12287.705285,
+      "simplification_p95_ms": [
+        10269.281152,
+        12287.705285,
+        13417.520415,
+        14935.519564,
+        11402.800394
+      ],
+      "simplification_windows": 5,
+      "sustained_experiment_id": "EXP-2026-015"
+    },
+    "runtime_release_conditions": [
+      {
+        "detail": "KleidiAI-only passed 0/5; the full recipe passed 5/5 at the same rate",
+        "id": "paired-sustained-effect",
+        "label": "Full recipe passed the sustained comparison",
+        "status": "pass"
+      },
+      {
+        "detail": "Two fixed-rate windows each separated THP, thread tuning, and mimalloc",
+        "id": "short-ablation",
+        "label": "Four runtime treatments were screened",
+        "status": "pass"
+      },
+      {
+        "detail": "mimalloc plus THP missed the SLO in 5/5 long windows",
+        "id": "simplification-rejected",
+        "label": "The tempting simplification was rejected",
+        "status": "pass"
+      },
+      {
+        "digest": "78b613260fabd3eefbfdbb030f8366ededfe3cd8d1003db85f70eeae5f48f684",
+        "id": "outputs-equivalent",
+        "label": "Outputs remained identical",
+        "status": "pass"
+      },
+      {
+        "id": "host-restored",
+        "label": "Host memory policy restored after collection",
+        "status": "pass"
+      }
+    ],
     "threads": 16,
     "verified_claims": 10,
     "weighted_pss_reduction_percent": 59.66032309469201
@@ -393,6 +558,13 @@
       "raw_quality_outputs": 1540,
       "reproduction_checksum_verified": true,
       "reproduction_checksummed_files": 141,
+      "runtime_memory_archive_sha256": {
+        "EXP-2026-015": "68ae8bb28e90eb9e6fb14fce83cc074f057783587ee19f8083e6963caa669a72",
+        "EXP-2026-016": "56179c8f535bdeea38a6de16e756c366fd89586614de24a72c352975637e8d57",
+        "EXP-2026-017": "19c55410275b75d23c5dfce15ed0d735e2e608ca1106a8146bce6bcb12364761"
+      },
+      "runtime_memory_archives_verified": true,
+      "runtime_memory_checksummed_files": 130,
       "sustained_archive_sha256": "c4f94870eece68081c54411eedc24e17ae3b6d541afb94daee7ed86577a1bb06",
       "sustained_archive_verified": true,
       "sustained_checksummed_files": 50,
@@ -400,13 +572,13 @@
       "sustained_matched_control_verified": true,
       "sustained_raw_confirmation_files": 10,
       "sustained_raw_confirmation_samples": 2100,
-      "total_checksummed_files": 487
+      "total_checksummed_files": 617
     },
     "experiment_id": "EXP-2026-014",
     "machine": "AWS Graviton4 / c8g.4xlarge / 16 cores",
     "model": "Phi-4 Mini",
     "model_id": "microsoft/Phi-4-mini-instruct-onnx",
-    "optimization": "KleidiAI disabled -> enabled",
+    "optimization": "BF16 to INT4, KleidiAI I8MM compute, then ONNX Runtime thread scheduling, mimalloc, and transparent huge pages",
     "release_action": "QasimKhan5x/ArmProof@v1.0.0",
     "release_experiment_id": "EXP-2026-014",
     "release_history": {

@@ -25,6 +25,9 @@ implementation. It is a routing summary, not a substitute for raw evidence.
 | Arm attribution | enabled/disabled perf callchains | `kai_*` only when enabled |
 | Independent Arm Performix attribution | matched Code Hotspots, enabled versus disabled | 67.35% versus 0% measured `kai_*` function-sample share; Linux perf separately measures cycle attribution |
 | Sustained fixed-SLO capacity | KleidiAI enabled versus disabled, mixed traffic | at least 2.0x |
+| Graviton runtime sustained test | full thread+allocator+THP recipe versus KleidiAI-only at 0.62 requests/s | 5/5 passes versus 0/5; 44.98% lower median p95 |
+| Final verified traffic floor | full runtime recipe versus prior KleidiAI floor | 0.62 versus 0.56 requests/s; +10.71% |
+| Simplified runtime recipe | mimalloc+THP without thread overrides at 0.62 requests/s | rejected after 5/5 long-window failures |
 | Large-set quality | enabled versus disabled on 770 BANKING77 cases | -0.390 pp accuracy, -0.673 pp macro F1 |
 | Schema validity | both normalized treatments | 100% |
 | Clean reproduction | fresh `c8g.4xlarge` versus accepted result | 0% ratio difference in all mixes |
@@ -38,6 +41,12 @@ The queue guard is product-layer evidence, not an Arm speedup. It uses word
 unigrams/bigrams and multinomial Naive Bayes, trains on the remaining 30 test
 examples per upstream class (2,310 total) and evaluates on the frozen first 10
 per class used by ArmProof (770 total). The sets have no shared text.
+
+The full Graviton runtime recipe keeps KleidiAI enabled and adds three ONNX
+Runtime scheduling controls, mimalloc, and transparent huge pages. Its gain is
+reported as a whole-runtime result on Graviton4, not as an I8MM-only effect.
+The two-window-per-candidate screen in EXP-2026-016 is diagnostic evidence; the
+long EXP-2026-015 and EXP-2026-017 outcomes determine what can be released.
 
 ## Historical Qualification
 
@@ -72,6 +81,8 @@ are under `ops/evidence/EXP-2026-014/` and `ops/evidence/EXP-2026-012/`.
 The immutable native Arm Performix exports and 40-entry guest ledger are under
 `ops/evidence/EXP-2026-013/`. The reference `armproof ci` command verifies and
 re-derives them; it does not trust the checked-in normalized JSON.
+The runtime-treatment archives are under `ops/evidence/EXP-2026-015/`,
+`ops/evidence/EXP-2026-016/`, and `ops/evidence/EXP-2026-017/`.
 
 ## Not Yet Established
 

@@ -44,6 +44,11 @@ def verify_live_identities(
             raise ValueError("endpoint health document is not ready")
         payloads.append(payload)
     baseline, optimized = payloads
+    expected_runtime = json.loads(
+        (ROOT / "examples/phi4-graviton/live-runtime.json").read_text(
+            encoding="utf-8"
+        )
+    )
     matched = (
         "model_identity", "source_artifact_sha256", "runtime_lock_sha256",
         "runtime_artifact_ledger_sha256", "instance_type",
@@ -59,6 +64,20 @@ def verify_live_identities(
         or optimized.get("optimization_control", {}).get("mlas.disable_kleidiai") != "0"
     ):
         raise ValueError("endpoint KleidiAI controls do not form the matched pair")
+    if (
+        baseline.get("memory_configuration")
+        != expected_runtime["memory"]["baseline"]
+        or optimized.get("memory_configuration")
+        != expected_runtime["memory"]["optimized"]
+    ):
+        raise ValueError("endpoint memory configuration differs from the release recipe")
+    if (
+        baseline.get("runtime_tuning")
+        != expected_runtime["runtime_tuning"]["baseline"]
+        or optimized.get("runtime_tuning")
+        != expected_runtime["runtime_tuning"]["optimized"]
+    ):
+        raise ValueError("endpoint thread tuning differs from the release recipe")
     return {
         field: baseline[field]
         for field in matched
@@ -66,7 +85,15 @@ def verify_live_identities(
         "controls": {
             "baseline": baseline["optimization_control"],
             "optimized": optimized["optimization_control"],
-        }
+        },
+        "memory": {
+            "baseline": baseline["memory_configuration"],
+            "optimized": optimized["memory_configuration"],
+        },
+        "runtime_tuning": {
+            "baseline": baseline["runtime_tuning"],
+            "optimized": optimized["runtime_tuning"],
+        },
     }
 
 
@@ -173,6 +200,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "runtime_artifact_ledger_sha256", "instance_type",
             "instance_identity_source", "runtime", "runtime_version", "threads",
             "architecture", "cpu_affinity", "controls",
+            "memory",
+            "runtime_tuning",
         }
         if any(identity.get(field) != expected.get(field) for field in comparable_fields):
             raise ValueError("live endpoint identity differs from the accepted audit")

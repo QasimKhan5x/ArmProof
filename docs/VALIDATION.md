@@ -12,12 +12,12 @@ reusable Arm optimization release gate.
 2. Inspect one clearly labeled stored BANKING77 model response, choose the final
    support queue and route the ticket.
 3. Open **Release evidence** and click **Open checked-in evidence**. The page shows
-   the two rates chosen before the final test, five outcomes per service and
-   the `0.56 / 0.28 = at least 2.0x` lower bound. The optimized rate is 2,016
-   offered messages per hour on the same server.
+   the three-stage journey: BF16-to-INT4 footprint, the matched KleidiAI
+   capacity result, and the fixed-rate memory ablation plus sustained final
+   recipe.
 4. Open **Traffic switch** to inspect the sustainable-capacity result, Arm Performix
-   profile and identity-bound live traffic control. Expand technical details
-   for the exploratory fixed-shape result, quality limits and GitHub Action.
+   profile, memory release conditions, and identity-bound live traffic control.
+   Expand technical details for quality limits and the GitHub Action.
 
 The public page uses checked-in evidence. A connected deployment can execute
 requests on matched Graviton services, recalculate the release decision from
@@ -40,11 +40,13 @@ python3.12 -m venv .venv
 Expected behavior:
 
 - exit `0`;
-- all capacity, raw quality and Arm Performix checksum entries verify;
+- all capacity, raw quality, Arm Performix, and runtime-treatment checksum entries
+  verify;
 - 2,100 traffic outcomes and 1,540 raw model outputs used for the separate
   quality comparison are re-evaluated;
 - the two measured treatment identities bind to the confirmed contract;
-- all ten required claims pass; and
+- all ten compute and quality claims plus five runtime-release conditions
+  pass; and
 - the command writes a machine-readable decision and offline report.
 
 ## Run SurgeDesk Locally
@@ -71,10 +73,14 @@ examples/armproof-reference/preregistration-publication.json plan bytes and reco
 ops/evidence/EXP-2026-014/              ten identity-bound 500-second windows
 ops/experiments/EXP-2026-013.json       final Performix preregistration
 ops/evidence/EXP-2026-013/              native Code Hotspots exports
+ops/evidence/EXP-2026-015/              paired sustained full-recipe comparison
+ops/evidence/EXP-2026-016/              short fixed-rate runtime-treatment screen
+ops/evidence/EXP-2026-017/              rejected sustained simplification
 examples/armproof-reference/            confirmed contract and release config
 src/armproof/evidence/confirmed_audit.py raw capacity derivation
 src/armproof/evidence/raw_quality.py     raw output quality derivation
 src/armproof/evidence/performix.py       native Performix parser
+src/armproof/evidence/runtime_memory.py  runtime-recipe verifier and derivation
 src/armproof/evidence/adapters.py        reusable release adapter
 ```
 
@@ -85,6 +91,12 @@ in the control and at least 50% in the treatment, with at least 100,000 function
 samples per profile. `kai_*` names are functions supplied by KleidiAI. The
 service-level objective (SLO) requires 95% of responses within ten seconds,
 zero errors and at least 95% completion of scheduled traffic.
+
+The later whole-runtime comparison keeps KleidiAI enabled and tests 0.62
+requests/s. The full thread-tuning, mimalloc, and THP recipe passed all five
+300-second windows; KleidiAI alone and the simplified mimalloc+THP candidate
+failed all five. ArmProof checks all three archives before authorizing the final
+recipe.
 
 ## Reuse The Gate
 

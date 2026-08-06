@@ -29,6 +29,12 @@ class _Endpoint:
                     self.send_error(404)
                     return
                 control = "1" if owner.backend == "kleidiai-disabled" else "0"
+                allocator = "system" if control == "1" else "mimalloc"
+                tuning = {} if control == "1" else {
+                    "session.dynamic_block_base": "4",
+                    "session.intra_op.spin_backoff_max": "8",
+                    "session.intra_op.spin_duration_us": "1000",
+                }
                 body = json.dumps({
                     "ready": True,
                     "backend": owner.backend,
@@ -44,6 +50,11 @@ class _Endpoint:
                     "architecture": "aarch64",
                     "cpu_affinity": list(range(16)),
                     "optimization_control": {"mlas.disable_kleidiai": control},
+                    "runtime_tuning": tuning,
+                    "memory_configuration": {
+                        "allocator": allocator,
+                        "transparent_huge_pages": "always",
+                    },
                 }).encode("utf-8")
                 self.send_response(200)
                 self.send_header("Content-Type", "application/json")
@@ -117,6 +128,10 @@ class LiveEndpointPreflightTests(unittest.TestCase):
 
         self.assertEqual([row.label for row in rows], ["KleidiAI disabled", "KleidiAI enabled"])
         self.assertEqual(identity["source_artifact_sha256"], "b" * 64)
+        self.assertEqual(
+            identity["runtime_tuning"]["optimized"]["session.dynamic_block_base"],
+            "4",
+        )
         self.assertEqual(rows[0].backend, "kleidiai-disabled")
         self.assertEqual(rows[1].backend, "kleidiai-enabled")
         self.assertGreater(rows[0].latency_ms, rows[1].latency_ms)

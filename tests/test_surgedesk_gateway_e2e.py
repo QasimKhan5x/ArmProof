@@ -22,6 +22,12 @@ def _lane_handler(
     backend: str,
     control: str,
 ) -> tuple[type[BaseHTTPRequestHandler], dict[str, Any]]:
+    allocator = "system" if control == "1" else "mimalloc"
+    runtime_tuning = {} if control == "1" else {
+        "session.dynamic_block_base": "4",
+        "session.intra_op.spin_backoff_max": "8",
+        "session.intra_op.spin_duration_us": "1000",
+    }
     identity = {
         "model_identity": MODEL_SHA,
         "source_artifact_sha256": SOURCE_SHA,
@@ -35,6 +41,11 @@ def _lane_handler(
         "architecture": "aarch64",
         "cpu_affinity": list(range(16)),
         "optimization_control": {"mlas.disable_kleidiai": control},
+        "memory_configuration": {
+            "allocator": allocator,
+            "transparent_huge_pages": "always",
+        },
+        "runtime_tuning": runtime_tuning,
     }
 
     class LaneHandler(BaseHTTPRequestHandler):

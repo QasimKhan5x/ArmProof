@@ -415,6 +415,69 @@
     "raw_confirmation_samples": 2100,
     "raw_quality_checksummed_files": 111,
     "raw_quality_outputs": 1540,
+    "runtime_memory": {
+      "ablation_median_p95_ms": {
+        "current": 5371.2520265,
+        "mimalloc-thp": 3058.4585425,
+        "thp-only": 4128.547281,
+        "thread-thp": 4257.1144285
+      },
+      "archive_sha256": {
+        "EXP-2026-015": "68ae8bb28e90eb9e6fb14fce83cc074f057783587ee19f8083e6963caa669a72",
+        "EXP-2026-016": "56179c8f535bdeea38a6de16e756c366fd89586614de24a72c352975637e8d57",
+        "EXP-2026-017": "19c55410275b75d23c5dfce15ed0d735e2e608ca1106a8146bce6bcb12364761"
+      },
+      "baseline_median_p95_ms": 14806.349951,
+      "baseline_p95_ms": [
+        15518.401933,
+        15416.908705,
+        14694.286548,
+        14806.349951,
+        14709.166596
+      ],
+      "candidate_rps": 0.62,
+      "capacity_gain_percent": 10.714285714285698,
+      "confirmation_passes": 5,
+      "confirmation_windows": 5,
+      "evidence_role": "A separate whole-runtime optimization layered after the matched KleidiAI compute comparison.",
+      "internal_checksummed_files": 130,
+      "isolation_experiment_id": "EXP-2026-016",
+      "optimized_median_p95_ms": 8146.752061,
+      "optimized_p95_ms": [
+        8214.897562,
+        7852.885417,
+        8146.752061,
+        8307.808137,
+        8100.180609
+      ],
+      "output_digest": "78b613260fabd3eefbfdbb030f8366ededfe3cd8d1003db85f70eeae5f48f684",
+      "outputs_equivalent": true,
+      "p95_reduction_percent": 44.9779852025598,
+      "passed": true,
+      "previous_capacity_rps": 0.56,
+      "recipe": {
+        "allocator": "mimalloc",
+        "arm_compute": "KleidiAI I8MM",
+        "onnxruntime_thread_overrides": {
+          "session.dynamic_block_base": "4",
+          "session.intra_op.spin_backoff_max": "8",
+          "session.intra_op.spin_duration_us": "1000"
+        },
+        "transparent_huge_pages": "always"
+      },
+      "simplification_experiment_id": "EXP-2026-017",
+      "simplification_failures": 5,
+      "simplification_median_p95_ms": 12287.705285,
+      "simplification_p95_ms": [
+        10269.281152,
+        12287.705285,
+        13417.520415,
+        14935.519564,
+        11402.800394
+      ],
+      "simplification_windows": 5,
+      "sustained_experiment_id": "EXP-2026-015"
+    },
     "runtime_version": "0.15.0.dev0",
     "schema_version": "1.0.0",
     "trial_matrix": [
@@ -478,10 +541,10 @@
       "comparison_sha256": "21051a4d3327da8f4f20eb61eb829798181042dd2001a7876e413c64ba2af543",
       "contract_sha256": "5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369",
       "decision_sha256": "827525a1b358045f0f48d08b5798d803606ded375da453deb09eb51384ad6fe7",
-      "summary_sha256": "82a9755096e2f2c8ad456718a504b7f8fa2ab22eb4437b66f18de69d7c98efa0"
+      "summary_sha256": "15619a64a27fcd078cd35857bc7cafa3f2d58568d973baabf5d3999b6dee3aec"
     },
     "checksums": {
-      "checked": 161,
+      "checked": 291,
       "mismatched": [],
       "missing": [],
       "passed": true
@@ -571,6 +634,69 @@
       "public_commit_url": "https://github.com/QasimKhan5x/ArmProof/commit/ab22cc055881c5e8bae35dd6e4d919f0b407971e"
     },
     "reproduction_checksums": null,
+    "runtime_memory": {
+      "ablation_median_p95_ms": {
+        "current": 5371.2520265,
+        "mimalloc-thp": 3058.4585425,
+        "thp-only": 4128.547281,
+        "thread-thp": 4257.1144285
+      },
+      "archive_sha256": {
+        "EXP-2026-015": "68ae8bb28e90eb9e6fb14fce83cc074f057783587ee19f8083e6963caa669a72",
+        "EXP-2026-016": "56179c8f535bdeea38a6de16e756c366fd89586614de24a72c352975637e8d57",
+        "EXP-2026-017": "19c55410275b75d23c5dfce15ed0d735e2e608ca1106a8146bce6bcb12364761"
+      },
+      "baseline_median_p95_ms": 14806.349951,
+      "baseline_p95_ms": [
+        15518.401933,
+        15416.908705,
+        14694.286548,
+        14806.349951,
+        14709.166596
+      ],
+      "candidate_rps": 0.62,
+      "capacity_gain_percent": 10.714285714285698,
+      "confirmation_passes": 5,
+      "confirmation_windows": 5,
+      "evidence_role": "A separate whole-runtime optimization layered after the matched KleidiAI compute comparison.",
+      "internal_checksummed_files": 130,
+      "isolation_experiment_id": "EXP-2026-016",
+      "optimized_median_p95_ms": 8146.752061,
+      "optimized_p95_ms": [
+        8214.897562,
+        7852.885417,
+        8146.752061,
+        8307.808137,
+        8100.180609
+      ],
+      "output_digest": "78b613260fabd3eefbfdbb030f8366ededfe3cd8d1003db85f70eeae5f48f684",
+      "outputs_equivalent": true,
+      "p95_reduction_percent": 44.9779852025598,
+      "passed": true,
+      "previous_capacity_rps": 0.56,
+      "recipe": {
+        "allocator": "mimalloc",
+        "arm_compute": "KleidiAI I8MM",
+        "onnxruntime_thread_overrides": {
+          "session.dynamic_block_base": "4",
+          "session.intra_op.spin_backoff_max": "8",
+          "session.intra_op.spin_duration_us": "1000"
+        },
+        "transparent_huge_pages": "always"
+      },
+      "simplification_experiment_id": "EXP-2026-017",
+      "simplification_failures": 5,
+      "simplification_median_p95_ms": 12287.705285,
+      "simplification_p95_ms": [
+        10269.281152,
+        12287.705285,
+        13417.520415,
+        14935.519564,
+        11402.800394
+      ],
+      "simplification_windows": 5,
+      "sustained_experiment_id": "EXP-2026-015"
+    },
     "schema_version": "1.0.0",
     "supporting_evidence": {
       "checksummed_files": 4,

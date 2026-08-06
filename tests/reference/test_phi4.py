@@ -12,7 +12,9 @@ from unittest.mock import patch
 
 from armproof.reference.phi4 import (
     OrtInt4Backend,
+    RELEASED_RUNTIME_TUNING,
     _aws_instance_type,
+    _memory_runtime_identity,
     _ort_model_identity,
     _verify_runtime_artifact_ledger,
     create_ort_variant,
@@ -23,6 +25,24 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class Phi4ReferenceTests(unittest.TestCase):
+    def test_memory_runtime_identity_reads_allocator_and_thp_state(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            maps = root / "maps"
+            thp = root / "enabled"
+            maps.write_text("7f libpython3.12.so\n", encoding="utf-8")
+            thp.write_text("always [madvise] never\n", encoding="utf-8")
+            self.assertEqual(
+                _memory_runtime_identity(maps_path=maps, thp_path=thp),
+                {"allocator": "system", "transparent_huge_pages": "madvise"},
+            )
+            maps.write_text("7f /lib/aarch64-linux-gnu/libmimalloc.so.2\n")
+            thp.write_text("[always] madvise never\n", encoding="utf-8")
+            self.assertEqual(
+                _memory_runtime_identity(maps_path=maps, thp_path=thp),
+                {"allocator": "mimalloc", "transparent_huge_pages": "always"},
+            )
+
     def test_runtime_ledger_is_verified_before_runtime_import(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             ledger = Path(directory) / "SHA256SUMS"
@@ -111,12 +131,14 @@ class Phi4ReferenceTests(unittest.TestCase):
             disabled_options.pop("mlas.disable_kleidiai")
             self.assertEqual(enabled_config, disabled_config)
             self.assertTrue((enabled / "model.onnx").is_symlink())
-            enabled_identity, enabled_source, enabled_control, enabled_threads = _ort_model_identity(enabled)
-            disabled_identity, disabled_source, disabled_control, disabled_threads = _ort_model_identity(disabled)
+            enabled_identity, enabled_source, enabled_control, enabled_threads, enabled_tuning = _ort_model_identity(enabled)
+            disabled_identity, disabled_source, disabled_control, disabled_threads, disabled_tuning = _ort_model_identity(disabled)
             self.assertEqual(enabled_identity, disabled_identity)
             self.assertEqual(enabled_source, disabled_source)
             self.assertEqual((enabled_control, disabled_control), ("0", "1"))
             self.assertEqual((enabled_threads, disabled_threads), (16, 16))
+            self.assertEqual(enabled_tuning, {})
+            self.assertEqual(disabled_tuning, {})
             (source / "model.onnx").write_bytes(b"changed-model")
             with self.assertRaisesRegex(ValueError, "no longer matches"):
                 _ort_model_identity(enabled)
@@ -145,6 +167,14 @@ class Phi4ReferenceTests(unittest.TestCase):
             )["model"]["decoder"]["session_options"]
             self.assertEqual(options["session.intra_op.spin_duration_us"], "1000")
             self.assertEqual(options["session.intra_op.spin_backoff_max"], "8")
+            identity = _ort_model_identity(variant)
+            self.assertEqual(
+                identity[4],
+                {
+                    "session.intra_op.spin_backoff_max": "8",
+                    "session.intra_op.spin_duration_us": "1000",
+                },
+            )
             with self.assertRaisesRegex(ValueError, "reserved session option"):
                 create_ort_variant(
                     source,
@@ -153,6 +183,29 @@ class Phi4ReferenceTests(unittest.TestCase):
                     16,
                     session_overrides={"mlas.disable_kleidiai": "1"},
                 )
+
+    def test_release_tuning_does_not_change_source_model_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source"
+            source.mkdir()
+            (source / "model.onnx").write_bytes(b"model")
+            (source / "genai_config.json").write_text(
+                json.dumps({"model": {"decoder": {"session_options": {}}}})
+            )
+            baseline = create_ort_variant(source, root / "baseline", False, 16)
+            optimized = create_ort_variant(
+                source,
+                root / "optimized",
+                True,
+                16,
+                session_overrides=RELEASED_RUNTIME_TUNING,
+            )
+            baseline_identity = _ort_model_identity(baseline)
+            optimized_identity = _ort_model_identity(optimized)
+            self.assertEqual(baseline_identity[:2], optimized_identity[:2])
+            self.assertEqual(baseline_identity[4], {})
+            self.assertEqual(optimized_identity[4], RELEASED_RUNTIME_TUNING)
 
     def test_request_contract_is_bounded(self) -> None:
         self.assertEqual(validate_request({"request_id": "r", "prompt": "p"}), ("r", "p", 64))

@@ -26,7 +26,18 @@ rule are fixed across the control and treatment.
 | Capacity request volume | Ten frozen windows | 2,100 raw HTTP outcomes | EXP-2026-014 confirmation JSONL files and [`confirmed_audit.py`](../src/armproof/evidence/confirmed_audit.py) |
 | Output quality | 770 original outputs from each treatment | Accuracy and macro-F1 loss no greater than one percentage point; at least 99% schema-valid | [`EXP-2026-003 raw quality evidence`](../ops/evidence/EXP-2026-003/attempt-002/evidence/capacity/quality-batch), its locked ledger, and [`raw_quality.py`](../src/armproof/evidence/raw_quality.py) |
 | Arm execution | Matched Performix Code Hotspots profiles | No `kai_*` samples in control; at least 50% in treatment; at least 100,000 function samples per profile | [`EXP-2026-013 plan`](../ops/experiments/EXP-2026-013.json), [`evidence`](../ops/evidence/EXP-2026-013/), and [`performix.py`](../src/armproof/evidence/performix.py) |
+| Graviton runtime recipe | KleidiAI-only versus full thread, allocator, and huge-page recipe at 0.62 requests/s | KleidiAI-only fails 5/5; full recipe passes 5/5; outputs identical | [`EXP-2026-015 evidence`](../ops/evidence/EXP-2026-015/), [`runtime_memory.py`](../src/armproof/evidence/runtime_memory.py) |
+| Runtime treatment screen | Current, THP-only, thread+THP, and mimalloc+THP; two 60-second windows each | Preserve all raw results and output equivalence; use for diagnosis rather than release | [`EXP-2026-016 evidence`](../ops/evidence/EXP-2026-016/) |
+| Simplification challenge | mimalloc+THP without thread overrides; five 300-second windows at 0.62 requests/s | Reject simplification if any window misses the 10-second p95 rule | [`EXP-2026-017 evidence`](../ops/evidence/EXP-2026-017/) |
 | Release decision | Ten required claims | All ten pass | [`confirmed contract`](../examples/armproof-reference/confirmed-contract.json), [`release config`](../examples/armproof-reference/armproof.json), and [`confirmed adapter`](../src/armproof/evidence/adapters.py) |
+
+The final runtime recipe adds 10.71% to the previously verified 0.56 requests/s
+traffic floor. At 0.62 requests/s, its median p95 was 8.147 seconds versus
+14.806 seconds for KleidiAI alone, a 44.98% reduction. The short screen by
+itself appeared to favor mimalloc plus THP. EXP-2026-017 tested that simpler
+candidate for five long windows and rejected it after all five missed the SLO.
+The release therefore retains the exact three thread options used by the full
+recipe in EXP-2026-015.
 
 The capacity and Performix plans match Git objects whose recorded times precede
 the recorded AWS launch times. The adapter requires byte-for-byte copies of
@@ -86,8 +97,11 @@ The command:
 8. keeps Performix function samples and Linux perf cycle samples in separate units;
 9. recalculates model-size and memory percentages from locked aggregate fields,
    and fixed-shape medians from raw repetitions in four hash-locked files;
-10. evaluates all ten required claims; and
-11. writes `verification.json`, `comparison.json`, `decision.json`, `summary.json`
+10. verifies 130 internal files across EXP-2026-015, EXP-2026-016, and
+    EXP-2026-017, then derives the only sustained runtime recipe that passed;
+11. evaluates all ten compute and quality claims plus five runtime-release
+    conditions; and
+12. writes `verification.json`, `comparison.json`, `decision.json`, `summary.json`
     and an offline HTML report.
 
 Exit `0` approves the measured treatment. Exit `2` means at least one required
@@ -107,7 +121,8 @@ that launch time remains experiment metadata rather than independent cloud
 attestation. The live service verifies the pinned runtime-wheel ledger and reads
 the instance type from AWS IMDSv2. The gateway rechecks the model fingerprint,
 source artifact, runtime lock, wheel ledger, runtime version, instance, Arm64
-CPU placement, threads and treatment controls before switching its route and
+CPU placement, threads, KleidiAI control, ONNX Runtime scheduling options,
+allocator, and huge-page policy before switching its route and
 again on every optimized response. Drift invalidates the release and restores
 the control route.
 

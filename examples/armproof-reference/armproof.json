@@ -23,6 +23,16 @@
       "experiment_id": "EXP-2026-013",
       "disabled_run_id": "51e4d24b6c03",
       "enabled_run_id": "2a6259add5fe"
+    },
+    "memory_optimization": {
+      "sustained_archive": "../../ops/evidence/EXP-2026-015/evidence.tar.gz",
+      "sustained_archive_sha256": "68ae8bb28e90eb9e6fb14fce83cc074f057783587ee19f8083e6963caa669a72",
+      "isolation_archive": "../../ops/evidence/EXP-2026-016/evidence.tar.gz",
+      "isolation_archive_sha256": "56179c8f535bdeea38a6de16e756c366fd89586614de24a72c352975637e8d57",
+      "simplification_archive": "../../ops/evidence/EXP-2026-017/evidence.tar.gz",
+      "simplification_archive_sha256": "19c55410275b75d23c5dfce15ed0d735e2e608ca1106a8146bce6bcb12364761",
+      "previous_capacity_rps": 0.56,
+      "expected_output_digest": "78b613260fabd3eefbfdbb030f8366ededfe3cd8d1003db85f70eeae5f48f684"
     }
   },
   "publication_proof": {

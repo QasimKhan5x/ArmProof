@@ -26,8 +26,9 @@ python3.12 -m pip install .
 armproof ci examples/armproof-reference/armproof.json
 ```
 
-The command verifies the confirmatory capacity and native Arm Performix
-archives. It re-derives 2,100 capacity requests and 1,540 raw model outputs,
+The command verifies the confirmatory capacity, native Arm Performix, and
+runtime-treatment experiment archives. It re-derives 2,100 capacity requests,
+1,540 raw model outputs, the memory ablation, and the sustained final recipe,
 then writes a machine-readable decision, a verification receipt and an offline
 `index.html`.
 Exit `0` means all required claims passed, `2` means at least one required

@@ -53,15 +53,17 @@ function formatShadowReceipt(result) {
     ? result.observed_at
     : observed.toLocaleTimeString([], { hour12: false });
   const control = runtime.optimization_control["mlas.disable_kleidiai"];
-  return `${result.request_id} · ${observedAt} · ${runtime.architecture}/${runtime.threads} threads · control=${control}`;
+  const memory = runtime.memory_configuration;
+  const tuningCount = Object.keys(runtime.runtime_tuning ?? {}).length;
+  const tuning = tuningCount ? ` · ${tuningCount} ORT settings` : "";
+  return `${result.request_id} · ${observedAt} · ${runtime.architecture}/${runtime.threads} threads · control=${control}${tuning} · ${memory.allocator}/${memory.transparent_huge_pages}`;
 }
 
 
 function liveServiceLabel(lane) {
-  const trials = data?.capacity?.mixes?.mixed?.trial_matrix ?? [];
-  const treatment = trials[lane === "optimized" ? 1 : 0]?.treatment ?? "measured configuration";
-  const conciseTreatment = treatment.replace("disabled", "off").replace("enabled", "on");
-  return `${lane === "optimized" ? "Optimized" : "Standard"} service · ${conciseTreatment}`;
+  return lane === "optimized"
+    ? "Optimized service · I8MM + tuned runtime"
+    : "Standard service · KleidiAI off";
 }
 
 
@@ -73,7 +75,7 @@ function liveActionLabel() {
 
 
 function matchedComparisonText() {
-  return `Same model, runtime, workload, machine, and ${data.proof.threads} threads; `
+  return `Compute isolation: same model, runtime, workload, machine, and ${data.proof.threads} threads; `
     + `${data.provenance.evidence.only_changed_control} is the service control under test`;
 }
 
@@ -177,7 +179,7 @@ function renderProofDecision(state, detail = "") {
     setText("proof-decision-title", "Checked-in conservative release receipt");
     setText(
       "proof-decision-detail",
-      `${data.proof.verified_claims} required claims passed when this recorded receipt was generated. `
+      `${data.proof.verified_claims} contract claims and ${data.proof.runtime_release_conditions.length} runtime conditions passed when this receipt was generated. `
       + "Run the measured experiment audit to recompute the decision in this session.",
     );
     setText("proof-decision-status", "RECORDED PASS");
@@ -345,12 +347,12 @@ function renderReviewedTickets() {
     elements["intake-form"].before(elements["live-cutover-summary"]);
     setText("cutover-before-lane", "Standard · KleidiAI off");
     setText("cutover-before-request", `${baselineTicket.final_queue} · ${baselineTicket.request_id}`);
-    setText("cutover-after-lane", "Optimized · KleidiAI on");
+    setText("cutover-after-lane", "Optimized · I8MM + tuned runtime");
     setText("cutover-after-request", `${treatmentTicket.final_queue} · ${treatmentTicket.request_id}`);
     setText("cutover-audit", treatmentTicket.release_audit_id);
     setText(
       "cutover-capacity",
-      `Authorizes the measured ≥${data.capacity.mixes.mixed.minimum_capacity_ratio.toFixed(1)}× capacity lower bound`,
+      `Authorizes ≥${data.proof.runtime_memory.candidate_rps.toFixed(2)} requests/s after the measured ≥${data.capacity.mixes.mixed.minimum_capacity_ratio.toFixed(1)}× compute gain`,
     );
     elements["review-complete"].hidden = true;
   }
@@ -364,7 +366,7 @@ function renderReviewedTickets() {
 
 
 function revealVerifiedProof() {
-  for (const id of ["optimization-summary", "performix-proof", "proof-details", "release-gate"]) {
+  for (const id of ["optimization-summary", "performix-proof", "memory-proof", "proof-details", "release-gate"]) {
     elements[id].hidden = false;
   }
 }
@@ -573,7 +575,7 @@ function renderDeploymentStatus() {
   setText(
     "opening-capacity",
     publicEvidence || optimized || freshAudit
-      ? `≥${data.capacity.mixes.mixed.minimum_capacity_ratio.toFixed(1)}×`
+      ? `≥${data.proof.runtime_memory.candidate_rps.toFixed(2)} r/s`
       : "Awaiting validation",
   );
   setText("promotion-eyebrow", "Live release action");
@@ -597,7 +599,7 @@ function renderDeploymentStatus() {
       : connected
         ? liveServiceLabel("optimized")
         : publicEvidence
-          ? `${data.capacity.mixes.mixed.trial_matrix[1].treatment} · measured`
+          ? `I8MM + tuned runtime · measured`
           : "Connect both matched Arm64 services",
   );
   setText(
@@ -644,12 +646,12 @@ function renderDeploymentStatus() {
     setText("promotion-audit-label", "Release evidence");
     setText(
       "promotion-audit-status",
-      `${data.provenance.experiment_id} · ${data.proof.verified_claims}/${data.proof.verified_claims} claims passed`,
+      `${data.provenance.experiment_id} · ${data.proof.verified_claims} claims + ${data.proof.runtime_release_conditions.length} runtime conditions passed`,
     );
     setText("promotion-title", "The optimized candidate cleared the checked-in release policy");
     setText(
       "promotion-detail",
-      `The repository receipt binds the matched ${data.provenance.machine} treatments, sustained traffic outcomes, quality rows and Arm profiles. Live routing remains unavailable on this public page.`,
+      `The repository receipt binds the ${data.provenance.machine} model, matched Arm-compute comparison, memory ablation, sustained traffic outcomes, quality rows, and profiler evidence. Live routing remains unavailable on this public page.`,
     );
     elements["promote-route"].hidden = true;
     elements["open-required-audit"].hidden = false;
@@ -767,6 +769,7 @@ function renderAuditStage(stage, detail, elapsedMs) {
   const labels = {
     quality: () => "Quality outputs checked against the release limit",
     performix: () => "Arm profiler evidence parsed",
+    memory: () => `${detail.confirmation_windows} sustained treatment windows verified`,
     archive: () => "Capacity archive matched the frozen plan",
     requests: () => `${capacityWindowLabel()} reconstructed`,
     policy: () => `Release policy ${detail.passed ? "passed" : "blocked"}`,
@@ -858,6 +861,10 @@ async function loadVerifiedExperiment() {
       && receipt.raw_quality_outputs === expected.raw_quality_outputs
       && receipt.confirmation_files === expected.sustained_raw_confirmation_files
       && receipt.archive_sha256 === expected.sustained_archive_sha256
+      && receipt.memory.passed
+      && receipt.memory.candidate_rps === data.proof.runtime_memory.candidate_rps
+      && receipt.memory.confirmation_passes === receipt.memory.confirmation_windows
+      && receipt.memory.simplification_failures === receipt.memory.simplification_windows
       && receipt.matched_control;
     if (!valid) throw new Error("audit receipt does not match the loaded release data");
     proofClaims = receipt.claims;
@@ -865,7 +872,7 @@ async function loadVerifiedExperiment() {
     revealVerifiedProof();
     renderProofDecision(
       "fresh",
-      `${receipt.claims_verified} required claims passed after ${receipt.raw_request_outcomes.toLocaleString()} outcomes were re-derived in ${receipt.elapsed_ms.toFixed(0)} ms.`,
+      `${receipt.claims_verified} contract claims and ${receipt.memory.release_conditions.length} runtime conditions passed after the bound evidence was re-derived in ${receipt.elapsed_ms.toFixed(0)} ms.`,
     );
     deploymentStatus = {
       ...deploymentStatus,
@@ -882,7 +889,10 @@ async function loadVerifiedExperiment() {
       `${receipt.raw_request_outcomes.toLocaleString()} capacity requests · ${receipt.raw_quality_outputs.toLocaleString()} model outputs`,
     );
     setText("audit-control-result", matchedComparisonText());
-    setText("audit-claim-result", `${receipt.claims_verified}/${receipt.claims_verified} required claims passed`);
+    setText(
+      "audit-claim-result",
+      `${receipt.claims_verified}/${receipt.claims_verified} contract claims + ${receipt.memory.release_conditions.length} runtime conditions passed`,
+    );
     elements["audit-receipt"].hidden = false;
     setText("audit-receipt-time", `Completed from local evidence in ${receipt.elapsed_ms.toFixed(0)} ms`);
     elements["load-experiment"].textContent = "Saved evidence revalidated";
@@ -948,6 +958,10 @@ function showRepositoryEvidence() {
       scope_note: data.proof.performix.scope_note,
       pmu_capability_note: data.proof.performix.pmu_capability_note,
     },
+    memory: {
+      ...data.proof.runtime_memory,
+      release_conditions: data.proof.runtime_release_conditions,
+    },
     supporting: {
       direct_speedup_min: data.proof.direct_speedup_min,
       direct_speedup_max: data.proof.direct_speedup_max,
@@ -964,7 +978,10 @@ function showRepositoryEvidence() {
   setText("audit-archive-result", `${evidence.sustained_archive_sha256.slice(0, 12)}… · repository receipt`);
   setText("audit-request-result", `${evidence.sustained_raw_confirmation_samples.toLocaleString()} capacity requests · ${evidence.raw_quality_outputs.toLocaleString()} model outputs`);
   setText("audit-control-result", matchedComparisonText());
-  setText("audit-claim-result", `${data.proof.verified_claims}/${data.proof.verified_claims} claims in the checked-in decision`);
+  setText(
+    "audit-claim-result",
+    `${data.proof.verified_claims}/${data.proof.verified_claims} contract claims + ${data.proof.runtime_release_conditions.length} runtime conditions`,
+  );
   setText("audit-receipt-time", "Loaded from the published repository receipt");
   elements["experiment-results"].hidden = false;
   elements["load-experiment"].textContent = "Repository evidence opened";
@@ -1099,12 +1116,12 @@ function renderAuditResult(receipt) {
   const description = describeCapacity(capacity);
   const arm = receipt.arm;
   const supporting = receipt.supporting;
+  const memory = receipt.memory;
   const controlTrial = capacity.trial_matrix[0];
   const treatmentTrial = capacity.trial_matrix[1];
   const controlPasses = controlTrial.outcomes.filter((outcome) => outcome === "pass").length;
   const treatmentPasses = treatmentTrial.outcomes.filter((outcome) => outcome === "pass").length;
   const qualityDelta = data.quality.accuracy_delta_pp;
-  const history = data.provenance.release_history;
   setText("result-capacity-ratio", `At least ${capacity.minimum_ratio.toFixed(1)}×`);
   setText(
     "result-capacity-scope",
@@ -1120,8 +1137,6 @@ function renderAuditResult(receipt) {
     "result-quality-scope",
     `Fine-grained intent ${data.quality.optimized_accuracy_percent.toFixed(2)}% (${qualityDelta.toFixed(2)} pp vs standard and inside the 1-point limit); human confirmation required`,
   );
-  setText("rejected-run-id", history.rejected_experiment_id);
-  setText("accepted-run-id", history.accepted_experiment_id);
   setText(
     "confirmation-count",
     `${description.windows_per_rate} trials × ${description.rate_count} frozen rates × ${description.window_seconds}s`,
@@ -1160,10 +1175,11 @@ function renderAuditResult(receipt) {
     `All ${supporting.direct_shape_gains.length} fixed shapes improved: ${supporting.direct_shape_gains.map((value) => `${value.toFixed(2)}×`).join(" · ")}`,
   );
   setText("summary-capacity", `≥${capacity.minimum_ratio.toFixed(2)}×`);
+  setText("summary-footprint", `${supporting.artifact_reduction_percent.toFixed(2)}% smaller`);
   setText("summary-performix", `${arm.performix_enabled_sample_share_percent.toFixed(2)}%`);
-  setText("summary-quality", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
-  setText("summary-quality-context", `Operational queue accuracy · fine-grained intent ${data.quality.optimized_accuracy_percent.toFixed(2)}% · ${qualityDelta.toFixed(2)} pp vs standard`);
-  setText("capacity-range", `≥${capacity.minimum_ratio.toFixed(2)}× sustainable capacity under the fixed response-time rule`);
+  setText("summary-final-capacity", `≥${memory.candidate_rps.toFixed(2)} r/s`);
+  setText("summary-final-context", `${memory.confirmation_passes}/${memory.confirmation_windows} sustained windows within the fixed p95 SLO`);
+  setText("capacity-range", `≥${memory.candidate_rps.toFixed(2)} r/s final verified traffic floor`);
   setText("artifact-reduction", `${supporting.artifact_reduction_percent.toFixed(2)}% smaller`);
   setText("memory-reduction", `${supporting.peak_pss_reduction_percent.toFixed(2)}% lower peak PSS`);
   setText(
@@ -1181,14 +1197,137 @@ function renderAuditResult(receipt) {
   setText("performix-kernel", arm.kernel);
   setText("performix-scope-note", arm.scope_note);
   setText("performix-capability-note", arm.pmu_capability_note);
+  renderOptimizationJourney(memory);
+  renderMemoryProof(memory);
   setText("surge-release-decision", receipt.passed ? "PASS" : "BLOCK");
   setText(
     "conclusion-copy",
-    `${receipt.claims_verified} required claims passed: capacity, quality, evidence volume, matched Arm execution, and profiler integrity.`,
+    `${receipt.claims_verified} compute and quality claims plus ${memory.release_conditions.length} runtime release conditions passed.`,
   );
   renderTrialMatrix(capacity.trial_matrix);
   renderLatencyConsequence(capacity.trial_matrix, description);
   renderRateSelection(capacity.rate_selection);
+}
+
+
+function renderOptimizationJourney(memory) {
+  setText("journey-final-capacity", `≥${memory.candidate_rps.toFixed(2)} requests/s`);
+  setText(
+    "journey-final-confirmation",
+    `${memory.confirmation_passes}/${memory.confirmation_windows} sustained windows passed`,
+  );
+  const list = elements["optimization-stages"];
+  list.replaceChildren();
+  const formatOutcome = {
+    model: (outcome) => [
+      `${outcome.artifact_reduction_percent.toFixed(2)}% smaller model`,
+      `${outcome.peak_pss_reduction_percent.toFixed(2)}% lower peak memory`,
+    ],
+    compute: (outcome) => [
+      `≥${outcome.minimum_capacity_ratio.toFixed(2)}× sustainable capacity`,
+      `${outcome.performix_kai_sample_share_percent.toFixed(2)}% Performix kai_* samples`,
+    ],
+    memory: (outcome) => [
+      `≥${outcome.final_capacity_rps.toFixed(2)} requests/s`,
+      `${outcome.p95_reduction_percent.toFixed(2)}% lower median p95 at the stress rate`,
+      `Simpler recipe missed the SLO in ${outcome.simplification_failures}/${outcome.simplification_windows} long windows`,
+    ],
+  };
+  data.optimization_journey.stages.forEach((stage) => {
+    const item = document.createElement("li");
+    item.dataset.stage = stage.id;
+    const sequence = document.createElement("span");
+    sequence.className = "stage-sequence";
+    sequence.textContent = stage.sequence;
+    const copy = document.createElement("div");
+    const label = document.createElement("small");
+    const title = document.createElement("h3");
+    const reason = document.createElement("p");
+    const outcomes = document.createElement("ul");
+    const evidence = document.createElement("footer");
+    label.textContent = `Stage ${stage.sequence}`;
+    title.textContent = stage.change;
+    reason.textContent = stage.reason;
+    formatOutcome[stage.id](stage.outcome).forEach((value) => {
+      const row = document.createElement("li");
+      row.textContent = value;
+      outcomes.append(row);
+    });
+    evidence.textContent = `Evidence: ${stage.evidence}`;
+    copy.append(label, title, reason, outcomes, evidence);
+    item.append(sequence, copy);
+    list.append(item);
+  });
+}
+
+
+function renderMemoryProof(memory) {
+  setText(
+    "memory-confirmation-badge",
+    `${memory.confirmation_passes}/${memory.confirmation_windows} sustained windows passed`,
+  );
+  setText(
+    "memory-proof-copy",
+    `With KleidiAI already active, the service missed the p95 objective at ${memory.candidate_rps.toFixed(2)} requests/s. `
+      + "Short screens favored mimalloc with huge pages, but all five long runs of that simpler recipe missed the objective. The complete thread, allocator, and huge-page recipe is the one that passed sustained validation.",
+  );
+  setText("memory-baseline-p95", formatMs(memory.baseline_median_p95_ms));
+  setText("memory-optimized-p95", formatMs(memory.optimized_median_p95_ms));
+  setText("memory-simplified-p95", formatMs(memory.simplification_median_p95_ms));
+  setText(
+    "memory-simplified-result",
+    `${memory.simplification_failures}/${memory.simplification_windows} windows missed the SLO`,
+  );
+  setText("memory-capacity-gain", `+${memory.capacity_gain_percent.toFixed(2)}%`);
+  setText(
+    "memory-capacity-detail",
+    `${memory.previous_capacity_rps.toFixed(2)} → ${memory.candidate_rps.toFixed(2)} requests/s verified floor`,
+  );
+
+  const labels = {
+    current: "KleidiAI only",
+    "thp-only": "Add THP",
+    "thread-thp": "Thread overrides + THP",
+    "mimalloc-thp": "mimalloc + THP",
+  };
+  const rows = Object.entries(memory.ablation_median_p95_ms);
+  const maximum = Math.max(...rows.map(([, value]) => value));
+  elements["memory-ablation"].replaceChildren();
+  rows.forEach(([id, value]) => {
+    const row = document.createElement("div");
+    const label = document.createElement("span");
+    const track = document.createElement("div");
+    const bar = document.createElement("i");
+    const measured = document.createElement("strong");
+    label.textContent = labels[id] ?? id;
+    track.className = "memory-ablation-track";
+    bar.style.width = `${Math.max(4, value / maximum * 100)}%`;
+    if (id === "mimalloc-thp") bar.className = "winner";
+    measured.textContent = formatMs(value);
+    track.append(bar);
+    row.append(label, track, measured);
+    elements["memory-ablation"].append(row);
+  });
+
+  elements["memory-release-conditions"].replaceChildren();
+  memory.release_conditions.forEach((condition) => {
+    const item = document.createElement("li");
+    const mark = document.createElement("span");
+    const copy = document.createElement("div");
+    const title = document.createElement("strong");
+    const detail = document.createElement("small");
+    mark.textContent = "✓";
+    title.textContent = condition.label;
+    detail.textContent = condition.detail
+      ?? (condition.observed !== undefined
+        ? `${condition.observed}/${condition.required} required windows`
+        : condition.digest
+          ? `Output digest ${condition.digest.slice(0, 12)}…`
+          : "Verified from the checksum-bound archive");
+    copy.append(title, detail);
+    item.append(mark, copy);
+    elements["memory-release-conditions"].append(item);
+  });
 }
 
 
@@ -1205,7 +1344,7 @@ async function promoteOptimizedLane() {
     setText(
       "promotion-result",
       `The gateway switched live support traffic to ${payload.backend} on cores ${payload.core_group}. `
-      + "The model and source artifact matched; the runtime artifact ledger was verified; AWS IMDSv2 reported the expected instance; Arm placement and controls matched the accepted audit.",
+      + "The model and runtime artifacts, AWS instance, Arm placement, KleidiAI control, ONNX Runtime settings, allocator, and huge-page policy all matched the accepted release.",
     );
     setText("environment-label", "Optimized Arm64 lane serving");
     setText(
@@ -1222,7 +1361,9 @@ async function promoteOptimizedLane() {
     );
     setText(
       "promotion-control-match",
-      `${payload.runtime_identity.changed_control}: ${payload.runtime_identity.baseline_control} → ${payload.runtime_identity.optimized_control}`,
+      `${payload.runtime_identity.changed_control}: ${payload.runtime_identity.baseline_control} → ${payload.runtime_identity.optimized_control}`
+      + ` · ${Object.keys(payload.runtime_identity.runtime_tuning.optimized).length} ORT settings`
+      + ` · ${payload.runtime_identity.memory.optimized.allocator} · THP ${payload.runtime_identity.memory.optimized.transparent_huge_pages}`,
     );
     elements["promotion-identity"].hidden = false;
     elements["tab-proof"].classList.add("completed");
@@ -1260,8 +1401,8 @@ function renderRedesignEvidence() {
   setText("experiment-model", `${data.provenance.model} · ${data.provenance.runtime}`);
   setText("experiment-slo", `p95 ≤ ${(data.capacity.slo_ms / 1000).toFixed(0)} seconds`);
   setText("experiment-control", evidence.only_changed_control);
-  setText("proof-evidence-count", `${evidence.sustained_checksummed_files} sustained + ${evidence.performix_checksummed_files} Performix checksums`);
-  setText("proof-derived-claims", `${proof.verified_claims} contract claims evaluated from ${evidence.sustained_raw_confirmation_samples.toLocaleString()} request outcomes; missing inputs block release.`);
+  setText("proof-evidence-count", `${evidence.sustained_checksummed_files} sustained + ${evidence.performix_checksummed_files} Performix + ${evidence.runtime_memory_checksummed_files} memory checksums`);
+  setText("proof-derived-claims", `${proof.verified_claims} compute and quality claims plus ${proof.runtime_release_conditions.length} runtime conditions evaluated; missing inputs block release.`);
   setText("deployment-instance", proof.instance);
   setText("deployment-threads", proof.threads);
   setText("deployment-runtime", data.provenance.runtime);
@@ -1279,7 +1420,7 @@ function renderRedesignEvidence() {
   setText("absolute-accuracy", `${data.quality.optimized_accuracy_percent.toFixed(2)}%`);
   setText(
     "evidence-chain-counts",
-    `Verify ${evidence.sustained_checksummed_files} sustained and ${evidence.performix_checksummed_files} Performix checksummed evidence files.`,
+    `Verify ${evidence.sustained_checksummed_files} sustained, ${evidence.performix_checksummed_files} Performix, and ${evidence.runtime_memory_checksummed_files} runtime-treatment evidence files.`,
   );
 }
 

@@ -362,6 +362,7 @@ def _run_ci(args: argparse.Namespace) -> int:
                         if verified.reproduction_checksums is not None else None
                     ),
                     "performix": dict(verified.performix) if verified.performix else None,
+                    "runtime_memory": verified.summary.get("runtime_memory"),
                     "supporting_evidence": (
                         {
                             "experiment_id": supporting["experiment_id"],

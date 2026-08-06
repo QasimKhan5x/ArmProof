@@ -4,6 +4,12 @@ Arm Performix is a required input to the SurgeDesk release. It answers one
 question: when the KleidiAI setting changes, did the optimized process actually
 execute KleidiAI functions on Graviton4?
 
+Performix establishes the Arm compute stage. The later ONNX Runtime scheduling,
+mimalloc, and transparent-huge-page recipe was selected by fixed-rate service
+tests and is verified separately; this project does not claim that Code
+Hotspots identified the later runtime limit or that the whole recipe is an
+ISA-only effect.
+
 ## Frozen Experiment
 
 [`EXP-2026-013`](../ops/experiments/EXP-2026-013.json) is bound to a Git commit

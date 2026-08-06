@@ -83,7 +83,7 @@
         {
           "type": "object",
           "additionalProperties": false,
-          "required": ["adapter", "archive", "archive_sha256", "preregistration", "analysis_lock", "protocol_lock", "workload_manifest", "workload", "raw_quality", "performix"],
+          "required": ["adapter", "archive", "archive_sha256", "preregistration", "analysis_lock", "protocol_lock", "workload_manifest", "workload", "raw_quality", "performix", "memory_optimization"],
           "properties": {
             "adapter": {"const": "kleidiai-confirmed-v2"},
             "archive": {"type": "string", "minLength": 1},
@@ -115,6 +115,21 @@
                 "experiment_id": {"type": "string", "minLength": 1},
                 "disabled_run_id": {"type": "string", "minLength": 1},
                 "enabled_run_id": {"type": "string", "minLength": 1}
+              }
+            },
+            "memory_optimization": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["sustained_archive", "sustained_archive_sha256", "isolation_archive", "isolation_archive_sha256", "simplification_archive", "simplification_archive_sha256", "previous_capacity_rps", "expected_output_digest"],
+              "properties": {
+                "sustained_archive": {"type": "string", "minLength": 1},
+                "sustained_archive_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "isolation_archive": {"type": "string", "minLength": 1},
+                "isolation_archive_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "simplification_archive": {"type": "string", "minLength": 1},
+                "simplification_archive_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "previous_capacity_rps": {"type": "number", "exclusiveMinimum": 0},
+                "expected_output_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
               }
             }
           }

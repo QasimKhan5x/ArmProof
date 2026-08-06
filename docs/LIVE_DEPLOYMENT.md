@@ -1,6 +1,6 @@
 # Live Graviton Deployment
 
-This runbook starts matched control and treatment services on one AWS
+This runbook starts the standard and released services on one AWS
 Graviton4 host, verifies their identities, and connects them to SurgeDesk. It
 is a live product-validation path; sustained-capacity evidence is collected by
 the separate [benchmark protocol](BENCHMARK_PROTOCOL.md).
@@ -53,7 +53,11 @@ The final line begins with `READY` and reports the model identity, source
 artifact identity, and `threads=16`. Setup verifies the runtime wheels and
 downloaded model before starting either service.
 
-## Start The Matched Services
+Host preparation installs mimalloc and selects `always` for transparent huge
+pages. The startup scripts refuse to run if that policy or the allocator library
+is unavailable.
+
+## Start The Release Lanes
 
 Keep each command running in a separate terminal.
 
@@ -63,7 +67,8 @@ Control service:
 ssh -t "$GRAVITON_HOST" '~/ArmProof/scripts/run_graviton_lane.sh baseline'
 ```
 
-KleidiAI treatment service:
+Released service (KleidiAI, ONNX Runtime thread tuning, mimalloc, and
+transparent huge pages):
 
 ```bash
 ssh -t "$GRAVITON_HOST" '~/ArmProof/scripts/run_graviton_lane.sh optimized'
@@ -96,7 +101,10 @@ READY matched endpoint identities verified; request latency is a warm-up observa
 ```
 
 The preflight checks that model, runtime, instance, architecture, thread count,
-and CPU affinity match while the `mlas.disable_kleidiai` controls are opposite.
+and CPU affinity match. It also requires opposite `mlas.disable_kleidiai`
+controls, the exact three ONNX Runtime scheduling options on the released lane,
+the system allocator on the standard lane, mimalloc on the released lane, and
+transparent huge pages on both.
 It sends one warm-up request to each service; that request is not capacity
 evidence.
 
@@ -115,14 +123,18 @@ Open <http://127.0.0.1:8765/surgedesk/#triage>. In connected mode:
 
 1. A customer message reaches the active control and the treatment shadow.
 2. A person chooses the final support queue.
-3. ArmProof re-derives the accepted capacity, quality, and Performix decision.
+3. ArmProof re-derives the accepted capacity, quality, Performix, runtime-screen,
+   paired sustained, and failed-simplification evidence.
 4. The gateway compares both live deployments with the accepted identity.
 5. The treatment becomes active only after the contract and deployment checks pass.
 6. Every treatment response is checked again for runtime drift.
 
-The checked-in capacity result comes from ten 500-second windows. The live
-request flow demonstrates deployment behavior and does not replace that
-measurement.
+The checked-in KleidiAI capacity result comes from ten 500-second windows. The
+runtime recipe has its own short screen, sustained comparison, and rejected
+simplification. The live request
+flow demonstrates deployment behavior and does not replace either measurement;
+the two live lanes intentionally represent the standard and final released
+service, not a one-variable causal benchmark.
 
 ## Verify The Adoption Path
 

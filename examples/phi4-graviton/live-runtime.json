@@ -12,5 +12,23 @@
   "controls": {
     "baseline": {"mlas.disable_kleidiai": "1"},
     "optimized": {"mlas.disable_kleidiai": "0"}
+  },
+  "runtime_tuning": {
+    "baseline": {},
+    "optimized": {
+      "session.dynamic_block_base": "4",
+      "session.intra_op.spin_backoff_max": "8",
+      "session.intra_op.spin_duration_us": "1000"
+    }
+  },
+  "memory": {
+    "baseline": {
+      "allocator": "system",
+      "transparent_huge_pages": "always"
+    },
+    "optimized": {
+      "allocator": "mimalloc",
+      "transparent_huge_pages": "always"
+    }
   }
 }

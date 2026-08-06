@@ -15,16 +15,16 @@ KleidiAI-enabled runtime, workload, and 10-second p95 objective.
 The result supports three conclusions:
 
 1. THP independently reduces latency for this Arm inference workload.
-2. Thread-pool tuning does not improve the THP result and should not be part of
-   the recommended recipe.
+2. Thread-pool tuning did not improve these short THP screens. That observation
+   was not strong enough to remove it from the sustained recipe.
 3. mimalloc is useful in combination with THP even though mimalloc alone did
    not improve p95 in EXP-2026-015, indicating an allocator/page interaction.
 
 The compared outputs were identical. These short screens establish mechanism
 direction, not a new sustained capacity claim. EXP-2026-015 remains the
-sustained five-run evidence for the full combined treatment. A future sustained
-confirmation can test the simpler `mimalloc + THP` recipe without thread
-tuning.
+sustained five-run evidence for the full combined treatment. EXP-2026-017 later
+tested the simpler `mimalloc + THP` recipe without thread tuning; all five long
+windows failed, so the simplification was rejected.
 
 ## Audit artifacts
 

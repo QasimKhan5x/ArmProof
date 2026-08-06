@@ -63,7 +63,7 @@
           <section class="product-context" aria-label="How SurgeDesk uses ArmProof">
             <div>
               <strong>SurgeDesk is the banking-support application. ArmProof is its reusable Arm optimization release gate.</strong>
-              <span>KleidiAI is the candidate Arm CPU optimization. SurgeDesk keeps the standard service active until ArmProof verifies the measured release contract.</span>
+              <span>The candidate combines INT4 model compression, Arm I8MM compute, and a measured Graviton runtime recipe. SurgeDesk keeps the standard service active until ArmProof verifies every layer.</span>
             </div>
             <div class="opening-result" aria-label="Checked-in candidate result awaiting fresh verification">
               <strong id="opening-capacity">—</strong>
@@ -119,7 +119,7 @@
                 <small id="shadow-baseline-receipt" class="shadow-receipt">Receipt pending</small>
               </article>
               <article class="shadow-lane candidate-lane">
-                <div><span>Shadow candidate</span><strong>Optimized · KleidiAI on</strong></div>
+                <div><span>Shadow candidate</span><strong>Optimized · Arm release recipe</strong></div>
                 <strong id="shadow-optimized-latency" class="shadow-latency">Waiting…</strong>
                 <small id="shadow-optimized-result">Cannot serve until evidence passes</small>
                 <small id="shadow-optimized-receipt" class="shadow-receipt">Receipt pending</small>
@@ -214,14 +214,14 @@
           <div>
             <p class="eyebrow">ArmProof release gate</p>
             <h1>Should SurgeDesk switch traffic to the Arm-optimized service?</h1>
-            <p>Archived Graviton measurements establish capacity, quality, and Arm execution. The two live requests show which lane actually serves traffic.</p>
+            <p>Archived Graviton measurements establish model footprint, Arm execution, sustained capacity, and the final runtime recipe. Live request receipts show which release actually serves traffic.</p>
           </div>
         </header>
 
         <section class="evidence-scope" aria-label="What happens live and what was measured earlier">
           <div><span>Live during the demo</span><strong>Customer requests and lane receipts</strong></div>
           <div><span>Recomputed during the demo</span><strong>Release decision from checked-in evidence</strong></div>
-          <div><span>Collected earlier on Graviton4</span><strong>Capacity windows, quality outputs, and Performix profiles</strong></div>
+            <div><span>Collected earlier on Graviton4</span><strong>Capacity windows, quality outputs, Performix profiles, and runtime-treatment tests</strong></div>
         </section>
 
         <section id="evidence-loader" class="evidence-loader" aria-labelledby="evidence-loader-title">
@@ -243,7 +243,7 @@
           <div><span>Machine</span><strong id="experiment-machine">—</strong></div>
           <div><span>Model</span><strong id="experiment-model">—</strong></div>
           <div><span>Response-time rule</span><strong id="experiment-slo">—</strong></div>
-          <div><span>Only changed runtime setting</span><strong id="experiment-control">—</strong></div>
+          <div><span>Primary compute comparison</span><strong id="experiment-control">—</strong></div>
         </div>
 
         <section id="audit-receipt" class="audit-receipt" aria-labelledby="audit-receipt-title" hidden>
@@ -263,10 +263,26 @@
         </section>
 
         <div id="experiment-results" class="experiment-results" hidden>
+          <section class="optimization-journey" aria-labelledby="optimization-journey-title">
+            <header>
+              <div>
+                <p class="eyebrow">Optimization journey</p>
+                <h2 id="optimization-journey-title">Three measured changes built the released Arm service</h2>
+                <p>The evidence follows the same order as the engineering work: fit the model, accelerate its hot compute path, then remove the runtime limit exposed at higher load.</p>
+              </div>
+              <div class="journey-final">
+                <span>Final verified traffic floor</span>
+                <strong id="journey-final-capacity">—</strong>
+                <small id="journey-final-confirmation">—</small>
+              </div>
+            </header>
+            <ol id="optimization-stages" class="optimization-stages"></ol>
+          </section>
+
           <section class="release-result" aria-labelledby="release-result-title">
             <div>
-              <p class="eyebrow">Accepted release result</p>
-              <h2 id="release-result-title"><span id="result-capacity-ratio">—</span> sustainable traffic</h2>
+              <p class="eyebrow">Stage 2 · Arm compute result</p>
+              <h2 id="release-result-title"><span id="result-capacity-ratio">—</span> capacity from KleidiAI</h2>
               <p id="result-capacity-scope">—</p>
             </div>
             <dl>
@@ -275,23 +291,6 @@
               <div><dt>Application quality</dt><dd id="result-quality-delta">—</dd><small id="result-quality-scope">—</small></div>
             </dl>
           </section>
-
-          <details class="original-gate-disclosure">
-            <summary>Inspect a blocked predecessor to this accepted release</summary>
-            <div class="original-gate-body">
-              <div>
-                <p class="eyebrow">Fail-closed release history</p>
-                <h2 id="rejected-run-title">ArmProof rejected the first confirmation</h2>
-              </div>
-              <dl class="rejected-receipt">
-                <div><dt>Experiment</dt><dd id="rejected-run-id">—</dd></div>
-                <div><dt>Release decision</dt><dd class="failed-decision">BLOCKED</dd></div>
-                <div><dt>Missing response field</dt><dd><code>source_artifact_sha256</code></dd></div>
-                <div><dt>Required follow-up</dt><dd>Repeat the frozen rates with complete identity</dd></div>
-              </dl>
-              <p><strong id="accepted-run-id">—</strong> repeated those unchanged rates with the required identity on every response. That later receipt is the release evidence shown above.</p>
-            </div>
-          </details>
 
           <details class="experiment-method">
             <summary>Inspect rate selection and the long confirmation windows</summary>
@@ -367,9 +366,10 @@
         </header>
 
         <section id="optimization-summary" class="optimization-summary" aria-label="Measured Arm optimization results" hidden>
-          <div><span>Sustainable traffic</span><strong id="summary-capacity">—</strong><small id="summary-capacity-context">Same measured server and response-time rule</small></div>
+          <div><span>Model footprint</span><strong id="summary-footprint">—</strong><small>BF16 to INT4 artifact reduction</small></div>
+          <div><span>Arm compute</span><strong id="summary-capacity">—</strong><small id="summary-capacity-context">Same measured server and response-time rule</small></div>
           <div><span>Arm execution</span><strong id="summary-performix">—</strong><small>Performix function samples in <code>kai_*</code></small></div>
-          <div><span>Output quality</span><strong id="summary-quality">—</strong><small id="summary-quality-context">Measured on the frozen quality set</small></div>
+          <div><span>Final traffic floor</span><strong id="summary-final-capacity">—</strong><small id="summary-final-context">Memory recipe sustained under the same SLO</small></div>
         </section>
 
         <section id="performix-proof" class="proof-section performix-proof" aria-labelledby="performix-title" hidden>
@@ -388,6 +388,27 @@
           </div>
           <p id="performix-scope-note" class="capability-note"></p>
           <p id="performix-capability-note" class="capability-note"></p>
+        </section>
+
+        <section id="memory-proof" class="proof-section memory-proof" aria-labelledby="memory-proof-title" hidden>
+          <div class="section-heading">
+            <div><p class="eyebrow">Stage 3 · Graviton runtime</p><h2 id="memory-proof-title">Long tests determined which runtime recipe could ship</h2></div>
+            <span id="memory-confirmation-badge" class="source-chip">—</span>
+          </div>
+          <p id="memory-proof-copy" class="memory-proof-copy">—</p>
+          <div class="memory-proof-layout">
+            <div>
+              <h3>Short fixed-rate screen</h3>
+              <div id="memory-ablation" class="memory-ablation"></div>
+            </div>
+            <dl class="memory-outcome">
+              <div><dt>KleidiAI-only at target rate</dt><dd id="memory-baseline-p95">—</dd><small>median p95 across sustained windows</small></div>
+              <div><dt>Full runtime recipe</dt><dd id="memory-optimized-p95">—</dd><small>5/5 sustained windows passed</small></div>
+              <div><dt>Simplified recipe</dt><dd id="memory-simplified-p95">—</dd><small id="memory-simplified-result">—</small></div>
+              <div><dt>Additional traffic floor</dt><dd id="memory-capacity-gain">—</dd><small id="memory-capacity-detail">—</small></div>
+            </dl>
+          </div>
+          <ul id="memory-release-conditions" class="memory-release-conditions" aria-label="Memory optimization release checks"></ul>
         </section>
 
         <section class="deployment-promotion" aria-labelledby="promotion-title">
@@ -411,7 +432,7 @@
             <div><dt>Model identities</dt><dd><code id="promotion-model-hash">—</code></dd></div>
             <div><dt>Runtime artifacts</dt><dd id="promotion-runtime-match">—</dd></div>
             <div><dt>Arm placement</dt><dd id="promotion-arm-match">—</dd></div>
-            <div><dt>Changed control</dt><dd id="promotion-control-match">—</dd></div>
+            <div><dt>Released recipe</dt><dd id="promotion-control-match">—</dd></div>
           </dl>
         </section>
 
@@ -446,21 +467,22 @@
 
         <section class="proof-section" aria-labelledby="stack-title">
           <div class="section-heading compact-heading">
-            <div><p class="eyebrow">Arm optimization path</p><h2 id="stack-title">Same service, one Arm setting changed</h2></div>
+            <div><p class="eyebrow">Arm optimization path</p><h2 id="stack-title">Three measured layers, one released service</h2></div>
           </div>
           <ol class="stack-path arm-stack-path">
-            <li><span>1</span><div><strong id="stack-model">—</strong><small>Same model files and BANKING77 workload</small></div></li>
-            <li><span>2</span><div><strong id="stack-runtime">—</strong><small>Same runtime artifacts, instance, threads, and SLO</small></div></li>
-            <li><span>3</span><div><strong>Enable KleidiAI</strong><small>Change only <code>mlas.disable_kleidiai</code></small></div></li>
-            <li><span>4</span><div><strong id="stack-machine">—</strong><small id="capacity-range">—</small></div></li>
+            <li><span>1</span><div><strong id="stack-model">—</strong><small>BF16 deployment replaced with CPU INT4</small></div></li>
+            <li><span>2</span><div><strong id="stack-runtime">—</strong><small>Pinned Arm64 runtime and artifacts</small></div></li>
+            <li><span>3</span><div><strong>Arm I8MM compute</strong><small>KleidiAI accelerated the hot matrix path</small></div></li>
+            <li><span>4</span><div><strong>Graviton runtime recipe</strong><small>thread scheduling, mimalloc, and transparent huge pages</small></div></li>
+            <li><span>5</span><div><strong id="stack-machine">—</strong><small id="capacity-range">—</small></div></li>
           </ol>
         </section>
 
         <section class="proof-section migration-proof" aria-labelledby="migration-title">
           <div>
-            <p class="eyebrow">Separate deployment migration</p>
+            <p class="eyebrow">Stage 1 · Model footprint</p>
             <h2 id="migration-title">BF16 to INT4 reduces the deployment footprint</h2>
-            <p>These whole-deployment gains are useful, but they are not attributed to the KleidiAI switch above.</p>
+            <p>This prepares the model for CPU serving. The later KleidiAI and memory measurements keep these compression gains separate.</p>
           </div>
           <dl>
             <div><dt>Artifact size</dt><dd id="artifact-reduction">—</dd></div>

@@ -3,8 +3,8 @@
   "experiment_id": "EXP-2026-017",
   "title": "Simplified Graviton memory-recipe sustained confirmation",
   "hypothesis": "KleidiAI plus mimalloc and transparent huge pages, without the regressive ONNX Runtime thread overrides, will pass five 300-second windows at 0.62 requests/s under the unchanged 10-second p95 SLO.",
-  "status": "preregistered",
-  "decision": "pending",
+  "status": "completed",
+  "decision": "rejected_simplification",
   "independent_variable": "mimalloc preload and transparent huge-page policy layered on the accepted KleidiAI runtime",
   "controls": [
     "same c8g.4xlarge instance shape",
@@ -31,5 +31,14 @@
     "maximum_runtime_minutes": 40,
     "hard_project_ceiling_usd": 15.0
   },
-  "notes": "This is a one-sided simplification confirmation. It does not re-estimate the KleidiAI-only control, which was already measured in five matched EXP-2026-015 windows. It only determines whether the cleaner mimalloc-plus-THP recipe preserves the accepted 0.62 requests/s treatment result."
+  "outcome": {
+    "confirmation_windows": 5,
+    "passing_windows": 0,
+    "p95_ms": [10269.281152, 12287.705285, 13417.520415, 14935.519564, 11402.800394],
+    "errors": 0,
+    "outputs_equivalent": true,
+    "thp_restored": true,
+    "evidence_archive_sha256": "19c55410275b75d23c5dfce15ed0d735e2e608ca1106a8146bce6bcb12364761"
+  },
+  "notes": "The simplified mimalloc-plus-THP recipe failed all five sustained windows. This does not invalidate EXP-2026-015: the full thread, allocator, and huge-page recipe passed all five paired windows there. The release retains the complete sustained recipe and preserves this failed simplification as negative evidence."
 }

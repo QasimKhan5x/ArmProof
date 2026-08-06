@@ -34,6 +34,15 @@ class PublicSchemaTests(unittest.TestCase):
             for branch in schema["properties"]["evidence"]["oneOf"]
         }
         self.assertIn("kleidiai-confirmed-v2", adapter_constants)
+        confirmed = next(
+            branch for branch in schema["properties"]["evidence"]["oneOf"]
+            if branch.get("properties", {}).get("adapter", {}).get("const")
+            == "kleidiai-confirmed-v2"
+        )
+        self.assertIn("memory_optimization", confirmed["required"])
+        self.assertFalse(
+            confirmed["properties"]["memory_optimization"]["additionalProperties"]
+        )
         self.assertIn("publication_proof", schema["properties"])
         self.assertIn("supporting_evidence", schema["properties"])
 

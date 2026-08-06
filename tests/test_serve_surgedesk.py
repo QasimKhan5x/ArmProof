@@ -72,6 +72,24 @@ class SurgeDeskGatewayTests(unittest.TestCase):
             "instance_identity_source": "aws-imdsv2",
             "baseline_control": "1",
             "optimized_control": "0",
+            "memory": {
+                "baseline": {
+                    "allocator": "system",
+                    "transparent_huge_pages": "always",
+                },
+                "optimized": {
+                    "allocator": "mimalloc",
+                    "transparent_huge_pages": "always",
+                },
+            },
+            "runtime_tuning": {
+                "baseline": {},
+                "optimized": {
+                    "session.dynamic_block_base": "4",
+                    "session.intra_op.spin_backoff_max": "8",
+                    "session.intra_op.spin_duration_us": "1000",
+                },
+            },
         }
         audited = {
             "model_identity": "b" * 64,
@@ -89,6 +107,8 @@ class SurgeDeskGatewayTests(unittest.TestCase):
                 "baseline": {"mlas.disable_kleidiai": "1"},
                 "optimized": {"mlas.disable_kleidiai": "0"},
             },
+            "memory": live_identity["memory"],
+            "runtime_tuning": live_identity["runtime_tuning"],
         }
         with self.assertRaisesRegex(ValueError, "fresh passing audit"):
             state.promote(live_identity)
@@ -152,6 +172,8 @@ class SurgeDeskGatewayTests(unittest.TestCase):
                 "instance_type": live_identity["instance_type"],
                 "instance_identity_source": live_identity["instance_identity_source"],
                 "optimization_control": {"mlas.disable_kleidiai": "0"},
+                "memory_configuration": live_identity["memory"]["optimized"],
+                "runtime_tuning": live_identity["runtime_tuning"]["optimized"],
             }),
             "EXP-2026-014",
         )
@@ -168,6 +190,8 @@ class SurgeDeskGatewayTests(unittest.TestCase):
             "instance_type": live_identity["instance_type"],
             "instance_identity_source": live_identity["instance_identity_source"],
             "optimization_control": {"mlas.disable_kleidiai": "0"},
+            "memory_configuration": live_identity["memory"]["optimized"],
+            "runtime_tuning": live_identity["runtime_tuning"]["optimized"],
         }
         with self.assertRaisesRegex(ValueError, "drifted from audited release"):
             state.authorize_active_route("optimized", drifted)
@@ -270,6 +294,15 @@ class SurgeDeskGatewayTests(unittest.TestCase):
             "instance_type": "c8g.4xlarge",
             "instance_identity_source": "aws-imdsv2",
             "optimization_control": {"mlas.disable_kleidiai": "0"},
+            "runtime_tuning": {
+                "session.dynamic_block_base": "4",
+                "session.intra_op.spin_backoff_max": "8",
+                "session.intra_op.spin_duration_us": "1000",
+            },
+            "memory_configuration": {
+                "allocator": "mimalloc",
+                "transparent_huge_pages": "always",
+            },
             "threads": 8,
         }).encode())
         config = {
@@ -277,6 +310,15 @@ class SurgeDeskGatewayTests(unittest.TestCase):
             "expected_backend": "kleidiai-enabled",
             "expected_cores": frozenset(range(8, 16)),
             "expected_control": "0",
+            "expected_memory": {
+                "allocator": "mimalloc",
+                "transparent_huge_pages": "always",
+            },
+            "expected_runtime_tuning": {
+                "session.dynamic_block_base": "4",
+                "session.intra_op.spin_backoff_max": "8",
+                "session.intra_op.spin_duration_us": "1000",
+            },
         }
         with patch("scripts.serve_surgedesk.urllib.request.urlopen", return_value=response):
             verified, status, payload = _probe_lane(config)
@@ -301,6 +343,10 @@ class SurgeDeskGatewayTests(unittest.TestCase):
             "model_identity": "a" * 64,
             "source_artifact_sha256": "c" * 64,
             "optimization_control": {"mlas.disable_kleidiai": "1"},
+            "memory_configuration": {
+                "allocator": "system",
+                "transparent_huge_pages": "always",
+            },
         })
         optimized = (True, "verified", {
             **common,

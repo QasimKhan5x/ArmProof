@@ -16,7 +16,8 @@ KleidiAI evidence adapter
      |-- re-derive fixed-SLO boundaries from request JSONL
      |-- re-derive quality from row-level evidence
      |-- validate positive/negative Arm callchains
-     `-- cross-check Linux perf with matched Arm Performix attribution
+     |-- cross-check Linux perf with matched Arm Performix attribution
+     `-- verify runtime-treatment screen, sustained proof, and rejected candidate
      |
      v
 contract identity binding
@@ -63,6 +64,8 @@ closed-loop smoke, fixed-rate SLO and saturation discovery.
 
 - Process collector: lifecycle, exit status and logs.
 - Memory collector: timestamped RSS/PSS from `smaps_rollup`.
+- Runtime-memory collector: allocator identity, transparent-huge-page policy,
+  fixed-rate request rows, output digests, and restoration of the host policy.
 - Performance collector: request latency, accepted throughput and errors.
 - Arm collector: two-layer attribution. Linux `perf` supplies an independent
   cycle-callchain record; Arm Performix supplies matched native Code Hotspots,
@@ -83,6 +86,15 @@ the native Code Hotspots ZIPs, checks matched commands and CPU identity, and
 recomputes the positive/negative `kai_*` sample attribution on every CI run.
 Its runtime-lock digest, model revision, workload reference and matched
 environment are also bound to the sustained release comparison.
+
+The reference adapter then evaluates a separate whole-runtime layer. It keeps
+the accepted KleidiAI path active and combines three evidence roles: a paired
+sustained comparison, a four-way short treatment screen, and a sustained test
+that rejected the tempting simplified recipe. Only the complete ONNX Runtime
+thread-scheduling, mimalloc, and transparent-huge-page recipe passed all five
+long windows. This layer is not presented as an ISA-only KleidiAI effect. Its
+experiment IDs, archive digests, output identity, exact session options,
+allocator, host policy, rate, SLO, and window counts are verified independently.
 
 ### Quality Evaluator
 
@@ -116,6 +128,11 @@ and required identity mismatches stop before a release decision is emitted.
 CLI, GitHub, the report and SurgeDesk consume the same verification, derivation
 and policy path. SurgeDesk rebuilds its payload through that path; it does not
 contain a hardcoded passing decision.
+
+The live Phi-4 service reports its ONNX Runtime session tuning, allocator, and
+selected transparent-huge-page policy alongside the model, runtime, instance,
+CPU affinity, and KleidiAI control. The gateway checks the expected baseline and
+optimized recipe identities before promotion and on every optimized response.
 
 ## Repository Structure
 
