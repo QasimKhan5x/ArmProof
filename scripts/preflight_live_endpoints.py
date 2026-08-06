@@ -77,7 +77,7 @@ def _request(
     prompt: str,
     timeout: float,
 ) -> LiveResult:
-    request_id = f"demo-{expected_backend}-{uuid.uuid4().hex[:8]}"
+    request_id = f"preflight-{expected_backend}-{uuid.uuid4().hex[:8]}"
     sample = send_http_json(
         endpoint,
         RequestInput(

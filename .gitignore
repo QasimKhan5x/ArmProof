@@ -13,6 +13,7 @@ test-results/
 models/
 *.gguf
 *.safetensors
+/runtime-checkpoints.tar.gz
 # Keep manifests, summaries and claim ledgers versioned. Put external or
 # license-restricted payloads under a run's large/ directory and reference
 # their immutable URL and checksum from the manifest.

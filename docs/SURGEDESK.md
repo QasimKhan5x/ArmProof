@@ -1,4 +1,4 @@
-# SurgeDesk Product And Demo Guide
+# SurgeDesk Product Guide
 
 SurgeDesk connects a practical support workflow to the deployment decision for
 an Arm-optimized cloud model.
@@ -6,7 +6,7 @@ an Arm-optimized cloud model.
 ## Public Evidence Mode
 
 ```bash
-python3.12 scripts/build_surgedesk_demo.py --verify
+python3.12 scripts/build_surgedesk.py --verify
 python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
@@ -19,7 +19,7 @@ native profiler results without an AWS dependency.
 
 ## Live Product Flow
 
-The recording path connects two exact 16-thread Graviton4 treatment services:
+Connected mode uses two exact 16-thread Graviton4 services:
 
 ```bash
 python3.12 scripts/serve_surgedesk.py --port 8765 \
@@ -40,12 +40,10 @@ The state transition is:
 5. The route changes to the treatment only after the audit and deployment checks pass.
 6. A different free-form message runs through the treatment and records the audit ID.
 
-After recording the three-minute demo, the separate adoption check uses
-`armproof init` to scaffold another bounded classification service. Its empty
-state deliberately blocks in CI until that project supplies measured evidence.
-
-The complete host setup, expected outputs and narration are in
-[`submission/DEMO_SCRIPT.md`](../submission/DEMO_SCRIPT.md).
+The adoption path uses `armproof init` to scaffold another bounded
+classification service. Its empty state deliberately blocks in CI until that
+project supplies measured evidence. Complete host setup and expected outputs
+are in [Live Graviton Deployment](LIVE_DEPLOYMENT.md).
 
 ## Evidence Shown In The App
 
@@ -71,8 +69,8 @@ The expandable detail also includes the exploratory direct-inference range
 across four fixed input shapes and labels it separately from confirmed capacity.
 
 The application page stays focused on support routing and deployment
-activation. The detailed ledger and adoption material remain available for a
-judge or developer who wants to inspect them.
+activation. The detailed ledger and adoption material remain available for
+developers who want to inspect them.
 
 ## Identity Binding
 

@@ -14,8 +14,9 @@ PYTHONPATH=src python3.12 -m armproof.cli ci \
   examples/armproof-reference/armproof.json
 ```
 
-`make check` validates durable context, imported evidence, unit/contract tests,
-and Python compilation. CI executes it on x86 and Arm64 runners.
+`make check` validates imported evidence, generated data, unit and contract
+tests, SurgeDesk artifacts, and Python compilation. CI executes it on x86 and
+Arm64 runners.
 
 The reusable Action consumes that same config. Pass, measured-fail and
 missing-attribution fixtures are under `examples/fixture-*`.
@@ -34,7 +35,7 @@ evidence, derives capacity, quality and Arm attribution, binds identities to the
 contract, then evaluates policy. Print the canonical release receipt with:
 
 ```bash
-python3.12 scripts/demo_release_gate.py
+python3.12 scripts/verify_reference_release.py
 ```
 
 ## Capacity Harness
@@ -52,12 +53,13 @@ PYTHONPATH=src python3.12 -m armproof.cli capacity \
 ```
 
 This command is a harness smoke path, not accepted benchmark evidence. Accepted
-runs must follow `docs/BENCHMARK_PROTOCOL.md` and `docs/CAPACITY_VALIDATION.md`.
+runs must follow `docs/BENCHMARK_PROTOCOL.md`.
 
 ## Network Integration Test
 
-The default suite mocks localhost HTTP because some agent sandboxes prohibit
-loopback connections. On a normal host, run the real subprocess test with:
+The default suite mocks localhost HTTP because some restricted CI environments
+prohibit loopback connections. On a normal host, run the real subprocess test
+with:
 
 ```bash
 ARMPROOF_NETWORK_TESTS=1 PYTHONPATH=src python3.12 -m unittest \

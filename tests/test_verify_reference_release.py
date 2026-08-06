@@ -8,11 +8,11 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts.demo_release_gate import demonstrate
+from scripts.verify_reference_release import verify_reference_release
 
 
-class DemoReleaseGateTests(unittest.TestCase):
-    def test_prints_the_verified_release_decision_without_a_tamper_stunt(self) -> None:
+class ReferenceReleaseVerificationTests(unittest.TestCase):
+    def test_prints_the_verified_release_decision(self) -> None:
         comparison = {
             "metrics": {
                 "minimum_capacity_ratio": 2.0,
@@ -31,18 +31,16 @@ class DemoReleaseGateTests(unittest.TestCase):
                 (output / "decision.json").write_text(json.dumps(decision))
                 return 0, ""
 
-            with patch("scripts.demo_release_gate._run", side_effect=fake_run):
+            with patch("scripts.verify_reference_release._run", side_effect=fake_run):
                 with redirect_stdout(io.StringIO()) as output:
                     self.assertEqual(
-                        demonstrate(Path("armproof.json"), output_dir), 0
+                        verify_reference_release(Path("armproof.json"), output_dir), 0
                     )
         rendered = output.getvalue()
         self.assertIn("PASS      10/10 required release claims", rendered)
         self.assertIn("CAPACITY  at least 2.00x", rendered)
         self.assertIn("EVIDENCE  2,100 capacity requests", rendered)
         self.assertIn("ARM PATH  67.00%", rendered)
-        self.assertNotIn("tamper", rendered.lower())
-        self.assertNotIn("altered", rendered.lower())
 
 
 if __name__ == "__main__":

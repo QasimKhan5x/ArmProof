@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = ROOT / "scripts" / "demo_live_compare.py"
+SCRIPT = ROOT / "scripts" / "preflight_live_endpoints.py"
 
 
 class _Endpoint:
@@ -91,10 +91,10 @@ class _Endpoint:
         self.thread.join(timeout=2)
 
 
-class LiveComparisonTests(unittest.TestCase):
+class LiveEndpointPreflightTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        spec = importlib.util.spec_from_file_location("demo_live_compare", SCRIPT)
+        spec = importlib.util.spec_from_file_location("preflight_live_endpoints", SCRIPT)
         assert spec and spec.loader
         cls.module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cls.module)

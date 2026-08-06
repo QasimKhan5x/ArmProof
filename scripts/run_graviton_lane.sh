@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-LANE="${1:?usage: run_live_demo_lane.sh baseline|optimized}"
+LANE="${1:?usage: run_graviton_lane.sh baseline|optimized}"
 ROOT="${2:-$HOME/ArmProof}"
 VENV="${3:-$HOME/armproof-venv}"
 MODELS="${4:-$HOME/armproof-models}"

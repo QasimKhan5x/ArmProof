@@ -1,7 +1,7 @@
 # Technical Evidence Map
 
 This page maps each public result to the raw artifact and code that verifies it.
-The submission text and screenshots are summaries; the release command derives
+The README and screenshots are summaries; the release command derives
 its decision again from the files below.
 
 ## Measured Environment

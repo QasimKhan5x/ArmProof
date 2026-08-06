@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Assemble static judge site
+      - name: Assemble static project site
         run: |
           mkdir -p _site
           cp site/index.html _site/index.html

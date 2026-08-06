@@ -7,14 +7,14 @@ cloud access. Its local gateway re-derives the release evidence when requested,
 and optional live endpoints add real Arm64 requests before and after activation:
 
 ```bash
-python3.12 scripts/build_surgedesk_demo.py --verify
+python3.12 scripts/build_surgedesk.py --verify
 python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
 Open `http://127.0.0.1:8765/surgedesk/#triage`, route a request, then continue
 through Release evidence and Traffic switch.
 The views are directly addressable as `#triage`, `#surge`, and `#proof`. See
-[`SURGEDESK_DEMO.md`](SURGEDESK_DEMO.md) for provenance and narration.
+[`SURGEDESK.md`](SURGEDESK.md) for provenance and the live product flow.
 
 ## Evaluate The Reference
 
@@ -36,7 +36,7 @@ claim failed or is unknown, and `1` means the inputs could not be evaluated.
 Print the same release decision consumed by SurgeDesk and CI:
 
 ```bash
-python3.12 scripts/demo_release_gate.py
+python3.12 scripts/verify_reference_release.py
 ```
 
 Use the normalized negative fixtures to inspect policy fail-closed behavior:

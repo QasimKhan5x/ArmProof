@@ -1,4 +1,4 @@
-# Judge Guide
+# Validation Guide
 
 The checked-in evidence can be evaluated without AWS credentials, paid
 infrastructure or model downloads.
@@ -6,7 +6,7 @@ infrastructure or model downloads.
 SurgeDesk is the banking-support reference application. ArmProof is its
 reusable Arm optimization release gate.
 
-## 60-Second Product Path
+## Product Walkthrough
 
 1. Open <https://qasimkhan5x.github.io/ArmProof/surgedesk/#triage>.
 2. Inspect one clearly labeled stored BANKING77 model response, choose the final
@@ -19,11 +19,11 @@ reusable Arm optimization release gate.
    profile and identity-bound live traffic control. Expand technical details
    for the exploratory fixed-shape result, quality limits and GitHub Action.
 
-The public page uses checked-in evidence. In the video, customer requests execute
-live on Graviton, the release decision is recalculated from the checked-in
-measurements, and the full ten-window benchmark remains a separate documented
-recollection workflow. The video ends with a different live request on the
-optimized route.
+The public page uses checked-in evidence. A connected deployment can execute
+requests on matched Graviton services, recalculate the release decision from
+the checked-in measurements, and promote the optimized route only after its
+runtime identity matches the accepted evidence. The full ten-window benchmark
+remains a separate documented recollection workflow.
 
 ## Recompute The Release
 
@@ -50,13 +50,13 @@ Expected behavior:
 ## Run SurgeDesk Locally
 
 ```bash
-python3.12 scripts/build_surgedesk_demo.py --verify
+python3.12 scripts/build_surgedesk.py --verify
 python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
 Open <http://127.0.0.1:8765/surgedesk/>.
 
-`build_surgedesk_demo.py --verify` independently derives the JSON used by the
+`build_surgedesk.py --verify` independently derives the JSON used by the
 page and compares it byte for byte with the checked-in payload. The local
 **Recompute release decision** action runs the same analysis again and displays
 the newly recalculated result.

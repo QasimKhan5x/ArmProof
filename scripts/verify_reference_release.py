@@ -24,9 +24,9 @@ def _run(config: Path, output: Path) -> tuple[int, str]:
     return status, stderr.getvalue().strip()
 
 
-def demonstrate(
+def verify_reference_release(
     config: Path = ROOT / "examples/armproof-reference/armproof.json",
-    output: Path = ROOT / "build/demo-release-gate",
+    output: Path = ROOT / "build/reference-release",
 ) -> int:
     status, error = _run(config, output)
     if status != 0:
@@ -58,4 +58,4 @@ def demonstrate(
 
 
 if __name__ == "__main__":
-    raise SystemExit(demonstrate())
+    raise SystemExit(verify_reference_release())

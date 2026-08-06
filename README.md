@@ -10,11 +10,12 @@ KleidiAI-optimized service. Each ticket records which service handled it.
 
 **Challenge track:** Cloud AI, Arm Create AI Optimization Challenge.
 
-## Judge In Five Minutes
+![SurgeDesk compares the active service with the Arm-optimized candidate](docs/assets/01-live-shadow.png)
 
-The shortest evaluation path is
-[`submission/JUDGE_GUIDE.md`](submission/JUDGE_GUIDE.md). To recompute the
-release directly:
+## Verify In Five Minutes
+
+The shortest evaluation path is [`docs/VALIDATION.md`](docs/VALIDATION.md). To
+recompute the release directly:
 
 ```bash
 git clone https://github.com/QasimKhan5x/ArmProof.git
@@ -108,7 +109,7 @@ queue, and this routing feature is separate from the Arm performance result.
 
 ## What Verification Checks
 
-The judge command verifies the archive ledgers, re-derives end-to-end capacity and quality from
+The verification command checks the archive ledgers, re-derives end-to-end capacity and quality from
 raw rows, parses native Arm Performix exports, binds the observed treatment
 identities to `confirmed-contract.json`, and writes:
 
@@ -125,12 +126,12 @@ was invalid.
 ## Run The Product
 
 ```bash
-python3.12 scripts/build_surgedesk_demo.py --verify
+python3.12 scripts/build_surgedesk.py --verify
 python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
 Open <http://127.0.0.1:8765/surgedesk/>. This local path uses the checked-in
-evidence and recorded BANKING77 examples, so judges can inspect the workflow
+evidence and recorded BANKING77 examples, so the workflow can be inspected
 without AWS credentials or model downloads.
 
 The three views have stable URLs:
@@ -139,10 +140,10 @@ The three views have stable URLs:
 - `#surge`: preregistered capacity audit and raw outcomes
 - `#proof`: live traffic control, optimization summary and Arm Performix evidence
 
-The full recording uses a real serving-plus-shadow comparison before the route
-cutover and a different real Graviton request after it.
-The exact commands and expected outputs are in
-[`submission/DEMO_SCRIPT.md`](submission/DEMO_SCRIPT.md).
+The connected deployment uses a real serving-plus-shadow comparison before the
+route cutover and routes subsequent requests through the approved Graviton
+service. Setup commands and expected outputs are in
+[`docs/LIVE_DEPLOYMENT.md`](docs/LIVE_DEPLOYMENT.md).
 
 ## Reuse ArmProof
 
@@ -227,11 +228,10 @@ pixels.
 
 ## Repository Map
 
-- [Documentation map](docs/README.md): one entry point for judge, adopter, and maintainer docs
-- [`submission/DEVPOST_SUBMISSION.md`](submission/DEVPOST_SUBMISSION.md): copy-ready submission
-- [`submission/DEMO_SCRIPT.md`](submission/DEMO_SCRIPT.md): setup and three-minute recording sequence
-- [`submission/JUDGE_GUIDE.md`](submission/JUDGE_GUIDE.md): fastest evaluation path
-- [`submission/TECHNICAL_EVIDENCE.md`](submission/TECHNICAL_EVIDENCE.md): claim-to-artifact map
+- [Documentation map](docs/README.md): entry point for users and maintainers
+- [Validation guide](docs/VALIDATION.md): fastest reproducible evaluation path
+- [Technical evidence](docs/EVIDENCE.md): claim-to-artifact map
+- [Live deployment](docs/LIVE_DEPLOYMENT.md): matched Graviton service setup
 - [`examples/armproof-reference/`](examples/armproof-reference/): release contract and config
 - [`ops/experiments/`](ops/experiments/): preregistered experiments
 - [`ops/evidence/`](ops/evidence/): accepted and rejected evidence history

@@ -33,7 +33,7 @@ def main() -> int:
     if args.verify:
         if not output.exists() or output.read_text(encoding="utf-8") != rendered:
             print(
-                "SurgeDesk generated artifacts are stale; run scripts/build_surgedesk_demo.py",
+                "SurgeDesk generated artifacts are stale; run scripts/build_surgedesk.py",
                 file=sys.stderr,
             )
             return 1
