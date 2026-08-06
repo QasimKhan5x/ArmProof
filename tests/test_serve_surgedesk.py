@@ -8,14 +8,54 @@ from unittest.mock import patch
 from scripts.serve_surgedesk import (
     DeploymentState,
     _match_lane_identity,
+    _post_audit,
     _probe_lane,
     _response_identity_matches,
+    _stream_audit,
     _upstream_request,
     handler_for,
 )
 
 
 class SurgeDeskGatewayTests(unittest.TestCase):
+    def test_audit_exceptions_revoke_an_active_optimized_route(self) -> None:
+        class Handler:
+            def __init__(self) -> None:
+                self.wfile = io.BytesIO()
+                self.close_connection = False
+
+            def send_response(self, _status: int) -> None:
+                return
+
+            def send_header(self, _name: str, _value: str) -> None:
+                return
+
+            def end_headers(self) -> None:
+                return
+
+        for audit_path in ("post", "stream"):
+            with self.subTest(audit_path=audit_path):
+                state = DeploymentState(
+                    active_lane="optimized",
+                    audit_experiment_id="EXP-2026-014",
+                    release_ready=True,
+                    promoted_at="2026-08-06T00:00:00Z",
+                    audited_deployment={"model_identity": "a" * 64},
+                )
+                handler = Handler()
+                with patch(
+                    "scripts.serve_surgedesk.build_surgedesk_payload",
+                    side_effect=ValueError("invalid evidence"),
+                ):
+                    if audit_path == "post":
+                        with self.assertRaisesRegex(ValueError, "invalid evidence"):
+                            _post_audit(handler, state)
+                    else:
+                        _stream_audit(handler, state)
+                        self.assertIn(b'"type":"error"', handler.wfile.getvalue())
+                self.assertEqual(state.snapshot()["active_lane"], "baseline")
+                self.assertFalse(state.snapshot()["release_ready"])
+
     def test_deployment_cannot_promote_before_a_passing_fresh_audit(self) -> None:
         state = DeploymentState(active_lane="baseline")
         live_identity = {

@@ -422,8 +422,12 @@ def _active_route(
 
 def _post_audit(handler: Any, deployment: DeploymentState) -> None:
     started = time.perf_counter()
-    payload = build_surgedesk_payload(ROOT)
-    receipt = _audit_receipt(payload, (time.perf_counter() - started) * 1000)
+    try:
+        payload = build_surgedesk_payload(ROOT)
+        receipt = _audit_receipt(payload, (time.perf_counter() - started) * 1000)
+    except Exception:
+        deployment.record_audit({"passed": False})
+        raise
     deployment.record_audit(receipt)
     handler._json(HTTPStatus.OK, receipt)
 
@@ -651,6 +655,7 @@ def _stream_audit(handler: Any, deployment: DeploymentState) -> None:
         deployment.record_audit(receipt)
         emit("result", {"receipt": receipt})
     except Exception as exc:
+        deployment.record_audit({"passed": False})
         emit("error", {"error": str(exc)})
 
 

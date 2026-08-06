@@ -15,6 +15,24 @@
     "treatment_label": "Optimized passes"
   },
   "confirmation_seconds": 500,
+  "cpu_affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
   "decision": {
     "claims": [
       {
@@ -111,6 +129,7 @@
       "valid_boundary_confirmations": true
     }
   },
+  "model_identity": "d86ae7ca1f12b2ae4abe70abb856cb9c688908477a7de653467623764ab5c687",
   "only_changed_control": "mlas.disable_kleidiai",
   "passed": true,
   "quality_comparison": {
@@ -122,6 +141,7 @@
   "raw_confirmation_samples": 2100,
   "raw_quality_checksummed_files": 111,
   "raw_quality_outputs": 1540,
+  "runtime_version": "0.15.0.dev0",
   "schema_version": "1.0.0",
   "trial_matrix": [
     {

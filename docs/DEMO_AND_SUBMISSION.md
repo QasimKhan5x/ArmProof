@@ -22,8 +22,8 @@ the candidate as a sequential shadow copy. After the control result is routed,
 the app recomputes the accepted release decision from published capacity,
 quality, and native Arm Performix evidence. That decision unlocks the measured
 KleidiAI treatment, and a different typed message is routed through the newly
-activated service. The final action generates a starter for another service and
-shows its expected missing-evidence CI block.
+activated service. The recording ends on that optimized route. ArmProof's
+separate adoption check remains documented after the recording steps.
 
 ## Submission Claim Rules
 

@@ -135,7 +135,7 @@ function renderProofClaims() {
 
 function renderProofDecision(state, detail = "") {
   proofState = state;
-  if (["recorded", "pending"].includes(state)) proofClaims = data.proof.claims;
+  if (["recorded", "pending", "active"].includes(state)) proofClaims = data.proof.claims;
   const header = elements["proof-decision-title"].closest(".proof-decision");
   const mark = header.querySelector(".decision-mark");
   header.classList.toggle("failed", state === "failed");
@@ -157,6 +157,12 @@ function renderProofDecision(state, detail = "") {
     setText("proof-decision-status", "BLOCKED");
     setText("environment-label", "Current evidence audit blocked");
     mark.textContent = "×";
+  } else if (state === "active") {
+    setText("proof-decision-source", "Current gateway release");
+    setText("proof-decision-title", "The optimized service has an active ArmProof release");
+    setText("proof-decision-detail", detail);
+    setText("proof-decision-status", "ACTIVE RELEASE");
+    mark.textContent = "✓";
   } else if (state === "pending") {
     setText("proof-decision-source", "Current release check");
     setText("proof-decision-title", "The optimized candidate is awaiting evidence validation");
@@ -531,7 +537,18 @@ async function configureLiveMode() {
       }
     }
     if (status.live_available && status.matched_lanes_available) {
-      renderProofDecision("pending");
+      if (
+        deploymentStatus.active_lane === "optimized"
+        && deploymentStatus.release_ready
+        && deploymentStatus.audit_experiment_id
+      ) {
+        renderProofDecision(
+          "active",
+          `${deploymentStatus.audit_experiment_id} remains authorized by this gateway session.`,
+        );
+      } else {
+        renderProofDecision("pending");
+      }
       elements["live-mode"].checked = true;
       setInferenceMode("live");
     }

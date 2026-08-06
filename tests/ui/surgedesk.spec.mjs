@@ -228,11 +228,13 @@ test("a rejected optimized response refreshes the UI to the standard route", asy
   });
 
   await page.goto(appUrl);
+  await expect(page.locator("#proof-decision-status")).toHaveText("ACTIVE RELEASE");
   await page.locator("#customer-message").fill("My card was stolen.");
   await page.getByRole("button", { name: "Run optimized live route" }).click();
   await expect(page.locator("#intake-error")).toContainText("route_runtime_identity_changed");
   await expect(page.locator("#workspace-serving")).toContainText("Standard service");
   await expect(page.locator("#workspace-release-status")).toContainText("Waiting for the measured release check");
+  await expect(page.locator("#proof-decision-status")).toHaveText("AWAITING CHECK");
 });
 
 
