@@ -16,7 +16,7 @@ from armproof.scaffold_assets import (
 )
 
 
-ACTION_COMMIT = "6a2785eccca0e42d36fcf37919bfc83dfca3ea6a"
+ACTION_COMMIT = "32c1ad339b2a09d66af73aa391ed311962e215c7"
 
 
 def _write_json(path: Path, payload: object) -> None:

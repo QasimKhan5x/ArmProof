@@ -407,7 +407,7 @@
     "model": "Phi-4 Mini",
     "model_id": "microsoft/Phi-4-mini-instruct-onnx",
     "optimization": "KleidiAI disabled -> enabled",
-    "release_action": "QasimKhan5x/ArmProof@v0.9.0",
+    "release_action": "QasimKhan5x/ArmProof@v1.0.0",
     "release_experiment_id": "EXP-2026-014",
     "release_history": {
       "accepted_experiment_id": "EXP-2026-014",
@@ -415,7 +415,7 @@
       "rejected_experiment_id": "EXP-2026-012",
       "rejection_reason": "Successful responses omitted the preregistered source_artifact_sha256 identity field, so the archive could not be released despite matching the capacity outcome."
     },
-    "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v0.9.0",
+    "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v1.0.0",
     "report_path": "../report/index.html",
     "runtime": "ONNX Runtime GenAI INT4"
   },

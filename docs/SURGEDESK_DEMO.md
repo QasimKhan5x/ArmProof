@@ -39,8 +39,10 @@ The state transition is:
 4. The gateway probes both services and compares them with the audited deployment.
 5. The route changes to the treatment only after the audit and deployment checks pass.
 6. A different free-form message runs through the treatment and records the audit ID.
-7. ArmProof generates a starter for another bounded classification service and
-   runs its empty state through CI, which blocks until evidence exists.
+
+After recording the three-minute demo, the separate adoption check uses
+`armproof init` to scaffold another bounded classification service. Its empty
+state deliberately blocks in CI until that project supplies measured evidence.
 
 The complete host setup, expected outputs and narration are in
 [`submission/DEMO_SCRIPT.md`](../submission/DEMO_SCRIPT.md).

@@ -12,7 +12,7 @@ python3.12 scripts/serve_surgedesk.py --port 8765
 ```
 
 Open `http://127.0.0.1:8765/surgedesk/#triage`, route a request, then continue
-through Capacity audit and Release gate.
+through Release evidence and Traffic switch.
 The views are directly addressable as `#triage`, `#surge`, and `#proof`. See
 [`SURGEDESK_DEMO.md`](SURGEDESK_DEMO.md) for provenance and narration.
 
@@ -57,7 +57,7 @@ Create an `armproof.json` matching
 [`schemas/ci-config.schema.json`](../schemas/ci-config.schema.json), then add:
 
 ```yaml
-- uses: QasimKhan5x/ArmProof@v0.9.0
+- uses: QasimKhan5x/ArmProof@v1.0.0
   with:
     config: armproof.json
     output: build/armproof-report

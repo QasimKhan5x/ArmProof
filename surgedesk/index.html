@@ -74,7 +74,7 @@
 
           <section class="live-deployment-strip" aria-label="Current AI deployment">
             <div><span>Serving this request</span><strong id="workspace-serving">Stored model output</strong></div>
-            <div><span>Arm optimization candidate</span><strong id="workspace-candidate">Measured candidate</strong></div>
+            <div><span id="workspace-candidate-label">Arm optimization candidate</span><strong id="workspace-candidate">Measured candidate</strong></div>
             <div><span>ArmProof gate</span><strong id="workspace-release-status">Evidence check required</strong></div>
           </section>
 
@@ -294,7 +294,7 @@
           </details>
 
           <details class="experiment-method">
-            <summary>Inspect rate selection and all ten long confirmation windows</summary>
+            <summary>Inspect rate selection and the long confirmation windows</summary>
             <div class="experiment-method-body">
               <section class="rate-selection" aria-labelledby="rate-selection-title">
                 <div>

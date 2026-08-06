@@ -84,7 +84,7 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator("#audit-progress li")).toHaveCount(5);
   await expect(page.locator('#audit-progress li[data-stage="quality"]')).toContainText("Quality outputs checked");
   await expect(page.locator('#audit-progress li[data-stage="performix"]')).toContainText("Arm profiler evidence parsed");
-  await expect(page.locator('#audit-progress li[data-stage="requests"]')).toContainText("Ten long capacity windows");
+  await expect(page.locator('#audit-progress li[data-stage="requests"]')).toContainText("10 500-second traffic windows");
   await expect(page.locator("#audit-progress time")).toHaveCount(5);
   await expect(page.locator("#audit-receipt")).toBeVisible();
   await expect(page.locator("#opening-capacity")).toHaveText("≥2.0×");
@@ -134,6 +134,8 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator("#promotion-control-match")).toContainText("1 → 0");
   await expect(page.locator("#promotion-candidate-label")).toHaveText("Previous route");
   await expect(page.locator("#opening-status")).toContainText("approved · serving now");
+  await expect(page.locator("#workspace-candidate-label")).toHaveText("Arm optimization status");
+  await expect(page.locator("#workspace-candidate")).toHaveText("Released · serving live traffic");
   await expect(page.locator("#route-next-request")).toBeVisible();
   expect(await overflowingElements(page)).toEqual([]);
   await page.setViewportSize({ width: 1440, height: 1000 });

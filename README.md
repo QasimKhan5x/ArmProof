@@ -184,7 +184,7 @@ endpoint compatibility; it does not claim a llama.cpp performance result.
 Use ArmProof in GitHub Actions:
 
 ```yaml
-- uses: QasimKhan5x/ArmProof@v0.9.0
+- uses: QasimKhan5x/ArmProof@v1.0.0
   with:
     config: armproof.json
     contract-sha256: REPLACE_WITH_THE_PROTECTED_CONTRACT_DIGEST

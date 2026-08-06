@@ -29,7 +29,7 @@ file and receives a GitHub Check, explanation, report and deployment recipe.
 Required proof:
 
 - one-command reference run;
-- one continuous Triage -> Surge -> Release proof application path;
+- one continuous Support -> Release evidence -> Traffic switch application path;
 - stable failure reason codes;
 - useful failed-state UX;
 - documentation for replacing workload and adapter; and
@@ -63,8 +63,9 @@ The three-minute story is operational and causal:
    and substantial KleidiAI execution in the treatment.
 5. Activation rechecks the model, wheel ledger, AWS instance and Arm placement;
    a different real request then records the optimized lane and audit ID.
-6. The closing action generates and validates a downloadable contract,
-   workload templates, evidence checklist and GitHub Action.
+6. The video closes on a second support request served by the newly approved
+   optimized route. After recording, `armproof init` separately validates the
+   reusable contract, workload templates, evidence checklist and GitHub Action.
 
 The audience should understand the application within 10 seconds and the Arm
 optimization within 45 seconds. The report supports this reveal; it is not the

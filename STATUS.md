@@ -65,7 +65,7 @@ separate from the sustained-capacity claim.
 ## Remaining Owner Work
 
 The repository, public artifacts, screenshots, submission copy, and recording
-runbook are ready for the `v0.9.0` release. The owner must record and publicly
+runbook are ready for the `v1.0.0` release. The owner must record and publicly
 upload the video, replace the Devpost video placeholder, paste the prepared
 submission, and complete the logged-out link check.
 

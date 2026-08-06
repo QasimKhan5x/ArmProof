@@ -85,7 +85,7 @@ class CiCommandTests(unittest.TestCase):
                 encoding="utf-8"
             )
             self.assertIn(
-                "QasimKhan5x/ArmProof@6a2785eccca0e42d36fcf37919bfc83dfca3ea6a # v0.9.0",
+                "QasimKhan5x/ArmProof@32c1ad339b2a09d66af73aa391ed311962e215c7 # v1.0.0",
                 workflow,
             )
             self.assertIn("fetch-depth: 0", workflow)
@@ -99,7 +99,7 @@ class CiCommandTests(unittest.TestCase):
                 tree_digest.update(b"\0")
             self.assertEqual(
                 tree_digest.hexdigest(),
-                "4290623e388d5a69c7ca0c882995def477c1bc4458e81ab0888d433fcd227704",
+                "362c6e498b6a8e05175b507ed25e4ac8ab85c68ad696dcd2ca3029c65a24b578",
             )
 
             original_contract_digest = hashlib.sha256(

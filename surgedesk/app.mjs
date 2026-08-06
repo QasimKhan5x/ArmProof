@@ -592,11 +592,17 @@ function renderDeploymentStatus() {
   );
   setText(
     "workspace-candidate",
-    connected
-      ? liveServiceLabel("optimized")
-      : publicEvidence
-        ? `${data.capacity.mixes.mixed.trial_matrix[1].treatment} · measured`
-        : "Connect both matched Arm64 services",
+    optimized
+      ? "Released · serving live traffic"
+      : connected
+        ? liveServiceLabel("optimized")
+        : publicEvidence
+          ? `${data.capacity.mixes.mixed.trial_matrix[1].treatment} · measured`
+          : "Connect both matched Arm64 services",
+  );
+  setText(
+    "workspace-candidate-label",
+    optimized ? "Arm optimization status" : "Arm optimization candidate",
   );
   setText(
     "workspace-release-status",
@@ -762,7 +768,7 @@ function renderAuditStage(stage, detail, elapsedMs) {
     quality: () => "Quality outputs checked against the release limit",
     performix: () => "Arm profiler evidence parsed",
     archive: () => "Capacity archive matched the frozen plan",
-    requests: () => "Ten long capacity windows reconstructed",
+    requests: () => `${capacityWindowLabel()} reconstructed`,
     policy: () => `Release policy ${detail.passed ? "passed" : "blocked"}`,
   };
   const item = document.createElement("li");
