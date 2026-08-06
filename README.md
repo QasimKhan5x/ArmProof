@@ -10,6 +10,23 @@ KleidiAI-optimized service. Each ticket records which service handled it.
 
 **Challenge track:** Cloud AI, Arm Create AI Optimization Challenge.
 
+## Judge In Five Minutes
+
+The shortest evaluation path is
+[`submission/JUDGE_GUIDE.md`](submission/JUDGE_GUIDE.md). To recompute the
+release directly:
+
+```bash
+git clone https://github.com/QasimKhan5x/ArmProof.git
+cd ArmProof
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -e .
+.venv/bin/armproof ci examples/armproof-reference/armproof.json
+```
+
+Expected result: exit `0` with all 10 required claims approved from the
+checked-in request, quality, identity, and native Arm Performix evidence.
+
 ## Measured Result
 
 The KleidiAI-optimized service handled **at least twice the sustained traffic**
@@ -89,19 +106,9 @@ on a disjoint 770-message development holdout. It raised routing accuracy from
 74.42% for direct model mapping to 86.75%. A person still selects every final
 queue, and this routing feature is separate from the Arm performance result.
 
-## Verify The Reference
+## What Verification Checks
 
-Prerequisite: Python 3.12.
-
-```bash
-git clone https://github.com/QasimKhan5x/ArmProof.git
-cd ArmProof
-python3.12 -m venv .venv
-.venv/bin/python -m pip install -e .
-.venv/bin/armproof ci examples/armproof-reference/armproof.json
-```
-
-The command verifies the archive ledgers, re-derives end-to-end capacity and quality from
+The judge command verifies the archive ledgers, re-derives end-to-end capacity and quality from
 raw rows, parses native Arm Performix exports, binds the observed treatment
 identities to `confirmed-contract.json`, and writes:
 
@@ -166,7 +173,7 @@ templates as well as the workloads, collection plan and GitHub Action. The
 generated Action is pinned to the reviewed ArmProof commit behind this release.
 Its binding helper recalculates workload, model, runtime, environment, service
 command, profiler-report, contract and workflow digests after placeholders are replaced.
-initial check fails until the developer collects real request rows, profiler
+The initial check fails until the developer collects real request rows, profiler
 output and observed identities. After collection,
 `armproof seal armproof.json` creates the deterministic checksum ledger and
 `armproof ci armproof.json` evaluates the contract. The executable reference
@@ -220,6 +227,7 @@ pixels.
 
 ## Repository Map
 
+- [Documentation map](docs/README.md): one entry point for judge, adopter, and maintainer docs
 - [`submission/DEVPOST_SUBMISSION.md`](submission/DEVPOST_SUBMISSION.md): copy-ready submission
 - [`submission/DEMO_SCRIPT.md`](submission/DEMO_SCRIPT.md): setup and three-minute recording sequence
 - [`submission/JUDGE_GUIDE.md`](submission/JUDGE_GUIDE.md): fastest evaluation path
@@ -244,7 +252,7 @@ Arm64 runtime bundle used by the live recipe is published with the `v0.9.0`
 GitHub release; model weights still download from their pinned upstream revision.
 
 SurgeDesk and ArmProof were created and meaningfully developed from July 29
-through August 5, 2026, during the challenge period. The Git history contains
+through August 6, 2026, during the challenge period. The Git history contains
 the source changes, preregistered plans, experiment records, and evidence used
 by the release.
 

@@ -18,8 +18,6 @@ let matchedLanesAvailable = false;
 let auditAvailable = false;
 let proofState = "recorded";
 let proofClaims = [];
-let adoptionReceipt = null;
-let adoptionReceiptGeneratedLive = false;
 let deploymentStatus = {
   active_lane: null,
   release_ready: false,
@@ -48,6 +46,17 @@ function formatMs(value) {
 }
 
 
+function formatShadowReceipt(result) {
+  const runtime = result.runtime_identity;
+  const observed = new Date(result.observed_at);
+  const observedAt = Number.isNaN(observed.getTime())
+    ? result.observed_at
+    : observed.toLocaleTimeString([], { hour12: false });
+  const control = runtime.optimization_control["mlas.disable_kleidiai"];
+  return `${result.request_id} · ${observedAt} · ${runtime.architecture}/${runtime.threads} threads · control=${control}`;
+}
+
+
 function liveServiceLabel(lane) {
   const trials = data?.capacity?.mixes?.mixed?.trial_matrix ?? [];
   const treatment = trials[lane === "optimized" ? 1 : 0]?.treatment ?? "measured configuration";
@@ -66,6 +75,13 @@ function liveActionLabel() {
 function matchedComparisonText() {
   return `Same model, runtime, workload, machine, and ${data.proof.threads} threads; `
     + `${data.provenance.evidence.only_changed_control} is the service control under test`;
+}
+
+
+function capacityWindowLabel() {
+  const mixed = data.capacity.mixes.mixed;
+  const windowCount = mixed.confirmations_per_treatment * mixed.trial_matrix.length;
+  return `${windowCount} ${mixed.confirmation_seconds}-second traffic windows`;
 }
 
 
@@ -96,7 +112,10 @@ function renderProofClaims() {
     });
     const status = document.createElement("td");
     const mark = document.createElement("span");
-    if (proofState === "recorded" && claim.status === "pass") {
+    if (proofState === "pending") {
+      mark.className = "unknown-label";
+      mark.textContent = "Awaiting check";
+    } else if (proofState === "recorded" && claim.status === "pass") {
       mark.className = "recorded-label";
       mark.textContent = "Recorded pass";
     } else if (proofState === "failed") {
@@ -116,28 +135,37 @@ function renderProofClaims() {
 
 function renderProofDecision(state, detail = "") {
   proofState = state;
-  if (state === "recorded") proofClaims = data.proof.claims;
+  if (["recorded", "pending"].includes(state)) proofClaims = data.proof.claims;
   const header = elements["proof-decision-title"].closest(".proof-decision");
   const mark = header.querySelector(".decision-mark");
   header.classList.toggle("failed", state === "failed");
   elements["environment-status"].classList.toggle("failed", state === "failed");
   if (state === "fresh") {
-    setText("proof-decision-source", "Verified during this session");
-    setText("proof-decision-title", "Fresh audit approved the conservative Graviton boundary");
+    setText("proof-decision-source", "Revalidated during this session");
+    setText("proof-decision-title", "Saved evidence approved the conservative Graviton boundary");
     setText("proof-decision-detail", detail);
-    setText("proof-decision-status", "VERIFIED NOW");
+    setText("proof-decision-status", "REVALIDATED NOW");
     setText(
       "environment-label",
-      `${inferenceMode === "live" ? "Live matched Arm64 endpoint" : "Recorded inference"} · fresh audit`,
+      `${inferenceMode === "live" ? "Connected Arm64 service" : "Checked-in model output"} · evidence revalidated`,
     );
     mark.textContent = "✓";
   } else if (state === "failed") {
     setText("proof-decision-source", "Current ArmProof audit");
-    setText("proof-decision-title", "Fresh audit blocked the release");
+    setText("proof-decision-title", "Current evidence check blocked the release");
     setText("proof-decision-detail", detail);
     setText("proof-decision-status", "BLOCKED");
     setText("environment-label", "Current evidence audit blocked");
     mark.textContent = "×";
+  } else if (state === "pending") {
+    setText("proof-decision-source", "Current release check");
+    setText("proof-decision-title", "The optimized candidate is awaiting evidence validation");
+    setText(
+      "proof-decision-detail",
+      "The checked-in result is available, but this live route remains on the standard service until ArmProof revalidates it.",
+    );
+    setText("proof-decision-status", "AWAITING CHECK");
+    mark.textContent = "·";
   } else {
     setText("proof-decision-source", "Checked-in ArmProof receipt");
     setText("proof-decision-title", "Checked-in conservative release receipt");
@@ -299,10 +327,6 @@ function renderReviewedTickets() {
   labelResponsiveTable(elements["reviewed-tickets"].closest("table"));
   elements["review-complete"].hidden = Boolean(workspace.active);
   const latest = workspace.resolved[0];
-  const optimizedTicket = workspace.resolved.some(
-    (ticket) => ticket.deployment_lane === "optimized" && ticket.release_audit_id,
-  );
-  elements["adoption-handoff"].hidden = !optimizedTicket;
   const baselineTicket = workspace.resolved.find(
     (ticket) => ticket.deployment_lane === "baseline" && ticket.mode === "live_model_output",
   );
@@ -334,7 +358,7 @@ function renderReviewedTickets() {
 
 
 function revealVerifiedProof() {
-  for (const id of ["optimization-summary", "release-reuse-summary", "performix-proof", "proof-details", "release-gate"]) {
+  for (const id of ["optimization-summary", "performix-proof", "proof-details", "release-gate"]) {
     elements[id].hidden = false;
   }
 }
@@ -379,6 +403,8 @@ async function routeSelectedMessage(event) {
       setText("shadow-optimized-latency", "Waiting…");
       setText("shadow-baseline-result", "Current production request");
       setText("shadow-optimized-result", "Shadow copy follows on the same cores");
+      setText("shadow-baseline-receipt", "Receipt pending");
+      setText("shadow-optimized-receipt", "Receipt pending");
       setText("shadow-observation", "Running the serving lane, then the candidate without full-core contention…");
     }
     try {
@@ -396,10 +422,12 @@ async function routeSelectedMessage(event) {
         setText("shadow-optimized-latency", formatMs(optimized.gateway_latency_ms));
         setText("shadow-baseline-result", `${baseline.suggested_label} · ${baseline.queue}`);
         setText("shadow-optimized-result", `${optimized.suggested_label} · ${optimized.queue} · shadow only`);
+        setText("shadow-baseline-receipt", formatShadowReceipt(baseline));
+        setText("shadow-optimized-receipt", formatShadowReceipt(optimized));
         setText(
           "shadow-observation",
           `Both configurations completed this request and proposed ${payload.same_queue ? "the same" : "different"} final queue. `
-            + "This one-request observation does not determine the release.",
+            + `The release decision comes from ${capacityWindowLabel()}, quality checks, and Arm profiles.`,
         );
         workspace = selectRecordedCase(workspace, baseline);
       } else {
@@ -411,6 +439,7 @@ async function routeSelectedMessage(event) {
       elements["review-title"].setAttribute("tabindex", "-1");
       elements["review-title"].focus({ preventScroll: true });
     } catch (error) {
+      await configureLiveMode();
       elements["intake-error"].textContent = `Live route failed: ${error.message}`;
       elements["intake-error"].hidden = false;
       elements["intake-error"].setAttribute("tabindex", "-1");
@@ -501,6 +530,11 @@ async function configureLiveMode() {
         deploymentStatus.core_group = activeConfig.core_group;
       }
     }
+    if (status.live_available && status.matched_lanes_available) {
+      renderProofDecision("pending");
+      elements["live-mode"].checked = true;
+      setInferenceMode("live");
+    }
     renderDeploymentStatus();
     if (!auditAvailable) {
       elements["load-experiment"].textContent = "Open checked-in evidence";
@@ -519,6 +553,12 @@ function renderDeploymentStatus() {
   const optimized = active === "optimized";
   const freshAudit = proofState === "fresh" && deploymentStatus.release_ready;
   const publicEvidence = !matchedLanesAvailable && !auditAvailable;
+  setText(
+    "opening-capacity",
+    publicEvidence || optimized || freshAudit
+      ? `≥${data.capacity.mixes.mixed.minimum_capacity_ratio.toFixed(1)}×`
+      : "Awaiting validation",
+  );
   setText("promotion-eyebrow", "Live release action");
   setText("promotion-current-label", "Serving now");
   setText("promotion-candidate-label", "Candidate");
@@ -570,11 +610,9 @@ function renderDeploymentStatus() {
     "promotion-audit-status",
     freshAudit
       ? `${deploymentStatus.audit_experiment_id} verified now`
-      : "Fresh audit required",
+      : "Evidence validation required",
   );
   if (publicEvidence) {
-    elements["generate-release-starter"].textContent = "Inspect included starter";
-    elements["generate-adoption-kit"].textContent = "Inspect included starter";
     setText("promotion-eyebrow", "Recorded release decision");
     setText("promotion-current-label", "Baseline");
     setText("promotion-current-lane", `${data.capacity.mixes.mixed.trial_matrix[0].treatment} · measured`);
@@ -592,11 +630,9 @@ function renderDeploymentStatus() {
     );
     elements["promote-route"].hidden = true;
     elements["open-required-audit"].hidden = false;
-    elements["open-required-audit"].textContent = "Inspect capacity evidence";
+    elements["open-required-audit"].textContent = "Inspect release evidence";
     elements["route-next-request"].hidden = true;
   } else if (optimized) {
-    elements["generate-release-starter"].textContent = "Generate blocked starter";
-    elements["generate-adoption-kit"].textContent = "Generate and validate starter";
     setText("promotion-current-label", "Serving now");
     setText("promotion-candidate-label", "Previous route");
     setText("promotion-candidate-lane", liveServiceLabel("baseline"));
@@ -780,7 +816,7 @@ async function loadVerifiedExperiment() {
   elements["load-experiment"].textContent =
     `Verifying ${expected.sustained_raw_confirmation_samples.toLocaleString()} outcomes…`;
   elements["evidence-load-note"].textContent =
-    "Reading the archive, recomputing all long windows, and evaluating the contract.";
+    "Reading the archive, re-deriving every recorded long window, and evaluating the contract.";
   setText("evidence-seal", "…");
   elements["audit-receipt"].hidden = true;
   elements["reveal-experiment-results"].hidden = true;
@@ -826,9 +862,9 @@ async function loadVerifiedExperiment() {
     setText("audit-claim-result", `${receipt.claims_verified}/${receipt.claims_verified} required claims passed`);
     elements["audit-receipt"].hidden = false;
     setText("audit-receipt-time", `Completed from local evidence in ${receipt.elapsed_ms.toFixed(0)} ms`);
-    elements["load-experiment"].textContent = "Measured experiment verified";
+    elements["load-experiment"].textContent = "Saved evidence revalidated";
     elements["evidence-load-note"].textContent =
-      `${receipt.adapter} recomputed the release decision from the immutable archive in ${receipt.elapsed_ms.toFixed(0)} ms.`;
+      `${receipt.adapter} recomputed the release decision from the checksum-bound archive in ${receipt.elapsed_ms.toFixed(0)} ms.`;
     elements["evidence-loader"].classList.add("loaded");
     setText("evidence-seal", "✓");
     elements["tab-surge"].classList.add("completed");
@@ -1095,10 +1131,6 @@ function renderAuditResult(receipt) {
     + `That places standard capacity below ${capacity.baseline_fail_rps.toFixed(2)} r/s and optimized capacity at or above `
     + `${capacity.optimized_pass_rps.toFixed(2)} r/s. The published result is the conservative lower bound shown here.`,
   );
-  setText("reveal-disabled-sample-share", `${arm.performix_disabled_sample_share_percent.toFixed(0)}%`);
-  setText("reveal-enabled-sample-share", `${arm.performix_enabled_sample_share_percent.toFixed(2)}%`);
-  setText("reveal-cycle-share", `${arm.linux_perf_cycle_share_percent.toFixed(2)}%`);
-  setText("reveal-kernel", arm.kernel);
   setText("direct-speedup", `${supporting.direct_speedup_min.toFixed(2)}–${supporting.direct_speedup_max.toFixed(2)}× faster`);
   setText(
     "direct-shapes",
@@ -1187,144 +1219,9 @@ function routeNextLiveRequest() {
 }
 
 
-async function loadAdoptionReceipt() {
-  if (adoptionReceipt !== null) return adoptionReceipt;
-  const response = auditAvailable
-    ? await fetch("/api/adoption", { method: "POST" })
-    : await fetch("./adoption.json", { cache: "no-store" });
-  const receipt = await response.json();
-  if (!response.ok) throw new Error(receipt.error || `HTTP ${response.status}`);
-  adoptionReceipt = receipt;
-  adoptionReceiptGeneratedLive = auditAvailable;
-  return receipt;
-}
-
-
-function configureAdoptionDownload(receipt) {
-  const download = elements["adoption-download"];
-  if (receipt.archive_base64) {
-    const bytes = Uint8Array.from(
-      atob(receipt.archive_base64),
-      (character) => character.charCodeAt(0),
-    );
-    download.href = URL.createObjectURL(new Blob([bytes], { type: "application/zip" }));
-  } else {
-    download.href = receipt.archive_href;
-  }
-  download.download = receipt.archive_name;
-  download.hidden = false;
-}
-
-
-async function generateReleaseStarter() {
-  elements["generate-release-starter"].disabled = true;
-  elements["generate-release-starter"].textContent = auditAvailable
-    ? "Generating and running CI…"
-    : "Loading included starter…";
-  try {
-    const receipt = await loadAdoptionReceipt();
-    setText("release-adoption-files", `${receipt.generated_files.length} files`);
-    setText(
-      "release-adoption-files-label",
-      adoptionReceiptGeneratedLive ? "Created now" : "Included files",
-    );
-    setText("release-adoption-gate", `${receipt.validation_status} · evidence required`);
-    setText("release-adoption-contract", `${receipt.contract_sha256.slice(0, 16)}…`);
-    elements["release-adoption-receipt"].hidden = false;
-    elements["generate-release-starter"].textContent = adoptionReceiptGeneratedLive
-      ? "Starter generated now"
-      : "Included starter inspected";
-  } catch (error) {
-    elements["generate-release-starter"].disabled = false;
-    elements["generate-release-starter"].textContent = "Retry starter generation";
-    setText("promotion-result", `Starter generation failed: ${error.message}`);
-  }
-}
-
-
-async function generateAdoptionKit() {
-  elements["generate-adoption-kit"].disabled = true;
-  elements["generate-adoption-kit"].textContent = auditAvailable
-    ? "Generating and validating starter…"
-    : "Inspecting included starter…";
-  setText(
-    "adoption-status",
-    auditAvailable ? "Creating the files with ArmProof now." : "Loading the checked-in example starter.",
-  );
-  try {
-    const receipt = await loadAdoptionReceipt();
-    setText(
-      "adoption-files",
-      `${receipt.generated_files.length} files ${adoptionReceiptGeneratedLive ? "created locally" : "included in the repository"}`,
-    );
-    setText(
-      "adoption-files-label",
-      adoptionReceiptGeneratedLive ? "Files generated now" : "Included files",
-    );
-    setText(
-      "adoption-gate",
-      `${receipt.validation_status} · ${receipt.validation_detail}`,
-    );
-    setText("adoption-contract", `${receipt.contract_sha256.slice(0, 16)}…`);
-    setText("adoption-workflow", receipt.workflow.trim());
-    configureAdoptionDownload(receipt);
-    elements["adoption-result"].hidden = false;
-    setText(
-      "adoption-status",
-      adoptionReceiptGeneratedLive
-        ? "The starter was generated now. Its first CI run blocked because measured evidence has not been collected yet."
-        : "This checked-in starter records the same blocked initial state. Run the local demo to generate and execute it live.",
-    );
-    elements["generate-adoption-kit"].textContent = adoptionReceiptGeneratedLive
-      ? "Collection starter generated"
-      : "Included starter inspected";
-    elements["adoption-result"].setAttribute("tabindex", "-1");
-    elements["adoption-result"].focus();
-  } catch (error) {
-    elements["generate-adoption-kit"].disabled = false;
-    elements["generate-adoption-kit"].textContent = "Retry starter generation";
-    setText("adoption-status", `Starter generation unavailable: ${error.message}. The repository includes the same executable example under examples/http-slo/.`);
-  }
-}
-
-
-async function generateInlineStarter() {
-  elements["generate-inline-starter"].disabled = true;
-  elements["generate-inline-starter"].textContent = "Generating and running first CI check…";
-  try {
-    const receipt = await loadAdoptionReceipt();
-    setText("inline-adoption-files", `${receipt.generated_files.length} files`);
-    setText("inline-adoption-gate", receipt.validation_status);
-    setText("inline-adoption-reason", receipt.initial_ci_reason);
-    elements["inline-adoption-receipt"].hidden = false;
-    elements["return-to-cutover"].hidden = false;
-    elements["generate-inline-starter"].textContent = adoptionReceiptGeneratedLive
-      ? "Starter generated during this session"
-      : "Included starter inspected";
-    elements["inline-adoption-receipt"].scrollIntoView({ block: "nearest" });
-  } catch (error) {
-    elements["generate-inline-starter"].disabled = false;
-    elements["generate-inline-starter"].textContent = "Retry starter generation";
-    setText("review-complete-detail", `Starter generation failed: ${error.message}`);
-  }
-}
-
-
-function openAdoptionKit() {
-  activateView("proof", { focusHeading: true });
-  elements["proof-details"].open = true;
-  elements["reuse-title"].setAttribute("tabindex", "-1");
-  elements["reuse-title"].scrollIntoView({ behavior: "smooth", block: "start" });
-  elements["reuse-title"].focus({ preventScroll: true });
-  generateAdoptionKit();
-}
-
-
 function renderRedesignEvidence() {
-  const mixed = data.capacity.mixes.mixed;
   const proof = data.proof;
   const evidence = data.provenance.evidence;
-  setText("opening-capacity", `≥${mixed.minimum_capacity_ratio.toFixed(1)}×`);
   setText("guard-accuracy", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
   setText(
     "guard-evaluation-size",
@@ -1340,8 +1237,6 @@ function renderRedesignEvidence() {
   setText("experiment-model", `${data.provenance.model} · ${data.provenance.runtime}`);
   setText("experiment-slo", `p95 ≤ ${(data.capacity.slo_ms / 1000).toFixed(0)} seconds`);
   setText("experiment-control", evidence.only_changed_control);
-  setText("arm-reveal-threads", proof.threads);
-  setText("arm-reveal-control", evidence.only_changed_control);
   setText("proof-evidence-count", `${evidence.sustained_checksummed_files} sustained + ${evidence.performix_checksummed_files} Performix checksums`);
   setText("proof-derived-claims", `${proof.verified_claims} contract claims evaluated from ${evidence.sustained_raw_confirmation_samples.toLocaleString()} request outcomes; missing inputs block release.`);
   setText("deployment-instance", proof.instance);
@@ -1400,14 +1295,6 @@ function bindInteractions() {
   elements["open-required-audit"].addEventListener("click", () => {
     activateView("surge", { focusHeading: true });
   });
-  elements["generate-inline-starter"].addEventListener("click", generateInlineStarter);
-  elements["return-to-cutover"].addEventListener("click", () => {
-    elements["live-cutover-summary"].scrollIntoView({ behavior: "smooth", block: "start" });
-    elements["live-cutover-title"].setAttribute("tabindex", "-1");
-    elements["live-cutover-title"].focus({ preventScroll: true });
-  });
-  elements["generate-release-starter"].addEventListener("click", generateReleaseStarter);
-  elements["generate-adoption-kit"].addEventListener("click", generateAdoptionKit);
   document.querySelectorAll('input[name="inference-mode"]').forEach((radio) => {
     radio.addEventListener("change", () => setInferenceMode(radio.value));
   });

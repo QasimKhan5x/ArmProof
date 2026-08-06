@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-import base64
 import io
 import json
 import unittest
-import zipfile
 from unittest.mock import patch
 
 from scripts.serve_surgedesk import (
     DeploymentState,
-    _adoption_receipt,
     _match_lane_identity,
     _probe_lane,
     _response_identity_matches,
@@ -19,31 +16,6 @@ from scripts.serve_surgedesk import (
 
 
 class SurgeDeskGatewayTests(unittest.TestCase):
-    def test_adoption_action_generates_and_validates_a_real_starter(self) -> None:
-        receipt = _adoption_receipt()
-        self.assertEqual(receipt["validation_status"], "BLOCKED")
-        self.assertNotEqual(receipt["initial_ci_exit_code"], 0)
-        self.assertEqual(
-            receipt["initial_ci_reason"],
-            "no measured evidence found",
-        )
-        self.assertIn("measured evidence is absent", receipt["validation_detail"])
-        self.assertIn("bound to this contract digest", receipt["validation_detail"])
-        self.assertIn("contract.json", receipt["generated_files"])
-        self.assertIn(".github/workflows/armproof.yml", receipt["generated_files"])
-        self.assertIn(
-            "QasimKhan5x/ArmProof@6a2785eccca0e42d36fcf37919bfc83dfca3ea6a # v0.9.0",
-            receipt["workflow"],
-        )
-        self.assertEqual(len(receipt["contract_sha256"]), 64)
-        self.assertEqual(receipt["archive_name"], "armproof-service-starter.zip")
-        with zipfile.ZipFile(
-            io.BytesIO(base64.b64decode(receipt["archive_base64"]))
-        ) as archive:
-            names = set(archive.namelist())
-        self.assertIn("my-arm-service/contract.json", names)
-        self.assertIn("my-arm-service/.github/workflows/armproof.yml", names)
-
     def test_deployment_cannot_promote_before_a_passing_fresh_audit(self) -> None:
         state = DeploymentState(active_lane="baseline")
         live_identity = {
@@ -95,6 +67,20 @@ class SurgeDeskGatewayTests(unittest.TestCase):
         self.assertEqual(promoted["audit_experiment_id"], "EXP-2026-014")
         self.assertTrue(promoted["release_ready"])
         self.assertIsNotNone(promoted["promoted_at"])
+
+        state.record_audit({"passed": False, "experiment_id": "EXP-recheck-failed"})
+        revoked = state.snapshot()
+        self.assertEqual(revoked["active_lane"], "baseline")
+        self.assertFalse(revoked["release_ready"])
+        self.assertIsNone(revoked["audit_experiment_id"])
+        self.assertIsNone(revoked["promoted_at"])
+
+        state.record_audit({
+            "passed": True,
+            "experiment_id": "EXP-2026-014",
+            "deployment_identity": audited,
+        })
+        state.promote(live_identity)
 
         state.active_lane = "baseline"
         swapped = {**live_identity, "source_artifact_sha256": "b" * 64}

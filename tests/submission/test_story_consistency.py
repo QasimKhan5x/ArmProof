@@ -18,13 +18,18 @@ class SubmissionStoryTests(unittest.TestCase):
             "Review and switch live traffic",
             "Switch live traffic to optimized service",
             "My card is about to expire",
-            "Generate a starter for another service",
-            "Return to released service",
         )
         positions = [script.index(moment) for moment in moments]
         self.assertEqual(positions, sorted(positions))
         self.assertIn("different message", script.lower())
-        self.assertIn("then sends a shadow copy", script.lower())
+        self.assertIn(
+            "surgedesk is the banking-support application. armproof is its reusable",
+            script.lower(),
+        )
+        self.assertIn("live requests:", script.lower())
+        self.assertIn("evidence validation:", script.lower())
+        self.assertIn("full recollection:", script.lower())
+        self.assertIn("end the recording on the cutover summary", script.lower())
         self.assertNotIn("use this customer message both times", script.lower())
         self.assertNotIn("paste the same message", script.lower())
         for staged_device in (
@@ -88,6 +93,8 @@ class SubmissionStoryTests(unittest.TestCase):
         )
         live_flow = browser_test.split(
             'test("public mode reveals checked-in proof', 1
+        )[0].split(
+            'test("a rejected optimized response refreshes', 1
         )[0]
         gateway_test = (ROOT / "tests/test_surgedesk_gateway_e2e.py").read_text(
             encoding="utf-8"

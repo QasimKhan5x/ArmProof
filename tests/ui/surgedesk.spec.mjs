@@ -39,14 +39,15 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   const messages = captureBrowserErrors(page);
   await page.setViewportSize({ width: 320, height: 780 });
   await page.goto(appUrl);
-  await expect(page.locator("#opening-capacity")).toHaveText("≥2.0×");
+  await expect(page.locator("#opening-capacity")).toHaveText("Awaiting validation");
   await expect(page.locator(".opening-result")).toContainText("blocked until ArmProof rechecks it");
   await page.setViewportSize({ width: 1440, height: 900 });
   await mkdir("build/screenshots", { recursive: true });
   await page.screenshot({ path: "build/screenshots/surgedesk-opening.png" });
   await page.setViewportSize({ width: 320, height: 780 });
 
-  await page.getByLabel("Live matched Arm64 endpoint").check();
+  await expect(page.getByLabel("Connected Arm64 service")).toBeChecked();
+  await expect(page.locator(".developer-mode")).not.toHaveAttribute("open", "");
   await expect(page.locator("#sample-select")).toBeHidden();
   await expect(page.locator("#sample-select-label")).toBeHidden();
   await page.locator("#customer-message").fill(
@@ -57,7 +58,11 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator("#shadow-baseline-latency")).toContainText("ms");
   await expect(page.locator("#shadow-optimized-latency")).toContainText("ms");
   await expect(page.locator("#shadow-optimized-result")).toContainText("shadow only");
-  await expect(page.locator("#shadow-observation")).toContainText("does not determine the release");
+  await expect(page.locator("#shadow-baseline-receipt")).toContainText("shadow-baseline-");
+  await expect(page.locator("#shadow-baseline-receipt")).toContainText("aarch64/16 threads · control=1");
+  await expect(page.locator("#shadow-optimized-receipt")).toContainText("shadow-optimized-");
+  await expect(page.locator("#shadow-optimized-receipt")).toContainText("aarch64/16 threads · control=0");
+  await expect(page.locator("#shadow-observation")).toContainText("10 500-second traffic windows");
   await expect(page.locator("#shadow-observation")).not.toContainText("lower observed latency");
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.locator("#shadow-comparison").scrollIntoViewIfNeeded();
@@ -82,6 +87,7 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator('#audit-progress li[data-stage="requests"]')).toContainText("Ten long capacity windows");
   await expect(page.locator("#audit-progress time")).toHaveCount(5);
   await expect(page.locator("#audit-receipt")).toBeVisible();
+  await expect(page.locator("#opening-capacity")).toHaveText("≥2.0×");
   await expect(page.locator("#experiment-results")).toBeHidden();
   await expect(page.locator("#audit-request-result")).toContainText("2,100 capacity requests");
   await expect(page.locator("#audit-request-result")).toContainText("1,540 model outputs");
@@ -168,27 +174,65 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator("#cutover-before-request")).toContainText("Account security");
   await expect(page.locator("#cutover-after-request")).toContainText("Cards & payments");
   await expect(page.locator("#cutover-capacity")).toContainText("≥2.0×");
-  await expect(page.locator("#adoption-handoff")).toBeVisible();
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.locator("#live-cutover-summary").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "build/screenshots/surgedesk-live-cutover.png" });
-  await page.getByRole("button", { name: "Generate a starter for another service" }).click();
-  await expect(page.locator("#inline-adoption-receipt")).toBeVisible();
-  await expect(page.locator("#inline-adoption-files")).toHaveText("17 files");
-  await expect(page.locator("#inline-adoption-gate")).toHaveText("BLOCKED");
-  await expect(page.locator("#inline-adoption-reason")).toHaveText("no measured evidence found");
-  await expect(page.locator("#return-to-cutover")).toBeVisible();
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.locator("#adoption-handoff").scrollIntoViewIfNeeded();
-  await page.screenshot({ path: "build/screenshots/surgedesk-generated-starter.png" });
-  await page.getByRole("button", { name: "Return to released service" }).click();
-  await expect(page.locator("#live-cutover-title")).toBeFocused();
   expect(await overflowingElements(page)).toEqual([]);
 
   await page.setViewportSize({ width: 1440, height: 1000 });
   await mkdir("build/screenshots", { recursive: true });
   await page.screenshot({ path: "build/screenshots/surgedesk-live-flow.png", fullPage: true });
   expect(messages).toEqual([]);
+});
+
+
+test("a rejected optimized response refreshes the UI to the standard route", async ({ page }) => {
+  const audit = await page.request.post(`${appUrl.replace(/surgedesk\/$/, "")}api/audit`);
+  expect(audit.ok()).toBeTruthy();
+  const promote = await page.request.post(`${appUrl.replace(/surgedesk\/$/, "")}api/promote`);
+  expect(promote.ok()).toBeTruthy();
+
+  let driftObserved = false;
+  await page.route("**/api/route", async (route) => {
+    driftObserved = true;
+    await route.fulfill({
+      status: 409,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "route_runtime_identity_changed" }),
+    });
+  });
+  await page.route("**/surgedesk/live-status.json", async (route) => {
+    if (!driftObserved) {
+      await route.continue();
+      return;
+    }
+    await route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({
+        audit_available: true,
+        live_available: true,
+        matched_lanes_available: true,
+        mode: "live",
+        deployment: {
+          active_lane: "baseline",
+          release_ready: false,
+          audit_experiment_id: null,
+          promoted_at: null,
+        },
+        lanes: {
+          baseline: { backend: "kleidiai-disabled", core_group: "0-15" },
+          optimized: { backend: "kleidiai-enabled", core_group: "0-15" },
+        },
+      }),
+    });
+  });
+
+  await page.goto(appUrl);
+  await page.locator("#customer-message").fill("My card was stolen.");
+  await page.getByRole("button", { name: "Run optimized live route" }).click();
+  await expect(page.locator("#intake-error")).toContainText("route_runtime_identity_changed");
+  await expect(page.locator("#workspace-serving")).toContainText("Standard service");
+  await expect(page.locator("#workspace-release-status")).toContainText("Waiting for the measured release check");
 });
 
 
@@ -211,22 +255,19 @@ test("public mode reveals checked-in proof only after the visitor requests it", 
   await expect(page.locator("#audit-receipt")).toBeVisible();
   await expect(page.locator("#trial-matrix-body tr")).toHaveCount(2);
   await expect(page.locator("#headline-ratio")).toHaveText("≥2.00×");
-  await page.getByRole("tab", { name: "Release" }).click();
+  await page.getByRole("tab", { name: "Traffic switch" }).click();
   await expect(page.locator("#optimization-summary")).toBeVisible();
   await expect(page.locator("#promotion-title")).toContainText("cleared the checked-in release policy");
   await expect(page.locator("#promote-route")).toBeHidden();
-  await expect(page.locator("#open-required-audit")).toHaveText("Inspect capacity evidence");
+  await expect(page.locator("#open-required-audit")).toHaveText("Inspect release evidence");
   await expect(page.locator("#proof-claims tr")).toHaveCount(10);
   await expect(page.locator("body")).not.toContainText(/tamper|altered archive/i);
-  await expect(page.getByRole("button", { name: "Inspect included starter" }).first()).toBeVisible();
-  await page.getByRole("button", { name: "Inspect included starter" }).first().click();
-  await expect(page.locator("#release-adoption-receipt")).toBeVisible();
-  await expect(page.locator("#release-adoption-files-label")).toHaveText("Included files");
-  await expect(page.getByRole("button", { name: "Included starter inspected" })).toBeVisible();
+  await page.locator("#proof-details > summary").click();
+  await expect(page.getByRole("link", { name: "Open adoption guide" })).toBeVisible();
   await mkdir("build/screenshots", { recursive: true });
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: "build/screenshots/surgedesk-public-release-proof.png" });
-  await page.getByRole("tab", { name: "Capacity" }).click();
+  await page.getByRole("tab", { name: "Release evidence" }).click();
   await page.locator("#latency-consequence-title").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "build/screenshots/surgedesk-capacity.png" });
   expect(messages).toEqual([]);
@@ -234,6 +275,17 @@ test("public mode reveals checked-in proof only after the visitor requests it", 
 
 
 test("recorded support examples remain human-confirmed and clearly labeled", async ({ page }) => {
+  await page.route("**/surgedesk/live-status.json", (route) => route.fulfill({
+    contentType: "application/json",
+    body: JSON.stringify({
+      audit_available: false,
+      live_available: false,
+      matched_lanes_available: false,
+      mode: "recorded",
+      deployment: {},
+      lanes: {},
+    }),
+  }));
   await page.goto(appUrl);
   await expect(page.getByRole("heading", { name: "Route an incoming request" })).toBeVisible();
   await expect(page.locator(".routing-quality-details")).not.toHaveAttribute("open", "");
@@ -272,7 +324,7 @@ test("mobile public evidence remains readable without horizontal overflow", asyn
   expect(await firstTrial.evaluate(
     (row) => getComputedStyle(row).display,
   )).toBe("grid");
-  await page.getByRole("tab", { name: "Release" }).click();
+  await page.getByRole("tab", { name: "Traffic switch" }).click();
   await expect(page.locator("#optimization-summary")).toBeVisible();
   await expect(page.locator("#proof-claims tr")).toHaveCount(10);
   expect(await page.evaluate(

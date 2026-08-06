@@ -15,7 +15,7 @@
       <span class="brand-mark" aria-hidden="true">S</span>
       <div>
         <strong>SurgeDesk</strong>
-        <span>Banking support triage on Arm</span>
+        <span>Banking support · Arm-optimized release</span>
       </div>
     </div>
     <div id="environment-status" class="environment-status">
@@ -27,8 +27,8 @@
   <nav class="view-tabs" aria-label="SurgeDesk views">
     <div role="tablist" aria-label="Demo workflow">
       <button id="tab-workspace" role="tab" aria-selected="true" aria-controls="view-workspace" data-view="workspace">Support</button>
-      <button id="tab-surge" role="tab" aria-selected="false" aria-controls="view-surge" data-view="surge">Capacity evidence</button>
-      <button id="tab-proof" role="tab" aria-selected="false" aria-controls="view-proof" data-view="proof">Release</button>
+      <button id="tab-surge" role="tab" aria-selected="false" aria-controls="view-surge" data-view="surge">Release evidence</button>
+      <button id="tab-proof" role="tab" aria-selected="false" aria-controls="view-proof" data-view="proof">Traffic switch</button>
     </div>
     <p id="demo-source">Loading accepted evidence…</p>
   </nav>
@@ -62,8 +62,8 @@
 
           <section class="product-context" aria-label="How SurgeDesk uses ArmProof">
             <div>
-              <strong>SurgeDesk handles the request. ArmProof controls the optimization release.</strong>
-              <span>KleidiAI is the Arm CPU inference optimization under test. Traffic remains on the standard service until its evidence passes.</span>
+              <strong>SurgeDesk is the banking-support application. ArmProof is its reusable Arm optimization release gate.</strong>
+              <span>KleidiAI is the candidate Arm CPU optimization. SurgeDesk keeps the standard service active until ArmProof verifies the measured release contract.</span>
             </div>
             <div class="opening-result" aria-label="Checked-in candidate result awaiting fresh verification">
               <strong id="opening-capacity">—</strong>
@@ -79,12 +79,15 @@
           </section>
 
           <form id="intake-form" class="intake-form">
-            <fieldset class="mode-control">
-              <legend>Inference mode</legend>
-              <label><input type="radio" name="inference-mode" value="recorded" checked> Stored benchmark outputs</label>
-              <label id="live-mode-label"><input id="live-mode" type="radio" name="inference-mode" value="live" disabled> Live matched Arm64 endpoint</label>
-              <span id="live-mode-hint">Start the demo gateway with an endpoint to enable live mode.</span>
-            </fieldset>
+            <details class="developer-mode">
+              <summary>Data source</summary>
+              <fieldset class="mode-control">
+                <legend>Inference mode</legend>
+                <label><input type="radio" name="inference-mode" value="recorded" checked> Checked-in model outputs</label>
+                <label id="live-mode-label"><input id="live-mode" type="radio" name="inference-mode" value="live" disabled> Connected Arm64 service</label>
+                <span id="live-mode-hint">The page selects the connected service automatically.</span>
+              </fieldset>
+            </details>
             <div id="scenario-picker" class="scenario-picker">
               <div class="scenario-heading"><span>Stored benchmark sample</span><small>Inspect an original model response</small></div>
               <div id="scenario-options" class="scenario-options" aria-label="Recorded evidence scenarios"></div>
@@ -102,22 +105,24 @@
           <section id="shadow-comparison" class="shadow-comparison" aria-labelledby="shadow-comparison-title" hidden>
             <header>
               <div>
-                <p class="eyebrow">Live matched request</p>
-                <h2 id="shadow-comparison-title">One message, two Arm configurations</h2>
-                <p>The current service runs first, followed by a shadow copy on the candidate. Sequential execution avoids full-core contention.</p>
+                <p class="eyebrow">Fresh request receipt</p>
+                <h2 id="shadow-comparison-title">One message, serving route and candidate shadow</h2>
+                <p>The gateway runs each configuration sequentially on the same core group. The long-window experiment below decides capacity.</p>
               </div>
-              <span class="source-chip">Illustrative latency · not capacity evidence</span>
+              <span class="source-chip">Observed now</span>
             </header>
             <div class="shadow-lanes">
               <article class="shadow-lane standard-lane">
                 <div><span>Serving route</span><strong>Standard · KleidiAI off</strong></div>
                 <strong id="shadow-baseline-latency" class="shadow-latency">Waiting…</strong>
                 <small id="shadow-baseline-result">Current production request</small>
+                <small id="shadow-baseline-receipt" class="shadow-receipt">Receipt pending</small>
               </article>
               <article class="shadow-lane candidate-lane">
                 <div><span>Shadow candidate</span><strong>Optimized · KleidiAI on</strong></div>
                 <strong id="shadow-optimized-latency" class="shadow-latency">Waiting…</strong>
                 <small id="shadow-optimized-result">Cannot serve until evidence passes</small>
+                <small id="shadow-optimized-receipt" class="shadow-receipt">Receipt pending</small>
               </article>
             </div>
             <div id="shadow-observation" class="shadow-observation" role="status">Running a fresh matched comparison on Graviton4…</div>
@@ -199,16 +204,6 @@
             </section>
           </details>
 
-          <section id="adoption-handoff" class="adoption-handoff" hidden>
-            <div><strong>Use the same release gate on another classification service</strong><span>Generate a contract, collection plan, and pull-request check. A new project starts blocked until it supplies measurements.</span></div>
-            <button id="generate-inline-starter" class="secondary-button" type="button">Generate a starter for another service</button>
-            <dl id="inline-adoption-receipt" class="inline-adoption-receipt" hidden>
-              <div><dt>Generated</dt><dd id="inline-adoption-files">—</dd></div>
-              <div><dt>First CI result</dt><dd id="inline-adoption-gate">—</dd></div>
-              <div><dt>Why</dt><dd id="inline-adoption-reason">—</dd></div>
-            </dl>
-            <button id="return-to-cutover" class="secondary-button return-to-cutover" type="button" hidden>Return to released service</button>
-          </section>
         </div>
       </div>
     </section>
@@ -234,7 +229,7 @@
           <div class="evidence-identity">
             <p class="eyebrow">Release evidence check</p>
             <h2 id="evidence-loader-title">Verify <span id="evidence-experiment-id">—</span> from raw outcomes</h2>
-            <p id="evidence-load-note" aria-live="polite">ArmProof will hash the archive, recompute every long window, bind both treatments, and evaluate the release contract now.</p>
+            <p id="evidence-load-note" aria-live="polite">ArmProof will hash the archive, re-derive metrics from every recorded long window, bind both treatments, and evaluate the release contract now.</p>
             <ol id="audit-progress" class="audit-progress" aria-label="Live verification progress" hidden></ol>
           </div>
           <dl class="evidence-facts">
@@ -350,19 +345,6 @@
             </div>
           </section>
 
-          <section class="arm-reveal" aria-labelledby="arm-reveal-title">
-            <div>
-              <p class="eyebrow">Evidence that KleidiAI ran</p>
-              <h2 id="arm-reveal-title">The optimized service executed the Neoverse I8MM path</h2>
-              <p>The standard and optimized services use the same model digest, runtime, workload, machine, and <span id="arm-reveal-threads">—</span>-thread setting. The only changed setting is <code id="arm-reveal-control">—</code>.</p>
-            </div>
-            <dl>
-              <div><dt>Performix function samples</dt><dd><span id="reveal-disabled-sample-share">—</span> → <strong id="reveal-enabled-sample-share">—</strong></dd></div>
-              <div><dt>Linux perf cycle attribution</dt><dd><strong id="reveal-cycle-share">—</strong></dd></div>
-              <div><dt>Observed kernel</dt><dd><code id="reveal-kernel">—</code></dd></div>
-            </dl>
-          </section>
-
           <div class="conclusion-band">
             <div><span>Release decision</span><strong id="surge-release-decision">—</strong></div>
             <p id="conclusion-copy">—</p>
@@ -384,56 +366,10 @@
           <span id="proof-decision-status">—</span>
         </header>
 
-        <section class="deployment-promotion" aria-labelledby="promotion-title">
-          <div>
-            <p id="promotion-eyebrow" class="eyebrow">Live release action</p>
-            <h2 id="promotion-title">The standard service is handling support requests</h2>
-            <p id="promotion-detail">Run the measured release check before switching live requests to the optimized service.</p>
-          </div>
-          <dl>
-            <div><dt id="promotion-current-label">Serving now</dt><dd id="promotion-current-lane">Checking gateway…</dd></div>
-            <div><dt id="promotion-candidate-label">Candidate</dt><dd id="promotion-candidate-lane">Waiting for live endpoint</dd></div>
-            <div><dt id="promotion-audit-label">Required evidence</dt><dd id="promotion-audit-status">Fresh audit required</dd></div>
-          </dl>
-          <div class="promotion-actions">
-            <button id="promote-route" class="primary-button" type="button" disabled>Recompute the release decision first</button>
-            <button id="open-required-audit" class="secondary-button" type="button">Open required capacity audit</button>
-            <button id="route-next-request" class="secondary-button" type="button" hidden>Send a request through the optimized service</button>
-          </div>
-          <p id="promotion-result" class="promotion-result" role="status" aria-live="polite"></p>
-          <dl id="promotion-identity" class="promotion-identity" hidden>
-            <div><dt>Model identities</dt><dd><code id="promotion-model-hash">—</code></dd></div>
-            <div><dt>Runtime artifacts</dt><dd id="promotion-runtime-match">—</dd></div>
-            <div><dt>Arm placement</dt><dd id="promotion-arm-match">—</dd></div>
-            <div><dt>Changed control</dt><dd id="promotion-control-match">—</dd></div>
-          </dl>
-        </section>
-
         <section id="optimization-summary" class="optimization-summary" aria-label="Measured Arm optimization results" hidden>
           <div><span>Sustainable traffic</span><strong id="summary-capacity">—</strong><small id="summary-capacity-context">Same measured server and response-time rule</small></div>
           <div><span>Arm execution</span><strong id="summary-performix">—</strong><small>Performix function samples in <code>kai_*</code></small></div>
           <div><span>Output quality</span><strong id="summary-quality">—</strong><small id="summary-quality-context">Measured on the frozen quality set</small></div>
-        </section>
-
-        <section id="release-reuse-summary" class="release-reuse-summary" aria-labelledby="release-reuse-title" hidden>
-          <div>
-            <p class="eyebrow">Reusable Arm community artifact</p>
-            <h2 id="release-reuse-title">Generate a fail-closed gate for another classification service</h2>
-          </div>
-          <ol>
-            <li><strong>Initialize</strong><code>armproof init</code></li>
-            <li><strong>Start blocked</strong><span>CI requires real evidence</span></li>
-            <li><strong>Collect and seal</strong><span>Capacity, quality, identity, profiler</span></li>
-            <li><strong>Release</strong><span>Pull request passes the declared contract</span></li>
-          </ol>
-          <div class="release-reuse-actions">
-            <button id="generate-release-starter" class="primary-button" type="button">Generate blocked starter</button>
-          </div>
-          <dl id="release-adoption-receipt" class="release-adoption-receipt" hidden>
-            <div><dt id="release-adoption-files-label">Created now</dt><dd id="release-adoption-files">—</dd></div>
-            <div><dt>Initial CI gate</dt><dd id="release-adoption-gate">—</dd></div>
-            <div><dt>Protected contract</dt><dd><code id="release-adoption-contract">—</code></dd></div>
-          </dl>
         </section>
 
         <section id="performix-proof" class="proof-section performix-proof" aria-labelledby="performix-title" hidden>
@@ -452,6 +388,31 @@
           </div>
           <p id="performix-scope-note" class="capability-note"></p>
           <p id="performix-capability-note" class="capability-note"></p>
+        </section>
+
+        <section class="deployment-promotion" aria-labelledby="promotion-title">
+          <div>
+            <p id="promotion-eyebrow" class="eyebrow">Live release action</p>
+            <h2 id="promotion-title">The standard service is handling support requests</h2>
+            <p id="promotion-detail">Run the measured release check before switching live requests to the optimized service.</p>
+          </div>
+          <dl>
+            <div><dt id="promotion-current-label">Serving now</dt><dd id="promotion-current-lane">Checking gateway…</dd></div>
+            <div><dt id="promotion-candidate-label">Candidate</dt><dd id="promotion-candidate-lane">Waiting for live endpoint</dd></div>
+            <div><dt id="promotion-audit-label">Required evidence</dt><dd id="promotion-audit-status">Evidence validation required</dd></div>
+          </dl>
+          <div class="promotion-actions">
+            <button id="promote-route" class="primary-button" type="button" disabled>Recompute the release decision first</button>
+            <button id="open-required-audit" class="secondary-button" type="button">Open required capacity audit</button>
+            <button id="route-next-request" class="secondary-button" type="button" hidden>Send a request through the optimized service</button>
+          </div>
+          <p id="promotion-result" class="promotion-result" role="status" aria-live="polite"></p>
+          <dl id="promotion-identity" class="promotion-identity" hidden>
+            <div><dt>Model identities</dt><dd><code id="promotion-model-hash">—</code></dd></div>
+            <div><dt>Runtime artifacts</dt><dd id="promotion-runtime-match">—</dd></div>
+            <div><dt>Arm placement</dt><dd id="promotion-arm-match">—</dd></div>
+            <div><dt>Changed control</dt><dd id="promotion-control-match">—</dd></div>
+          </dl>
         </section>
 
         <details id="proof-details" class="proof-details" hidden>
@@ -555,21 +516,10 @@
 
         <section class="proof-section reuse-walkthrough" aria-labelledby="reuse-title">
           <div class="section-heading">
-            <div><p class="eyebrow">Live developer action</p><h2 id="reuse-title">Generate a release gate for another bounded HTTP classification service</h2></div>
-            <span class="source-chip">Runs locally</span>
+            <div><p class="eyebrow">Arm community artifact</p><h2 id="reuse-title">Apply ArmProof to another bounded HTTP classifier</h2></div>
+            <a class="text-link" href="https://github.com/QasimKhan5x/ArmProof#reuse-armproof">Open adoption guide</a>
           </div>
-          <p>ArmProof creates a contract, representative workloads, an evidence checklist and a GitHub Action bound to the generated contract digest.</p>
-          <button id="generate-adoption-kit" class="primary-button" type="button">Generate and validate starter</button>
-          <p id="adoption-status" class="copy-status" role="status" aria-live="polite"></p>
-          <div id="adoption-result" class="adoption-result" hidden>
-            <dl>
-              <div><dt id="adoption-files-label">Files generated now</dt><dd id="adoption-files">—</dd></div>
-              <div><dt>Initial CI gate</dt><dd id="adoption-gate">—</dd></div>
-              <div><dt>Protected contract</dt><dd><code id="adoption-contract">—</code></dd></div>
-            </dl>
-            <details><summary>Inspect the generated GitHub Action</summary><pre><code id="adoption-workflow">—</code></pre></details>
-            <a id="adoption-download" class="primary-link" href="#" hidden>Download generated starter</a>
-          </div>
+          <p><code>armproof init</code> creates the contract, workloads, collection plan, evidence templates and pull-request check. The generated project begins blocked and can pass only after the developer collects and seals its own measurements.</p>
         </section>
           </div>
         </details>

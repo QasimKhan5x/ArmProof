@@ -4,19 +4,13 @@
 from __future__ import annotations
 
 import argparse
-import base64
-import hashlib
-import io
 import json
 import os
 import sys
-import tempfile
 import time
 import urllib.error
 import urllib.request
 import uuid
-import zipfile
-from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from http import HTTPStatus
@@ -32,9 +26,6 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from armproof.demo.live import build_prompt, compose_live_route  # noqa: E402
 from armproof.demo.surgedesk import _queue_guard, build_surgedesk_payload  # noqa: E402
-from armproof.contracts.parser import parse_contract  # noqa: E402
-from armproof.cli import main as armproof_cli  # noqa: E402
-from armproof.scaffold import create_scaffold  # noqa: E402
 MAX_BODY_BYTES = 16 * 1024
 
 
@@ -52,6 +43,12 @@ class DeploymentState:
     def record_audit(self, receipt: dict[str, Any]) -> None:
         with self._lock:
             self.release_ready = receipt.get("passed") is True
+            if not self.release_ready:
+                self._revoke_optimized_route_unlocked()
+                self.audit_experiment_id = None
+                self.promoted_at = None
+                self.audited_deployment = None
+                return
             self.audit_experiment_id = (
                 str(receipt["experiment_id"]) if self.release_ready else None
             )
@@ -373,67 +370,6 @@ def _audit_receipt(payload: dict[str, Any], elapsed_ms: float) -> dict[str, Any]
         },
         "elapsed_ms": elapsed_ms,
     }
-
-
-def _adoption_receipt() -> dict[str, Any]:
-    """Generate a starter and prove that its empty evidence state fails closed."""
-    with tempfile.TemporaryDirectory(prefix="armproof-adoption-") as directory:
-        output = Path(directory) / "my-arm-service"
-        create_scaffold(output, "http://127.0.0.1:8000/infer")
-        contract_path = output / "contract.json"
-        contract = parse_contract(json.loads(contract_path.read_text(encoding="utf-8")))
-        contract_sha256 = hashlib.sha256(contract_path.read_bytes()).hexdigest()
-        workflow = (output / ".github/workflows/armproof.yml").read_text(
-            encoding="utf-8"
-        )
-        if f"contract-sha256: {contract_sha256}" not in workflow:
-            raise ValueError("generated workflow is not bound to its contract")
-        config = json.loads((output / "armproof.json").read_text(encoding="utf-8"))
-        if config.get("contract") != "contract.json":
-            raise ValueError("generated config is not bound to its contract")
-        stdout = io.StringIO()
-        stderr = io.StringIO()
-        with redirect_stdout(stdout), redirect_stderr(stderr):
-            initial_ci_exit_code = armproof_cli([
-                "ci",
-                str(output / "armproof.json"),
-                "--contract-sha256",
-                contract_sha256,
-            ])
-        if initial_ci_exit_code == 0:
-            raise ValueError("empty adoption starter unexpectedly passed ArmProof CI")
-        initial_ci_output = f"{stderr.getvalue()}\n{stdout.getvalue()}"
-        if "No measured evidence found" not in initial_ci_output:
-            raise ValueError("empty adoption starter failed for an unexpected reason")
-        archive_buffer = io.BytesIO()
-        generated_files = sorted(
-            candidate for candidate in output.rglob("*") if candidate.is_file()
-        )
-        with zipfile.ZipFile(
-            archive_buffer, mode="w", compression=zipfile.ZIP_DEFLATED
-        ) as archive:
-            for path in generated_files:
-                name = str(Path("my-arm-service") / path.relative_to(output))
-                info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
-                info.compress_type = zipfile.ZIP_DEFLATED
-                info.external_attr = 0o100644 << 16
-                archive.writestr(info, path.read_bytes())
-        return {
-            "generated_files": [
-                str(path.relative_to(output)) for path in generated_files
-            ],
-            "validation_status": "BLOCKED",
-            "validation_detail": (
-                f"Fresh ArmProof CI exited {initial_ci_exit_code} because measured "
-                "evidence is absent; the Action is bound to this contract digest"
-            ),
-            "initial_ci_exit_code": initial_ci_exit_code,
-            "initial_ci_reason": "no measured evidence found",
-            "workflow": workflow,
-            "contract_sha256": contract_sha256,
-            "archive_name": "armproof-service-starter.zip",
-            "archive_base64": base64.b64encode(archive_buffer.getvalue()).decode("ascii"),
-        }
 
 
 def _upstream_request(
@@ -836,9 +772,6 @@ def handler_for(
                     return
                 if self.path == "/api/audit":
                     _post_audit(self, deployment)
-                    return
-                if self.path == "/api/adoption":
-                    self._json(HTTPStatus.OK, _adoption_receipt())
                     return
                 if self.path == "/api/promote":
                     _post_promote(self, lanes, deployment)

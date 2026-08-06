@@ -88,7 +88,7 @@ The two live lanes must expose:
 Each inference response repeats the probed deployment data. Promotion compares
 the model fingerprint, source artifact, runtime lock, verified wheel ledger,
 IMDSv2 instance type, runtime, architecture, CPU placement and controls with the
-fresh audit. Every later optimized response is checked again. Drift blocks that
+saved-evidence validation. Every later optimized response is checked again. Drift blocks that
 response, invalidates the release and returns the gateway to the control lane.
 
 ## Quality Boundary

@@ -3,21 +3,27 @@
 The checked-in evidence can be evaluated without AWS credentials, paid
 infrastructure or model downloads.
 
+SurgeDesk is the banking-support reference application. ArmProof is its
+reusable Arm optimization release gate.
+
 ## 60-Second Product Path
 
 1. Open <https://qasimkhan5x.github.io/ArmProof/surgedesk/#triage>.
 2. Inspect one clearly labeled stored BANKING77 model response, choose the final
    support queue and route the ticket.
-3. Open **Capacity evidence** and click **Open checked-in evidence**. The page shows
+3. Open **Release evidence** and click **Open checked-in evidence**. The page shows
    the two rates chosen before the final test, five outcomes per service and
-   the `0.56 / 0.28 = at least 2.0x` lower bound.
-4. Open **Release** to inspect the sustainable-capacity result, Arm Performix
+   the `0.56 / 0.28 = at least 2.0x` lower bound. The optimized rate is 2,016
+   offered messages per hour on the same server.
+4. Open **Traffic switch** to inspect the sustainable-capacity result, Arm Performix
    profile and identity-bound live traffic control. Expand technical details
    for the exploratory fixed-shape result, quality limits and GitHub Action.
 
-The public page uses checked-in evidence. The demo video adds the live path: a
-real serving-plus-shadow comparison, a newly recalculated release decision, a
-route cutover to the matching optimized service and a different real request.
+The public page uses checked-in evidence. In the video, customer requests execute
+live on Graviton, the release decision is recalculated from the checked-in
+measurements, and the full ten-window benchmark remains a separate documented
+recollection workflow. The video ends with a different live request on the
+optimized route.
 
 ## Recompute The Release
 
@@ -109,7 +115,8 @@ npm run test:ui
 
 The browser suite covers desktop, tablet and 320-pixel mobile layouts. The
 backend suite includes a real localhost HTTP flow through control routing,
-fresh audit, deployment-identity comparison, promotion and optimized routing.
+saved-evidence validation, deployment-identity comparison, promotion and
+optimized routing.
 The visible action is a route cutover between two already-running services.
 The service verifies the pinned runtime-wheel ledger at startup, reads its
 instance type from AWS IMDSv2, and checks every optimized response against the

@@ -8,10 +8,12 @@ expanded evidence because the quality and reproduction tests read individual
 files. Later release experiments keep immutable archives because ArmProof
 audits those archives directly. We do not keep both forms when one is unused.
 
-Model files referenced by the early capacity runs are identified by hashes in
-the evidence. They are not vendored or represented by machine-local symlinks.
-The accepted measurements, raw profiler data, logs, checksums, and failed runs
-remain in the repository.
+Model files referenced by the capacity runs are identified by hashes in the
+evidence and are not vendored. The expanded repository directories contain no
+machine-local symlinks. Immutable release archives retain the absolute model
+links captured from the measurement host as deployment-topology records; those
+links are not dereferenced or used as proof inputs. The accepted measurements,
+raw profiler data, logs, checksums, and failed runs remain in the repository.
 
 Normalized run bundles live under `ops/evidence/<experiment-id>/<run-id>/`.
 Large raw traces and model files may use external artifact storage, but their

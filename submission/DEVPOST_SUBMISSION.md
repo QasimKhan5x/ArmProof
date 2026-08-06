@@ -24,16 +24,17 @@ HTML, CSS and Playwright.
 
 ## Short Description
 
-SurgeDesk is a banking-support application. A support agent enters a customer
+SurgeDesk is the banking-support application. ArmProof is its reusable Arm
+optimization release gate. A support agent enters a customer
 message, receives an AI-classified intent and the application's matching
 procedure, chooses the final queue, and routes the ticket.
 
 The application begins on the standard Phi-4 Mini INT4 service with KleidiAI
 off. One live message also runs as a sequential shadow copy on the optimized
 candidate, so judges can see fresh behavior from both configurations before the
-candidate is allowed to serve. SurgeDesk then recalculates the release decision
-from saved Graviton4 request rows and checks an Arm Performix profile showing
-which code ran. Once those
+candidate is allowed to serve. ArmProof then recalculates the release decision
+from checked-in Graviton4 request rows and reads the Arm Performix profile that
+shows which code ran. Once those
 checks pass, the interface switches live traffic to the optimized service. A
 different support message visibly comes back through the KleidiAI-enabled route
 with a new request ID, timestamp and release receipt.
@@ -91,14 +92,12 @@ the current ArmProof audit from the application. The audit:
 - evaluates ten required quality, capacity, evidence-volume and Arm-execution claims; and
 - reads the native Arm Performix Code Hotspots exports directly.
 
-After the audit passes, the gateway probes both live services again. Their model
-and source hashes, verified runtime-wheel ledger, ONNX Runtime GenAI version,
-Arm64 architecture, 16-thread placement and KleidiAI controls must match the
-audited deployment. The instance type comes from AWS IMDSv2 instead of a command
-line label. The route then switches to the treatment, and the next real request
-carries the release audit ID in the application's audit trail. Every later
-optimized response is checked again; drift blocks the response, invalidates the
-release and returns the gateway to the standard lane.
+After the audit passes, the gateway checks both live services again. It compares
+the model, runtime files, Arm64 architecture, 16 active cores, and KleidiAI
+setting with the measured release. It reads the EC2 instance type from AWS
+IMDSv2. The route then switches to the optimized service, and the next request
+records the release ID. Each later response repeats the identity check; a
+mismatch returns traffic to the standard service.
 
 ## What We Optimized
 
@@ -183,10 +182,10 @@ confirmation.
    precede the AWS launch times recorded in the experiment metadata. This makes
    the chronology inspectable, but we do not present it as independent AWS
    attestation.
-6. We wrote adapters that reopen the immutable archives and derive decisions
+6. We wrote adapters that reopen the checksum-bound archives and derive decisions
    from raw rows and native profiler exports.
 7. We connected that decision to a stateful gateway: serving-plus-shadow
-   comparison, fresh audit, deployment-bound traffic switch, per-request drift
+   comparison, saved-evidence validation, deployment-bound traffic switch, per-request drift
    checks and optimized route.
 8. We packaged the verification path as a Python CLI, offline report and GitHub Action.
 
@@ -214,9 +213,11 @@ ArmProof ships with:
 - a CLI that exits successfully only when every required claim passes;
 - an offline HTML report and machine-readable decision;
 - a GitHub Action for pull-request release gates;
-- `armproof init`, which creates a blocked-by-default 17-file starter with exact protocol, identity and profiler-manifest templates plus a digest-refresh helper for another bounded HTTP classification service;
+- `armproof init`, which creates a blocked-by-default starter with protocol,
+  identity and profiler templates for another HTTP classification service;
 - `armproof seal`, which writes a deterministic evidence ledger after collection without approving the result;
-- a SurgeDesk handoff that generates the starter, runs its empty state through ArmProof CI to prove it blocks, and downloads the files as a ZIP;
+- a documented CLI handoff whose empty starter is tested to block until the new
+  service supplies measurements;
 - a complete Graviton4 deployment recipe plus the checksum-pinned 45 MB Arm64
   runtime bundle attached to the `v0.9.0` release; and
 - a tested llama.cpp HTTP compatibility adapter whose performance extension is documented separately.
@@ -239,7 +240,7 @@ threshold in its native units and presents Linux perf as separate supporting
 evidence.
 
 Finally, the live application had to bind deployment behavior to the evidence.
-The gateway keeps the control active until a fresh audit passes. The model
+The gateway keeps the control active until the saved evidence passes validation. The model
 service verifies the runtime-wheel ledger, reads the instance type from AWS
 IMDSv2, and reports its actual CPU affinity. The gateway compares those values,
 the model and source hashes, runtime lock and treatment controls with the
@@ -284,6 +285,6 @@ The project is MIT licensed. BANKING77 is used under CC BY 4.0 and credited in
 source and are not stored in this repository.
 
 SurgeDesk and ArmProof were created and meaningfully developed from July 29
-through August 5, 2026, during the challenge submission period. The public Git
+through August 6, 2026, during the challenge submission period. The public Git
 history records the source changes, preregistrations, AWS experiments, evidence
 and releases.
