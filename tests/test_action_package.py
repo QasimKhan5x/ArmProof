@@ -64,7 +64,7 @@ class ActionPackageTests(unittest.TestCase):
     def test_generic_quickstart_uses_the_adopters_contract_digest(self) -> None:
         quickstart = (ROOT / "docs/QUICKSTART.md").read_text(encoding="utf-8")
         self.assertIn("sha256sum contract.json", quickstart)
-        self.assertIn("REPLACE_WITH_RELEASE_COMMIT_SHA", quickstart)
+        self.assertIn("7e1f33510af34f79a46b9011a26b899e80ff0dc4", quickstart)
         self.assertIn("REPLACE_WITH_CONTRACT_SHA256", quickstart)
         self.assertIn(
             "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",

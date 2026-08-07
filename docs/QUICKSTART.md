@@ -73,7 +73,7 @@ full commit SHA and the digest printed above:
   with:
     python-version: "3.12"
 
-- uses: QasimKhan5x/ArmProof@REPLACE_WITH_RELEASE_COMMIT_SHA
+- uses: QasimKhan5x/ArmProof@7e1f33510af34f79a46b9011a26b899e80ff0dc4
   with:
     config: armproof.json
     output: build/armproof-report

@@ -192,7 +192,7 @@ Generate a starter for another bounded HTTP classification service:
 .venv/bin/armproof init \
   --endpoint http://127.0.0.1:8000/infer \
   --output my-arm-service \
-  --action-commit REPLACE_WITH_THE_REVIEWED_40_CHARACTER_RELEASE_COMMIT
+  --action-commit 7e1f33510af34f79a46b9011a26b899e80ff0dc4
 cd my-arm-service
 ../.venv/bin/armproof ci armproof.json
 ```
@@ -216,7 +216,7 @@ Use ArmProof in GitHub Actions:
 - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
   with:
     python-version: "3.12"
-- uses: QasimKhan5x/ArmProof@REPLACE_WITH_THE_REVIEWED_40_CHARACTER_RELEASE_COMMIT
+- uses: QasimKhan5x/ArmProof@7e1f33510af34f79a46b9011a26b899e80ff0dc4
   with:
     config: armproof.json
     contract-sha256: REPLACE_WITH_THE_PROTECTED_CONTRACT_DIGEST

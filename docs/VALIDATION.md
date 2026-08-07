@@ -107,7 +107,7 @@ recipe.
 ```bash
 .venv/bin/armproof init \
   --endpoint http://127.0.0.1:8000/infer \
-  --action-commit REPLACE_WITH_THE_REVIEWED_40_CHARACTER_RELEASE_COMMIT \
+  --action-commit 7e1f33510af34f79a46b9011a26b899e80ff0dc4 \
   --output /tmp/my-arm-service
 .venv/bin/armproof ci /tmp/my-arm-service/armproof.json
 ```
