@@ -47,7 +47,7 @@ enabled = _ort_model_identity(root / "kleidiai-enabled")
 if disabled[0] != enabled[0] or disabled[1] != enabled[1]:
     raise SystemExit("matched variant identity check failed")
 expected = json.loads(Path("examples/phi4-graviton/live-runtime.json").read_text())
-release = json.loads(Path("surgedesk/data.json").read_text())["proof"]["live_deployment_identity"]
+release = json.loads(Path("surgedesk/data.json").read_text())["proof"]["expected_deployment_identity"]
 if disabled[1] != expected["source_artifact_sha256"]:
     raise SystemExit("downloaded model does not match the audited source artifact")
 if disabled[0] != release["model_identity"]:

@@ -338,7 +338,7 @@ def _proof_payload(
         ),
         "instance": release.comparison.treatment.controls["instance"],
         "threads": release.comparison.treatment.controls["threads"],
-        "live_deployment_identity": live_runtime,
+        "expected_deployment_identity": live_runtime,
         "kleidiai_enabled_callchains": release.comparison.arm_path_treatment_observed,
         "kleidiai_disabled_callchains": release.comparison.arm_path_baseline_observed,
         "kleidiai_cycle_callchain_share_percent": (
@@ -346,9 +346,14 @@ def _proof_payload(
             * 100
         ),
         "artifact_reduction_percent": deployment["disk_reduction_percent"],
-        "peak_pss_reduction_percent": deployment["peak_pss_reduction_percent"],
-        "weighted_pss_reduction_percent": deployment[
-            "weighted_pss_reduction_percent"
+        "migration_peak_pss_reduction_percent": deployment[
+            "migration_peak_pss_reduction_percent"
+        ],
+        "final_stack_peak_pss_reduction_percent": deployment[
+            "final_stack_peak_pss_reduction_percent"
+        ],
+        "final_stack_weighted_pss_reduction_percent": deployment[
+            "final_stack_weighted_pss_reduction_percent"
         ],
         "migration_bf16_quality_correct": deployment[
             "migration_bf16_quality_correct"
@@ -396,9 +401,13 @@ def _proof_payload(
             },
             {
                 "id": "outputs-equivalent",
-                "label": "Outputs remained identical",
+                "label": "All sustained request outputs remained identical",
                 "status": "pass",
-                "digest": runtime_memory["output_digest"],
+                "detail": (
+                    f"{runtime_memory['raw_output_rows']} raw responses across "
+                    f"{runtime_memory['raw_output_cases']} request cases matched"
+                ),
+                "digest": runtime_memory["raw_output_digest"],
             },
             {
                 "id": "host-restored",
@@ -479,6 +488,21 @@ def _provenance_payload(
     release_tag: str,
 ) -> dict[str, Any]:
     runtime_memory = release_summary["runtime_memory"]
+    reference_root = root / "examples/armproof-reference"
+    raw_quality_ledger = (
+        reference_root
+        / reference_config["evidence"]["raw_quality"]["checksums"]
+    ).resolve()
+    supporting_lock = (
+        reference_root / reference_config["supporting_evidence"]["lock"]
+    ).resolve()
+    evidence_binding_sha256 = {
+        release_summary["experiment_id"]: release_summary["archive_sha256"],
+        performix["experiment_id"]: performix["archive_sha256"],
+        **runtime_memory["archive_sha256"],
+        "EXP-2026-003-raw-quality-ledger": _sha256(raw_quality_ledger),
+        deployment["release_evidence_id"]: _sha256(supporting_lock),
+    }
     return {
         "experiment_id": release_summary["experiment_id"],
         "release_experiment_id": release_summary["experiment_id"],
@@ -546,6 +570,7 @@ def _provenance_payload(
             "comparison": "matched_control",
             "only_changed_control": release_summary["only_changed_control"],
         },
+        "evidence_binding_sha256": evidence_binding_sha256,
         "dataset": "BANKING77",
         "dataset_license": "CC-BY-4.0",
         "model": model_name,
@@ -577,7 +602,7 @@ def _runtime_evidence(
     quality_total: int,
 ) -> dict[str, Any]:
     deployment = derive_supporting_optimization(
-        root / "ops/evidence/result-first/EXP-2026-002",
+        root / "ops/evidence/imported-migration-measurements/EXP-2026-002",
         root / "examples/armproof-reference/supporting-evidence-lock.json",
     )
     runtime_lock_path = root / "examples/phi4-graviton/runtime-lock.json"
@@ -784,8 +809,8 @@ def build_surgedesk_payload(
                         "artifact_reduction_percent": deployment[
                             "disk_reduction_percent"
                         ],
-                        "peak_pss_reduction_percent": deployment[
-                            "peak_pss_reduction_percent"
+                        "migration_peak_pss_reduction_percent": deployment[
+                            "migration_peak_pss_reduction_percent"
                         ],
                     },
                     "evidence": "checksum-bound model and deployment measurements",
@@ -812,7 +837,7 @@ def build_surgedesk_payload(
                 {
                     "id": "memory",
                     "sequence": 3,
-                    "label": "Remove the next runtime limit",
+                    "label": "Tune Graviton runtime scheduling and memory",
                     "change": "Tune scheduling, allocation, and huge pages",
                     "reason": (
                         "Short tests exposed promising memory treatments, then a "
@@ -865,4 +890,7 @@ def build_surgedesk_payload(
             release_tag=release_tag,
         ),
     }
+    payload["provenance"]["release_evidence_ids"] = list(
+        payload["provenance"]["evidence_binding_sha256"]
+    )
     return payload

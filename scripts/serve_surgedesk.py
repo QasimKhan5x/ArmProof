@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -27,6 +28,17 @@ sys.path.insert(0, str(ROOT / "src"))
 from armproof.demo.live import build_prompt, compose_live_route  # noqa: E402
 from armproof.demo.surgedesk import _queue_guard, build_surgedesk_payload  # noqa: E402
 MAX_BODY_BYTES = 16 * 1024
+COMPARISON_TTL_SECONDS = 15 * 60
+
+
+def _seal_receipt(body: dict[str, Any]) -> dict[str, Any]:
+    """Attach the exact canonical bytes used for the public receipt digest."""
+    canonical_body = json.dumps(body, sort_keys=True, separators=(",", ":"))
+    return {
+        **body,
+        "canonical_body": canonical_body,
+        "receipt_sha256": hashlib.sha256(canonical_body.encode("utf-8")).hexdigest(),
+    }
 
 
 @dataclass
@@ -35,38 +47,79 @@ class DeploymentState:
 
     active_lane: str | None
     audit_experiment_id: str | None = None
+    release_evidence_ids: tuple[str, ...] = ()
+    release_evidence_sha256: dict[str, str] = field(default_factory=dict)
+    audit_receipt_sha256: str | None = None
     release_ready: bool = False
     promoted_at: str | None = None
     audited_deployment: dict[str, Any] | None = None
+    audit_workflow_id: str | None = None
+    promoted_workflow_id: str | None = None
+    pending_comparisons: dict[str, tuple[float, dict[str, Any]]] = field(
+        default_factory=dict
+    )
     _lock: Lock = field(default_factory=Lock, repr=False)
 
-    def record_audit(self, receipt: dict[str, Any]) -> None:
+    def assert_audit_allowed(self) -> None:
+        """Keep a running cutover bound to the audit that authorized it."""
         with self._lock:
+            if self.active_lane == "optimized":
+                raise ValueError(
+                    "release audit is unavailable while the optimized route is active; "
+                    "roll back first"
+                )
+
+    def record_audit(self, receipt: dict[str, Any], workflow_id: str | None = None) -> None:
+        with self._lock:
+            if self.active_lane == "optimized":
+                raise ValueError(
+                    "release audit cannot replace an active cutover; roll back first"
+                )
             self.release_ready = receipt.get("passed") is True
             if not self.release_ready:
                 self._revoke_optimized_route_unlocked()
                 self.audit_experiment_id = None
+                self.release_evidence_ids = ()
+                self.release_evidence_sha256 = {}
+                self.audit_receipt_sha256 = None
                 self.promoted_at = None
                 self.audited_deployment = None
+                self.audit_workflow_id = None
                 return
             self.audit_experiment_id = (
                 str(receipt["experiment_id"]) if self.release_ready else None
             )
-            identity = receipt.get("deployment_identity")
+            evidence_ids = receipt.get("release_evidence_ids", [])
+            self.release_evidence_ids = tuple(str(value) for value in evidence_ids)
+            evidence_sha256 = receipt.get("release_evidence_sha256", {})
+            self.release_evidence_sha256 = {
+                str(key): str(value) for key, value in evidence_sha256.items()
+            }
+            self.audit_receipt_sha256 = str(receipt["receipt_sha256"])
+            self.audit_workflow_id = workflow_id
+            identity = receipt.get("expected_deployment_identity")
             self.audited_deployment = (
                 dict(identity)
                 if self.release_ready and isinstance(identity, dict)
                 else None
             )
 
-    def promote(self, live_identity: dict[str, Any]) -> dict[str, Any]:
+    def promote(
+        self, live_identity: dict[str, Any], workflow_id: str | None = None
+    ) -> dict[str, Any]:
         with self._lock:
+            self._expire_comparisons_unlocked()
             if (
                 not self.release_ready
                 or not self.audit_experiment_id
                 or not self.audited_deployment
+                or not workflow_id
+                or workflow_id != self.audit_workflow_id
+                or workflow_id not in self.pending_comparisons
             ):
-                raise ValueError("optimized lane requires a fresh passing audit")
+                raise ValueError(
+                    "optimized lane requires this workflow's matched comparison and passing audit"
+                )
             expected = self.audited_deployment
             compared = {
                 "model_identity": live_identity.get("model_identity"),
@@ -110,6 +163,7 @@ class DeploymentState:
                 raise ValueError("live deployment identity differs from audited release")
             self.active_lane = "optimized"
             self.promoted_at = datetime.now(UTC).isoformat(timespec="milliseconds")
+            self.promoted_workflow_id = workflow_id
             return self._snapshot_unlocked()
 
     def authorize_active_route(
@@ -128,7 +182,10 @@ class DeploymentState:
                 or not self.release_ready
                 or not self.audit_experiment_id
                 or not self.audited_deployment
+                or not self.audit_workflow_id
+                or self.audit_workflow_id != self.promoted_workflow_id
             ):
+                self._revoke_optimized_route_unlocked()
                 raise ValueError("optimized route lacks an active release authorization")
             expected = self.audited_deployment
             compared = {
@@ -155,19 +212,128 @@ class DeploymentState:
                 raise ValueError("optimized route drifted from audited release")
             return self.audit_experiment_id
 
+    def record_comparison(
+        self, workflow_id: str, comparison: dict[str, Any]
+    ) -> None:
+        """Retain the matched pre-release observation for a later cutover receipt."""
+        lanes = comparison.get("lanes")
+        if not isinstance(lanes, dict) or not {"baseline", "optimized"} <= set(lanes):
+            raise ValueError("cutover comparison must contain both matched lanes")
+        with self._lock:
+            self._expire_comparisons_unlocked()
+            self.pending_comparisons[workflow_id] = (
+                time.monotonic(),
+                json.loads(json.dumps(comparison)),
+            )
+
+    def issue_cutover_receipt(
+        self, workflow_id: str, optimized_result: dict[str, Any]
+    ) -> dict[str, Any] | None:
+        """Bind the before/after requests and the authorizing evidence in one receipt."""
+        with self._lock:
+            self._expire_comparisons_unlocked()
+            if (
+                self.active_lane != "optimized"
+                or not self.audit_experiment_id
+                or not self.audit_receipt_sha256
+                or not self.release_evidence_sha256
+            ):
+                raise ValueError("cutover receipt requires an active release")
+            if self.audit_workflow_id != self.promoted_workflow_id:
+                self._revoke_optimized_route_unlocked()
+                raise ValueError("cutover audit and promotion workflows differ")
+            if workflow_id != self.promoted_workflow_id:
+                return None
+            pending = self.pending_comparisons.pop(workflow_id, None)
+            if not pending:
+                return None
+            comparison = pending[1]
+            before = comparison["lanes"]["baseline"]
+            shadow = comparison["lanes"]["optimized"]
+            receipt: dict[str, Any] = {
+                "workflow_id": workflow_id,
+                "comparison_id": comparison["comparison_id"],
+                "before": {
+                    "lane": "baseline",
+                    "request_id": before["request_id"],
+                    "input_sha256": before["input_sha256"],
+                    "model_output_sha256": before["model_output_sha256"],
+                    "queue": before["queue"],
+                },
+                "candidate_shadow": {
+                    "lane": "optimized",
+                    "request_id": shadow["request_id"],
+                    "input_sha256": shadow["input_sha256"],
+                    "model_output_sha256": shadow["model_output_sha256"],
+                    "queue": shadow["queue"],
+                },
+                "after": {
+                    "lane": "optimized",
+                    "request_id": optimized_result["request_id"],
+                    "input_sha256": optimized_result["input_sha256"],
+                    "model_output_sha256": optimized_result["model_output_sha256"],
+                    "queue": optimized_result["queue"],
+                },
+                "release": {
+                    "experiment_id": self.audit_experiment_id,
+                    "audit_receipt_sha256": self.audit_receipt_sha256,
+                    "evidence_sha256": dict(self.release_evidence_sha256),
+                },
+                "observed_deployment_identity": optimized_result[
+                    "runtime_identity"
+                ],
+                "issued_at": datetime.now(UTC).isoformat(timespec="milliseconds"),
+            }
+            return _seal_receipt(receipt)
+
+    def rollback(self, workflow_id: str) -> dict[str, Any]:
+        """Return the selected deployment to the standard lane."""
+        with self._lock:
+            if (
+                self.active_lane != "optimized"
+                or workflow_id != self.promoted_workflow_id
+            ):
+                raise ValueError("rollback workflow does not own the active cutover")
+            self.active_lane = "baseline"
+            self.audit_experiment_id = None
+            self.release_evidence_ids = ()
+            self.release_evidence_sha256 = {}
+            self.audit_receipt_sha256 = None
+            self.release_ready = False
+            self.promoted_at = None
+            self.audited_deployment = None
+            self.audit_workflow_id = None
+            self.promoted_workflow_id = None
+            self.pending_comparisons.clear()
+            return self._snapshot_unlocked()
+
     def revoke_optimized_route(self) -> None:
         """Return to the standard lane when the active candidate cannot be trusted."""
         with self._lock:
             self._revoke_optimized_route_unlocked()
 
     def _revoke_optimized_route_unlocked(self) -> None:
+        self.pending_comparisons.clear()
+        self.promoted_workflow_id = None
         if self.active_lane != "optimized":
             return
         self.active_lane = "baseline"
         self.audit_experiment_id = None
+        self.release_evidence_ids = ()
+        self.release_evidence_sha256 = {}
+        self.audit_receipt_sha256 = None
         self.release_ready = False
         self.promoted_at = None
         self.audited_deployment = None
+        self.audit_workflow_id = None
+
+    def _expire_comparisons_unlocked(self) -> None:
+        cutoff = time.monotonic() - COMPARISON_TTL_SECONDS
+        self.pending_comparisons = {
+            workflow_id: pending
+            for workflow_id, pending in self.pending_comparisons.items()
+            if pending[0] >= cutoff
+        }
 
     def snapshot(self) -> dict[str, Any]:
         with self._lock:
@@ -177,6 +343,9 @@ class DeploymentState:
         return {
             "active_lane": self.active_lane,
             "audit_experiment_id": self.audit_experiment_id,
+            "release_evidence_ids": list(self.release_evidence_ids),
+            "release_evidence_sha256": dict(self.release_evidence_sha256),
+            "audit_receipt_sha256": self.audit_receipt_sha256,
             "release_ready": self.release_ready,
             "promoted_at": self.promoted_at,
         }
@@ -318,13 +487,28 @@ def _response_identity_matches(
     )
 
 
-def _audit_receipt(payload: dict[str, Any], elapsed_ms: float) -> dict[str, Any]:
+def _workflow_id(payload: dict[str, Any]) -> str:
+    value = payload.get("workflow_id")
+    if (
+        not isinstance(value, str)
+        or not 8 <= len(value) <= 128
+        or any(not (char.isalnum() or char in "-_") for char in value)
+    ):
+        raise ValueError("workflow_id must contain 8 to 128 letters, digits, '-' or '_'")
+    return value
+
+
+def _audit_receipt(
+    payload: dict[str, Any], elapsed_ms: float, workflow_id: str
+) -> dict[str, Any]:
     decision = payload["proof"]
     evidence = payload["provenance"]["evidence"]
     mixed = payload["capacity"]["mixes"]["mixed"]
-    return {
+    receipt = {
+        "workflow_id": workflow_id,
         "passed": decision["decision"] == "PASS",
         "experiment_id": payload["provenance"]["experiment_id"],
+        "release_evidence_ids": payload["provenance"]["release_evidence_ids"],
         "adapter": decision["adapter_id"],
         "claims_verified": decision["verified_claims"],
         "claims": decision["claims"],
@@ -332,8 +516,13 @@ def _audit_receipt(payload: dict[str, Any], elapsed_ms: float) -> dict[str, Any]
         "raw_quality_outputs": evidence["raw_quality_outputs"],
         "confirmation_files": evidence["sustained_raw_confirmation_files"],
         "archive_sha256": evidence["sustained_archive_sha256"],
+        "release_evidence_sha256": payload["provenance"][
+            "evidence_binding_sha256"
+        ],
         "matched_control": evidence["sustained_matched_control_verified"],
-        "deployment_identity": decision["live_deployment_identity"],
+        "expected_deployment_identity": decision[
+            "expected_deployment_identity"
+        ],
         "capacity": {
             "trial_matrix": mixed["trial_matrix"],
             "optimized_pass_rps": mixed["optimized_sustainable_rps"],
@@ -381,7 +570,15 @@ def _audit_receipt(payload: dict[str, Any], elapsed_ms: float) -> dict[str, Any]
             "direct_speedup_max": decision["direct_speedup_max"],
             "direct_shape_gains": decision["direct_shape_gains"],
             "artifact_reduction_percent": decision["artifact_reduction_percent"],
-            "peak_pss_reduction_percent": decision["peak_pss_reduction_percent"],
+            "migration_peak_pss_reduction_percent": decision[
+                "migration_peak_pss_reduction_percent"
+            ],
+            "final_stack_peak_pss_reduction_percent": decision[
+                "final_stack_peak_pss_reduction_percent"
+            ],
+            "final_stack_weighted_pss_reduction_percent": decision[
+                "final_stack_weighted_pss_reduction_percent"
+            ],
             "migration_quality_delta_pp": decision["migration_quality_delta_pp"],
             "migration_int4_quality_correct": decision[
                 "migration_int4_quality_correct"
@@ -393,6 +590,7 @@ def _audit_receipt(payload: dict[str, Any], elapsed_ms: float) -> dict[str, Any]
         },
         "elapsed_ms": elapsed_ms,
     }
+    return _seal_receipt(receipt)
 
 
 def _upstream_request(
@@ -444,14 +642,18 @@ def _active_route(
 
 
 def _post_audit(handler: Any, deployment: DeploymentState) -> None:
+    workflow_id = _workflow_id(handler._body())
+    deployment.assert_audit_allowed()
     started = time.perf_counter()
     try:
         payload = build_surgedesk_payload(ROOT)
-        receipt = _audit_receipt(payload, (time.perf_counter() - started) * 1000)
+        receipt = _audit_receipt(
+            payload, (time.perf_counter() - started) * 1000, workflow_id
+        )
     except Exception:
-        deployment.record_audit({"passed": False})
+        deployment.record_audit({"passed": False}, workflow_id)
         raise
-    deployment.record_audit(receipt)
+    deployment.record_audit(receipt, workflow_id)
     handler._json(HTTPStatus.OK, receipt)
 
 
@@ -460,6 +662,7 @@ def _post_promote(
     lanes: dict[str, dict[str, Any]],
     deployment: DeploymentState,
 ) -> None:
+    workflow_id = _workflow_id(handler._body())
     lane_probes = {name: _probe_lane(config) for name, config in lanes.items()}
     matched, reason, live_identity = _match_lane_identity(
         lane_probes["baseline"], lane_probes["optimized"]
@@ -470,7 +673,7 @@ def _post_promote(
             {"error": "matched_runtime_identity_changed", "detail": reason},
         )
         return
-    promoted = deployment.promote(live_identity)
+    promoted = deployment.promote(live_identity, workflow_id)
     handler._json(
         HTTPStatus.OK,
         {
@@ -478,8 +681,14 @@ def _post_promote(
             "backend": lanes["optimized"]["expected_backend"],
             "core_group": lanes["optimized"]["core_group"],
             "runtime_identity": live_identity,
+            "workflow_id": workflow_id,
         },
     )
+
+
+def _post_rollback(handler: Any, deployment: DeploymentState) -> None:
+    workflow_id = _workflow_id(handler._body())
+    handler._json(HTTPStatus.OK, deployment.rollback(workflow_id))
 
 
 def _post_shadow_compare(
@@ -505,7 +714,9 @@ def _post_shadow_compare(
             {"error": "matched_runtime_identity_changed", "detail": reason},
         )
         return
-    text = handler._text(handler._body())
+    body = handler._body()
+    workflow_id = _workflow_id(body)
+    text = handler._text(body)
     results: dict[str, Any] = {}
     for lane_name in ("baseline", "optimized"):
         config = lanes[lane_name]
@@ -530,28 +741,28 @@ def _post_shadow_compare(
                 "observed_at": datetime.now(UTC).isoformat(),
                 "runtime_identity": upstream["runtime_identity"],
                 "release_audit_id": None,
+                "release_evidence_ids": [],
                 "shadow_only": lane_name == "optimized",
             }
         )
         results[lane_name] = result
     baseline_ms = results["baseline"]["gateway_latency_ms"]
     optimized_ms = results["optimized"]["gateway_latency_ms"]
-    handler._json(
-        HTTPStatus.OK,
-        {
-            "comparison_id": f"compare-{uuid.uuid4().hex[:12]}",
-            "execution": "sequential_shadow",
-            "serving_lane": "baseline",
-            "capacity_evidence": False,
-            "same_queue": (
-                results["baseline"]["queue"] == results["optimized"]["queue"]
-            ),
-            "observed_latency_ratio": (
-                baseline_ms / optimized_ms if optimized_ms > 0 else None
-            ),
-            "lanes": results,
-        },
-    )
+    comparison = {
+        "comparison_id": f"compare-{uuid.uuid4().hex[:12]}",
+        "execution": "sequential_shadow",
+        "serving_lane": "baseline",
+        "capacity_evidence": False,
+        "same_queue": (
+            results["baseline"]["queue"] == results["optimized"]["queue"]
+        ),
+        "observed_latency_ratio": (
+            baseline_ms / optimized_ms if optimized_ms > 0 else None
+        ),
+        "lanes": results,
+    }
+    deployment.record_comparison(workflow_id, comparison)
+    handler._json(HTTPStatus.OK, comparison)
 
 
 def _post_route(
@@ -576,7 +787,9 @@ def _post_route(
             {"error": "route_runtime_identity_changed"},
         )
         return
-    text = handler._text(handler._body())
+    body = handler._body()
+    workflow_id = _workflow_id(body)
+    text = handler._text(body)
     upstream, elapsed_ms, _ = _upstream_request(
         str(route_config["endpoint"]),
         text=text,
@@ -609,13 +822,20 @@ def _post_route(
             "observed_at": datetime.now(UTC).isoformat(),
             "runtime_identity": upstream["runtime_identity"],
             "release_audit_id": release_audit_id,
+            "release_evidence_ids": deployment.snapshot()["release_evidence_ids"],
+            "release_evidence_sha256": deployment.snapshot()["release_evidence_sha256"],
+            "audit_receipt_sha256": deployment.snapshot()["audit_receipt_sha256"],
         }
     )
+    if active_lane == "optimized":
+        cutover_receipt = deployment.issue_cutover_receipt(workflow_id, result)
+        if cutover_receipt:
+            result["cutover_receipt"] = cutover_receipt
     handler._json(HTTPStatus.OK, result)
 
 
 def _live_status_payload(
-    lanes: dict[str, dict[str, Any]], deployment: DeploymentState
+    lanes: dict[str, dict[str, Any]], deployment: DeploymentState, fixture_mode: bool
 ) -> dict[str, Any]:
     lane_status = {name: _probe_lane(row) for name, row in lanes.items()}
     matched_available, matched_reason, matched_identity = _match_lane_identity(
@@ -630,6 +850,9 @@ def _live_status_payload(
         "matched_status": matched_reason,
         "audit_available": True,
         "mode": "live" if route_config else "recorded",
+        "observation_source": (
+            "local_integration_fixture" if fixture_mode else "live_graviton_endpoints"
+        ),
         "deployment": deployment.snapshot(),
         "lanes": {
             name: {
@@ -652,7 +875,10 @@ def _live_status_payload(
     }
 
 
-def _stream_audit(handler: Any, deployment: DeploymentState) -> None:
+def _stream_audit(
+    handler: Any, deployment: DeploymentState, workflow_id: str
+) -> None:
+    deployment.assert_audit_allowed()
     handler.send_response(HTTPStatus.OK.value)
     handler.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
     handler.send_header("Cache-Control", "no-store")
@@ -680,11 +906,17 @@ def _stream_audit(handler: Any, deployment: DeploymentState) -> None:
                 },
             ),
         )
-        receipt = _audit_receipt(payload, (time.perf_counter() - started) * 1000)
-        deployment.record_audit(receipt)
+        receipt = _audit_receipt(
+            payload, (time.perf_counter() - started) * 1000, workflow_id
+        )
+        deployment.record_audit(receipt, workflow_id)
         emit("result", {"receipt": receipt})
     except Exception as exc:
-        deployment.record_audit({"passed": False})
+        try:
+            deployment.record_audit({"passed": False}, workflow_id)
+        except ValueError:
+            # A concurrent promotion owns the active authorization; do not replace it.
+            pass
         emit("error", {"error": str(exc)})
 
 
@@ -694,6 +926,7 @@ def handler_for(
     optimized_endpoint: str | None = None,
     baseline_cores: str = "0-15",
     optimized_cores: str = "0-15",
+    fixture_mode: bool = False,
 ) -> type[SimpleHTTPRequestHandler]:
     if baseline_endpoint and optimized_endpoint and baseline_endpoint == optimized_endpoint:
         raise ValueError("matched endpoints must be distinct")
@@ -776,7 +1009,7 @@ def handler_for(
             self.wfile.write(body)
 
         def _audit_stream(self) -> None:
-            _stream_audit(self, deployment)
+            _stream_audit(self, deployment, _workflow_id(self._body()))
 
         def _body(self) -> dict[str, Any]:
             length = int(self.headers.get("Content-Length", "0"))
@@ -796,7 +1029,10 @@ def handler_for(
 
         def do_GET(self) -> None:
             if self.path == "/surgedesk/live-status.json":
-                self._json(HTTPStatus.OK, _live_status_payload(lanes, deployment))
+                self._json(
+                    HTTPStatus.OK,
+                    _live_status_payload(lanes, deployment, fixture_mode),
+                )
                 return
             if self.path == "/":
                 self.send_response(HTTPStatus.FOUND.value)
@@ -818,6 +1054,9 @@ def handler_for(
                     return
                 if self.path == "/api/promote":
                     _post_promote(self, lanes, deployment)
+                    return
+                if self.path == "/api/rollback":
+                    _post_rollback(self, deployment)
                     return
                 if self.path == "/api/shadow-compare":
                     _post_shadow_compare(

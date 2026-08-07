@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build or verify the imported result-first evidence manifest."""
+"""Build or verify the imported migration-measurement manifest."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ def main() -> int:
     parser.add_argument("--source-root", type=Path)
     parser.add_argument("--verify", action="store_true")
     args = parser.parse_args()
-    evidence_root = ROOT / "ops/evidence/result-first"
+    evidence_root = ROOT / "ops/evidence/imported-migration-measurements"
     manifest_path = evidence_root / "manifest.json"
     if args.verify:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))

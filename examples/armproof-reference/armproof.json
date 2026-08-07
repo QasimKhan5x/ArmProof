@@ -40,7 +40,7 @@
     "project_bundle": "../../ops/evidence/EXP-2026-014/project.tar.gz"
   },
   "supporting_evidence": {
-    "root": "../../ops/evidence/result-first/EXP-2026-002",
+    "root": "../../ops/evidence/imported-migration-measurements/EXP-2026-002",
     "lock": "supporting-evidence-lock.json"
   },
   "deployment_summary": "deployment-summary.json",

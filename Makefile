@@ -10,7 +10,7 @@ evidence-verify:
 	$(PYTHON) scripts/build_evidence_manifest.py --verify
 
 data-verify:
-	$(PYTHON) scripts/build_banking77_workload.py >/dev/null
+	$(PYTHON) scripts/build_banking77_workload.py --verify >/dev/null
 
 surgedesk-verify:
 	$(PYTHON) scripts/build_surgedesk.py --verify

@@ -31,20 +31,31 @@ class ReportGeneratorTests(unittest.TestCase):
             }))
             comparison = root / "comparison.json"
             comparison.write_text(json.dumps({
-                "metrics": {"minimum_capacity_ratio": 2.5},
+                "metrics": {
+                    "minimum_capacity_ratio": 2.5,
+                    "performix_enabled_kai_share": 0.6735,
+                    "enabled_kai_cycle_callchain_share": 0.6791,
+                },
             }))
             deployment = root / "deployment.json"
             deployment.write_text(json.dumps({
                 "schema_version": "1.0.0",
                 "experiment_id": "EXP-2026-002",
+                "source_experiment_id": "EXP-RESULT-FIRST-MEM-002",
+                "release_evidence_id": "EXP-2026-002",
                 "metrics": {
                     "disk_reduction_percent": 35.9,
-                    "peak_pss_reduction_percent": 55.3,
+                    "final_stack_peak_pss_reduction_percent": 55.3,
                 },
                 "metric_source": {
                     "experiment_id": "EXP-2026-002",
+                    "source_experiment_id": "EXP-RESULT-FIRST-MEM-002",
+                    "release_evidence_id": "EXP-2026-002",
                     "checksummed_files": 4,
                     "derivation": "locked_aggregate_footprint_and_raw_timing_repetitions",
+                    "pss_evidence": (
+                        "locked_aggregate_statistics_no_raw_sample_trace"
+                    ),
                 },
             }))
             verification = root / "verification.json"
@@ -61,7 +72,7 @@ class ReportGeneratorTests(unittest.TestCase):
                 "reproduction_checksums": None,
                 "performix": None,
                 "supporting_evidence": {
-                    "experiment_id": "EXP-2026-002",
+                    "experiment_id": "EXP-RESULT-FIRST-MEM-002",
                     "checksummed_files": 4,
                     "derivation": "locked_aggregate_footprint_and_raw_timing_repetitions",
                 },
@@ -72,12 +83,20 @@ class ReportGeneratorTests(unittest.TestCase):
                 comparison_path=comparison, verification_path=verification,
             )
             rendered = index.read_text()
-            self.assertIn("Measured capacity", rendered)
+            self.assertIn("Measured capacity cleared the release checks", rendered)
             self.assertNotIn("</script><script>", rendered)
             self.assertEqual(json.loads((output / "decision.json").read_text())["passed"], True)
             self.assertTrue((output / "data.json").is_file())
             self.assertTrue((output / "deployment-summary.json").is_file())
             self.assertIn("Deployment transformation", rendered)
+            self.assertIn("Performix kai_* function samples", rendered)
+            self.assertIn(
+                "comparison.metrics.performix_enabled_kai_share", rendered
+            )
+            self.assertNotIn("enabled_kai_cycle_callchain_share??", rendered)
+            self.assertIn(
+                "KleidiAI-enabled INT4 final stack versus BF16", rendered
+            )
 
             changed = json.loads(decision.read_text(encoding="utf-8"))
             changed["claims"][0]["observed"] = 99

@@ -1,7 +1,7 @@
 # llama.cpp HTTP Adoption Example
 
-This compact example proves that ArmProof's bounded HTTP contract is not tied
-to Phi-4 Mini or ONNX Runtime. It bridges llama.cpp's documented
+This compact example demonstrates that ArmProof's bounded HTTP contract can
+connect to a second runtime. It bridges llama.cpp's documented
 OpenAI-compatible `/v1/chat/completions` endpoint to ArmProof's `/infer`
 request shape.
 
@@ -9,7 +9,7 @@ It is a compatibility example, **not an optimization benchmark**. No latency,
 throughput, quality or Arm-acceleration claim from this smoke may be compared
 with the Graviton4 reference result.
 
-## Reproduce The Real Smoke
+## Run The Compatibility Smoke Test
 
 Install `llama-server`, then start the official Apache-2.0 Qwen2.5 0.5B GGUF:
 

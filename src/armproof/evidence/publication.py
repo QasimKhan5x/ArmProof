@@ -143,8 +143,16 @@ def verify_preregistration_publication(
         "git_commit_verified_in_checkout": git_commit_verified,
         "instance_launch_time_source": "recorded_experiment_metadata",
         "chronology_scope": (
-            "Git commit and plan bytes verified in this checkout; instance launch "
-            "time is recorded experiment metadata, not independent cloud attestation."
+            (
+                "Git commit and plan bytes verified in this checkout; instance launch "
+                "time is recorded experiment metadata, not independent cloud attestation."
+            )
+            if git_commit_verified
+            else (
+                "Plan and archive byte bindings plus recorded chronology were checked; "
+                "the Git object was unavailable in this run, so commit provenance was "
+                "not independently verified."
+            )
         ),
         "plan_embedded_in_project_bundle": True,
         "plan_embedded_in_measurement_archive": True,

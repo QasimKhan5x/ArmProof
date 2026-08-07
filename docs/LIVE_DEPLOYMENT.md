@@ -128,6 +128,8 @@ Open <http://127.0.0.1:8765/surgedesk/#triage>. In connected mode:
 4. The gateway compares both live deployments with the accepted identity.
 5. The treatment becomes active only after the contract and deployment checks pass.
 6. Every treatment response is checked again for runtime drift.
+7. Each ticket receipt stores SHA-256 digests of the exact input text and raw
+   model output alongside the request and release IDs.
 
 The checked-in KleidiAI capacity result comes from ten 500-second windows. The
 runtime recipe has its own short screen, sustained comparison, and rejected
@@ -135,6 +137,15 @@ simplification. The live request
 flow demonstrates deployment behavior and does not replace either measurement;
 the two live lanes intentionally represent the standard and final released
 service, not a one-variable causal benchmark.
+
+The gateway trusts the two endpoint declarations after checking them against
+the pinned runtime, model, AWS IMDSv2 instance type, CPU affinity, and release
+recipe. This is operator-controlled deployment validation, not
+hardware-backed remote attestation. The Playwright gateway runs with an
+explicit `fixture_mode` flag; SurgeDesk labels those responses and screenshots
+as a local integration fixture with synthetic timing. A recording of live
+behavior should proceed only when the interface says **Connected Graviton
+gateway**.
 
 ## Verify The Adoption Path
 

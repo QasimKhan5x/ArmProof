@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 import hashlib
 import json
@@ -48,10 +49,23 @@ def prompt(text: str, categories: list[str], detailed: bool) -> str:
     )
 
 
-def write_jsonl(path: Path, rows: list[dict]) -> None:
-    with path.open("w", encoding="utf-8", newline="\n") as stream:
-        for row in rows:
-            stream.write(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n")
+def serialize_jsonl(rows: list[dict]) -> str:
+    return "".join(
+        json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n"
+        for row in rows
+    )
+
+
+def verify_or_write(path: Path, content: str, *, verify: bool) -> None:
+    if verify:
+        if not path.is_file() or path.read_text(encoding="utf-8") != content:
+            try:
+                label = path.relative_to(ROOT)
+            except ValueError:
+                label = path
+            raise SystemExit(f"generated data is stale: {label}")
+        return
+    path.write_text(content, encoding="utf-8", newline="\n")
 
 
 def workload_row(index: int, text: str, categories: list[str], detailed: bool, prefix: str) -> dict:
@@ -67,6 +81,13 @@ def workload_row(index: int, text: str, categories: list[str], detailed: bool, p
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="fail when checked-in generated files differ from deterministic output",
+    )
+    args = parser.parse_args()
     for filename, expected in SOURCE_HASHES.items():
         observed = digest(SOURCE_ROOT / filename)
         if observed != expected:
@@ -104,15 +125,15 @@ def main() -> None:
         source = short_sources[index] if index % 2 == 0 else long_sources[index]
         mixed.append(workload_row(index, source["text"], categories, index % 2 == 1, "mixed"))
 
-    OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+    if not args.verify:
+        OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
     outputs = {
         "quality.jsonl": quality,
         "traffic-short.jsonl": short,
         "traffic-long.jsonl": long,
         "traffic-mixed.jsonl": mixed,
     }
-    for filename, rows in outputs.items():
-        write_jsonl(OUTPUT_ROOT / filename, rows)
+    serialized = {filename: serialize_jsonl(rows) for filename, rows in outputs.items()}
     manifest = {
         "schema_version": "1.0.0",
         "dataset": "BANKING77",
@@ -121,15 +142,21 @@ def main() -> None:
         "license": "CC-BY-4.0",
         "source_hashes": SOURCE_HASHES,
         "outputs": {
-            filename: {"rows": len(rows), "sha256": digest(OUTPUT_ROOT / filename)}
+            filename: {
+                "rows": len(rows),
+                "sha256": hashlib.sha256(serialized[filename].encode("utf-8")).hexdigest(),
+            }
             for filename, rows in outputs.items()
         },
         "categories": len(categories),
         "selection": "first 10 test examples per upstream category for quality; deterministic traffic transforms",
     }
-    (OUTPUT_ROOT / "manifest.json").write_text(
+    for filename, content in serialized.items():
+        verify_or_write(OUTPUT_ROOT / filename, content, verify=args.verify)
+    verify_or_write(
+        OUTPUT_ROOT / "manifest.json",
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+        verify=args.verify,
     )
     print(json.dumps(manifest["outputs"], indent=2, sort_keys=True))
 

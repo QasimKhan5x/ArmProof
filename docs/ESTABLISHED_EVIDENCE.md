@@ -17,8 +17,9 @@ implementation. It is a routing summary, not a substitute for raw evidence.
 | Claim | Comparison | Result |
 |---|---|---:|
 | Artifact size | INT4 versus BF16 | 35.92% smaller |
-| Peak PSS | INT4 versus BF16 | 55.34% lower |
-| Time-weighted PSS | INT4 versus BF16 | 59.66% lower |
+| Peak PSS | INT4 versus BF16, before enabling KleidiAI | 43.09% lower |
+| Final stack peak PSS | KleidiAI-enabled INT4 versus BF16 | 55.34% lower |
+| Time-weighted PSS | KleidiAI-enabled INT4 final stack versus BF16 | 59.66% lower |
 | KleidiAI end-to-end speed | enabled versus disabled, same INT4 runtime | 1.72x to 2.59x |
 | 24-case migration spot-check | INT4 versus BF16 | 20/24 versus 19/24 |
 | Parseability | both | 24/24 |
@@ -47,6 +48,10 @@ Runtime scheduling controls, mimalloc, and transparent huge pages. Its gain is
 reported as a whole-runtime result on Graviton4, not as an I8MM-only effect.
 The two-window-per-candidate screen in EXP-2026-016 is diagnostic evidence; the
 long EXP-2026-015 and EXP-2026-017 outcomes determine what can be released.
+The verifier re-derives all 31 window summaries from 3,678 raw rows and checks
+sustained output equivalence across 2,790 rows and 186 request cases. The three
+archives are checksum-bound, but they are not presented as having the public
+pre-launch Git chronology established for EXP-2026-014.
 
 ## Historical Qualification
 
@@ -71,7 +76,7 @@ does not select a new boundary.
 ## Current Evidence Location
 
 The imported size, memory and direct-speed evidence is under
-`ops/evidence/result-first/`. The accepted service-capacity bundle is under
+`ops/evidence/imported-migration-measurements/`. The accepted service-capacity bundle is under
 `ops/evidence/EXP-2026-004/accepted/`. Its guest ledger contains 141 entries;
 `armproof evidence-verify` checks all of them after relocation. The independent
 reproduction is under `ops/evidence/EXP-2026-005/accepted/` with its comparison
@@ -86,7 +91,8 @@ The runtime-treatment archives are under `ops/evidence/EXP-2026-015/`,
 
 ## Not Yet Established
 
-- ArmProof measurement overhead.
+- ArmProof collection-overhead percentage. Verification runs after traffic
+  collection and is not active in the measured capacity windows.
 - Performix CPU Microarchitecture and Instruction Mix on this VM. Both require
   three PMU counters, while the virtual Graviton PMU exposed two.
 

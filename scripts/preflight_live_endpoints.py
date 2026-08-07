@@ -194,7 +194,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         expected = json.loads(
             (ROOT / "surgedesk/data.json").read_text(encoding="utf-8")
-        )["proof"]["live_deployment_identity"]
+        )["proof"]["expected_deployment_identity"]
         comparable_fields = {
             "model_identity", "source_artifact_sha256", "runtime_lock_sha256",
             "runtime_artifact_ledger_sha256", "instance_type",

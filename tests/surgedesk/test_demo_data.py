@@ -164,7 +164,14 @@ class SurgeDeskPayloadTests(unittest.TestCase):
         self.assertEqual(memory["simplification_failures"], 5)
         self.assertEqual(memory["simplification_windows"], 5)
         self.assertTrue(memory["outputs_equivalent"])
+        self.assertEqual(memory["raw_output_rows"], 2790)
+        self.assertEqual(memory["raw_output_cases"], 186)
+        self.assertEqual(memory["complete_raw_windows"], 31)
+        self.assertEqual(memory["complete_raw_rows"], 3678)
+        self.assertEqual(memory["sustained_equivalence_rows"], 2790)
+        self.assertEqual(len(memory["raw_output_digest"]), 64)
         self.assertEqual(memory["recipe"]["allocator"], "mimalloc")
+        self.assertIsNone(memory["recipe"]["observed_host_state"]["allocator"])
         self.assertEqual(
             memory["recipe"]["transparent_huge_pages"], "always"
         )
@@ -188,8 +195,17 @@ class SurgeDeskPayloadTests(unittest.TestCase):
             ["model", "compute", "memory"],
         )
 
-    def test_live_release_identity_is_fully_bound_to_the_audit(self) -> None:
-        identity = self.payload["proof"]["live_deployment_identity"]
+    def test_int4_and_full_stack_memory_claims_are_separate(self) -> None:
+        proof = self.payload["proof"]
+        self.assertAlmostEqual(
+            proof["migration_peak_pss_reduction_percent"], 43.089459969982
+        )
+        self.assertAlmostEqual(
+            proof["final_stack_peak_pss_reduction_percent"], 55.336785335289
+        )
+
+    def test_expected_release_identity_is_fully_bound_to_the_audit(self) -> None:
+        identity = self.payload["proof"]["expected_deployment_identity"]
         self.assertEqual(identity["model_identity"], "d86ae7ca1f12b2ae4abe70abb856cb9c688908477a7de653467623764ab5c687")
         self.assertEqual(identity["runtime_lock_sha256"], "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884")
         self.assertEqual(identity["instance_type"], "c8g.4xlarge")

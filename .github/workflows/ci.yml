@@ -9,6 +9,27 @@ permissions:
   contents: read
 
 jobs:
+  action-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+      - id: gate
+        uses: ./
+        with:
+          config: examples/armproof-reference/armproof.json
+          output: build/action-smoke-report
+          contract-sha256: 5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369
+      - name: Confirm composite Action outputs
+        env:
+          DECISION: ${{ steps.gate.outputs.decision }}
+          REPORT: ${{ steps.gate.outputs.report }}
+        run: test -f "$DECISION" && test -f "$REPORT"
+
   check:
     strategy:
       fail-fast: false
@@ -44,6 +65,8 @@ jobs:
           examples/armproof-reference/armproof.json --output report
           --contract-sha256 5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369
       - run: python3.12 scripts/build_surgedesk.py --verify
+      - name: Confirm generated publication files are current
+        run: git diff --exit-code -- report surgedesk/data.json
       - run: npm run test:logic
       - run: npm run test:ui
       - name: Upload product screenshots

@@ -4,7 +4,7 @@
     "comparison_sha256": "21051a4d3327da8f4f20eb61eb829798181042dd2001a7876e413c64ba2af543",
     "contract_sha256": "5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369",
     "decision_sha256": "827525a1b358045f0f48d08b5798d803606ded375da453deb09eb51384ad6fe7",
-    "summary_sha256": "15619a64a27fcd078cd35857bc7cafa3f2d58568d973baabf5d3999b6dee3aec"
+    "summary_sha256": "43afbbabccfe22ca3265c009b08a51417fd8fcb49b25e7a4088c1d90a020efc4"
   },
   "checksums": {
     "checked": 291,
@@ -119,6 +119,8 @@
     ],
     "candidate_rps": 0.62,
     "capacity_gain_percent": 10.714285714285698,
+    "complete_raw_rows": 3678,
+    "complete_raw_windows": 31,
     "confirmation_passes": 5,
     "confirmation_windows": 5,
     "evidence_role": "A separate whole-runtime optimization layered after the matched KleidiAI compute comparison.",
@@ -137,14 +139,36 @@
     "p95_reduction_percent": 44.9779852025598,
     "passed": true,
     "previous_capacity_rps": 0.56,
+    "raw_output_cases": 186,
+    "raw_output_digest": "348576c01dada3d82fc9bedecd8cbe0af310a63986262924e3793c5eaccf367c",
+    "raw_output_rows": 2790,
     "recipe": {
       "allocator": "mimalloc",
       "arm_compute": "KleidiAI I8MM",
+      "evidence_counts": {
+        "complete_raw_rows": 3678,
+        "complete_raw_windows": 31,
+        "sustained_equivalence_cases": 186,
+        "sustained_equivalence_rows": 2790
+      },
+      "observed_host_state": {
+        "allocator": null,
+        "allocator_evidence": "not_observed_no_proc_maps_archived",
+        "transparent_huge_pages": "always",
+        "transparent_huge_pages_evidence": "validated_per_window_sysfs_readback"
+      },
       "onnxruntime_thread_overrides": {
         "session.dynamic_block_base": "4",
         "session.intra_op.spin_backoff_max": "8",
         "session.intra_op.spin_duration_us": "1000"
       },
+      "setting_evidence": {
+        "allocator": "declared_variant_metadata_only",
+        "arm_compute": "kleidiai_enablement_in_config_i8mm_not_reprofiled_in_stage3",
+        "onnxruntime_thread_overrides": "archived_exact_genai_configs",
+        "transparent_huge_pages": "declared_variant_metadata_and_observed_per_window_sysfs"
+      },
+      "settings_status": "declared_recipe_with_field_level_evidence",
       "transparent_huge_pages": "always"
     },
     "simplification_experiment_id": "EXP-2026-017",
@@ -158,12 +182,14 @@
       11402.800394
     ],
     "simplification_windows": 5,
+    "sustained_equivalence_cases": 186,
+    "sustained_equivalence_rows": 2790,
     "sustained_experiment_id": "EXP-2026-015"
   },
   "schema_version": "1.0.0",
   "supporting_evidence": {
     "checksummed_files": 4,
     "derivation": "locked_aggregate_footprint_and_raw_timing_repetitions",
-    "experiment_id": "EXP-2026-002"
+    "experiment_id": "EXP-RESULT-FIRST-MEM-002"
   }
 }

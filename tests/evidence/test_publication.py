@@ -45,6 +45,8 @@ class PublicationEvidenceTests(unittest.TestCase):
                 expected_evidence_archive_sha256=hashlib.sha256(evidence.read_bytes()).hexdigest(),
             )
             self.assertTrue(result["plan_embedded_in_measurement_archive"])
+            self.assertFalse(result["git_commit_verified_in_checkout"])
+            self.assertIn("Git object was unavailable", result["chronology_scope"])
 
             changed = json.loads(plan.read_text(encoding="utf-8"))
             changed["claim"] = "changed later"

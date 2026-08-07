@@ -10,12 +10,14 @@ import {
 const elements = Object.fromEntries(
   [...document.querySelectorAll("[id]")].map((element) => [element.id, element]),
 );
+const workflowId = crypto.randomUUID();
 
 let data;
 let workspace;
 let inferenceMode = "recorded";
 let matchedLanesAvailable = false;
 let auditAvailable = false;
+let observationSource = "recorded";
 let proofState = "recorded";
 let proofClaims = [];
 let deploymentStatus = {
@@ -27,16 +29,69 @@ let deploymentStatus = {
 
 const VIEW_TO_HASH = {
   workspace: "triage",
-  surge: "surge",
-  proof: "proof",
+  surge: "evidence",
+  proof: "release",
 };
 const HASH_TO_VIEW = Object.fromEntries(
   Object.entries(VIEW_TO_HASH).map(([view, hash]) => [hash, view]),
 );
+HASH_TO_VIEW.surge = "surge";
+HASH_TO_VIEW.proof = "proof";
 
 
 function setText(id, value) {
   elements[id].textContent = String(value);
+}
+
+
+function canonicalJson(value) {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+
+async function sha256Hex(value) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+
+function evidenceBindingsMatch(observed) {
+  return canonicalJson(observed) === canonicalJson(data.provenance.evidence_binding_sha256);
+}
+
+
+async function receiptHashMatches(receipt) {
+  if (
+    !receipt
+    || !/^[0-9a-f]{64}$/.test(receipt.receipt_sha256 ?? "")
+    || typeof receipt.canonical_body !== "string"
+  ) return false;
+  const { receipt_sha256: expected, canonical_body: canonicalBody, ...body } = receipt;
+  let parsedBody;
+  try {
+    parsedBody = JSON.parse(canonicalBody);
+  } catch {
+    return false;
+  }
+  return canonicalJson(parsedBody) === canonicalJson(body)
+    && await sha256Hex(canonicalBody) === expected;
+}
+
+
+async function verifyCutoverReceipt(receipt) {
+  return await receiptHashMatches(receipt)
+    && receipt.workflow_id === workflowId
+    && receipt.release.experiment_id === data.provenance.experiment_id
+    && evidenceBindingsMatch(receipt.release.evidence_sha256)
+    && receipt.release.audit_receipt_sha256 === deploymentStatus.audit_receipt_sha256
+    && receipt.before.lane === "baseline"
+    && receipt.candidate_shadow.lane === "optimized"
+    && receipt.after.lane === "optimized";
 }
 
 
@@ -56,7 +111,7 @@ function formatShadowReceipt(result) {
   const memory = runtime.memory_configuration;
   const tuningCount = Object.keys(runtime.runtime_tuning ?? {}).length;
   const tuning = tuningCount ? ` · ${tuningCount} ORT settings` : "";
-  return `${result.request_id} · ${observedAt} · ${runtime.architecture}/${runtime.threads} threads · control=${control}${tuning} · ${memory.allocator}/${memory.transparent_huge_pages}`;
+  return `${result.request_id} · ${observedAt} · ${runtime.architecture}/${runtime.threads} threads · control=${control}${tuning} · declared ${memory.allocator}/THP ${memory.transparent_huge_pages} · in ${result.input_sha256.slice(0, 8)} / out ${result.model_output_sha256.slice(0, 8)}`;
 }
 
 
@@ -67,10 +122,27 @@ function liveServiceLabel(lane) {
 }
 
 
+function renderEnvironmentLabel() {
+  if (inferenceMode !== "live") {
+    setText("environment-label", "Recorded Graviton evidence");
+    return;
+  }
+  const route = deploymentStatus.active_lane === "optimized" ? "optimized route selected" : "baseline route selected";
+  setText(
+    "environment-label",
+    observationSource === "local_integration_fixture"
+      ? `Local integration fixture · ${route} · synthetic timing`
+      : `Connected Graviton gateway · ${route}`,
+  );
+}
+
+
 function liveActionLabel() {
   return deploymentStatus.active_lane === "baseline" && matchedLanesAvailable
     ? "Compare current route with Arm candidate"
-    : "Run optimized live route";
+    : observationSource === "local_integration_fixture"
+      ? "Run optimized fixture route"
+      : "Run optimized live route";
 }
 
 
@@ -147,17 +219,12 @@ function renderProofDecision(state, detail = "") {
     setText("proof-decision-title", "Saved evidence approved the conservative Graviton boundary");
     setText("proof-decision-detail", detail);
     setText("proof-decision-status", "REVALIDATED NOW");
-    setText(
-      "environment-label",
-      `${inferenceMode === "live" ? "Connected Arm64 service" : "Checked-in model output"} · evidence revalidated`,
-    );
     mark.textContent = "✓";
   } else if (state === "failed") {
     setText("proof-decision-source", "Current ArmProof audit");
     setText("proof-decision-title", "Current evidence check blocked the release");
     setText("proof-decision-detail", detail);
     setText("proof-decision-status", "BLOCKED");
-    setText("environment-label", "Current evidence audit blocked");
     mark.textContent = "×";
   } else if (state === "active") {
     setText("proof-decision-source", "Current gateway release");
@@ -176,7 +243,7 @@ function renderProofDecision(state, detail = "") {
     mark.textContent = "·";
   } else {
     setText("proof-decision-source", "Checked-in ArmProof receipt");
-    setText("proof-decision-title", "Checked-in conservative release receipt");
+    setText("proof-decision-title", "Checked-in release receipt");
     setText(
       "proof-decision-detail",
       `${data.proof.verified_claims} contract claims and ${data.proof.runtime_release_conditions.length} runtime conditions passed when this receipt was generated. `
@@ -268,11 +335,15 @@ function renderReview() {
     setText("live-arm-runtime", `${runtime.architecture} · ${runtime.threads} threads · ${runtime.runtime_version}`);
     const control = runtime.optimization_control["mlas.disable_kleidiai"];
     setText("live-control", `KleidiAI ${control === "0" ? "on" : "off"} · raw flag ${control}`);
+    setText("live-input-digest", active.input_sha256.slice(0, 16));
+    setText("live-output-digest", active.model_output_sha256.slice(0, 16));
   }
   if (active.mode === "live_model_output") {
     elements["review-warning"].textContent = active.guard_overrode
       ? `The routing guard changed the live model route from ${active.llm_queue} to ${active.guard_queue}. Human validation is required.`
-      : "This is a live two-stage suggestion with no benchmark label. Human validation is required.";
+      : observationSource === "local_integration_fixture"
+        ? "This fixture response has no benchmark label. Human validation is required."
+        : "This live suggestion has no benchmark label. Human validation is required.";
   } else if (!active.queue_correct) {
     elements["review-warning"].textContent = `The guarded queue differs from the benchmark queue (${active.expected_queue}). Correct it before routing.`;
   } else if (active.guard_overrode) {
@@ -292,7 +363,7 @@ function renderReviewedTickets() {
     row.className = "empty-row";
     const cell = document.createElement("td");
     cell.colSpan = 5;
-    cell.textContent = "No tickets reviewed in this demo session.";
+    cell.textContent = "No tickets reviewed in this session.";
     row.append(cell);
     elements["reviewed-tickets"].append(row);
     labelResponsiveTable(elements["reviewed-tickets"].closest("table"));
@@ -309,7 +380,8 @@ function renderReviewedTickets() {
     request.textContent = ticket.source_text;
     if (ticket.mode === "live_model_output" && ticket.runtime_identity) {
       const label = document.createElement("strong");
-      label.textContent = `${liveServiceLabel(ticket.deployment_lane)} · ${formatMs(ticket.gateway_latency_ms)} observed`;
+      const sourceLabel = observationSource === "local_integration_fixture" ? "fixture" : "observed";
+      label.textContent = `${liveServiceLabel(ticket.deployment_lane)} · ${formatMs(ticket.gateway_latency_ms)} ${sourceLabel}`;
       const receipt = document.createElement("small");
       const observed = new Date(ticket.observed_at);
       const observedAt = Number.isNaN(observed.getTime())
@@ -319,7 +391,9 @@ function renderReviewedTickets() {
       receipt.textContent = `${ticket.request_id} · ${observedAt} · `
         + `${ticket.runtime_identity.architecture}/${ticket.runtime_identity.threads} threads · `
         + `mlas.disable_kleidiai=${ticket.runtime_identity.optimization_control["mlas.disable_kleidiai"]}`
-        + (ticket.release_audit_id ? ` · ${ticket.release_audit_id}` : "");
+        + ` · in ${ticket.input_sha256.slice(0, 8)} / out ${ticket.model_output_sha256.slice(0, 8)}`
+        + (ticket.release_audit_id ? ` · ${ticket.release_audit_id}` : "")
+        + (ticket.audit_receipt_sha256 ? ` · audit ${ticket.audit_receipt_sha256.slice(0, 10)}…` : "");
       served.append(label, receipt);
     } else {
       served.textContent = "Recorded evidence";
@@ -335,25 +409,49 @@ function renderReviewedTickets() {
   labelResponsiveTable(elements["reviewed-tickets"].closest("table"));
   elements["review-complete"].hidden = Boolean(workspace.active);
   const latest = workspace.resolved[0];
-  const baselineTicket = workspace.resolved.find(
-    (ticket) => ticket.deployment_lane === "baseline" && ticket.mode === "live_model_output",
-  );
   const treatmentTicket = workspace.resolved.find(
-    (ticket) => ticket.deployment_lane === "optimized" && ticket.release_audit_id,
+    (ticket) => ticket.deployment_lane === "optimized"
+      && ticket.cutover_receipt
+      && ticket.cutover_receipt_verified,
   );
-  const cutoverComplete = Boolean(baselineTicket && treatmentTicket);
+  const cutoverComplete = Boolean(treatmentTicket);
   elements["live-cutover-summary"].hidden = !cutoverComplete;
   if (cutoverComplete) {
+    const receipt = treatmentTicket.cutover_receipt;
     elements["intake-form"].before(elements["live-cutover-summary"]);
     setText("cutover-before-lane", "Standard · KleidiAI off");
-    setText("cutover-before-request", `${baselineTicket.final_queue} · ${baselineTicket.request_id}`);
+    setText(
+      "cutover-before-request",
+      `${receipt.before.queue} · ${receipt.comparison_id} · ${receipt.before.request_id}`,
+    );
     setText("cutover-after-lane", "Optimized · I8MM + tuned runtime");
-    setText("cutover-after-request", `${treatmentTicket.final_queue} · ${treatmentTicket.request_id}`);
-    setText("cutover-audit", treatmentTicket.release_audit_id);
+    setText("cutover-after-request", `${receipt.after.queue} · ${receipt.after.request_id}`);
+    setText("cutover-audit", "Release receipt verified");
     setText(
       "cutover-capacity",
-      `Authorizes ≥${data.proof.runtime_memory.candidate_rps.toFixed(2)} requests/s after the measured ≥${data.capacity.mixes.mixed.minimum_capacity_ratio.toFixed(1)}× compute gain`,
+      `Approved at ≥${data.proof.runtime_memory.candidate_rps.toFixed(2)} requests/s`,
     );
+    setText("cutover-receipt-sha", receipt.receipt_sha256);
+    setText("cutover-comparison-binding", receipt.comparison_id);
+    setText(
+      "cutover-before-binding",
+      `${receipt.before.request_id} · in ${receipt.before.input_sha256.slice(0, 12)}… · out ${receipt.before.model_output_sha256.slice(0, 12)}…`,
+    );
+    setText(
+      "cutover-after-binding",
+      `${receipt.after.request_id} · in ${receipt.after.input_sha256.slice(0, 12)}… · out ${receipt.after.model_output_sha256.slice(0, 12)}…`,
+    );
+    setText("cutover-audit-binding", receipt.release.audit_receipt_sha256);
+    elements["cutover-evidence-digests"].replaceChildren();
+    Object.entries(receipt.release.evidence_sha256).forEach(([experimentId, digest]) => {
+      const item = document.createElement("li");
+      const label = document.createElement("strong");
+      const value = document.createElement("code");
+      label.textContent = experimentId;
+      value.textContent = digest;
+      item.append(label, value);
+      elements["cutover-evidence-digests"].append(item);
+    });
     elements["review-complete"].hidden = true;
   }
   setText(
@@ -366,7 +464,7 @@ function renderReviewedTickets() {
 
 
 function revealVerifiedProof() {
-  for (const id of ["optimization-summary", "performix-proof", "memory-proof", "proof-details", "release-gate"]) {
+  for (const id of ["optimization-summary", "performix-proof", "memory-proof", "proof-details"]) {
     elements[id].hidden = false;
   }
 }
@@ -409,7 +507,7 @@ async function routeSelectedMessage(event) {
       elements["shadow-comparison"].hidden = false;
       setText("shadow-baseline-latency", "Running…");
       setText("shadow-optimized-latency", "Waiting…");
-      setText("shadow-baseline-result", "Current production request");
+      setText("shadow-baseline-result", "Serving baseline-lane request");
       setText("shadow-optimized-result", "Shadow copy follows on the same cores");
       setText("shadow-baseline-receipt", "Receipt pending");
       setText("shadow-optimized-receipt", "Receipt pending");
@@ -419,13 +517,24 @@ async function routeSelectedMessage(event) {
       const response = await fetch(compare ? "/api/shadow-compare" : "/api/route", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: elements["customer-message"].value }),
+        body: JSON.stringify({
+          text: elements["customer-message"].value,
+          workflow_id: workflowId,
+        }),
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+      if (payload.cutover_receipt) {
+        if (!await verifyCutoverReceipt(payload.cutover_receipt)) {
+          throw new Error("cutover receipt did not match the verified release evidence");
+        }
+        payload.cutover_receipt_verified = true;
+      }
       if (compare) {
         const baseline = payload.lanes.baseline;
         const optimized = payload.lanes.optimized;
+        baseline.comparison_id = payload.comparison_id;
+        optimized.comparison_id = payload.comparison_id;
         setText("shadow-baseline-latency", formatMs(baseline.gateway_latency_ms));
         setText("shadow-optimized-latency", formatMs(optimized.gateway_latency_ms));
         setText("shadow-baseline-result", `${baseline.suggested_label} · ${baseline.queue}`);
@@ -434,7 +543,7 @@ async function routeSelectedMessage(event) {
         setText("shadow-optimized-receipt", formatShadowReceipt(optimized));
         setText(
           "shadow-observation",
-          `Both configurations completed this request and proposed ${payload.same_queue ? "the same" : "different"} final queue. `
+          `${payload.comparison_id} completed on both configurations and proposed ${payload.same_queue ? "the same" : "different"} final queue. `
             + `The release decision comes from ${capacityWindowLabel()}, quality checks, and Arm profiles.`,
         );
         workspace = selectRecordedCase(workspace, baseline);
@@ -448,7 +557,7 @@ async function routeSelectedMessage(event) {
       elements["review-title"].focus({ preventScroll: true });
     } catch (error) {
       await configureLiveMode();
-      elements["intake-error"].textContent = `Live route failed: ${error.message}`;
+      elements["intake-error"].textContent = `Request failed: ${error.message}`;
       elements["intake-error"].hidden = false;
       elements["intake-error"].setAttribute("tabindex", "-1");
       elements["intake-error"].focus();
@@ -460,7 +569,7 @@ async function routeSelectedMessage(event) {
   }
   const recordedCase = findRecordedCase(data.routing_cases, elements["customer-message"].value);
   if (!recordedCase) {
-    elements["intake-error"].textContent = `No recorded ${data.provenance.model} result exists for edited text. Select an evidence-backed ${data.provenance.dataset} request for this offline demo.`;
+    elements["intake-error"].textContent = `No recorded ${data.provenance.model} result exists for edited text. Select an evidence-backed ${data.provenance.dataset} request in the checked-in view.`;
     elements["intake-error"].hidden = false;
     return;
   }
@@ -473,33 +582,34 @@ async function routeSelectedMessage(event) {
 }
 
 
-function setInferenceMode(mode) {
+function setInferenceMode(mode, { focus = true } = {}) {
   inferenceMode = mode;
   const live = mode === "live";
   elements["sample-select"].disabled = live;
   elements["sample-select"].hidden = live;
   elements["sample-select-label"].hidden = live;
   elements["scenario-picker"].hidden = live;
-  setText(
-    "environment-label",
-    live
-      ? liveServiceLabel(deploymentStatus.active_lane)
-      : "Recorded Graviton evidence",
-  );
+  renderEnvironmentLabel();
   elements["workspace-mode"].textContent = live
-    ? "Live matched Arm64 inference"
-    : `${data.provenance.dataset} recorded output`;
+    ? observationSource === "local_integration_fixture"
+      ? "Local integration fixture · synthetic timing"
+      : "Connected Graviton gateway"
+    : "Archived Graviton response";
   elements["intake-note"].textContent = live
     ? deploymentStatus.active_lane === "baseline"
       ? "The serving lane handles the request; the candidate receives a sequential shadow copy for a contention-free comparison."
-      : "This message is sent through the evidence-cleared optimized service and local queue guard."
-    : "Select an evidence-backed request to load its recorded model output.";
-  elements["route-request"].textContent = live ? liveActionLabel() : "Inspect stored output";
+      : observationSource === "local_integration_fixture"
+        ? "This message is sent through the evidence-cleared optimized fixture route; timing is synthetic."
+        : "This message is sent through the evidence-cleared optimized service and local queue guard."
+    : "Select an archived support case to load its recorded model output.";
+  elements["route-request"].textContent = live ? liveActionLabel() : "Review recorded request";
   elements["customer-message"].readOnly = !live;
   if (live) {
     elements["customer-message"].value = "";
-    elements["customer-message"].placeholder = "Enter a support request for the live Arm64 service";
-    elements["customer-message"].focus();
+    elements["customer-message"].placeholder = observationSource === "local_integration_fixture"
+      ? "Enter a support request for the local integration fixture"
+      : "Enter a support request for the Arm64 service";
+    if (focus) elements["customer-message"].focus();
   } else {
     elements["customer-message"].placeholder = "";
     loadSelectedSample();
@@ -526,6 +636,7 @@ async function configureLiveMode() {
     }
     matchedLanesAvailable = Boolean(status.matched_lanes_available);
     auditAvailable = Boolean(status.audit_available);
+    observationSource = status.observation_source ?? "recorded";
     deploymentStatus = { ...deploymentStatus, ...(status.deployment || {}) };
     if (status.lanes?.baseline && status.lanes?.optimized) {
       setText(
@@ -552,13 +663,34 @@ async function configureLiveMode() {
         renderProofDecision("pending");
       }
       elements["live-mode"].checked = true;
-      setInferenceMode("live");
+      setInferenceMode("live", { focus: false });
     }
+    const fixture = observationSource === "local_integration_fixture";
+    setText(
+      "session-request-scope",
+      fixture ? "Fixture requests and synthetic lane receipts" : "Live requests and lane receipts",
+    );
+    setText("shadow-source-chip", fixture ? "Local fixture · synthetic timing" : "Observed now on Graviton");
+    setText("live-observed-label", fixture ? "Fixture response" : "Observed now");
+    setText("cutover-source-chip", fixture ? "Local integration fixture · synthetic timing" : "Observed now on Graviton");
+    setText("cutover-eyebrow", fixture ? "Integration flow complete" : "Connected gateway cutover complete");
+    setText(
+      "live-cutover-title",
+      fixture
+        ? "The integration gateway selected the optimized Arm route"
+        : "The optimized Arm service is handling support traffic",
+    );
+    setText(
+      "cutover-description",
+      fixture
+        ? "The local fixture exercised the complete before-and-after release flow; its timing is synthetic."
+        : "A matched request established the starting route; a new inference request confirms the approved route is selected.",
+    );
     renderDeploymentStatus();
     if (!auditAvailable) {
       elements["load-experiment"].textContent = "Open checked-in evidence";
       elements["evidence-load-note"].textContent =
-        "This public page can inspect the repository receipt. Run the local demo to hash and re-derive the archive.";
+        "This public page can inspect the repository receipt. Run the local gateway to hash and re-derive the archive.";
     }
   } catch {
     // Static hosting intentionally remains in recorded-evidence mode.
@@ -572,14 +704,16 @@ function renderDeploymentStatus() {
   const optimized = active === "optimized";
   const freshAudit = proofState === "fresh" && deploymentStatus.release_ready;
   const publicEvidence = !matchedLanesAvailable && !auditAvailable;
+  elements["rollback-route"].hidden = !optimized;
   setText(
     "opening-capacity",
     publicEvidence || optimized || freshAudit
       ? `≥${data.proof.runtime_memory.candidate_rps.toFixed(2)} r/s`
       : "Awaiting validation",
   );
-  setText("promotion-eyebrow", "Live release action");
-  setText("promotion-current-label", "Serving now");
+  const fixture = observationSource === "local_integration_fixture";
+  setText("promotion-eyebrow", fixture ? "Release engineer · integration route decision" : "Release engineer · connected gateway decision");
+  setText("promotion-current-label", fixture ? "Active fixture route" : "Serving now");
   setText("promotion-candidate-label", "Candidate");
   setText("promotion-audit-label", "Required evidence");
   elements["promote-route"].hidden = false;
@@ -595,7 +729,7 @@ function renderDeploymentStatus() {
   setText(
     "workspace-candidate",
     optimized
-      ? "Released · serving live traffic"
+        ? fixture ? "Released · selected in fixture" : "Released · selected by connected gateway"
       : connected
         ? liveServiceLabel("optimized")
         : publicEvidence
@@ -609,20 +743,28 @@ function renderDeploymentStatus() {
   setText(
     "workspace-release-status",
     optimized
-      ? `${deploymentStatus.audit_experiment_id} approved · optimized route serving`
+      ? fixture
+        ? "Release receipt passed · fixture route selected"
+        : "Release receipt passed · optimized gateway route selected"
       : freshAudit
-        ? `${deploymentStatus.audit_experiment_id} approved · route switch ready`
+        ? "Fresh release receipt passed · gateway switch ready"
       : publicEvidence
-        ? `${data.provenance.experiment_id} passed the checked-in release policy`
+        ? "Recorded Graviton release checks passed"
         : "Waiting for the measured release check",
   );
   setText(
     "opening-status",
     optimized
-      ? `${deploymentStatus.audit_experiment_id} approved · serving now`
+      ? fixture
+        ? "Release receipt passed · fixture route selected"
+        : "Release receipt passed · optimized route selected"
       : freshAudit
-        ? `${deploymentStatus.audit_experiment_id} approved · switch ready`
-        : "blocked until ArmProof rechecks it",
+        ? "Fresh release receipt passed · switch ready"
+        : publicEvidence
+          ? "Checked-in result; local audit required to recompute"
+          : fixture
+            ? "Local release check required"
+            : "Current-session release check required",
   );
   elements["opening-status"].classList.toggle("approved", optimized || freshAudit);
   setText(
@@ -634,10 +776,11 @@ function renderDeploymentStatus() {
   setText(
     "promotion-audit-status",
     freshAudit
-      ? `${deploymentStatus.audit_experiment_id} verified now`
+      ? "Fresh release receipt verified"
       : "Evidence validation required",
   );
   if (publicEvidence) {
+    elements["tab-proof"].textContent = "Release status";
     setText("promotion-eyebrow", "Recorded release decision");
     setText("promotion-current-label", "Baseline");
     setText("promotion-current-lane", `${data.capacity.mixes.mixed.trial_matrix[0].treatment} · measured`);
@@ -646,7 +789,7 @@ function renderDeploymentStatus() {
     setText("promotion-audit-label", "Release evidence");
     setText(
       "promotion-audit-status",
-      `${data.provenance.experiment_id} · ${data.proof.verified_claims} claims + ${data.proof.runtime_release_conditions.length} runtime conditions passed`,
+      `${data.proof.verified_claims} compute and quality checks plus ${data.proof.runtime_release_conditions.length} runtime conditions passed`,
     );
     setText("promotion-title", "The optimized candidate cleared the checked-in release policy");
     setText(
@@ -658,45 +801,62 @@ function renderDeploymentStatus() {
     elements["open-required-audit"].textContent = "Inspect release evidence";
     elements["route-next-request"].hidden = true;
   } else if (optimized) {
-    setText("promotion-current-label", "Serving now");
+    elements["tab-proof"].textContent = "Traffic switch";
+    setText("promotion-current-label", fixture ? "Active fixture route" : "Serving now");
     setText("promotion-candidate-label", "Previous route");
     setText("promotion-candidate-lane", liveServiceLabel("baseline"));
-    setText("promotion-title", "The optimized service is handling live requests");
+    setText("promotion-title", fixture ? "The optimized route is selected in the integration fixture" : "The optimized service is handling live requests");
     setText(
       "promotion-detail",
-      "The gateway changed its active route only after the measured release check passed and both service declarations were checked again.",
+      fixture
+        ? "The fixture gateway selected its optimized route only after the measured release check passed and both service declarations were checked again. Timing remains synthetic."
+        : "The gateway changed its active route only after the measured release check passed and both service declarations were checked again.",
     );
     elements["promote-route"].disabled = true;
-    elements["promote-route"].textContent = "Live traffic switched";
+    elements["promote-route"].textContent = fixture ? "Optimized fixture route selected" : "Connected gateway switched";
     elements["route-next-request"].hidden = false;
     elements["open-required-audit"].hidden = true;
   } else if (freshAudit && matchedLanesAvailable) {
-    setText("promotion-title", "The measured optimized service is ready for live traffic");
+    elements["tab-proof"].textContent = "Traffic switch";
+    setText(
+      "promotion-title",
+      fixture
+        ? "The measured optimized route is ready for fixture selection"
+        : "The measured optimized service is ready for the connected gateway",
+    );
     setText(
       "promotion-detail",
-      "The release check passed. The gateway will recheck both Arm service declarations, then switch traffic from the standard service to the optimized service.",
+      fixture
+        ? "The release check passed. The fixture gateway will recheck both Arm service declarations before selecting the optimized route."
+        : "The release check passed. The gateway will recheck both Arm service declarations, then switch traffic from the standard service to the optimized service.",
     );
     elements["promote-route"].disabled = false;
-    elements["promote-route"].textContent = "Switch live traffic to optimized service";
+    elements["promote-route"].textContent = fixture ? "Select optimized fixture route" : "Switch connected gateway to optimized service";
     elements["route-next-request"].hidden = true;
     elements["open-required-audit"].hidden = true;
   } else {
+    elements["tab-proof"].textContent = matchedLanesAvailable ? "Traffic switch" : "Release status";
     setText("promotion-title", connected
-      ? "The standard service is handling support requests"
-      : "Connect both matched Arm64 lanes to switch live traffic");
+      ? fixture
+        ? "The standard route is selected in the integration fixture"
+        : "The standard service is handling support requests"
+      : "Connect both matched Arm64 lanes to enable a gateway switch");
     setText(
       "promotion-detail",
       connected
-        ? "Run the measured release check before routing live requests to the optimized service."
-        : "The public evidence remains inspectable, but changing the live route requires both matched endpoints and a fresh local audit.",
+        ? fixture
+          ? "Run the measured release check before selecting the optimized fixture route."
+          : "Run the measured release check before routing live requests to the optimized service."
+        : "The public evidence remains inspectable, but changing the connected route requires both matched endpoints and a fresh local audit.",
     );
     elements["promote-route"].disabled = true;
     elements["promote-route"].textContent = connected
       ? "Recompute the release decision first"
-      : "Matched live lanes required";
+      : "Matched Arm64 lanes required";
     elements["route-next-request"].hidden = true;
     elements["open-required-audit"].hidden = false;
   }
+  renderEnvironmentLabel();
 }
 
 
@@ -711,6 +871,7 @@ function review() {
   );
   elements["tab-workspace"].classList.add("completed");
   if (workspace.resolved.length > 1 && !elements["live-cutover-summary"].hidden) {
+    elements["intake-form"].hidden = true;
     elements["live-cutover-title"].setAttribute("tabindex", "-1");
     elements["live-cutover-summary"].scrollIntoView({ block: "start" });
     elements["live-cutover-title"].focus({ preventScroll: true });
@@ -743,9 +904,9 @@ function populateFinalQueues() {
 
 function populateScenarios() {
   const labels = {
-    "straight-through": ["Straight-through", "Model and guard agree"],
-    "guard-intervention": ["Guard intervention", "Guard rescues the LLM route"],
-    "human-correction": ["Human correction", "Operator catches a guard error"],
+    "straight-through": ["Stolen card", "Account security request"],
+    "guard-intervention": ["Missing card", "Card delivery question"],
+    "human-correction": ["Statement fee", "Operator review required"],
   };
   elements["scenario-options"].replaceChildren();
   Object.entries(labels).forEach(([role, [title, description]], index) => {
@@ -788,7 +949,11 @@ function renderAuditStage(stage, detail, elapsedMs) {
 
 
 async function streamVerifiedAudit() {
-  const response = await fetch("/api/audit-stream", { method: "POST" });
+  const response = await fetch("/api/audit-stream", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ workflow_id: workflowId }),
+  });
   if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
@@ -845,14 +1010,18 @@ async function loadVerifiedExperiment() {
     "Reading the archive, re-deriving every recorded long window, and evaluating the contract.";
   setText("evidence-seal", "…");
   elements["audit-receipt"].hidden = true;
-  elements["reveal-experiment-results"].hidden = true;
   elements["audit-progress"].replaceChildren();
   elements["audit-progress"].hidden = false;
   try {
     const receipt = await streamVerifiedAudit();
+    const receiptHashValid = await receiptHashMatches(receipt);
     const valid =
       receipt.passed
+      && receipt.workflow_id === workflowId
       && receipt.experiment_id === data.provenance.experiment_id
+      && JSON.stringify(receipt.release_evidence_ids) === JSON.stringify(data.provenance.release_evidence_ids)
+      && evidenceBindingsMatch(receipt.release_evidence_sha256)
+      && receiptHashValid
       && receipt.claims_verified === data.proof.verified_claims
       && Array.isArray(receipt.claims)
       && receipt.claims.length === receipt.claims_verified
@@ -878,6 +1047,9 @@ async function loadVerifiedExperiment() {
       ...deploymentStatus,
       release_ready: true,
       audit_experiment_id: receipt.experiment_id,
+      release_evidence_ids: receipt.release_evidence_ids,
+      release_evidence_sha256: receipt.release_evidence_sha256,
+      audit_receipt_sha256: receipt.receipt_sha256,
     };
     renderDeploymentStatus();
     setText(
@@ -901,9 +1073,10 @@ async function loadVerifiedExperiment() {
     elements["evidence-loader"].classList.add("loaded");
     setText("evidence-seal", "✓");
     elements["tab-surge"].classList.add("completed");
-    elements["reveal-experiment-results"].hidden = false;
-    elements["reveal-experiment-results"].scrollIntoView({ behavior: "smooth", block: "center" });
-    elements["reveal-experiment-results"].focus({ preventScroll: true });
+    elements["experiment-results"].hidden = true;
+    elements["audit-receipt-title"].setAttribute("tabindex", "-1");
+    elements["audit-receipt"].scrollIntoView({ behavior: "smooth", block: "start" });
+    elements["audit-receipt-title"].focus({ preventScroll: true });
   } catch (error) {
     console.error(error);
     elements["load-experiment"].disabled = false;
@@ -915,15 +1088,6 @@ async function loadVerifiedExperiment() {
     setText("evidence-seal", "×");
     renderProofDecision("failed", `The current audit did not approve: ${error.message}`);
   }
-}
-
-
-function revealConfirmedResult() {
-  elements["experiment-results"].hidden = false;
-  elements["reveal-experiment-results"].hidden = true;
-  elements["release-result-title"].scrollIntoView({ behavior: "smooth", block: "start" });
-  elements["release-result-title"].setAttribute("tabindex", "-1");
-  elements["release-result-title"].focus({ preventScroll: true });
 }
 
 
@@ -967,7 +1131,7 @@ function showRepositoryEvidence() {
       direct_speedup_max: data.proof.direct_speedup_max,
       direct_shape_gains: data.proof.direct_shape_gains,
       artifact_reduction_percent: data.proof.artifact_reduction_percent,
-      peak_pss_reduction_percent: data.proof.peak_pss_reduction_percent,
+      migration_peak_pss_reduction_percent: data.proof.migration_peak_pss_reduction_percent,
       migration_quality_delta_pp: data.proof.migration_quality_delta_pp,
       migration_int4_quality_correct: data.proof.migration_int4_quality_correct,
       migration_bf16_quality_correct: data.proof.migration_bf16_quality_correct,
@@ -983,16 +1147,16 @@ function showRepositoryEvidence() {
     `${data.proof.verified_claims}/${data.proof.verified_claims} contract claims + ${data.proof.runtime_release_conditions.length} runtime conditions`,
   );
   setText("audit-receipt-time", "Loaded from the published repository receipt");
-  elements["experiment-results"].hidden = false;
+  elements["experiment-results"].hidden = true;
   elements["load-experiment"].textContent = "Repository evidence opened";
   elements["evidence-load-note"].textContent =
-    "GitHub Pages loaded the checked-in audit receipt. The local runbook recomputes the archive during the demo.";
+    "GitHub Pages loaded the checked-in audit receipt. The local gateway recomputes the archive when requested.";
   elements["evidence-loader"].classList.add("loaded");
   setText("evidence-seal", "✓");
   renderProofDecision("recorded");
-  elements["capacity-title"].setAttribute("tabindex", "-1");
-  elements["capacity-title"].scrollIntoView({ block: "start" });
-  elements["capacity-title"].focus({ preventScroll: true });
+  elements["audit-receipt-title"].setAttribute("tabindex", "-1");
+  elements["audit-receipt"].scrollIntoView({ block: "start" });
+  elements["audit-receipt-title"].focus({ preventScroll: true });
 }
 
 
@@ -1049,10 +1213,10 @@ function renderTrialMatrix(trials) {
 
 function renderRateSelection(selection) {
   setText("rate-selection-copy", selection.interpretation);
-  setText("rate-discovery-id", `Discovery: ${selection.experiment_id}`);
+  setText("rate-discovery-id", "Discovery run");
   setText(
     "rate-confirmation-id",
-    `Frozen confirmation: ${selection.confirmation_experiment_id} · commit ${selection.publication.git_commit.slice(0, 7)}`,
+    "Preregistered confirmation run",
   );
   elements["rate-confirmation-id"].href = selection.publication.public_commit_url;
   elements["rate-selection-grid"].replaceChildren();
@@ -1135,7 +1299,8 @@ function renderAuditResult(receipt) {
   setText("result-quality-delta", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}% queue accuracy`);
   setText(
     "result-quality-scope",
-    `Fine-grained intent ${data.quality.optimized_accuracy_percent.toFixed(2)}% (${qualityDelta.toFixed(2)} pp vs standard and inside the 1-point limit); human confirmation required`,
+    `Five-queue recommendation improved from ${(data.quality.guard_queue_accuracy_percent - data.quality.guard_queue_gain_pp).toFixed(2)}% to ${data.quality.guard_queue_accuracy_percent.toFixed(2)}%. `
+      + `The harder 77-intent diagnostic scored ${data.quality.optimized_accuracy_percent.toFixed(2)}% (${qualityDelta.toFixed(2)} pp vs standard); every route remains human-confirmed.`,
   );
   setText(
     "confirmation-count",
@@ -1169,25 +1334,14 @@ function renderAuditResult(receipt) {
     + `That places standard capacity below ${capacity.baseline_fail_rps.toFixed(2)} r/s and optimized capacity at or above `
     + `${capacity.optimized_pass_rps.toFixed(2)} r/s. The published result is the conservative lower bound shown here.`,
   );
-  setText("direct-speedup", `${supporting.direct_speedup_min.toFixed(2)}–${supporting.direct_speedup_max.toFixed(2)}× faster`);
-  setText(
-    "direct-shapes",
-    `All ${supporting.direct_shape_gains.length} fixed shapes improved: ${supporting.direct_shape_gains.map((value) => `${value.toFixed(2)}×`).join(" · ")}`,
-  );
   setText("summary-capacity", `≥${capacity.minimum_ratio.toFixed(2)}×`);
   setText("summary-footprint", `${supporting.artifact_reduction_percent.toFixed(2)}% smaller`);
-  setText("summary-performix", `${arm.performix_enabled_sample_share_percent.toFixed(2)}%`);
+  setText(
+    "summary-performix",
+    `${arm.performix_disabled_sample_share_percent.toFixed(0)}% → ${arm.performix_enabled_sample_share_percent.toFixed(2)}%`,
+  );
   setText("summary-final-capacity", `≥${memory.candidate_rps.toFixed(2)} r/s`);
   setText("summary-final-context", `${memory.confirmation_passes}/${memory.confirmation_windows} sustained windows within the fixed p95 SLO`);
-  setText("capacity-range", `≥${memory.candidate_rps.toFixed(2)} r/s final verified traffic floor`);
-  setText("artifact-reduction", `${supporting.artifact_reduction_percent.toFixed(2)}% smaller`);
-  setText("memory-reduction", `${supporting.peak_pss_reduction_percent.toFixed(2)}% lower peak PSS`);
-  setText(
-    "migration-quality",
-    `${supporting.migration_quality_delta_pp >= 0 ? "+" : ""}${supporting.migration_quality_delta_pp.toFixed(2)} pp `
-      + `(${supporting.migration_int4_quality_correct}/${supporting.migration_quality_total} vs `
-      + `${supporting.migration_bf16_quality_correct}/${supporting.migration_quality_total})`,
-  );
   setText("performix-version", `Arm Performix ${arm.engine_version} · ${arm.cpu}`);
   setText("performix-disabled-share", `${arm.performix_disabled_sample_share_percent.toFixed(0)}%`);
   setText("performix-enabled-share", `${arm.performix_enabled_sample_share_percent.toFixed(2)}%`);
@@ -1221,7 +1375,7 @@ function renderOptimizationJourney(memory) {
   const formatOutcome = {
     model: (outcome) => [
       `${outcome.artifact_reduction_percent.toFixed(2)}% smaller model`,
-      `${outcome.peak_pss_reduction_percent.toFixed(2)}% lower peak memory`,
+      `${outcome.migration_peak_pss_reduction_percent.toFixed(2)}% lower peak memory`,
     ],
     compute: (outcome) => [
       `≥${outcome.minimum_capacity_ratio.toFixed(2)}× sustainable capacity`,
@@ -1268,8 +1422,8 @@ function renderMemoryProof(memory) {
   );
   setText(
     "memory-proof-copy",
-    `With KleidiAI already active, the service missed the p95 objective at ${memory.candidate_rps.toFixed(2)} requests/s. `
-      + "Short screens favored mimalloc with huge pages, but all five long runs of that simpler recipe missed the objective. The complete thread, allocator, and huge-page recipe is the one that passed sustained validation.",
+    `At ${memory.candidate_rps.toFixed(2)} requests/s, KleidiAI alone missed the p95 objective in every sustained window. `
+      + "The complete thread, allocator, and huge-page recipe passed all five. The allocator-and-huge-page variant failed all five sustained windows, so it was not released.",
   );
   setText("memory-baseline-p95", formatMs(memory.baseline_median_p95_ms));
   setText("memory-optimized-p95", formatMs(memory.optimized_median_p95_ms));
@@ -1302,7 +1456,7 @@ function renderMemoryProof(memory) {
     label.textContent = labels[id] ?? id;
     track.className = "memory-ablation-track";
     bar.style.width = `${Math.max(4, value / maximum * 100)}%`;
-    if (id === "mimalloc-thp") bar.className = "winner";
+    if (id === "mimalloc-thp") bar.className = "short-screen-best";
     measured.textContent = formatMs(value);
     track.append(bar);
     row.append(label, track, measured);
@@ -1336,17 +1490,21 @@ async function promoteOptimizedLane() {
   elements["promote-route"].textContent = "Rechecking both Arm lanes…";
   elements["promotion-result"].textContent = "";
   try {
-    const response = await fetch("/api/promote", { method: "POST" });
+    const response = await fetch("/api/promote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ workflow_id: workflowId }),
+    });
     const payload = await response.json();
     if (!response.ok) throw new Error(payload.detail || payload.error || `HTTP ${response.status}`);
     deploymentStatus = { ...deploymentStatus, ...payload };
     renderDeploymentStatus();
+    const fixture = observationSource === "local_integration_fixture";
     setText(
       "promotion-result",
-      `The gateway switched live support traffic to ${payload.backend} on cores ${payload.core_group}. `
-      + "The model and runtime artifacts, AWS instance, Arm placement, KleidiAI control, ONNX Runtime settings, allocator, and huge-page policy all matched the accepted release.",
+      `The gateway ${fixture ? "selected the optimized fixture route" : "selected the optimized support route"} using ${payload.backend} on cores ${payload.core_group}. `
+      + "The model and runtime artifacts, AWS instance, Arm placement, KleidiAI control, ONNX Runtime settings, declared allocator treatment, and huge-page policy all matched the accepted release.",
     );
-    setText("environment-label", "Optimized Arm64 lane serving");
     setText(
       "promotion-model-hash",
       `model ${payload.runtime_identity.model_identity.slice(0, 10)}… · source ${payload.runtime_identity.source_artifact_sha256.slice(0, 10)}…`,
@@ -1363,23 +1521,77 @@ async function promoteOptimizedLane() {
       "promotion-control-match",
       `${payload.runtime_identity.changed_control}: ${payload.runtime_identity.baseline_control} → ${payload.runtime_identity.optimized_control}`
       + ` · ${Object.keys(payload.runtime_identity.runtime_tuning.optimized).length} ORT settings`
-      + ` · ${payload.runtime_identity.memory.optimized.allocator} · THP ${payload.runtime_identity.memory.optimized.transparent_huge_pages}`,
+      + ` · declared ${payload.runtime_identity.memory.optimized.allocator} · THP ${payload.runtime_identity.memory.optimized.transparent_huge_pages}`,
     );
     elements["promotion-identity"].hidden = false;
     elements["tab-proof"].classList.add("completed");
+    renderEnvironmentLabel();
   } catch (error) {
-    elements["promotion-result"].textContent = `Traffic switch blocked: ${error.message}`;
+    elements["promotion-result"].textContent = `Traffic decision blocked: ${error.message}`;
     elements["promote-route"].disabled = false;
-    elements["promote-route"].textContent = "Retry live traffic switch";
+    elements["promote-route"].textContent = "Retry traffic decision";
+  }
+}
+
+
+function openPromotionConfirmation() {
+  const fixture = observationSource === "local_integration_fixture";
+  setText(
+    "promotion-confirm-environment",
+    fixture ? "Local integration fixture · synthetic timing" : "Connected Graviton service",
+  );
+  setText(
+    "promotion-confirm-audit",
+    `Fresh release receipt · ${deploymentStatus.audit_receipt_sha256.slice(0, 12)}…`,
+  );
+  setText(
+    "promotion-confirmation-copy",
+    fixture
+      ? "The fixture gateway will recheck both declared services before selecting its optimized route."
+      : "The gateway will recheck both running services before changing the active support route.",
+  );
+  elements["promotion-confirmation"].showModal();
+}
+
+
+async function rollbackToStandardLane() {
+  elements["rollback-route"].disabled = true;
+  try {
+    const response = await fetch("/api/rollback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ workflow_id: workflowId }),
+    });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+    deploymentStatus = { ...deploymentStatus, ...payload };
+    proofState = "recorded";
+    elements["promotion-identity"].hidden = true;
+    elements["live-cutover-summary"].hidden = true;
+    elements["intake-form"].hidden = false;
+    setText("promotion-result", "The gateway returned to the standard service.");
+    await configureLiveMode();
+  } catch (error) {
+    setText("promotion-result", `Rollback blocked: ${error.message}`);
+  } finally {
+    elements["rollback-route"].disabled = false;
   }
 }
 
 
 function routeNextLiveRequest() {
   activateView("workspace");
+  elements["intake-form"].hidden = false;
   elements["live-mode"].checked = true;
   setInferenceMode("live");
   elements["shadow-comparison"].hidden = true;
+}
+
+
+function startNextRequest() {
+  elements["live-cutover-summary"].hidden = true;
+  elements["review-complete"].hidden = true;
+  routeNextLiveRequest();
 }
 
 
@@ -1407,14 +1619,7 @@ function renderRedesignEvidence() {
   setText("deployment-threads", proof.threads);
   setText("deployment-runtime", data.provenance.runtime);
   setText("deployment-optimization", data.provenance.optimization);
-  setText("stack-model", data.provenance.model);
-  setText("stack-runtime", data.provenance.runtime);
-  setText("stack-machine", data.provenance.machine.split(" / ")[0].replace("AWS ", ""));
   setText("intent-count", data.quality.intent_count);
-  setText("release-adapter-id", proof.adapter_id);
-  setText("release-action", data.provenance.release_action);
-  setText("release-contract-sha", data.provenance.contract_sha256);
-  elements["release-link"].href = data.provenance.release_url;
   setText("queue-accuracy", `${data.quality.guard_queue_accuracy_percent.toFixed(2)}%`);
   setText("queue-gain", `+${data.quality.guard_queue_gain_pp.toFixed(2)} percentage points`);
   setText("absolute-accuracy", `${data.quality.optimized_accuracy_percent.toFixed(2)}%`);
@@ -1453,9 +1658,20 @@ function bindInteractions() {
   elements["intake-form"].addEventListener("submit", routeSelectedMessage);
   elements["confirm-route"].addEventListener("click", review);
   elements["load-experiment"].addEventListener("click", loadVerifiedExperiment);
-  elements["reveal-experiment-results"].addEventListener("click", revealConfirmedResult);
-  elements["promote-route"].addEventListener("click", promoteOptimizedLane);
+  elements["review-measured-changes"].addEventListener("click", () => {
+    elements["experiment-results"].hidden = false;
+    elements["optimization-journey-title"].scrollIntoView({ behavior: "smooth", block: "start" });
+    elements["optimization-journey-title"].setAttribute("tabindex", "-1");
+    elements["optimization-journey-title"].focus({ preventScroll: true });
+  });
+  elements["promote-route"].addEventListener("click", openPromotionConfirmation);
+  elements["confirm-promotion"].addEventListener("click", async () => {
+    elements["promotion-confirmation"].close();
+    await promoteOptimizedLane();
+  });
+  elements["rollback-route"].addEventListener("click", rollbackToStandardLane);
   elements["route-next-request"].addEventListener("click", routeNextLiveRequest);
+  elements["start-next-request"].addEventListener("click", startNextRequest);
   elements["open-required-audit"].addEventListener("click", () => {
     activateView("surge", { focusHeading: true });
   });
@@ -1485,8 +1701,8 @@ async function main() {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     data = await response.json();
     workspace = createWorkspace(data);
-    setText("demo-source", `${data.provenance.experiment_id} · ${data.provenance.machine} · sustained audit`);
-    setText("workspace-mode", `${data.provenance.dataset} recorded output`);
+    setText("demo-source", `Recorded Graviton release evidence · ${data.provenance.machine}`);
+    setText("workspace-mode", "Archived Graviton response");
     setText("rail-model", data.provenance.model);
     setText("intent-model-label", `${data.provenance.model} intent`);
     populateCases();

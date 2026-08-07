@@ -109,6 +109,10 @@ def build_parser() -> argparse.ArgumentParser:
     init = subparsers.add_parser("init", help="scaffold a fail-closed HTTP adoption kit")
     init.add_argument("--endpoint", required=True)
     init.add_argument("--output", type=Path, required=True)
+    init.add_argument(
+        "--action-commit",
+        help="full 40-character ArmProof release commit used by the generated workflow",
+    )
     seal = subparsers.add_parser(
         "seal", help="write a deterministic SHA-256 ledger for collected evidence"
     )
@@ -163,7 +167,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     if args.command == "init":
         try:
-            paths = create_scaffold(args.output.resolve(), args.endpoint)
+            paths = create_scaffold(
+                args.output.resolve(),
+                args.endpoint,
+                action_commit=args.action_commit,
+            )
         except (OSError, ValueError) as exc:
             print(f"armproof: {exc}", file=sys.stderr)
             return 1

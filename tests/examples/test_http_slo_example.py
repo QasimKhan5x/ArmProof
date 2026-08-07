@@ -36,7 +36,7 @@ class HttpSloExampleTests(unittest.TestCase):
             self.assertEqual(len(decision["claims"]), 5)
             self.assertTrue((output / ".github/workflows/armproof.yml").is_file())
             workflow = (output / ".github/workflows/armproof.yml").read_text()
-            self.assertIn(module.ACTION_COMMIT, workflow)
+            self.assertIn(module.ACTION_REF, workflow)
 
 
 if __name__ == "__main__":

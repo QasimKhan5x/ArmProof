@@ -1,4 +1,4 @@
-"""Static text emitted by the HTTP adoption scaffold."""
+"""Static text emitted by the HTTP classification adoption scaffold."""
 
 from __future__ import annotations
 
@@ -90,13 +90,14 @@ print("Refreshed evidence layout, identities, commands, contract, and workflow d
 '''
 
 
-ADOPTION_CHECKLIST = """# ArmProof Adoption Checklist
+ADOPTION_CHECKLIST = """# ArmProof HTTP Classification Adoption Checklist
 
 - [ ] Replace the sample workload with representative requests.
 - [ ] Pin model, runtime, environment and service commands.
 - [ ] Set a service-level objective and claim threshold before testing.
 - [ ] Run `python3 refresh_bindings.py` after replacing placeholders and before collecting evidence.
-- [ ] Collect at least three passing and failing boundary confirmations.
+- [ ] Collect at least five passing and failing boundary confirmations with at
+      least 100 raw requests in each confirmation.
 - [ ] Keep confirmation files distinct and preserve open-loop timestamps.
 - [ ] Capture positive and negative Arm execution profiles separately.
 - [ ] Bind parser-ready profiler reports to the treatment identities.
@@ -108,7 +109,7 @@ ADOPTION_CHECKLIST = """# ArmProof Adoption Checklist
 """
 
 
-EVIDENCE_LAYOUT = """# Evidence Layout
+EVIDENCE_LAYOUT = """# HTTP Classification Evidence Layout
 
 `collection-plan.json` contains these paths as machine-readable JSON. Collect each file from matched baseline and treatment runs; never reuse one confirmation under more than one name.
 
@@ -121,7 +122,7 @@ evidence/
   profiles/manifest.json
   quality/baseline-samples.jsonl
   quality/treatment-samples.jsonl
-  requests/{baseline,treatment}-{pass,fail}-{1,2,3}.jsonl
+  requests/{baseline,treatment}-{pass,fail}-{1,2,3,4,5}.jsonl
   identity-sources/artifact.ref
   identity-sources/runtime.lock
   identity-sources/environment.json
@@ -132,7 +133,7 @@ evidence/
 
 Edit the workload, identity sources, service commands, protocol rates, and claim limits first. `python3 refresh_bindings.py` creates the evidence directories, copies the templates and source files, and recalculates every embedded digest.
 
-Collect each lane and boundary three times with `armproof capacity`. For each run, copy its `requests-rps-<rate>.jsonl` file to the corresponding `evidence/requests/<lane>-<pass-or-fail>-<1-3>.jsonl` path shown above. Run `armproof quality` once against each lane and copy each `quality-samples.jsonl` to `evidence/quality/<lane>-samples.jsonl`. Capture each service under representative load with `perf record -e cycles:P -g -p <pid> -- sleep 60`, then render parser-ready reports with `perf report --stdio` into `evidence/baseline.perf` and `evidence/treatment.perf`. Rerun `python3 refresh_bindings.py` to hash those reports, then run:
+Collect each lane and boundary five times with `armproof capacity`, retaining at least 100 raw requests per confirmation. For each run, copy its `requests-rps-<rate>.jsonl` file to the corresponding `evidence/requests/<lane>-<pass-or-fail>-<1-5>.jsonl` path shown above. Run `armproof quality` once against each lane and copy each `quality-samples.jsonl` to `evidence/quality/<lane>-samples.jsonl`. Capture each service under representative load with `perf record -e cycles:P -g -p <pid> -- sleep 60`, then render parser-ready reports with `perf report --stdio` into `evidence/baseline.perf` and `evidence/treatment.perf`. Rerun `python3 refresh_bindings.py` to hash those reports, then run:
 
 ```bash
 armproof seal armproof.json
@@ -144,11 +145,11 @@ The exact flags are listed by `armproof capacity --help` and `armproof quality -
 
 
 def starter_readme(endpoint: str, version: str) -> str:
-    return f"""# ArmProof HTTP Starter
+    return f"""# ArmProof HTTP Classification Starter
 
 Target endpoint: `{endpoint}`
 
-This scaffold intentionally contains no passing evidence. Start with `ADOPTION_CHECKLIST.md`, use the fixed-SLO collector, then place raw files under `evidence/`. Until that evidence is complete and checksum-bound, `armproof ci armproof.json` fails closed.
+This scaffold intentionally contains no passing evidence. It targets exact-label HTTP classification services. Start with `ADOPTION_CHECKLIST.md`, use the fixed-SLO collector, then place raw files under `evidence/`. Until that evidence is complete and checksum-bound, `armproof ci armproof.json` fails closed.
 
 ## Check The Empty Starter
 
@@ -166,6 +167,8 @@ The last command must fail because the starter has no measurements. Follow `EVID
 ```
 
 Replace both workload templates and the identity-source placeholders before collecting evidence, then run `python3 refresh_bindings.py` to update every embedded identity and workflow digest. The `templates/` directory contains exact parser-ready JSON shapes; the collection plan names every required output.
+
+Before production, ensure the generated workflow uses the released Action's full commit SHA. Release tooling can pass that commit directly to `create_scaffold`; no future commit is embedded in this package.
 
 See the complete executable shape in the upstream `examples/http-slo/` directory.
 """

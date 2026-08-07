@@ -17,7 +17,7 @@ agent chooses the final queue, including manual review, before a ticket enters
 the audit trail. The public site exposes the checked-in release receipt and
 native profiler results without an AWS dependency.
 
-## Live Product Flow
+## Connected Reference Flow
 
 Connected mode uses the standard and final 16-thread Graviton4 services:
 
@@ -90,14 +90,15 @@ The two live lanes must expose:
 - 16 threads on the exact audited CPU set; and
 - opposite values for `mlas.disable_kleidiai`;
 - the exact ONNX Runtime thread-scheduling controls on the released lane;
-- the system allocator on the standard lane and mimalloc on the released lane;
+- the declared system allocator on the standard lane and mimalloc preload on
+  the released lane;
   and
 - the selected transparent-huge-page policy required by the released recipe.
 
 Each inference response repeats the probed deployment data. Promotion compares
 the model fingerprint, source artifact, runtime lock, verified wheel ledger,
 IMDSv2 instance type, runtime, architecture, CPU placement, Arm controls, thread
-tuning, and memory configuration with the
+tuning, and declared memory configuration with the
 saved-evidence validation. Every later optimized response is checked again. Drift blocks that
 response, invalidates the release and returns the gateway to the control lane.
 

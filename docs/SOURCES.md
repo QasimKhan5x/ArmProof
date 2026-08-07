@@ -29,7 +29,7 @@ and executed Arm-path evidence.
 
 ## Repository Evidence
 
-The accepted result-first findings are summarized in
+The accepted imported migration findings are summarized in
 [`ESTABLISHED_EVIDENCE.md`](ESTABLISHED_EVIDENCE.md). Exact runtime and model
 revisions are recorded in the reference configuration and checksummed evidence
 archives.

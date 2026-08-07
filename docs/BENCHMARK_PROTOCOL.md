@@ -38,7 +38,10 @@ supports KleidiAI-attributable performance claims.
 ### Cloud Consequence
 
 For each INT4 treatment, measure the highest confirmed tested accepted throughput under
-the same p95 SLO. Use short, long and mixed prompt traffic.
+the same p95 SLO. The broad application qualification (EXP-2026-004 and its
+EXP-2026-005 reproduction) uses short, long and mixed traffic. The narrower
+causal release confirmation (EXP-2026-014) freezes only the mixed workload and
+its two one-sided boundary rates; it must not be described as a three-mix test.
 
 ### Runtime Memory Follow-Up
 
@@ -50,6 +53,12 @@ the fully sustained recipe. Preserve output digests and restore the host page
 policy after collection. This comparison may
 support a Graviton whole-runtime result; it must not be relabeled as a
 KleidiAI-only or Arm-ISA-only effect.
+
+The Stage 3 archives contain the exact plans used by their runners and are
+checksum-bound after collection. Unlike EXP-2026-014, the repository does not
+establish a public pre-launch commit chronology for EXP-2026-015 through
+EXP-2026-017. They are therefore described as archived runtime-treatment
+validation, not publicly preregistered experiments.
 
 ## Measurement Rules
 
@@ -68,6 +77,12 @@ KleidiAI-only or Arm-ISA-only effect.
   huge-page policy before, during, and after runtime-memory treatments.
 - Never drop a sample solely because it is unfavorable.
 
+The Stage 3 runner archived the selected huge-page policy for every window and
+the declared allocator treatment, but it did not retain `/proc/<pid>/maps`.
+ArmProof therefore verifies THP as observed host state and reports mimalloc as a
+declared launch setting. A future recollection must satisfy the stronger process-map
+rule above before calling allocator loading observed.
+
 ## Quality
 
 - Freeze a public, licensed workload and IDs before the accepted run.
@@ -81,8 +96,9 @@ KleidiAI-only or Arm-ISA-only effect.
 
 ## Statistics
 
-Report raw repetitions, median and a 95% confidence interval or bootstrap
-interval. The fixed-SLO capacity result passes when:
+For the broad three-mix application qualification, report raw repetitions,
+median and a 95% confidence interval or bootstrap interval. That qualification
+passes when:
 
 - at least two of three traffic mixes show at least 1.5x throughput;
 - the preferred headline target is 1.7x; and
@@ -98,10 +114,12 @@ matched disabled control must contain none. The reference release requires two
 independent profiler layers:
 
 1. Linux `perf` preserves the already accepted cycle-share attribution.
-2. Arm Performix Code Hotspots repeats the positive/negative callchain test,
-   derives measured `kai_*` function-sample shares from native exports, and
-   must independently agree with Linux `perf` within the preregistered five
-   percentage-point tolerance.
+2. Arm Performix Code Hotspots repeats the positive/negative callchain test and
+   derives measured `kai_*` function-sample shares from native exports.
+
+Linux `perf` cycle attribution and Performix function-sample share use different
+sampling units. They are separate corroborating views and are never required to
+agree numerically.
 
 CPU Microarchitecture and Instruction Mix are capability-gated because they
 require at least three exposed PMU counters. On the measured `c8g.4xlarge`,
@@ -112,16 +130,18 @@ part of the accepted causal claim.
 
 Performix runs must be exported in their native format with run IDs, recipe
 versions, commands, target facts and SHA-256 hashes. If Performix is unavailable,
-the reference Arm attribution remains `unknown`, not `pass`. If Performix and
-Linux `perf` disagree, publication stops pending a new preregistered experiment.
+the reference Arm attribution remains `unknown`, not `pass`. If either profiler
+fails its positive/negative attribution check, publication stops.
 Exact microkernel identity is reported only when directly observable;
 family-level evidence must not be relabeled as an exact kernel.
 
 ## Overhead
 
-Measure ArmProof's normal collection overhead against the same service without
-collection. It must remain below 5%. Explicit profiler runs are excluded but
-must be labeled as intrusive.
+Primary capacity windows run with neither ArmProof verification nor a profiler
+attached. ArmProof reads the resulting files after collection, so it is not in
+the serving latency path. Explicit profiler runs are separate and intrusive.
+This release reports audit duration but does not claim a measured collection
+overhead percentage.
 
 ## Evidence Bundle
 

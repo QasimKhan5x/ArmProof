@@ -3,7 +3,7 @@
 The checked-in evidence can be evaluated without AWS credentials, paid
 infrastructure or model downloads.
 
-SurgeDesk is the banking-support reference application. ArmProof is its
+SurgeDesk is the banking-support triage application. ArmProof is its
 reusable Arm optimization release gate.
 
 ## Product Walkthrough
@@ -15,9 +15,9 @@ reusable Arm optimization release gate.
    the three-stage journey: BF16-to-INT4 footprint, the matched KleidiAI
    capacity result, and the fixed-rate memory ablation plus sustained final
    recipe.
-4. Open **Traffic switch** to inspect the sustainable-capacity result, Arm Performix
-   profile, memory release conditions, and identity-bound live traffic control.
-   Expand technical details for quality limits and the GitHub Action.
+4. Open **Release status** to inspect the sustainable-capacity result, Arm
+   Performix profile, memory release conditions, and deployment identity.
+   Expand technical details for quality limits and the reusable integration.
 
 The public page uses checked-in evidence. A connected deployment can execute
 requests on matched Graviton services, recalculate the release decision from
@@ -27,7 +27,7 @@ remains a separate documented recollection workflow.
 
 ## Recompute The Release
 
-Prerequisite: Python 3.12.
+Prerequisites: Python 3.12 and, for browser validation, Node.js 18 or newer.
 
 ```bash
 git clone https://github.com/QasimKhan5x/ArmProof.git
@@ -44,6 +44,10 @@ Expected behavior:
   verify;
 - 2,100 traffic outcomes and 1,540 raw model outputs used for the separate
   quality comparison are re-evaluated;
+- all 31 Stage 3 windows and 3,678 raw rows are used to rebuild every stored
+  p95 and pass/fail decision;
+- 2,790 sustained runtime-treatment responses covering 186 request cases are
+  used to rebuild the output-equivalence digest;
 - the two measured treatment identities bind to the confirmed contract;
 - all ten compute and quality claims plus five runtime-release conditions
   pass; and
@@ -103,6 +107,7 @@ recipe.
 ```bash
 .venv/bin/armproof init \
   --endpoint http://127.0.0.1:8000/infer \
+  --action-commit REPLACE_WITH_THE_REVIEWED_40_CHARACTER_RELEASE_COMMIT \
   --output /tmp/my-arm-service
 .venv/bin/armproof ci /tmp/my-arm-service/armproof.json
 ```
@@ -112,6 +117,8 @@ request, quality, profiler and identity evidence that must be collected. The
 initial `ci` call demonstrates that the empty starter is blocked. After
 collection, run `armproof seal /tmp/my-arm-service/armproof.json`; sealing
 creates a ledger, while `ci` still rejects incomplete evidence.
+Pass `--action-commit` with the reviewed release commit when generating the
+workflow that will be committed to another repository.
 External adapters are
 discovered through Python entry points and listed with `armproof adapters`.
 
@@ -120,7 +127,7 @@ discovered through Python entry points and listed with `armproof adapters`.
 ```bash
 make check
 npm ci
-npx playwright install chromium
+npx playwright install --with-deps chromium
 npm run test:logic
 npm run test:ui
 ```

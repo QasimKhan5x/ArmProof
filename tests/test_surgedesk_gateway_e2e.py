@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import threading
 import unittest
@@ -16,6 +17,7 @@ from scripts.serve_surgedesk import handler_for
 SOURCE_SHA = "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1"
 RUNTIME_LOCK_SHA = "68a4aa0e9b52bfacd435b1515aa5cc34acb760ba63961ddf70f6b0b01c96a884"
 MODEL_SHA = "d86ae7ca1f12b2ae4abe70abb856cb9c688908477a7de653467623764ab5c687"
+WORKFLOW_ID = "workflow-e2e-001"
 
 
 def _lane_handler(
@@ -96,7 +98,10 @@ def _server(handler: type[BaseHTTPRequestHandler]) -> Iterator[ThreadingHTTPServ
 
 
 def _request(url: str, path: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
-    body = json.dumps(payload).encode() if payload is not None else b""
+    request_payload = dict(payload or {})
+    if path.startswith("/api/"):
+        request_payload.setdefault("workflow_id", WORKFLOW_ID)
+    body = json.dumps(request_payload).encode()
     request = urllib.request.Request(
         f"{url}{path}",
         data=body,
@@ -148,6 +153,9 @@ class SurgeDeskGatewayEndToEndTests(unittest.TestCase):
 
             receipt = _request(root, "/api/audit")
             self.assertTrue(receipt["passed"])
+            self.assertEqual(receipt["workflow_id"], WORKFLOW_ID)
+            self.assertEqual(len(receipt["release_evidence_sha256"]), 7)
+            self.assertEqual(len(receipt["receipt_sha256"]), 64)
             promoted = _request(root, "/api/promote")
             self.assertEqual(promoted["active_lane"], "optimized")
             self.assertEqual(promoted["runtime_identity"]["source_artifact_sha256"], SOURCE_SHA)
@@ -156,6 +164,37 @@ class SurgeDeskGatewayEndToEndTests(unittest.TestCase):
             self.assertEqual(second["backend"], "kleidiai-enabled")
             self.assertEqual(second["deployment_lane"], "optimized")
             self.assertEqual(second["release_audit_id"], receipt["experiment_id"])
+            self.assertEqual(second["release_evidence_sha256"], receipt["release_evidence_sha256"])
+            self.assertEqual(second["audit_receipt_sha256"], receipt["receipt_sha256"])
+            cutover = second["cutover_receipt"]
+            self.assertEqual(cutover["workflow_id"], WORKFLOW_ID)
+            self.assertEqual(cutover["comparison_id"], comparison["comparison_id"])
+            self.assertEqual(
+                cutover["before"]["request_id"],
+                comparison["lanes"]["baseline"]["request_id"],
+            )
+            self.assertEqual(
+                cutover["before"]["input_sha256"],
+                comparison["lanes"]["baseline"]["input_sha256"],
+            )
+            self.assertEqual(cutover["after"]["request_id"], second["request_id"])
+            self.assertEqual(cutover["after"]["input_sha256"], second["input_sha256"])
+            self.assertEqual(
+                cutover["release"]["audit_receipt_sha256"], receipt["receipt_sha256"]
+            )
+            self.assertEqual(
+                cutover["release"]["evidence_sha256"],
+                receipt["release_evidence_sha256"],
+            )
+            self.assertEqual(
+                json.loads(cutover["canonical_body"])["comparison_id"],
+                comparison["comparison_id"],
+            )
+            self.assertEqual(
+                hashlib.sha256(cutover["canonical_body"].encode()).hexdigest(),
+                cutover["receipt_sha256"],
+            )
+            self.assertEqual(len(cutover["receipt_sha256"]), 64)
             self.assertEqual(
                 second["runtime_identity"]["optimization_control"][
                     "mlas.disable_kleidiai"
@@ -172,6 +211,7 @@ class SurgeDeskGatewayEndToEndTests(unittest.TestCase):
             self.assertIsNone(status["release_audit_id"])
 
             optimized_identity["model_identity"] = MODEL_SHA
+            _request(root, "/api/shadow-compare", {"text": message})
             receipt = _request(root, "/api/audit")
             self.assertTrue(receipt["passed"])
             self.assertEqual(_request(root, "/api/promote")["active_lane"], "optimized")

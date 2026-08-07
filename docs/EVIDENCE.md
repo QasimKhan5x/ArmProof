@@ -63,14 +63,22 @@ These measurements were established earlier and remain separate comparisons:
 
 | Result | Comparison | Measured improvement | Artifact |
 |---|---|---:|---|
-| Direct inference | KleidiAI enabled versus disabled, same INT4 runtime | 1.72x to 2.59x across four batch/prompt shapes | [`EXP-2026-002 raw measurements`](../ops/evidence/result-first/EXP-2026-002/) and [`supporting evidence lock`](../examples/armproof-reference/supporting-evidence-lock.json) |
+| Direct inference | KleidiAI enabled versus disabled, same INT4 runtime | 1.72x to 2.59x across four batch/prompt shapes | [`EXP-2026-002 raw measurements`](../ops/evidence/imported-migration-measurements/EXP-2026-002/) and [`supporting evidence lock`](../examples/armproof-reference/supporting-evidence-lock.json) |
+
+The imported archive retains its original `EXP-RESULT-FIRST-MEM-002` source ID
+so its historical bytes and checksum lock remain auditable. ArmProof uses it
+only as supporting model-size, memory, and direct-inference evidence; the final
+capacity claim comes from the later preregistered confirmation archives.
 | Model files | Public INT4 deployment versus BF16 reference | 35.92% smaller | Same summary |
-| Peak proportional set size | INT4 versus BF16 | 55.34% lower | Same summary |
-| Time-weighted proportional set size | INT4 versus BF16 | 59.66% lower | Same summary |
+| Peak proportional set size | INT4 with KleidiAI disabled versus BF16 | 43.09% lower | Same summary |
+| Final-stack peak proportional set size | KleidiAI-enabled INT4 versus BF16 | 55.34% lower | Same summary |
+| Final-stack time-weighted proportional set size | KleidiAI-enabled INT4 versus BF16 | 59.66% lower | Same summary |
 | Operational routing | Queue guard versus direct LLM-to-queue mapping on a disjoint 770-message holdout | 86.75% accuracy, +12.34 percentage points | [`queue_guard.py`](../src/armproof/demo/queue_guard.py) and generated [`data.json`](../surgedesk/data.json) |
 
-The INT4 footprint results describe the model migration. The two-times capacity
-claim isolates the KleidiAI setting inside the already-quantized deployment.
+The first INT4 footprint result describes the model migration before KleidiAI.
+The final-stack memory rows include KleidiAI and are labeled accordingly. The
+two-times capacity claim isolates the KleidiAI setting inside the
+already-quantized deployment.
 The routing guard is a SurgeDesk product feature and is not attributed to Arm.
 SurgeDesk recalculates the median from five raw repetitions for each fixed
 shape. It calculates the size and PSS reductions from locked aggregate fields
@@ -98,7 +106,10 @@ The command:
 9. recalculates model-size and memory percentages from locked aggregate fields,
    and fixed-shape medians from raw repetitions in four hash-locked files;
 10. verifies 130 internal files across EXP-2026-015, EXP-2026-016, and
-    EXP-2026-017, then derives the only sustained runtime recipe that passed;
+    EXP-2026-017, recalculates all 31 stored window summaries from 3,678 raw
+    rows and the sustained output digest from 2,790 responses covering 186
+    request cases, then derives
+    the only sustained runtime recipe that passed;
 11. evaluates all ten compute and quality claims plus five runtime-release
     conditions; and
 12. writes `verification.json`, `comparison.json`, `decision.json`, `summary.json`
@@ -113,8 +124,9 @@ was invalid.
 The SHA-256 ledgers detect changes after collection. They do not independently
 attest who controlled the original AWS host. The evidence bundle therefore also
 records the Arm machine, runtime lock, source-model fingerprint, workload,
-treatment configs, response backend labels, native profiler exports and
-preregistered plans. A publication record binds the exact EXP-2026-014 plan
+treatment configs, response backend labels, native profiler exports, the
+preregistered capacity/Performix plans, and the archived Stage 3 plans. A
+publication record binds the exact EXP-2026-014 plan
 bytes in the prelaunch project bundle and measurement archive to a Git object
 in this checkout. The Git object time predates the recorded AWS launch time;
 that launch time remains experiment metadata rather than independent cloud
@@ -122,7 +134,7 @@ attestation. The live service verifies the pinned runtime-wheel ledger and reads
 the instance type from AWS IMDSv2. The gateway rechecks the model fingerprint,
 source artifact, runtime lock, wheel ledger, runtime version, instance, Arm64
 CPU placement, threads, KleidiAI control, ONNX Runtime scheduling options,
-allocator, and huge-page policy before switching its route and
+declared allocator treatment, and observed huge-page policy before switching its route and
 again on every optimized response. Drift invalidates the release and restores
 the control route.
 

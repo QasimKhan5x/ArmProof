@@ -101,6 +101,7 @@ def main() -> None:
             optimized_endpoint=f"http://127.0.0.1:{optimized.server_port}/infer",
             baseline_cores="0-15",
             optimized_cores="0-15",
+            fixture_mode=True,
         ),
     )
     for server in (baseline, optimized):

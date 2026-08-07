@@ -81,7 +81,7 @@ overhead does not contaminate the primary performance result.
 For the Phi-4 reference adapter, both profiler layers are required. Performix
 is not a report importer or optional visualization: contradictory, missing or
 unmatched runs make the Arm-specific release claim unknown and fail the gate.
-The adapter verifies the outer archive digest and 35-entry guest checksum ledger, reads
+The adapter verifies the outer archive digest and 40-entry guest checksum ledger, reads
 the native Code Hotspots ZIPs, checks matched commands and CPU identity, and
 recomputes the positive/negative `kai_*` sample attribution on every CI run.
 Its runtime-lock digest, model revision, workload reference and matched
@@ -94,7 +94,9 @@ that rejected the tempting simplified recipe. Only the complete ONNX Runtime
 thread-scheduling, mimalloc, and transparent-huge-page recipe passed all five
 long windows. This layer is not presented as an ISA-only KleidiAI effect. Its
 experiment IDs, archive digests, output identity, exact session options,
-allocator, host policy, rate, SLO, and window counts are verified independently.
+declared allocator treatment, observed huge-page policy, rate, SLO, and window
+counts are verified independently. The archived Stage 3 evidence lacks process
+maps, so it does not independently prove that the declared allocator was loaded.
 
 ### Quality Evaluator
 

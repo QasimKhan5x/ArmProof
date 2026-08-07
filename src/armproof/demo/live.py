@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from typing import Any
 
 from armproof.demo.queue_guard import QueueGuard, queue_for_intent
@@ -25,9 +27,15 @@ def compose_live_route(
     guard: QueueGuard,
     categories: list[str],
 ) -> dict[str, Any]:
-    intent, schema_valid, error = _parse_intent(upstream.get("output"), set(categories))
+    raw_output = upstream.get("output")
+    intent, schema_valid, error = _parse_intent(raw_output, set(categories))
     prediction = guard.predict(text)
     llm_queue = queue_for_intent(intent)
+    output_bytes = (
+        raw_output.encode("utf-8")
+        if isinstance(raw_output, str)
+        else json.dumps(raw_output, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    )
     return {
         "request_id": upstream.get("request_id", "live-request"),
         "source_text": text,
@@ -48,4 +56,6 @@ def compose_live_route(
         "mode": "live_model_output",
         "backend": upstream.get("backend", "unknown"),
         "inference_ms": upstream.get("inference_ms"),
+        "input_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+        "model_output_sha256": hashlib.sha256(output_bytes).hexdigest(),
     }

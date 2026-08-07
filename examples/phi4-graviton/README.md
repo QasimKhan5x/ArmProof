@@ -2,7 +2,7 @@
 
 This is ArmProof's single reference deployment. Use the revisions in
 `runtime-lock.json` and restore the checksummed Arm64 ONNX Runtime artifacts
-listed in `ops/evidence/result-first/EXP-2026-002/build-artifacts/SHA256SUMS`.
+listed in `ops/evidence/imported-migration-measurements/EXP-2026-002/build-artifacts/SHA256SUMS`.
 
 Create matched INT4 overlays:
 

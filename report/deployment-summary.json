@@ -1,6 +1,6 @@
 {
   "comparison": "PyTorch BF16 deployment versus ONNX Runtime GenAI INT4 deployment",
-  "evidence": "ops/evidence/result-first/EXP-2026-002/summary.json",
+  "evidence": "ops/evidence/imported-migration-measurements/EXP-2026-002/summary.json",
   "experiment_id": "EXP-2026-002",
   "history": [
     {
@@ -59,22 +59,29 @@
       "status": "passed"
     }
   ],
+  "metric_scopes": {
+    "disk_reduction_percent": "INT4 model files versus BF16",
+    "final_stack_peak_pss_reduction_percent": "KleidiAI-enabled INT4 final stack versus BF16",
+    "final_stack_weighted_pss_reduction_percent": "KleidiAI-enabled INT4 final stack versus BF16",
+    "maximum_kleidiai_speedup": "KleidiAI enabled versus disabled on the same INT4 runtime",
+    "minimum_kleidiai_speedup": "KleidiAI enabled versus disabled on the same INT4 runtime"
+  },
   "metric_source": {
     "checksummed_files": 4,
     "derivation": "locked_aggregate_footprint_and_raw_timing_repetitions",
-    "experiment_id": "EXP-2026-002"
+    "experiment_id": "EXP-2026-002",
+    "pss_evidence": "locked_aggregate_statistics_no_raw_sample_trace",
+    "release_evidence_id": "EXP-2026-002",
+    "source_experiment_id": "EXP-RESULT-FIRST-MEM-002"
   },
   "metrics": {
     "disk_reduction_percent": 35.91724249132322,
+    "final_stack_peak_pss_reduction_percent": 55.336785335288766,
+    "final_stack_weighted_pss_reduction_percent": 59.66032309469201,
     "maximum_kleidiai_speedup": 2.5870578477345356,
-    "minimum_kleidiai_speedup": 1.7170141477125782,
-    "peak_pss_reduction_percent": 55.336785335288766,
-    "weighted_pss_reduction_percent": 59.66032309469201
+    "minimum_kleidiai_speedup": 1.7170141477125782
   },
-  "reproduction": {
-    "experiment_id": "EXP-2026-005",
-    "maximum_relative_difference": 0.0,
-    "mixes_reproduced": 3
-  },
-  "schema_version": "1.0.0"
+  "release_evidence_id": "EXP-2026-002",
+  "schema_version": "1.0.0",
+  "source_experiment_id": "EXP-RESULT-FIRST-MEM-002"
 }

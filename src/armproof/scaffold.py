@@ -1,4 +1,4 @@
-"""Generate a fail-closed starter kit for a bounded HTTP inference service."""
+"""Generate a fail-closed starter kit for HTTP classification services."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from armproof.scaffold_assets import (
 )
 
 
-ACTION_COMMIT = "32c1ad339b2a09d66af73aa391ed311962e215c7"
+SETUP_PYTHON_COMMIT = "5fda3b95a4ea91299a34e894583c3862153e4b97"
 
 
 def _write_json(path: Path, payload: object) -> None:
@@ -36,6 +36,16 @@ def _validate_endpoint(endpoint: str) -> None:
         or any(char.isspace() or char == "`" for char in endpoint)
     ):
         raise ValueError("endpoint must be a valid HTTP(S) URL")
+
+
+def _action_reference(action_commit: str | None) -> tuple[str, str]:
+    if action_commit is None:
+        return f"v{__version__}", " # Pin the release commit SHA before production"
+    if len(action_commit) != 40 or any(
+        char not in "0123456789abcdef" for char in action_commit
+    ):
+        raise ValueError("action commit must be a full lowercase 40-character Git SHA")
+    return action_commit, ""
 
 
 def _write_workloads(output: Path) -> tuple[Path, Path]:
@@ -196,7 +206,7 @@ def _write_collection_templates(
         treatment: {
             outcome: [
                 f"requests/{treatment}-{outcome}-{index}.jsonl"
-                for index in range(1, 4)
+                for index in range(1, 6)
             ]
             for outcome in ("pass", "fail")
         }
@@ -219,8 +229,8 @@ def _write_collection_templates(
             "workload": "workload.jsonl",
             "baseline_treatment_id": "baseline",
             "treatment_treatment_id": "optimized",
-            "minimum_boundary_confirmations": 3,
-            "minimum_requests_per_confirmation": 2,
+            "minimum_boundary_confirmations": 5,
+            "minimum_requests_per_confirmation": 100,
             "request_schedule_tolerance_percent": 5,
             "expected_evidence_layout": {
                 "protocol": "evidence/protocol.json",
@@ -274,7 +284,7 @@ def _write_collection_templates(
             "p95_slo_ms": 10_000.0,
             "max_error_rate": 0.01,
             "minimum_delivery_ratio": 0.95,
-            "minimum_requests_per_file": 2,
+            "minimum_requests_per_file": 100,
             "baseline_treatment_id": "baseline",
             "treatment_treatment_id": "optimized",
             "identity_manifest": "identities.json",
@@ -321,9 +331,15 @@ def _write_collection_templates(
     )
 
 
-def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
-    """Create templates without inventing evidence or overwriting owner files."""
+def create_scaffold(
+    output: Path,
+    endpoint: str,
+    *,
+    action_commit: str | None = None,
+) -> tuple[Path, ...]:
+    """Create classification templates without inventing evidence."""
     _validate_endpoint(endpoint)
+    action_ref, action_comment = _action_reference(action_commit)
     if output.exists() and any(output.iterdir()):
         raise ValueError(f"output directory is not empty: {output}")
     output.mkdir(parents=True, exist_ok=True)
@@ -340,7 +356,9 @@ def create_scaffold(output: Path, endpoint: str) -> tuple[Path, ...]:
         "  verify:\n    runs-on: ubuntu-latest\n    steps:\n"
         "      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7\n"
         "        with:\n          fetch-depth: 0\n"
-        f"      - uses: QasimKhan5x/ArmProof@{ACTION_COMMIT} # v{__version__}\n"
+        f"      - uses: actions/setup-python@{SETUP_PYTHON_COMMIT} # v7\n"
+        "        with:\n          python-version: \"3.12\"\n"
+        f"      - uses: QasimKhan5x/ArmProof@{action_ref}{action_comment}\n"
         "        with:\n          config: armproof.json\n"
         f"          contract-sha256: {_sha256(output / 'contract.json')}\n",
         encoding="utf-8",

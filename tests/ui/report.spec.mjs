@@ -40,7 +40,7 @@ for (const viewport of [
     });
     await page.setViewportSize(viewport);
     await page.goto(reportUrl);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Measured capacity, verified before merge.');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Measured capacity cleared the release checks.');
     await expect(page.locator('.mix')).toHaveCount(1);
     await expect(page.locator('.claim')).toHaveCount(10);
     await expect(page.locator('#min-ratio')).toHaveText('2.0x');
@@ -85,7 +85,7 @@ for (const viewport of [
 test('blocked decision is unmistakable and actionable', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 800 });
   await page.goto(blockedUrl);
-  await expect(page.locator('#decision-title')).toHaveText('Blocked');
+  await expect(page.locator('#decision-title')).toHaveText('Release blocked');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Optimization evidence blocked before merge.');
   await expect(page.locator('#decision-subtitle')).toHaveText('Required claims did not pass');
   await expect(page.locator('#min-ratio')).toHaveText('1.2x');

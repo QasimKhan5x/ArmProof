@@ -1,4 +1,4 @@
-"""Re-derive supporting EXP-2026-002 optimization measurements."""
+"""Re-derive checksum-locked supporting optimization measurements."""
 
 from __future__ import annotations
 
@@ -79,9 +79,19 @@ def derive_supporting_optimization(root: Path, lock_path: Path) -> dict[str, Any
     bf16 = _json(root / "bf16.json")
     disabled = _json(root / "ort-disabled.json")
     enabled = _json(root / "ort-enabled.json")
-    stored = _json(root / "summary.json").get("summary")
+    stored_document = _json(root / "summary.json")
+    source_experiment_id = stored_document.get("experiment_id")
+    stored = stored_document.get("summary")
+    if source_experiment_id != "EXP-RESULT-FIRST-MEM-002":
+        raise ValueError("supporting source experiment identity is invalid")
     if not isinstance(stored, dict):
         raise ValueError("supporting summary is invalid")
+    if (
+        bf16.get("label") != "bf16"
+        or disabled.get("label") != "disabled"
+        or enabled.get("label") != "enabled"
+    ):
+        raise ValueError("supporting PSS treatment labels are invalid")
     disabled_shapes = disabled.get("performance")
     enabled_shapes = enabled.get("performance")
     if (
@@ -104,20 +114,53 @@ def derive_supporting_optimization(root: Path, lock_path: Path) -> dict[str, Any
         gains.append(gain)
         shapes.append({"batch": identity[0], "prompt_length": identity[1], "speedup": gain})
 
+    migration_peak_pss_reduction = _reduction(
+        float(bf16["memory"]["peak_pss_bytes"]),
+        float(disabled["memory"]["peak_pss_bytes"]),
+    )
+    final_stack_peak_pss_reduction = _reduction(
+        float(bf16["memory"]["peak_pss_bytes"]),
+        float(enabled["memory"]["peak_pss_bytes"]),
+    )
+    final_stack_weighted_pss_reduction = _reduction(
+        float(bf16["memory"]["time_weighted_pss_bytes"]),
+        float(enabled["memory"]["time_weighted_pss_bytes"]),
+    )
     result = {
-        "experiment_id": "EXP-2026-002",
+        "experiment_id": source_experiment_id,
+        "release_evidence_id": lock["experiment_id"],
         "checksummed_files": len(required),
         "disk_reduction_percent": _reduction(
             float(bf16["model_bytes"]), float(enabled["model_bytes"])
         ),
-        "peak_pss_reduction_percent": _reduction(
-            float(bf16["memory"]["peak_pss_bytes"]),
-            float(enabled["memory"]["peak_pss_bytes"]),
+        "peak_pss_reduction_percent": final_stack_peak_pss_reduction,
+        "int4_peak_pss_reduction_percent": migration_peak_pss_reduction,
+        "weighted_pss_reduction_percent": final_stack_weighted_pss_reduction,
+        "migration_peak_pss_reduction_percent": migration_peak_pss_reduction,
+        "final_stack_peak_pss_reduction_percent": final_stack_peak_pss_reduction,
+        "final_stack_weighted_pss_reduction_percent": (
+            final_stack_weighted_pss_reduction
         ),
-        "weighted_pss_reduction_percent": _reduction(
-            float(bf16["memory"]["time_weighted_pss_bytes"]),
-            float(enabled["memory"]["time_weighted_pss_bytes"]),
-        ),
+        "pss_comparisons": {
+            "migration_peak": {
+                "reference": "BF16",
+                "treatment": "INT4 with KleidiAI disabled",
+                "metric": "peak PSS",
+                "reduction_percent": migration_peak_pss_reduction,
+            },
+            "final_stack_peak": {
+                "reference": "BF16",
+                "treatment": "KleidiAI-enabled INT4 final stack",
+                "metric": "peak PSS",
+                "reduction_percent": final_stack_peak_pss_reduction,
+            },
+            "final_stack_weighted": {
+                "reference": "BF16",
+                "treatment": "KleidiAI-enabled INT4 final stack",
+                "metric": "time-weighted PSS",
+                "reduction_percent": final_stack_weighted_pss_reduction,
+            },
+        },
         "migration_bf16_quality_correct": int(bf16["quality"]["correct"]),
         "migration_int4_quality_correct": int(enabled["quality"]["correct"]),
         "migration_quality_total": int(enabled["quality"]["total"]),
@@ -153,15 +196,19 @@ def verified_deployment_summary(
     summary = _json(summary_path)
     expected_metrics = {
         "disk_reduction_percent": derived["disk_reduction_percent"],
-        "peak_pss_reduction_percent": derived["peak_pss_reduction_percent"],
-        "weighted_pss_reduction_percent": derived["weighted_pss_reduction_percent"],
+        "final_stack_peak_pss_reduction_percent": derived[
+            "final_stack_peak_pss_reduction_percent"
+        ],
+        "final_stack_weighted_pss_reduction_percent": derived[
+            "final_stack_weighted_pss_reduction_percent"
+        ],
         "minimum_kleidiai_speedup": min(derived["direct_shape_gains"]),
         "maximum_kleidiai_speedup": max(derived["direct_shape_gains"]),
     }
     metrics = summary.get("metrics")
     if (
         summary.get("schema_version") != "1.0.0"
-        or summary.get("experiment_id") != derived["experiment_id"]
+        or summary.get("experiment_id") != derived["release_evidence_id"]
         or not isinstance(metrics, dict)
         or set(metrics) != set(expected_metrics)
     ):
@@ -174,10 +221,33 @@ def verified_deployment_summary(
                 f"deployment summary metric {name} disagrees with rederived evidence"
             )
     verified = dict(summary)
+    # Reproduction belongs to the primary adapter; this verifier does not
+    # validate it, so it cannot publish that field.
+    verified.pop("reproduction", None)
     verified["metrics"] = expected_metrics
+    verified["source_experiment_id"] = derived["experiment_id"]
+    verified["release_evidence_id"] = derived["release_evidence_id"]
+    verified["metric_scopes"] = {
+        "disk_reduction_percent": "INT4 model files versus BF16",
+        "final_stack_peak_pss_reduction_percent": (
+            "KleidiAI-enabled INT4 final stack versus BF16"
+        ),
+        "final_stack_weighted_pss_reduction_percent": (
+            "KleidiAI-enabled INT4 final stack versus BF16"
+        ),
+        "minimum_kleidiai_speedup": (
+            "KleidiAI enabled versus disabled on the same INT4 runtime"
+        ),
+        "maximum_kleidiai_speedup": (
+            "KleidiAI enabled versus disabled on the same INT4 runtime"
+        ),
+    }
     verified["metric_source"] = {
-        "experiment_id": derived["experiment_id"],
+        "experiment_id": derived["release_evidence_id"],
+        "source_experiment_id": derived["experiment_id"],
+        "release_evidence_id": derived["release_evidence_id"],
         "checksummed_files": derived["checksummed_files"],
         "derivation": "locked_aggregate_footprint_and_raw_timing_repetitions",
+        "pss_evidence": "locked_aggregate_statistics_no_raw_sample_trace",
     }
     return verified, derived

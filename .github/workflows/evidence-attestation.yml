@@ -2,10 +2,12 @@ name: Attest ArmProof evidence
 
 on:
   workflow_dispatch:
-  release:
-    types: [published]
+  push:
+    tags:
+      - "v*"
 
 permissions:
+  actions: read
   contents: write
   id-token: write
   attestations: write
@@ -20,6 +22,27 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: "3.12"
+      - name: Confirm tag and package version agree
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          package_version="$(python3.12 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')"
+          test "${GITHUB_REF_NAME}" = "v${package_version}"
+      - name: Require successful CI for this exact commit
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in $(seq 1 40); do
+            if gh run list --workflow ci.yml --commit "$GITHUB_SHA" \
+              --json status,conclusion \
+              --jq 'any(.[]; .status == "completed" and .conclusion == "success")' \
+              | grep -qx true; then
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "No successful CI run found for $GITHUB_SHA" >&2
+          exit 1
       - name: Derive and evaluate the release decision
         run: |
           python -m pip install .
@@ -28,16 +51,50 @@ jobs:
             --contract-sha256 5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369
       - name: Assemble immutable publication bundle
         run: |
+          preregistration_commit="$(python3.12 -c 'import json; print(json.load(open("examples/armproof-reference/preregistration-publication.json"))["git_commit"])')"
+          git update-ref refs/armproof/preregistration "$preregistration_commit"
+          git bundle create build/preregistration.bundle refs/armproof/preregistration
+          git update-ref -d refs/armproof/preregistration
           tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner \
             -czf build/armproof-evidence.tar.gz \
             ops/evidence/EXP-2026-014/evidence.tar.gz \
             ops/evidence/EXP-2026-013/evidence.tar.gz \
+            ops/evidence/EXP-2026-015/evidence.tar.gz \
+            ops/evidence/EXP-2026-016/evidence.tar.gz \
+            ops/evidence/EXP-2026-017/evidence.tar.gz \
             ops/evidence/EXP-2026-003/attempt-002/evidence \
+            ops/evidence/imported-migration-measurements/EXP-2026-002 \
+            ops/evidence/EXP-2026-014/project.tar.gz \
+            ops/experiments/EXP-2026-013.json \
+            ops/experiments/EXP-2026-014.json \
+            ops/experiments/EXP-2026-014-analysis.json \
+            ops/aws/sustained-006/protocol.json \
             data/banking77/generated \
             data/banking77/source \
             examples/armproof-reference \
+            src \
+            pyproject.toml \
+            LICENSE \
+            build/preregistration.bundle \
             build/armproof-report
           (cd build && sha256sum armproof-evidence.tar.gz > armproof-evidence.tar.gz.sha256)
+      - name: Prove the publication bundle is self-contained
+        run: |
+          extraction="$RUNNER_TEMP/armproof-bundle"
+          repository="$RUNNER_TEMP/armproof-recompute"
+          mkdir -p "$extraction"
+          tar -xzf build/armproof-evidence.tar.gz -C "$extraction"
+          git init "$repository"
+          git -C "$repository" fetch \
+            "$extraction/build/preregistration.bundle" \
+            refs/armproof/preregistration:refs/armproof/preregistration
+          tar -xzf build/armproof-evidence.tar.gz -C "$repository"
+          cd "$repository"
+          PYTHONPATH=src python3.12 -m armproof.cli ci \
+            examples/armproof-reference/armproof.json \
+            --output recomputed-report \
+            --contract-sha256 5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369
+          python3.12 -c 'import json; assert json.load(open("recomputed-report/verification.json"))["preregistration_publication"]["git_commit_verified_in_checkout"] is True'
       - name: Attest bundle provenance
         uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
         with:
@@ -50,13 +107,14 @@ jobs:
             build/armproof-evidence.tar.gz
             build/armproof-evidence.tar.gz.sha256
             build/armproof-report
-      - name: Attach durable assets to the release
-        if: github.event_name == 'release'
+      - name: Publish the attested release assets
+        if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          gh release upload "$RELEASE_TAG" \
+          gh release create "$GITHUB_REF_NAME" \
+            --verify-tag \
+            --title "ArmProof ${GITHUB_REF_NAME#v}" \
+            --notes "Checksum-bound Arm optimization evidence, offline report, and self-contained recomputation bundle." \
             build/armproof-evidence.tar.gz \
-            build/armproof-evidence.tar.gz.sha256 \
-            --clobber
+            build/armproof-evidence.tar.gz.sha256

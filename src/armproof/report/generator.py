@@ -168,21 +168,32 @@ def generate_report(
         ):
             raise ValueError("verification receipt is not a passing raw-evidence receipt")
     if deployment is not None:
-        required = {"disk_reduction_percent", "peak_pss_reduction_percent"}
+        required = {
+            "disk_reduction_percent", "final_stack_peak_pss_reduction_percent"
+        }
         supporting = verification.get("supporting_evidence") if verification else None
         metric_source = deployment.get("metric_source")
+        source_experiment_id = deployment.get("source_experiment_id")
+        release_evidence_id = deployment.get("release_evidence_id")
         if deployment.get("schema_version") != "1.0.0" or not required.issubset(
             deployment.get("metrics", {})
         ) or (
             not isinstance(supporting, dict)
             or not isinstance(metric_source, dict)
-            or supporting.get("experiment_id") != deployment.get("experiment_id")
-            or metric_source.get("experiment_id") != deployment.get("experiment_id")
+            or not isinstance(source_experiment_id, str)
+            or not isinstance(release_evidence_id, str)
+            or deployment.get("experiment_id") != release_evidence_id
+            or supporting.get("experiment_id") != source_experiment_id
+            or metric_source.get("experiment_id") != release_evidence_id
+            or metric_source.get("source_experiment_id") != source_experiment_id
+            or metric_source.get("release_evidence_id") != release_evidence_id
             or supporting.get("checksummed_files") != metric_source.get("checksummed_files")
             or supporting.get("derivation")
             != "locked_aggregate_footprint_and_raw_timing_repetitions"
             or metric_source.get("derivation")
             != "locked_aggregate_footprint_and_raw_timing_repetitions"
+            or metric_source.get("pss_evidence")
+            != "locked_aggregate_statistics_no_raw_sample_trace"
         ):
             raise ValueError(
                 "deployment summary is not bound to rederived supporting evidence"
@@ -208,7 +219,7 @@ def generate_report(
         _copy_input(verification_path, output / "verification.json")
     _copy_input(decision_path, output / "decision.json")
     _copy_input(summary_path, output / "summary.json")
-    title = "Verified" if decision["passed"] else "Blocked"
+    title = "Release checks passed" if decision["passed"] else "Release blocked"
     document = _HTML.replace("{{TITLE}}", title).replace("{{DATA}}", encoded)
     index = output / "index.html"
     index.write_text(document, encoding="utf-8")
@@ -231,10 +242,10 @@ _HTML = r'''<!doctype html>
 <body>
 <main class="shell">
 <nav class="topbar" aria-label="Report actions"><div class="brand">Arm<span>Proof</span></div><div class="top-actions"><a class="button" href="verification.json">Verification receipt</a><a class="button" href="summary.json" download>Download summary</a><a class="button" href="decision.json">Decision JSON</a></div></nav>
-<header class="hero"><div><div class="eyebrow">Arm AI release evidence</div><h1 id="report-headline">Measured capacity, verified before merge.</h1><p id="report-lead">A fail-closed decision derived from checksum-bound request, quality, identity and Arm execution evidence.</p></div><div class="decision"><strong id="decision-title">Verified</strong><span id="decision-subtitle">All required claims passed</span></div></header>
+<header class="hero"><div><div class="eyebrow">Arm AI release evidence</div><h1 id="report-headline">Measured capacity cleared the release checks.</h1><p id="report-lead">A fail-closed decision derived from checksum-bound request, quality, identity and Arm execution evidence.</p></div><div class="decision"><strong id="decision-title">Checks passed</strong><span id="decision-subtitle">All required claims passed</span></div></header>
 <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" aria-controls="overview" id="overview-tab">Overview</button><button class="tab" role="tab" aria-selected="false" aria-controls="evidence" id="evidence-tab">Evidence &amp; provenance</button></div>
 <section class="view" id="overview" role="tabpanel" aria-labelledby="overview-tab">
-  <div class="metric-band"><div class="metric"><b id="disk-reduction">n/a</b><span>smaller deployment artifact</span></div><div class="metric"><b id="min-ratio">--</b><span>minimum KleidiAI capacity gain</span></div><div class="metric"><b id="arm-cycle-share">--</b><span>cycles in the declared Arm callchain</span></div><div class="metric"><b id="pss-reduction">n/a</b><span>lower peak proportional set size</span></div><div class="metric"><b id="memory-capacity">n/a</b><span>final verified requests per second</span></div><div class="metric"><b id="schema-rate">--</b><span>normalized schema validity</span></div></div>
+  <div class="metric-band"><div class="metric"><b id="disk-reduction">n/a</b><span>smaller deployment artifact</span></div><div class="metric"><b id="min-ratio">--</b><span>minimum KleidiAI capacity gain</span></div><div class="metric"><b id="performix-function-share">--</b><span>Performix kai_* function samples</span></div><div class="metric"><b id="pss-reduction">n/a</b><span>lower peak PSS, KleidiAI-enabled INT4 final stack versus BF16</span></div><div class="metric"><b id="memory-capacity">n/a</b><span>final verified requests per second</span></div><div class="metric"><b id="schema-rate">--</b><span>normalized schema validity</span></div></div>
   <div class="section"><h2>Sustainable serving capacity</h2><p class="section-lead" id="capacity-description">Measured fixed-SLO boundary rates used by the declared comparison.</p><div class="mix-grid" id="mixes"></div><div class="callout reproduction-note" id="reproduction-note" hidden></div></div>
   <div class="section" id="deployment-section"><h2>Deployment transformation</h2><p class="section-lead">The reference migration also cuts storage and process memory. These figures compare the complete BF16 and INT4 deployments; they are not attributed to KleidiAI alone.</p><div class="scope"><div class="node"><b>PyTorch BF16</b><br><span>Reference model and runtime deployment</span></div><div class="arrow">&rarr;</div><div class="node"><b>ONNX Runtime GenAI INT4</b><br><span id="deployment-detail"></span></div><div class="arrow">&rarr;</div><div class="node"><b>KleidiAI execution</b><br><span>Matched on/off control proves the Arm-specific capacity gain</span></div></div></div>
   <div class="section" id="memory-section" hidden><h2>Graviton runtime recipe</h2><p class="section-lead" id="memory-detail"></p><div class="scope"><div class="node"><b>KleidiAI-only stress run</b><br><span id="memory-control"></span></div><div class="arrow">&rarr;</div><div class="node"><b>Short treatment screen</b><br><span>Separated THP, thread tuning, and mimalloc</span></div><div class="arrow">&rarr;</div><div class="node"><b>Sustained decision</b><br><span id="memory-treatment"></span></div></div></div>
@@ -245,18 +256,18 @@ _HTML = r'''<!doctype html>
   <div class="section" id="history-section"><h2>Evidence history</h2><p class="section-lead">Negative and inconclusive experiments remain visible; later runs do not rewrite them.</p><div class="timeline" id="history"></div></div>
   <div class="section"><h2>Authoritative evidence path</h2><p class="section-lead" id="verification-detail">No verification receipt supplied.</p><div class="scope"><div class="node"><b>Verify</b><br><span>SHA-256 ledgers and workload manifest</span></div><div class="arrow">&rarr;</div><div class="node"><b>Derive and bind</b><br><span>Raw metrics plus contract identities</span></div><div class="arrow">&rarr;</div><div class="node"><b>Decide</b><br><span>Fail-closed policy evaluation</span></div></div></div>
   <div class="section" id="performix-section" hidden><h2>Matched Arm Performix attribution</h2><p class="section-lead" id="performix-detail"></p><div class="scope"><div class="node"><b>Control</b><br><span id="performix-disabled"></span></div><div class="arrow">&rarr;</div><div class="node"><b>Treatment</b><br><span id="performix-enabled"></span></div><div class="arrow">&rarr;</div><div class="node"><b>Cross-check</b><br><span id="performix-crosscheck"></span></div></div></div>
-  <div class="section"><h2>Artifact identity</h2><table class="provenance"><thead><tr><th>Identity</th><th>SHA-256</th></tr></thead><tbody id="provenance"></tbody></table><div class="callout"><b>Not Arm certification.</b> ArmProof verifies a declared contract from supplied evidence. It does not claim official Arm approval or independently attest the evidence producer.</div></div>
+  <div class="section"><h2>Artifact identity</h2><table class="provenance"><thead><tr><th>Identity</th><th>SHA-256</th></tr></thead><tbody id="provenance"></tbody></table><div class="callout"><b>Verification scope.</b> This report validates the supplied checksum-bound evidence. Producer identity and host attestation are outside this report.</div></div>
 </section>
 <footer class="footer"><span>Offline report generated by ArmProof</span><span id="report-context"></span></footer>
 </main>
 <script id="report-data" type="application/json">{{DATA}}</script>
 <script>
 const data=JSON.parse(document.getElementById('report-data').textContent);const decision=data.decision,summary=data.summary,comparison=data.comparison,deployment=data.deployment,verification=data.verification;const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const title=document.getElementById('decision-title');title.textContent=decision.passed?'Verified':'Blocked';title.parentElement.style.borderColor=decision.passed?'var(--green)':'var(--red)';document.getElementById('decision-subtitle').textContent=decision.passed?'All required claims passed':'Required claims did not pass';
+const title=document.getElementById('decision-title');title.textContent=decision.passed?'Checks passed':'Release blocked';title.parentElement.style.borderColor=decision.passed?'var(--green)':'var(--red)';document.getElementById('decision-subtitle').textContent=decision.passed?'All required claims passed':'Required claims did not pass';
 if(!decision.passed){document.getElementById('report-headline').textContent='Optimization evidence blocked before merge.';document.getElementById('report-lead').textContent='The declared Arm optimization contract did not pass. Review the failed or unknown claims before deploying this treatment.';}
 const display=summary.capacity_display||{};if(display.description)document.getElementById('capacity-description').textContent=display.description;const mixes=document.getElementById('mixes');let ratios=[];for(const [name,row] of Object.entries(summary.mixes)){const base=row.ratio.baseline_median,opt=row.ratio.treatment_median,ratio=row.ratio.ratio;ratios.push(ratio);const max=Math.max(base,opt);const el=document.createElement('article');el.className='mix';el.innerHTML=`<div class="mix-head"><h3>${esc(name)}</h3><span class="ratio">${ratio.toFixed(1)}x</span></div><div class="bar-row"><span>${esc(display.baseline_label||'Baseline')}</span><div class="track"><div class="bar" style="width:${base/max*100}%"></div></div><b>${base.toFixed(2)}</b></div><div class="bar-row"><span>${esc(display.treatment_label||'Treatment')}</span><div class="track"><div class="bar enabled" style="width:${opt/max*100}%"></div></div><b>${opt.toFixed(2)}</b></div>`;mixes.appendChild(el)}if(ratios.length)document.getElementById('min-ratio').textContent=Math.min(...ratios).toFixed(1)+'x';if(summary.quality_comparison)document.getElementById('schema-rate').textContent=(summary.quality_comparison.schema_valid_rate*100).toFixed(0)+'%';
-if(comparison){const share=comparison.metrics.performix_enabled_kai_share??comparison.metrics.enabled_kai_cycle_callchain_share??comparison.metrics.enabled_arm_cycle_share;if(Number.isFinite(share))document.getElementById('arm-cycle-share').textContent=(share*100).toFixed(2)+'%';}
-if(deployment){const disk=deployment.metrics.disk_reduction_percent,pss=deployment.metrics.peak_pss_reduction_percent;document.getElementById('disk-reduction').textContent=disk.toFixed(1)+'%';document.getElementById('pss-reduction').textContent=pss.toFixed(1)+'%';document.getElementById('deployment-detail').textContent=`${disk.toFixed(1)}% less disk and ${pss.toFixed(1)}% lower peak PSS`;if(deployment.reproduction&&verification&&verification.reproduction_checksums){const note=document.getElementById('reproduction-note');note.textContent=`A fresh-instance confirmation matched all ${deployment.reproduction.mixes_reproduced} tested capacity ratios with ${(deployment.reproduction.maximum_relative_difference*100).toFixed(0)}% relative difference.`;note.hidden=false;}}else{document.getElementById('deployment-section').hidden=true;}
+if(comparison){const share=comparison.metrics.performix_enabled_kai_share;if(Number.isFinite(share))document.getElementById('performix-function-share').textContent=(share*100).toFixed(2)+'%';}
+if(deployment){const disk=deployment.metrics.disk_reduction_percent,pss=deployment.metrics.final_stack_peak_pss_reduction_percent;document.getElementById('disk-reduction').textContent=disk.toFixed(1)+'%';document.getElementById('pss-reduction').textContent=pss.toFixed(1)+'%';document.getElementById('deployment-detail').textContent=`${disk.toFixed(1)}% less disk and ${pss.toFixed(1)}% lower final-stack peak PSS`;if(deployment.reproduction&&verification&&verification.reproduction_checksums){const note=document.getElementById('reproduction-note');note.textContent=`A fresh-instance confirmation matched all ${deployment.reproduction.mixes_reproduced} tested capacity ratios with ${(deployment.reproduction.maximum_relative_difference*100).toFixed(0)}% relative difference.`;note.hidden=false;}}else{document.getElementById('deployment-section').hidden=true;}
 const claims=document.getElementById('claims');for(const row of decision.claims){const el=document.createElement('div');el.className='claim';const symbol=row.status==='pass'?'✓':'!';el.innerHTML=`<span class="check ${esc(row.status)}">${symbol}</span><div><b>${esc(row.claim_id.replaceAll('-',' '))}</b><br><code>${esc(row.reason_code)}</code></div><code>${row.observed===null?'unknown':Number(row.observed).toFixed(2)} / ${Number(row.threshold)}</code>`;claims.appendChild(el)}
 const history=document.getElementById('history');for(const row of data.history){const el=document.createElement('div');el.className='event';const status=document.createElement('span');status.className='status';if(['passed','failed','inconclusive'].includes(row.status))status.classList.add(row.status);status.textContent=row.status;const id=document.createElement('b');id.textContent=row.id;const note=document.createElement('span');note.textContent=row.note;el.append(status,id,note);history.appendChild(el)}
 if(!data.history.length)document.getElementById('history-section').hidden=true;const experiment=summary.experiment_id||(comparison&&comparison.comparison_id)||'ArmProof comparison';const instance=comparison&&comparison.treatment.controls.instance||'Arm target';document.getElementById('report-context').textContent=`${experiment} / ${instance}`;

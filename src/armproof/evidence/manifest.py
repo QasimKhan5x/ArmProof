@@ -91,7 +91,7 @@ def build_manifest(
         )
     return {
         "schema_version": "1.0.0",
-        "bundle_id": "result-first",
+        "bundle_id": "imported-migration-measurements",
         "redactions": redactions,
         "experiments": experiments,
         "files": files,

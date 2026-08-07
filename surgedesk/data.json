@@ -180,11 +180,30 @@
     "final_recipe": {
       "allocator": "mimalloc",
       "arm_compute": "KleidiAI I8MM",
+      "evidence_counts": {
+        "complete_raw_rows": 3678,
+        "complete_raw_windows": 31,
+        "sustained_equivalence_cases": 186,
+        "sustained_equivalence_rows": 2790
+      },
+      "observed_host_state": {
+        "allocator": null,
+        "allocator_evidence": "not_observed_no_proc_maps_archived",
+        "transparent_huge_pages": "always",
+        "transparent_huge_pages_evidence": "validated_per_window_sysfs_readback"
+      },
       "onnxruntime_thread_overrides": {
         "session.dynamic_block_base": "4",
         "session.intra_op.spin_backoff_max": "8",
         "session.intra_op.spin_duration_us": "1000"
       },
+      "setting_evidence": {
+        "allocator": "declared_variant_metadata_only",
+        "arm_compute": "kleidiai_enablement_in_config_i8mm_not_reprofiled_in_stage3",
+        "onnxruntime_thread_overrides": "archived_exact_genai_configs",
+        "transparent_huge_pages": "declared_variant_metadata_and_observed_per_window_sysfs"
+      },
+      "settings_status": "declared_recipe_with_field_level_evidence",
       "transparent_huge_pages": "always"
     },
     "stages": [
@@ -195,7 +214,7 @@
         "label": "Fit the model to CPU serving",
         "outcome": {
           "artifact_reduction_percent": 35.91724249132322,
-          "peak_pss_reduction_percent": 55.336785335288766
+          "migration_peak_pss_reduction_percent": 43.08945996998166
         },
         "reason": "Reduce every worker's model and memory footprint.",
         "sequence": 1
@@ -216,7 +235,7 @@
         "change": "Tune scheduling, allocation, and huge pages",
         "evidence": "four-way short ablation, paired sustained comparison, and five-window simplification challenge",
         "id": "memory",
-        "label": "Remove the next runtime limit",
+        "label": "Tune Graviton runtime scheduling and memory",
         "outcome": {
           "additional_capacity_percent": 10.714285714285698,
           "final_capacity_rps": 0.62,
@@ -340,11 +359,7 @@
     ],
     "direct_speedup_max": 2.5870578477345356,
     "direct_speedup_min": 1.7170141477125782,
-    "instance": "c8g.4xlarge",
-    "kleidiai_cycle_callchain_share_percent": 67.91,
-    "kleidiai_disabled_callchains": false,
-    "kleidiai_enabled_callchains": true,
-    "live_deployment_identity": {
+    "expected_deployment_identity": {
       "architecture": "aarch64",
       "controls": {
         "baseline": {
@@ -401,11 +416,17 @@
       "source_artifact_sha256": "9ef697ababdc0b4ffc63b098bbd4760f79795eb0502ca4d41c80e20843ac0ab1",
       "threads": 16
     },
+    "final_stack_peak_pss_reduction_percent": 55.336785335288766,
+    "final_stack_weighted_pss_reduction_percent": 59.66032309469201,
+    "instance": "c8g.4xlarge",
+    "kleidiai_cycle_callchain_share_percent": 67.91,
+    "kleidiai_disabled_callchains": false,
+    "kleidiai_enabled_callchains": true,
     "migration_bf16_quality_correct": 19,
     "migration_int4_quality_correct": 20,
+    "migration_peak_pss_reduction_percent": 43.08945996998166,
     "migration_quality_delta_pp": 4.166666666666666,
     "migration_quality_total": 24,
-    "peak_pss_reduction_percent": 55.336785335288766,
     "performix": {
       "cpu": "Neoverse-V2",
       "disabled_function_samples": 944847,
@@ -446,6 +467,8 @@
       ],
       "candidate_rps": 0.62,
       "capacity_gain_percent": 10.714285714285698,
+      "complete_raw_rows": 3678,
+      "complete_raw_windows": 31,
       "confirmation_passes": 5,
       "confirmation_windows": 5,
       "evidence_role": "A separate whole-runtime optimization layered after the matched KleidiAI compute comparison.",
@@ -464,14 +487,36 @@
       "p95_reduction_percent": 44.9779852025598,
       "passed": true,
       "previous_capacity_rps": 0.56,
+      "raw_output_cases": 186,
+      "raw_output_digest": "348576c01dada3d82fc9bedecd8cbe0af310a63986262924e3793c5eaccf367c",
+      "raw_output_rows": 2790,
       "recipe": {
         "allocator": "mimalloc",
         "arm_compute": "KleidiAI I8MM",
+        "evidence_counts": {
+          "complete_raw_rows": 3678,
+          "complete_raw_windows": 31,
+          "sustained_equivalence_cases": 186,
+          "sustained_equivalence_rows": 2790
+        },
+        "observed_host_state": {
+          "allocator": null,
+          "allocator_evidence": "not_observed_no_proc_maps_archived",
+          "transparent_huge_pages": "always",
+          "transparent_huge_pages_evidence": "validated_per_window_sysfs_readback"
+        },
         "onnxruntime_thread_overrides": {
           "session.dynamic_block_base": "4",
           "session.intra_op.spin_backoff_max": "8",
           "session.intra_op.spin_duration_us": "1000"
         },
+        "setting_evidence": {
+          "allocator": "declared_variant_metadata_only",
+          "arm_compute": "kleidiai_enablement_in_config_i8mm_not_reprofiled_in_stage3",
+          "onnxruntime_thread_overrides": "archived_exact_genai_configs",
+          "transparent_huge_pages": "declared_variant_metadata_and_observed_per_window_sysfs"
+        },
+        "settings_status": "declared_recipe_with_field_level_evidence",
         "transparent_huge_pages": "always"
       },
       "simplification_experiment_id": "EXP-2026-017",
@@ -485,6 +530,8 @@
         11402.800394
       ],
       "simplification_windows": 5,
+      "sustained_equivalence_cases": 186,
+      "sustained_equivalence_rows": 2790,
       "sustained_experiment_id": "EXP-2026-015"
     },
     "runtime_release_conditions": [
@@ -507,9 +554,10 @@
         "status": "pass"
       },
       {
-        "digest": "78b613260fabd3eefbfdbb030f8366ededfe3cd8d1003db85f70eeae5f48f684",
+        "detail": "2790 raw responses across 186 request cases matched",
+        "digest": "348576c01dada3d82fc9bedecd8cbe0af310a63986262924e3793c5eaccf367c",
         "id": "outputs-equivalent",
-        "label": "Outputs remained identical",
+        "label": "All sustained request outputs remained identical",
         "status": "pass"
       },
       {
@@ -519,8 +567,7 @@
       }
     ],
     "threads": 16,
-    "verified_claims": 10,
-    "weighted_pss_reduction_percent": 59.66032309469201
+    "verified_claims": 10
   },
   "provenance": {
     "application_evaluation_experiment_id": "EXP-2026-004",
@@ -574,12 +621,30 @@
       "sustained_raw_confirmation_samples": 2100,
       "total_checksummed_files": 617
     },
+    "evidence_binding_sha256": {
+      "EXP-2026-002": "c9be42143f65983d38ed91a34219fce17147dbedc556424cb059ec2b5c37822d",
+      "EXP-2026-003-raw-quality-ledger": "bdb6990353359fd125551174fa8af9c78c01b8bc4944e241c44dd12e1660b648",
+      "EXP-2026-013": "9301e9da951ce8b294b8b1a2153a2d333017cbeecef73ab5d930b90bde2d7d4e",
+      "EXP-2026-014": "c4f94870eece68081c54411eedc24e17ae3b6d541afb94daee7ed86577a1bb06",
+      "EXP-2026-015": "68ae8bb28e90eb9e6fb14fce83cc074f057783587ee19f8083e6963caa669a72",
+      "EXP-2026-016": "56179c8f535bdeea38a6de16e756c366fd89586614de24a72c352975637e8d57",
+      "EXP-2026-017": "19c55410275b75d23c5dfce15ed0d735e2e608ca1106a8146bce6bcb12364761"
+    },
     "experiment_id": "EXP-2026-014",
     "machine": "AWS Graviton4 / c8g.4xlarge / 16 cores",
     "model": "Phi-4 Mini",
     "model_id": "microsoft/Phi-4-mini-instruct-onnx",
     "optimization": "BF16 to INT4, KleidiAI I8MM compute, then ONNX Runtime thread scheduling, mimalloc, and transparent huge pages",
-    "release_action": "QasimKhan5x/ArmProof@v1.0.0",
+    "release_action": "QasimKhan5x/ArmProof@v1.1.0",
+    "release_evidence_ids": [
+      "EXP-2026-014",
+      "EXP-2026-013",
+      "EXP-2026-015",
+      "EXP-2026-016",
+      "EXP-2026-017",
+      "EXP-2026-003-raw-quality-ledger",
+      "EXP-2026-002"
+    ],
     "release_experiment_id": "EXP-2026-014",
     "release_history": {
       "accepted_experiment_id": "EXP-2026-014",
@@ -587,7 +652,7 @@
       "rejected_experiment_id": "EXP-2026-012",
       "rejection_reason": "Successful responses omitted the preregistered source_artifact_sha256 identity field, so the archive could not be released despite matching the capacity outcome."
     },
-    "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v1.0.0",
+    "release_url": "https://github.com/QasimKhan5x/ArmProof/releases/tag/v1.1.0",
     "report_path": "../report/index.html",
     "runtime": "ONNX Runtime GenAI INT4"
   },

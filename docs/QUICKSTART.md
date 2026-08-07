@@ -13,8 +13,9 @@ python3.12 scripts/serve_surgedesk.py --port 8765
 
 Open `http://127.0.0.1:8765/surgedesk/#triage`, route a request, then continue
 through Release evidence and Traffic switch.
-The views are directly addressable as `#triage`, `#surge`, and `#proof`. See
-[`SURGEDESK.md`](SURGEDESK.md) for provenance and the live product flow.
+The views are directly addressable as `#triage`, `#evidence`, and `#release`.
+See [`SURGEDESK.md`](SURGEDESK.md) for provenance and the connected reference
+flow. The former `#surge` and `#proof` hashes remain compatibility aliases.
 
 ## Evaluate The Reference
 
@@ -55,14 +56,28 @@ armproof verify \
 ## Add The GitHub Gate
 
 Create an `armproof.json` matching
-[`schemas/ci-config.schema.json`](../schemas/ci-config.schema.json), then add:
+[`schemas/ci-config.schema.json`](../schemas/ci-config.schema.json). After the
+contract is final, compute the protected digest that the Action must receive:
+
+```bash
+sha256sum contract.json
+```
+
+Then add these steps, replacing both placeholders with the released Action's
+full commit SHA and the digest printed above:
 
 ```yaml
-- uses: QasimKhan5x/ArmProof@v1.0.0
+- uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+- uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+  with:
+    python-version: "3.12"
+
+- uses: QasimKhan5x/ArmProof@REPLACE_WITH_RELEASE_COMMIT_SHA
   with:
     config: armproof.json
     output: build/armproof-report
-    contract-sha256: 5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369
+    contract-sha256: REPLACE_WITH_CONTRACT_SHA256
 
 - if: always()
   uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -87,7 +102,7 @@ that declared trust boundary.
 
 Pin the released Action commit in production. Never run paid benchmarks or
 cloud credentials in `pull_request_target` or on untrusted fork code. The
-reference Action verifies raw evidence ledgers, re-derives the comparison and
+Action verifies raw evidence ledgers, re-derives the comparison and
 binds it to the contract. Produce evidence on a trusted Arm runner; the ledger
 detects later modification but does not independently attest who produced it.
 
@@ -99,9 +114,9 @@ measurement process.
 
 ## Produce Evidence
 
-The built-in collector only needs a bounded HTTP endpoint accepting `POST /infer` with a
-request ID, prompt and token limit. ArmProof provides separate commands for
-load and quality collection:
+The built-in collector targets a bounded HTTP classification endpoint accepting
+`POST /infer` with a request ID, prompt and token limit. ArmProof provides
+separate commands for load and exact-label quality collection:
 
 ```bash
 armproof capacity \
@@ -149,8 +164,8 @@ the declared guest prefix fails verification.
 
 ## Adapt Another Runtime
 
-Use the built-in `http-slo-v1` raw-evidence adapter or publish an external
-adapter through the `armproof.evidence_adapters` entry-point group. See
+Use the built-in `http-slo-v1` classification evidence adapter or publish an
+external adapter through the `armproof.evidence_adapters` entry-point group. See
 [`ADAPTERS.md`](ADAPTERS.md) for the public contract and an executable example.
 
 Keep these boundaries intact:
@@ -162,6 +177,6 @@ Keep these boundaries intact:
 4. Quality claims pass before dependent performance claims.
 5. The deployment manifest points to the exact passing treatment.
 
-Start from `examples/phi4-graviton/`, the JSON schemas and the pass/fail/unknown
-fixtures. Runtime breadth is intentionally an extension point, not hidden
-inside the reference report.
+Start from `examples/http-slo/`, the JSON schemas and the pass/fail/unknown
+fixtures. Other output types require an external adapter; runtime breadth is an
+extension point, not hidden inside the reference report.

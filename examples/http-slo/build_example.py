@@ -12,7 +12,7 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parents[2]
 VERSION = str(tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"])
-ACTION_COMMIT = "32c1ad339b2a09d66af73aa391ed311962e215c7"
+ACTION_REF = f"v{VERSION}"
 
 
 def _sha256(path: Path) -> str:
@@ -336,7 +336,7 @@ def build(output: Path) -> Path:
         "name: ArmProof\non: [push, pull_request]\njobs:\n"
         "  verify:\n    runs-on: ubuntu-latest\n    steps:\n"
         "      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7\n"
-        f"      - uses: QasimKhan5x/ArmProof@{ACTION_COMMIT} # v{VERSION}\n"
+        f"      - uses: QasimKhan5x/ArmProof@{ACTION_REF}\n"
         "        with:\n          config: armproof.json\n"
         f"          contract-sha256: {_sha256(output / 'contract.json')}\n",
         encoding="utf-8",

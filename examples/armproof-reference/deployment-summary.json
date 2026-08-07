@@ -4,8 +4,8 @@
   "comparison": "PyTorch BF16 deployment versus ONNX Runtime GenAI INT4 deployment",
   "metrics": {
     "disk_reduction_percent": 35.91724249132322,
-    "peak_pss_reduction_percent": 55.336785335288766,
-    "weighted_pss_reduction_percent": 59.66032309469201,
+    "final_stack_peak_pss_reduction_percent": 55.336785335288766,
+    "final_stack_weighted_pss_reduction_percent": 59.66032309469201,
     "minimum_kleidiai_speedup": 1.7170141477125784,
     "maximum_kleidiai_speedup": 2.5870578477345356
   },
@@ -22,10 +22,5 @@
     {"id": "EXP-2026-013", "status": "passed", "note": "Preregistered matched Performix Code Hotspots profiles bound execution to the Neoverse I8MM path"},
     {"id": "EXP-2026-014", "status": "passed", "note": "Preregistered identity-bound confirmation established the >=2.0x sustained-capacity lower bound across all ten 500-second windows"}
   ],
-  "reproduction": {
-    "experiment_id": "EXP-2026-005",
-    "maximum_relative_difference": 0.0,
-    "mixes_reproduced": 3
-  },
-  "evidence": "ops/evidence/result-first/EXP-2026-002/summary.json"
+  "evidence": "ops/evidence/imported-migration-measurements/EXP-2026-002/summary.json"
 }

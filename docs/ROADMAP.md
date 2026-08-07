@@ -1,6 +1,6 @@
 # Roadmap
 
-ArmProof 1.0 supports fixed-SLO HTTP inference comparisons, raw-output quality
+ArmProof 1.1 supports fixed-SLO HTTP inference comparisons, raw-output quality
 checks, native Performix attribution, identity-bound release decisions, an
 offline report, and a GitHub Action. SurgeDesk is the reference deployment.
 

@@ -38,6 +38,9 @@ class LiveRoutingTests(unittest.TestCase):
         self.assertEqual(route["queue"], "Account security")
         self.assertEqual(route["mode"], "live_model_output")
         self.assertEqual(route["backend"], "kleidiai-enabled")
+        self.assertEqual(len(route["input_sha256"]), 64)
+        self.assertEqual(len(route["model_output_sha256"]), 64)
+        self.assertNotEqual(route["input_sha256"], route["model_output_sha256"])
 
 
 if __name__ == "__main__":

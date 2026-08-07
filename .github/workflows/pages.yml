@@ -1,8 +1,9 @@
 name: Pages
 
 on:
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -12,26 +13,62 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+      - name: Ignore superseded CI revisions
+        id: freshness
+        shell: bash
+        run: |
+          git fetch origin main
+          if [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "current=false" >> "$GITHUB_OUTPUT"
+            echo "A newer main revision exists; this successful older CI run will not replace Pages."
+          fi
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        if: steps.freshness.outputs.current == 'true'
+        with:
+          python-version: "3.12"
+      - name: Rebuild the published evidence views
+        if: steps.freshness.outputs.current == 'true'
+        run: |
+          PYTHONPATH=src python3.12 -m armproof.cli ci \
+            examples/armproof-reference/armproof.json --output report \
+            --contract-sha256 5233b0cb7898a02f451de51f1cf43a15829dda07306dd71ddfafbc1311f47369
+          python3.12 scripts/build_surgedesk.py --verify
+          git diff --exit-code -- report surgedesk/data.json
       - name: Assemble static project site
+        if: steps.freshness.outputs.current == 'true'
         run: |
           mkdir -p _site
           cp site/index.html _site/index.html
           cp -R surgedesk _site/surgedesk
           cp -R report _site/report
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+        if: steps.freshness.outputs.current == 'true'
       - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        if: steps.freshness.outputs.current == 'true'
         with:
           path: _site
       - name: Deploy
+        if: steps.freshness.outputs.current == 'true'
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

@@ -57,8 +57,10 @@ class CiCommandTests(unittest.TestCase):
                         "pass"
                     ]
                 ),
-                3,
+                5,
             )
+            self.assertEqual(plan["minimum_boundary_confirmations"], 5)
+            self.assertEqual(plan["minimum_requests_per_confirmation"], 100)
             self.assertEqual(
                 plan["expected_evidence_layout"]["identity_sources"]["artifact"],
                 "evidence/identity-sources/artifact.ref",
@@ -67,6 +69,7 @@ class CiCommandTests(unittest.TestCase):
                 (output / "templates/protocol.json").read_text(encoding="utf-8")
             )
             self.assertEqual(protocol_template["boundaries"], plan["expected_evidence_layout"]["boundaries"])
+            self.assertEqual(protocol_template["minimum_requests_per_file"], 100)
             identities_template = json.loads(
                 (output / "templates/identities.json").read_text(encoding="utf-8")
             )
@@ -85,10 +88,16 @@ class CiCommandTests(unittest.TestCase):
                 encoding="utf-8"
             )
             self.assertIn(
-                "QasimKhan5x/ArmProof@32c1ad339b2a09d66af73aa391ed311962e215c7 # v1.0.0",
+                "QasimKhan5x/ArmProof@v1.1.0",
                 workflow,
             )
+            self.assertIn(
+                "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97",
+                workflow,
+            )
+            self.assertIn('python-version: "3.12"', workflow)
             self.assertIn("fetch-depth: 0", workflow)
+            self.assertIn("HTTP Classification Starter", (output / "README.md").read_text())
             self.assertIn("Created 17 files", stdout.getvalue())
 
             tree_digest = hashlib.sha256()
@@ -99,7 +108,7 @@ class CiCommandTests(unittest.TestCase):
                 tree_digest.update(b"\0")
             self.assertEqual(
                 tree_digest.hexdigest(),
-                "362c6e498b6a8e05175b507ed25e4ac8ab85c68ad696dcd2ca3029c65a24b578",
+                "ab4ec2b9ae6aadd4f1f167f55ce403dd328ae858a5d322a41bc7819d1eb8bb94",
             )
 
             original_contract_digest = hashlib.sha256(
@@ -494,7 +503,7 @@ class CiCommandTests(unittest.TestCase):
                     ),
                     "supporting_evidence": {
                         "root": str(
-                            ROOT / "ops/evidence/result-first/EXP-2026-002"
+                            ROOT / "ops/evidence/imported-migration-measurements/EXP-2026-002"
                         ),
                         "lock": str(
                             ROOT

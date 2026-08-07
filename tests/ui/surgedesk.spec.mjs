@@ -40,7 +40,7 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await page.setViewportSize({ width: 320, height: 780 });
   await page.goto(appUrl);
   await expect(page.locator("#opening-capacity")).toHaveText("Awaiting validation");
-  await expect(page.locator(".opening-result")).toContainText("blocked until ArmProof rechecks it");
+  await expect(page.locator(".opening-result")).toContainText("Local release check required");
   await page.setViewportSize({ width: 1440, height: 900 });
   await mkdir("build/screenshots", { recursive: true });
   await page.screenshot({ path: "build/screenshots/surgedesk-opening.png" });
@@ -50,6 +50,11 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator(".developer-mode")).not.toHaveAttribute("open", "");
   await expect(page.locator("#sample-select")).toBeHidden();
   await expect(page.locator("#sample-select-label")).toBeHidden();
+  await expect(page.locator("#customer-message")).toHaveAttribute(
+    "placeholder",
+    "Enter a support request for the local integration fixture",
+  );
+  expect(await page.locator("#view-workspace").innerText()).not.toMatch(/\bproduction\b/i);
   await page.locator("#customer-message").fill(
     "My card was stolen while I am travelling. Freeze it and help me replace it.",
   );
@@ -64,6 +69,8 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator("#shadow-optimized-receipt")).toContainText("aarch64/16 threads · control=0");
   await expect(page.locator("#shadow-observation")).toContainText("10 500-second traffic windows");
   await expect(page.locator("#shadow-observation")).not.toContainText("lower observed latency");
+  await expect(page.locator("#workspace-mode")).toContainText("Local integration fixture");
+  await expect(page.locator("#shadow-source-chip")).toHaveText("Local fixture · synthetic timing");
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.locator("#shadow-comparison").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "build/screenshots/surgedesk-live-shadow.png" });
@@ -74,6 +81,11 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   const firstRequestId = await page.locator("#live-request-id").textContent();
   await expect(page.locator("#live-arm-runtime")).toContainText("aarch64 · 16 threads");
   await expect(page.locator("#live-control")).toHaveText("KleidiAI off · raw flag 1");
+  await expect(page.locator("#live-observed-label")).toHaveText("Fixture response");
+  await expect(page.locator("#live-input-digest")).toHaveText(/[0-9a-f]{16}/);
+  await expect(page.locator("#live-output-digest")).toHaveText(/[0-9a-f]{16}/);
+  await expect(page.locator("#review-warning")).toContainText("fixture response");
+  await expect(page.locator("#review-warning")).not.toContainText("live");
   await page.locator("#final-queue").selectOption("Account security");
   await page.getByRole("button", { name: "Route ticket" }).click();
   await page.getByRole("button", { name: "Check the Arm optimization" }).click();
@@ -88,18 +100,20 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator('#audit-progress li[data-stage="memory"]')).toContainText("sustained treatment windows verified");
   await expect(page.locator("#audit-progress time")).toHaveCount(6);
   await expect(page.locator("#audit-receipt")).toBeVisible();
+  await expect(page.locator("#experiment-results")).toBeHidden();
   await expect(page.locator("#opening-capacity")).toHaveText(
     `≥${demoData.proof.runtime_memory.candidate_rps.toFixed(2)} r/s`,
   );
-  await expect(page.locator("#experiment-results")).toBeHidden();
   await expect(page.locator("#audit-request-result")).toContainText("2,100 capacity requests");
   await expect(page.locator("#audit-request-result")).toContainText("1,540 model outputs");
-  await page.getByRole("button", { name: "Open confirmed result" }).click();
   await expect(page.locator("#release-result-title")).toContainText("At least 2.0×");
   await expect(page.locator("#result-control-outcomes")).toHaveText("0/5 long windows passed");
   await expect(page.locator("#result-treatment-outcomes")).toHaveText("5/5 long windows passed");
   await expect(page.locator("#result-quality-delta")).toContainText("86.75% queue accuracy");
-  await expect(page.locator("#result-quality-scope")).toContainText("Fine-grained intent 46.49% (-0.39 pp vs standard");
+  await page.getByRole("button", { name: "Review the three measured changes" }).click();
+  await expect(page.locator("#experiment-results")).toBeVisible();
+  await expect(page.locator("#result-quality-scope")).toContainText("Five-queue recommendation improved from 74.42% to 86.75%");
+  await expect(page.locator("#result-quality-scope")).toContainText("harder 77-intent diagnostic scored 46.49%");
   await expect(page.locator("#optimization-stages > li")).toHaveCount(3);
   await expect(page.locator("#journey-final-capacity")).toHaveText(
     `≥${demoData.proof.runtime_memory.candidate_rps.toFixed(2)} requests/s`,
@@ -122,10 +136,12 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
     "Same c8g.4xlarge server and 10-second p95 SLO",
   );
   await expect(page.locator("#headline-ratio")).toHaveText("≥2.00×");
-  await expect(page.locator("#rate-confirmation-id")).toContainText("EXP-2026-014");
+  await expect(page.locator("#rate-confirmation-id")).toHaveText("Preregistered confirmation run");
   await expect(page.locator("#rate-confirmation-id")).toHaveAttribute("href", /\/commit\//);
 
-  await page.getByRole("button", { name: "Review and switch live traffic" }).click();
+  await page.locator("#experiment-results").getByRole(
+    "button", { name: "Continue to traffic decision" },
+  ).click();
   await expect(page.locator("#optimization-summary")).toBeVisible();
   await expect(page.locator("#performix-proof")).toBeVisible();
   await expect(page.locator("#memory-proof")).toBeVisible();
@@ -137,19 +153,28 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator("#memory-release-conditions")).toContainText("simplification was rejected");
   await expect(page.locator("#performix-disabled-count")).toContainText("0 / 944,847");
   await expect(page.locator("#performix-sample-count")).toContainText("245,876 / 365,062");
-  await page.getByRole("button", { name: "Switch live traffic to optimized service" }).click();
-  await expect(page.locator("#promotion-result")).toContainText("switched live support traffic");
+  await page.getByRole("button", { name: "Select optimized fixture route" }).click();
+  await expect(page.locator("#promotion-confirmation")).toBeVisible();
+  await expect(page.locator("#promotion-confirm-environment")).toContainText("synthetic timing");
+  await expect(page.locator("#promotion-confirm-audit")).toContainText("Fresh release receipt");
+  await page.getByRole("button", { name: "Confirm gateway switch" }).click();
+  await expect(page.locator("#promotion-result")).toContainText("selected the optimized fixture route");
+  await expect(page.locator("#environment-label")).toContainText("Local integration fixture");
+  await expect(page.locator("#environment-label")).toContainText("optimized route selected");
+  await expect(page.locator("#environment-label")).toContainText("synthetic timing");
   await expect(page.locator("#promotion-identity")).toBeVisible();
   await expect(page.locator("#promotion-control-match")).toContainText("1 → 0");
   await expect(page.locator("#promotion-candidate-label")).toHaveText("Previous route");
-  await expect(page.locator("#opening-status")).toContainText("approved · serving now");
+  await expect(page.locator("#opening-status")).toContainText("Release receipt passed · fixture route selected");
   await expect(page.locator("#workspace-candidate-label")).toHaveText("Arm optimization status");
-  await expect(page.locator("#workspace-candidate")).toHaveText("Released · serving live traffic");
+  await expect(page.locator("#workspace-candidate")).toHaveText("Released · selected in fixture");
   await expect(page.locator("#route-next-request")).toBeVisible();
+  await expect(page.locator("#rollback-route")).toBeVisible();
+  expect(await page.locator(".deployment-promotion").innerText()).not.toMatch(/\blive\b|production|serving traffic/i);
   expect(await overflowingElements(page)).toEqual([]);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await mkdir("build/screenshots", { recursive: true });
-  await page.locator("#optimization-summary").scrollIntoViewIfNeeded();
+  await page.locator(".deployment-promotion").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "build/screenshots/surgedesk-release-proof.png" });
   await page.setViewportSize({ width: 320, height: 780 });
   await page.getByRole("button", { name: "Send a request through the optimized service" }).click();
@@ -157,7 +182,7 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await page.locator("#customer-message").fill(
     "My card is about to expire. How do I get a replacement?",
   );
-  await page.getByRole("button", { name: "Run optimized live route" }).click();
+  await page.getByRole("button", { name: "Run optimized fixture route" }).click();
   await expect(page.locator("#inference-source")).toContainText("Optimized service · I8MM + tuned runtime");
   await expect(page.locator("#live-control")).toHaveText("KleidiAI on · raw flag 0");
   const secondRequestId = await page.locator("#live-request-id").textContent();
@@ -168,7 +193,7 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await expect(page.locator("#reviewed-tickets")).toContainText("Standard service");
   await expect(page.locator("#reviewed-tickets")).toContainText("Optimized service");
   await expect(page.locator("#reviewed-tickets")).toContainText("My card is about to expire");
-  await expect(page.locator("#reviewed-tickets")).toContainText("observed");
+  await expect(page.locator("#reviewed-tickets")).toContainText("fixture");
   await expect(page.locator("#reviewed-tickets")).toContainText(firstRequestId);
   await expect(page.locator("#reviewed-tickets")).toContainText(secondRequestId);
   await expect(page.locator("#reviewed-tickets")).toContainText("mlas.disable_kleidiai=1");
@@ -180,13 +205,33 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
     await expect(receipt).toContainText(/\d{2}:\d{2}:\d{2}/);
   }
   await expect(page.locator("#live-cutover-summary")).toBeVisible();
+  await expect(page.locator("#intake-form")).toBeHidden();
+  await expect(page.locator("#start-next-request")).toBeVisible();
+  await expect(page.locator("#live-cutover-title")).toHaveText("The integration gateway selected the optimized Arm route");
+  await expect(page.locator("#cutover-source-chip")).toContainText("Local integration fixture");
   await expect(page.locator("#cutover-before-lane")).toContainText("KleidiAI off");
   await expect(page.locator("#cutover-after-lane")).toContainText("I8MM + tuned runtime");
   await expect(page.locator("#cutover-before-request")).toContainText("Account security");
+  await expect(page.locator("#cutover-before-request")).toContainText("compare-");
   await expect(page.locator("#cutover-after-request")).toContainText("Cards & payments");
+  await expect(page.locator("#cutover-audit")).toContainText("receipt verified");
   await expect(page.locator("#cutover-capacity")).toContainText(
     `≥${demoData.proof.runtime_memory.candidate_rps.toFixed(2)} requests/s`,
   );
+  await expect(page.locator("#cutover-comparison-binding")).toContainText("compare-");
+  await expect(page.locator("#cutover-before-binding")).toContainText(firstRequestId);
+  await expect(page.locator("#cutover-after-binding")).toContainText(secondRequestId);
+  await expect(page.locator("#cutover-receipt-sha")).toHaveText(/^[0-9a-f]{64}$/);
+  await expect(page.locator("#cutover-audit-binding")).toHaveText(/^[0-9a-f]{64}$/);
+  await expect(page.locator("#cutover-evidence-digests li")).toHaveCount(
+    demoData.provenance.release_evidence_ids.length,
+  );
+  for (const experimentId of demoData.provenance.release_evidence_ids) {
+    await expect(page.locator("#cutover-evidence-digests")).toContainText(experimentId);
+  }
+  for (const digest of await page.locator("#cutover-evidence-digests code").all()) {
+    await expect(digest).toHaveText(/^[0-9a-f]{64}$/);
+  }
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.locator("#live-cutover-summary").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "build/screenshots/surgedesk-live-cutover.png" });
@@ -196,13 +241,34 @@ test("a live ticket causes the audit, traffic switch, and optimized second route
   await mkdir("build/screenshots", { recursive: true });
   await page.screenshot({ path: "build/screenshots/surgedesk-live-flow.png", fullPage: true });
   expect(messages).toEqual([]);
+
+  await page.getByRole("tab", { name: "Traffic switch" }).click();
+  await page.getByRole("button", { name: "Return to standard service" }).click();
+  await expect(page.locator("#promotion-result")).toContainText("returned to the standard service");
+  await expect(page.locator("#promotion-current-lane")).toContainText("kleidiai-disabled");
+  await expect(page.locator("#promote-route")).toBeDisabled();
+  await expect(page.locator("#promotion-audit-status")).toContainText("Evidence validation required");
 });
 
 
 test("a rejected optimized response refreshes the UI to the standard route", async ({ page }) => {
-  const audit = await page.request.post(`${appUrl.replace(/surgedesk\/$/, "")}api/audit`);
+  const api = appUrl.replace(/surgedesk\/$/, "");
+  const workflowId = "workflow-playwright-drift";
+  const headers = { "Content-Type": "application/json" };
+  const comparison = await page.request.post(`${api}api/shadow-compare`, {
+    headers,
+    data: { text: "My card was stolen.", workflow_id: workflowId },
+  });
+  expect(comparison.ok()).toBeTruthy();
+  const audit = await page.request.post(`${api}api/audit`, {
+    headers,
+    data: { workflow_id: workflowId },
+  });
   expect(audit.ok()).toBeTruthy();
-  const promote = await page.request.post(`${appUrl.replace(/surgedesk\/$/, "")}api/promote`);
+  const promote = await page.request.post(`${api}api/promote`, {
+    headers,
+    data: { workflow_id: workflowId },
+  });
   expect(promote.ok()).toBeTruthy();
 
   let driftObserved = false;
@@ -243,7 +309,7 @@ test("a rejected optimized response refreshes the UI to the standard route", asy
   await page.goto(appUrl);
   await expect(page.locator("#proof-decision-status")).toHaveText("ACTIVE RELEASE");
   await page.locator("#customer-message").fill("My card was stolen.");
-  await page.getByRole("button", { name: "Run optimized live route" }).click();
+  await page.getByRole("button", { name: "Run optimized fixture route" }).click();
   await expect(page.locator("#intake-error")).toContainText("route_runtime_identity_changed");
   await expect(page.locator("#workspace-serving")).toContainText("Standard service");
   await expect(page.locator("#workspace-release-status")).toContainText("Waiting for the measured release check");
@@ -268,9 +334,10 @@ test("public mode reveals checked-in proof only after the visitor requests it", 
   await expect(page.locator("#experiment-results")).toBeHidden();
   await page.getByRole("button", { name: "Open checked-in evidence" }).click();
   await expect(page.locator("#audit-receipt")).toBeVisible();
+  await page.getByRole("button", { name: "Review the three measured changes" }).click();
   await expect(page.locator("#trial-matrix-body tr")).toHaveCount(2);
   await expect(page.locator("#headline-ratio")).toHaveText("≥2.00×");
-  await page.getByRole("tab", { name: "Traffic switch" }).click();
+  await page.getByRole("tab", { name: "Release status" }).click();
   await expect(page.locator("#optimization-summary")).toBeVisible();
   await expect(page.locator("#promotion-title")).toContainText("cleared the checked-in release policy");
   await expect(page.locator("#promote-route")).toBeHidden();
@@ -278,7 +345,7 @@ test("public mode reveals checked-in proof only after the visitor requests it", 
   await expect(page.locator("#proof-claims tr")).toHaveCount(10);
   await expect(page.locator("body")).not.toContainText(/tamper|altered archive/i);
   await page.locator("#proof-details > summary").click();
-  await expect(page.getByRole("link", { name: "Open adoption guide" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Use ArmProof with another bounded HTTP inference service" })).toBeVisible();
   await mkdir("build/screenshots", { recursive: true });
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: "build/screenshots/surgedesk-public-release-proof.png" });
@@ -304,8 +371,8 @@ test("recorded support examples remain human-confirmed and clearly labeled", asy
   await page.goto(appUrl);
   await expect(page.getByRole("heading", { name: "Route an incoming request" })).toBeVisible();
   await expect(page.locator(".routing-quality-details")).not.toHaveAttribute("open", "");
-  await page.getByRole("button", { name: "Guard intervention" }).click();
-  await page.getByRole("button", { name: "Inspect stored output" }).click();
+  await page.getByRole("button", { name: "Missing card" }).click();
+  await page.getByRole("button", { name: "Review recorded request" }).click();
   await expect(page.locator("#review-warning")).toContainText("routing guard changed");
   await expect(page.locator("#inference-source")).toContainText("Recorded");
   await mkdir("build/screenshots", { recursive: true });
@@ -325,6 +392,7 @@ test("mobile public evidence remains readable without horizontal overflow", asyn
   await page.goto(`${appUrl}#surge`);
   await page.getByRole("button", { name: "Open checked-in evidence" }).click();
   await expect(page.locator("#audit-receipt")).toBeVisible();
+  await page.getByRole("button", { name: "Review the three measured changes" }).click();
   await expect(page.locator("#trial-matrix-body tr")).toHaveCount(2);
   expect(await page.evaluate(
     () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
@@ -339,7 +407,7 @@ test("mobile public evidence remains readable without horizontal overflow", asyn
   expect(await firstTrial.evaluate(
     (row) => getComputedStyle(row).display,
   )).toBe("grid");
-  await page.getByRole("tab", { name: "Traffic switch" }).click();
+  await page.getByRole("tab", { name: "Release status" }).click();
   await expect(page.locator("#optimization-summary")).toBeVisible();
   await expect(page.locator("#proof-claims tr")).toHaveCount(10);
   expect(await page.evaluate(

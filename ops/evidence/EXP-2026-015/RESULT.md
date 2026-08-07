@@ -1,6 +1,6 @@
 # EXP-2026-015 Result: Accepted
 
-The preregistered Graviton4 experiment tested three additions to the existing
+The archived Graviton4 experiment tested three additions to the existing
 KleidiAI-enabled SurgeDesk runtime: ONNX Runtime thread-pool tuning, mimalloc,
 and a combined thread-and-memory treatment that also enabled transparent huge
 pages (THP). The model, 16-thread allocation, workload, instance, and 10-second
@@ -17,8 +17,9 @@ At `0.62 requests/s`, five matched 300-second windows produced:
 
 The selected treatment reduced median p95 by 44.98%. It also raised the
 accepted sustainable-capacity lower bound from `0.56` to `0.62 requests/s`, a
-10.71% increase beyond the existing KleidiAI result. Every request completed
-without an error, and the compared model outputs were identical.
+10.71% increase beyond the existing KleidiAI result. Across the sustained
+comparison subset, all 2,790 raw rows completed without an error and outputs
+were identical for 186 request cases.
 
 The observed median RSS was 21.89% lower during these windows. That value
 describes process memory under the measured queueing pressure; it is not
@@ -44,9 +45,19 @@ combined treatment that received five long confirmations.
 ## Audit artifacts
 
 - Evidence archive: `ops/evidence/EXP-2026-015/evidence.tar.gz`
+- Raw Stage 3 rederivation: 31 windows and 3,678 rows across EXP-2026-015,
+  EXP-2026-016, and EXP-2026-017; every per-window file matched its aggregate,
+  and every request-statistics summary was rederived from its raw rows
+- Sustained output-equivalence subset: 186 request cases and 2,790 rows across
+  the current, full-recipe, and rejected simplified treatments
+- Declared settings: archived variant metadata and exact GenAI configs validate
+  KleidiAI enablement, 16 threads, and the selected ONNX Runtime thread options
+- Observed host state: per-window THP readbacks validate `always`; no
+  `/proc/<pid>/maps` evidence was archived, so mimalloc loading is declared but
+  not observed
 - Accepted session cost: `$0.8336`
 - Conservative cumulative project estimate: `$14.3208`
-- Output equivalence: passed
+- Sustained output equivalence: passed within the subset above
 - Archived checksums: passed
 - THP restoration: passed
 - AWS cleanup: complete; instance terminated; post-run inventory empty

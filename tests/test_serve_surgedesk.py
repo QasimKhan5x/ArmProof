@@ -18,7 +18,111 @@ from scripts.serve_surgedesk import (
 
 
 class SurgeDeskGatewayTests(unittest.TestCase):
-    def test_audit_exceptions_revoke_an_active_optimized_route(self) -> None:
+    def test_active_cutover_rejects_audit_rebinding_from_every_workflow(self) -> None:
+        state = DeploymentState(
+            active_lane="optimized",
+            audit_experiment_id="EXP-2026-014",
+            release_evidence_ids=("EXP-2026-014",),
+            release_evidence_sha256={"EXP-2026-014": "b" * 64},
+            audit_receipt_sha256="a" * 64,
+            release_ready=True,
+            promoted_at="2026-08-06T00:00:00Z",
+            audited_deployment={"model_identity": "c" * 64},
+            audit_workflow_id="workflow-a",
+            promoted_workflow_id="workflow-a",
+        )
+        snapshot = state.snapshot()
+        replacement = {
+            "passed": True,
+            "experiment_id": "EXP-replacement",
+            "release_evidence_ids": ["EXP-replacement"],
+            "release_evidence_sha256": {"EXP-replacement": "d" * 64},
+            "receipt_sha256": "e" * 64,
+            "expected_deployment_identity": {"model_identity": "f" * 64},
+        }
+
+        for workflow_id in ("workflow-a", "workflow-b"):
+            with self.subTest(workflow_id=workflow_id):
+                with self.assertRaisesRegex(ValueError, "active cutover"):
+                    state.record_audit(replacement, workflow_id)
+                with self.assertRaisesRegex(ValueError, "roll back first"):
+                    state.assert_audit_allowed()
+                self.assertEqual(state.snapshot(), snapshot)
+
+    def test_optimized_authorization_requires_one_audit_and_promotion_workflow(self) -> None:
+        state = DeploymentState(
+            active_lane="optimized",
+            audit_experiment_id="EXP-2026-014",
+            release_ready=True,
+            audited_deployment={"model_identity": "c" * 64},
+            audit_workflow_id="workflow-b",
+            promoted_workflow_id="workflow-a",
+        )
+
+        with self.assertRaisesRegex(ValueError, "active release authorization"):
+            state.authorize_active_route("optimized", {"model_identity": "c" * 64})
+        self.assertEqual(state.snapshot()["active_lane"], "baseline")
+        self.assertFalse(state.snapshot()["release_ready"])
+
+    def test_cutover_receipt_cannot_consume_another_workflow_comparison(self) -> None:
+        state = DeploymentState(
+            active_lane="optimized",
+            audit_experiment_id="EXP-2026-014",
+            audit_receipt_sha256="a" * 64,
+            release_evidence_sha256={"EXP-2026-014": "b" * 64},
+            release_ready=True,
+            audit_workflow_id="workflow-a",
+            promoted_workflow_id="workflow-a",
+        )
+        lane = {
+            "request_id": "request-1",
+            "input_sha256": "c" * 64,
+            "model_output_sha256": "d" * 64,
+            "queue": "Account security",
+        }
+        comparison = {
+            "comparison_id": "compare-1",
+            "lanes": {"baseline": lane, "optimized": {**lane, "request_id": "request-2"}},
+        }
+        state.record_comparison("workflow-a", comparison)
+        state.record_comparison("workflow-b", {**comparison, "comparison_id": "compare-2"})
+        optimized = {
+            **lane,
+            "request_id": "request-3",
+            "runtime_identity": {"architecture": "aarch64"},
+        }
+
+        self.assertIsNone(state.issue_cutover_receipt("workflow-b", optimized))
+        receipt = state.issue_cutover_receipt("workflow-a", optimized)
+        self.assertIsNotNone(receipt)
+        self.assertEqual(receipt["workflow_id"], "workflow-a")
+        self.assertEqual(receipt["comparison_id"], "compare-1")
+
+    def test_rollback_returns_to_baseline_and_requires_fresh_evidence(self) -> None:
+        state = DeploymentState(
+            active_lane="optimized",
+            audit_experiment_id="EXP-2026-014",
+            audit_receipt_sha256="a" * 64,
+            release_evidence_ids=("EXP-2026-014",),
+            release_evidence_sha256={"EXP-2026-014": "b" * 64},
+            release_ready=True,
+            promoted_at="2026-08-06T00:00:00Z",
+            audited_deployment={"model_identity": "c" * 64},
+            audit_workflow_id="workflow-a",
+            promoted_workflow_id="workflow-a",
+        )
+
+        snapshot = state.rollback("workflow-a")
+
+        self.assertEqual(snapshot["active_lane"], "baseline")
+        self.assertFalse(snapshot["release_ready"])
+        self.assertIsNone(snapshot["audit_experiment_id"])
+        self.assertIsNone(snapshot["audit_receipt_sha256"])
+        self.assertEqual(snapshot["release_evidence_ids"], [])
+        with self.assertRaisesRegex(ValueError, "rollback workflow"):
+            state.rollback("workflow-a")
+
+    def test_audit_exceptions_leave_the_standard_route_blocked(self) -> None:
         class Handler:
             def __init__(self) -> None:
                 self.wfile = io.BytesIO()
@@ -33,14 +137,14 @@ class SurgeDeskGatewayTests(unittest.TestCase):
             def end_headers(self) -> None:
                 return
 
+            @staticmethod
+            def _body() -> dict[str, str]:
+                return {"workflow_id": "workflow-test-001"}
+
         for audit_path in ("post", "stream"):
             with self.subTest(audit_path=audit_path):
                 state = DeploymentState(
-                    active_lane="optimized",
-                    audit_experiment_id="EXP-2026-014",
-                    release_ready=True,
-                    promoted_at="2026-08-06T00:00:00Z",
-                    audited_deployment={"model_identity": "a" * 64},
+                    active_lane="baseline",
                 )
                 handler = Handler()
                 with patch(
@@ -51,7 +155,7 @@ class SurgeDeskGatewayTests(unittest.TestCase):
                         with self.assertRaisesRegex(ValueError, "invalid evidence"):
                             _post_audit(handler, state)
                     else:
-                        _stream_audit(handler, state)
+                        _stream_audit(handler, state, "workflow-test-001")
                         self.assertIn(b'"type":"error"', handler.wfile.getvalue())
                 self.assertEqual(state.snapshot()["active_lane"], "baseline")
                 self.assertFalse(state.snapshot()["release_ready"])
@@ -110,42 +214,57 @@ class SurgeDeskGatewayTests(unittest.TestCase):
             "memory": live_identity["memory"],
             "runtime_tuning": live_identity["runtime_tuning"],
         }
-        with self.assertRaisesRegex(ValueError, "fresh passing audit"):
-            state.promote(live_identity)
+        workflow_id = "workflow-test-001"
+        comparison = {"lanes": {"baseline": {}, "optimized": {}}}
+        with self.assertRaisesRegex(ValueError, "matched comparison"):
+            state.promote(live_identity, workflow_id)
 
-        state.record_audit({"passed": False, "experiment_id": "EXP-failed"})
-        with self.assertRaisesRegex(ValueError, "fresh passing audit"):
-            state.promote(live_identity)
+        state.record_audit(
+            {"passed": False, "experiment_id": "EXP-failed"}, workflow_id
+        )
+        with self.assertRaisesRegex(ValueError, "matched comparison"):
+            state.promote(live_identity, workflow_id)
 
         state.record_audit({
             "passed": True,
             "experiment_id": "EXP-2026-014",
-            "deployment_identity": audited,
-        })
-        promoted = state.promote(live_identity)
+            "release_evidence_ids": ["EXP-2026-014"],
+            "release_evidence_sha256": {"EXP-2026-014": "1" * 64},
+            "receipt_sha256": "2" * 64,
+            "expected_deployment_identity": audited,
+        }, workflow_id)
+        state.record_comparison(workflow_id, comparison)
+        promoted = state.promote(live_identity, workflow_id)
         self.assertEqual(promoted["active_lane"], "optimized")
         self.assertEqual(promoted["audit_experiment_id"], "EXP-2026-014")
         self.assertTrue(promoted["release_ready"])
+        self.assertEqual(promoted["audit_receipt_sha256"], "2" * 64)
         self.assertIsNotNone(promoted["promoted_at"])
 
-        state.record_audit({"passed": False, "experiment_id": "EXP-recheck-failed"})
-        revoked = state.snapshot()
-        self.assertEqual(revoked["active_lane"], "baseline")
-        self.assertFalse(revoked["release_ready"])
-        self.assertIsNone(revoked["audit_experiment_id"])
-        self.assertIsNone(revoked["promoted_at"])
+        with self.assertRaisesRegex(ValueError, "active cutover"):
+            state.record_audit(
+                {"passed": False, "experiment_id": "EXP-recheck-failed"}, workflow_id
+            )
+        still_promoted = state.snapshot()
+        self.assertEqual(still_promoted["active_lane"], "optimized")
+        self.assertTrue(still_promoted["release_ready"])
+        state.rollback(workflow_id)
 
         state.record_audit({
             "passed": True,
             "experiment_id": "EXP-2026-014",
-            "deployment_identity": audited,
-        })
-        state.promote(live_identity)
+            "release_evidence_ids": ["EXP-2026-014"],
+            "release_evidence_sha256": {"EXP-2026-014": "1" * 64},
+            "receipt_sha256": "2" * 64,
+            "expected_deployment_identity": audited,
+        }, workflow_id)
+        state.record_comparison(workflow_id, comparison)
+        state.promote(live_identity, workflow_id)
 
         state.active_lane = "baseline"
         swapped = {**live_identity, "source_artifact_sha256": "b" * 64}
         with self.assertRaisesRegex(ValueError, "differs from audited"):
-            state.promote(swapped)
+            state.promote(swapped, workflow_id)
         for field, value in (
             ("model_identity", "d" * 64),
             ("runtime_lock_sha256", "e" * 64),
@@ -155,7 +274,7 @@ class SurgeDeskGatewayTests(unittest.TestCase):
             with self.subTest(field=field):
                 state.active_lane = "baseline"
                 with self.assertRaisesRegex(ValueError, "differs from audited"):
-                    state.promote({**live_identity, field: value})
+                    state.promote({**live_identity, field: value}, workflow_id)
 
         state.active_lane = "optimized"
         self.assertEqual(

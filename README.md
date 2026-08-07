@@ -1,51 +1,40 @@
-# SurgeDesk + ArmProof
+# SurgeDesk
 
-SurgeDesk is a banking-support application running on a CPU-only AWS Graviton4
-server. Phi-4 Mini suggests the intent, SurgeDesk selects the matching support
+### Banking-support triage on a measured Arm cloud AI service, with ArmProof as its release gate
+
+SurgeDesk is a banking-support triage application built around measurements
+from a CPU-only AWS Graviton4 server. Phi-4 Mini suggests the intent, SurgeDesk selects the matching support
 procedure, and a person chooses the final queue.
 
 The application starts on its standard service. ArmProof checks the measured
-performance, output quality and Arm execution before SurgeDesk can switch to the
-KleidiAI-optimized service. Each ticket records which service handled it.
+performance, output quality and Arm execution before SurgeDesk can switch its
+connected gateway to the KleidiAI-optimized service. Each ticket records which
+service handled it.
 
 **Challenge track:** Cloud AI, Arm Create AI Optimization Challenge.
 
-![SurgeDesk compares the active service with the Arm-optimized candidate](docs/assets/01-live-shadow.png)
+![SurgeDesk compares the active service with the Arm-optimized candidate](docs/assets/01-fixture-shadow.png)
 
-## Verify In Five Minutes
-
-The shortest evaluation path is [`docs/VALIDATION.md`](docs/VALIDATION.md). To
-recompute the release directly:
-
-```bash
-git clone https://github.com/QasimKhan5x/ArmProof.git
-cd ArmProof
-python3.12 -m venv .venv
-.venv/bin/python -m pip install -e .
-.venv/bin/armproof ci examples/armproof-reference/armproof.json
-```
-
-Expected result: exit `0` with all 10 required claims approved from the
-checked-in request, quality, identity, and native Arm Performix evidence.
+_Local integration-test capture. Synthetic fixture timing is labeled in the
+interface; the capacity claims come from the archived Graviton4 experiments,
+and the recorded demo uses the real Graviton endpoints._
 
 ## Measured Optimization
 
-SurgeDesk was optimized in three stages. Each stage has a different comparison,
-so the project does not attribute model compression or general runtime tuning to
-KleidiAI.
+SurgeDesk was optimized in three stages. Each stage is evaluated against the
+comparison shown below.
 
 | Stage | Technical change | Measured result |
 |---|---|---:|
-| Model footprint | Migrate Phi-4 Mini from BF16 to CPU INT4 | 35.92% smaller files; 55.34% lower peak PSS |
+| Model footprint | Migrate Phi-4 Mini from BF16 to CPU INT4 | 35.92% smaller files; 43.09% lower peak PSS before KleidiAI |
 | Arm compute | Enable ONNX Runtime's KleidiAI I8MM path on the same INT4 service | At least 2.0x sustained capacity; 67.35% of Performix function samples in `kai_*` |
 | Graviton runtime | Keep the I8MM path and tune ONNX Runtime thread scheduling, mimalloc, and transparent huge pages | 5/5 passes at 0.62 requests/s versus 0/5 for KleidiAI alone; 44.98% lower median p95 |
 
 The final stage raises the verified traffic floor from 0.56 to 0.62 requests per
-second, an additional 10.71%. More importantly, it shows how the released
-configuration was selected: a short screen favored the simpler mimalloc plus
-huge-page candidate, but that candidate failed all five long confirmation
-windows. ArmProof therefore releases the complete thread, allocator, and
-huge-page recipe that passed every sustained window.
+second, or from 2,016 to 2,232 offered messages per hour, an additional 10.71%.
+At 0.62 requests per second, the full runtime
+recipe passed all five sustained windows. The allocator-and-huge-page variant
+failed all five, so the released recipe retains the measured thread settings.
 
 ### Arm Compute Result
 
@@ -85,49 +74,41 @@ For the compute release, ArmProof checks:
 - that accuracy and class-balanced F1 change by less than one percentage point;
 - that at least 99% of model outputs use the required JSON format; and
 - four hash-locked deployment measurement files used to recalculate footprint
-  percentages and raw-repetition timing medians; and
+  percentages and raw-repetition timing medians;
 - Arm Performix profiles with zero KleidiAI functions in the control and at
   least 50% KleidiAI function samples in the optimized service.
 
 For the final runtime recipe, it additionally verifies 130 checksum-bound files
 across three Graviton experiments: the paired sustained comparison, a four-way
-short treatment screen, and the failed sustained simplification. It checks the
-rate, SLO, output digest, allocator, huge-page state, exact ONNX Runtime session
-options, and restoration of the host policy.
+short treatment screen, and the failed sustained simplification. It re-derives
+all 31 stored window summaries from 3,678 raw rows. Output equivalence is checked
+on the 2,790 sustained rows covering 186 request cases. The archived configs
+bind the rate, SLO, KleidiAI control, 16 threads, exact ONNX Runtime session
+options and declared allocator; per-window host readbacks verify huge-page state
+and restoration. The archives do not contain `/proc/<pid>/maps`, so ArmProof
+does not claim observed allocator loading.
 
 An exploratory supporting test recalculates five raw repetitions for each of
 four fixed input shapes and found 1.72x to 2.59x faster direct inference. The
-earlier BF16-to-INT4 migration measured 35.92%
-smaller model files, 55.34% lower peak proportional set size (PSS) and 59.66%
-lower time-weighted PSS, a measure of the process's share of memory over time.
-These model-migration results are reported separately from the KleidiAI-only
-comparison.
+BF16-to-INT4 migration measured 35.92% smaller model files and 43.09% lower peak
+proportional set size (PSS) before KleidiAI was enabled. The complete
+KleidiAI-enabled INT4 stack measured 55.34% lower peak PSS and 59.66% lower
+time-weighted PSS than BF16. Those whole-stack footprint results are kept
+separate from the matched KleidiAI-only capacity comparison.
 ArmProof recalculates the size and memory percentages from locked aggregate
-measurements and the timing medians from raw repetitions in EXP-2026-002;
-editing the display summary cannot change the published report.
+measurements and the timing medians from raw repetitions in EXP-2026-002. The
+report is generated from those locked measurements and raw repetitions.
 
 ## Product Workflow
 
-```text
-real support message
-        |
-        v
-serving control + sequential optimized shadow -> fresh side-by-side observation
-        |
-        v
-Phi-4 intent -> SurgeDesk procedure + queue guard -> human chooses final queue
-        |
-        v
-verify preregistered capacity + raw quality + native Performix evidence
-        |
-        v
-verify sustained runtime recipe + reject the failed simplification
-        |
-        v
-verify wheels + AWS instance + model + Arm placement + deployed controls
-        |
-        v
-switch live traffic -> different request records optimized lane + audit ID
+```mermaid
+flowchart LR
+    A["Support request"] --> B["SurgeDesk: Phi-4 suggestion + queue guard"]
+    B --> C["Operator confirms the route"]
+    C --> D["ArmProof checks raw tests, quality, Performix, and release identity"]
+    D -->|pass| E["Gateway selects the measured Arm service"]
+    D -->|fail| F["Standard service remains active"]
+    E --> G["Next ticket records the optimized lane and release ID"]
 ```
 
 The five-queue routing guard was built on 2,310 BANKING77 examples and evaluated
@@ -151,6 +132,22 @@ Exit `0` approves every required claim. Exit `2` means at least one required
 claim failed or remained unknown. Exit `1` means the evidence or configuration
 was invalid.
 
+## Verify In Five Minutes
+
+The shortest evaluation path is [`docs/VALIDATION.md`](docs/VALIDATION.md). To
+recompute the release directly:
+
+```bash
+git clone https://github.com/QasimKhan5x/ArmProof.git
+cd ArmProof
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -e .
+.venv/bin/armproof ci examples/armproof-reference/armproof.json
+```
+
+Expected result: exit `0` after 10 compute, quality, identity, and Arm
+attribution claims plus five sustained-runtime release conditions pass.
+
 ## Run The Product
 
 ```bash
@@ -165,8 +162,9 @@ without AWS credentials or model downloads.
 The three views have stable URLs:
 
 - `#triage`: support workflow and human routing decision
-- `#surge`: preregistered capacity audit and raw outcomes
-- `#proof`: live traffic control, optimization summary and Arm Performix evidence
+- `#evidence`: capacity audit and raw outcomes
+- `#release`: release status, optimization summary, Arm Performix evidence, and
+  connected traffic control when both Arm services are available
 
 The connected deployment uses a real serving-plus-shadow comparison before the
 route cutover and routes subsequent requests through the approved Graviton
@@ -193,14 +191,15 @@ Generate a starter for another bounded HTTP classification service:
 ```bash
 .venv/bin/armproof init \
   --endpoint http://127.0.0.1:8000/infer \
-  --output my-arm-service
+  --output my-arm-service \
+  --action-commit REPLACE_WITH_THE_REVIEWED_40_CHARACTER_RELEASE_COMMIT
 cd my-arm-service
 ../.venv/bin/armproof ci armproof.json
 ```
 
 The 17-file starter includes exact protocol, identity and profiler-manifest
 templates as well as the workloads, collection plan and GitHub Action. The
-generated Action is pinned to the reviewed ArmProof commit behind this release.
+`--action-commit` value pins that Action immutably in the generated workflow.
 Its binding helper recalculates workload, model, runtime, environment, service
 command, profiler-report, contract and workflow digests after placeholders are replaced.
 The initial check fails until the developer collects real request rows, profiler
@@ -214,7 +213,10 @@ endpoint compatibility; it does not claim a llama.cpp performance result.
 Use ArmProof in GitHub Actions:
 
 ```yaml
-- uses: QasimKhan5x/ArmProof@v1.0.0
+- uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+  with:
+    python-version: "3.12"
+- uses: QasimKhan5x/ArmProof@REPLACE_WITH_THE_REVIEWED_40_CHARACTER_RELEASE_COMMIT
   with:
     config: armproof.json
     contract-sha256: REPLACE_WITH_THE_PROTECTED_CONTRACT_DIGEST
@@ -232,8 +234,8 @@ Action checks the contract digest before reading evidence.
 - **Control:** `mlas.disable_kleidiai=1`
 - **Treatment:** `mlas.disable_kleidiai=0`
 - **Final runtime recipe:** KleidiAI enabled; ONNX Runtime dynamic block base
-  `4`, spin backoff `8`, spin duration `1000 us`; mimalloc; transparent huge
-  pages `always`
+  `4`, spin backoff `8`, spin duration `1000 us`; declared mimalloc preload;
+  transparent huge pages observed as `always`
 - **Profiler:** Arm Performix 1.20 Code Hotspots, with Linux perf as a separate cycle view
 - **Workload:** frozen BANKING77 quality and mixed traffic inputs
 - **SLO:** p95 at or below 10 seconds, zero errors, at least 95% delivery
@@ -250,7 +252,7 @@ with the Performix percentage.
 ```bash
 make check
 npm ci
-npx playwright install chromium
+npx playwright install --with-deps chromium
 npm run test:logic
 npm run test:ui
 ```
@@ -268,7 +270,7 @@ pixels.
 - [Technical evidence](docs/EVIDENCE.md): claim-to-artifact map
 - [Live deployment](docs/LIVE_DEPLOYMENT.md): matched Graviton service setup
 - [`examples/armproof-reference/`](examples/armproof-reference/): release contract and config
-- [`ops/experiments/`](ops/experiments/): preregistered experiments
+- [`ops/experiments/`](ops/experiments/): frozen plans, including the public capacity and Performix preregistrations
 - [`ops/evidence/`](ops/evidence/): accepted and rejected evidence history
 - [`examples/phi4-graviton/`](examples/phi4-graviton/): pinned Arm deployment
 - [`docs/PERFORMIX.md`](docs/PERFORMIX.md): native Performix collection and interpretation
@@ -281,15 +283,18 @@ integrity controls rather than independent attestation of the original AWS
 host. The live service verifies the pinned wheel ledger, reads its instance type
 from AWS IMDSv2, and reports actual CPU affinity. The gateway checks those values
 and content-derived model identities before promotion and on every optimized
-response. This is deployment validation rather than hardware-backed remote
+response; ticket receipts also bind the exact input and raw model output by
+SHA-256. This is deployment validation rather than hardware-backed remote
 attestation, and it assumes the operator controls the host. The checksum-pinned
-Arm64 runtime bundle used by the live recipe is published with the `v0.9.0`
-GitHub release; model weights still download from their pinned upstream revision.
+Arm64 runtime bundle used by the connected SurgeDesk recipe is a separate
+deployment artifact published with the earlier `v0.9.0` release; ArmProof itself
+is versioned independently. Model weights still download from their pinned
+upstream revision.
 
 SurgeDesk and ArmProof were created and meaningfully developed from July 29
-through August 6, 2026, during the challenge period. The Git history contains
-the source changes, preregistered plans, experiment records, and evidence used
-by the release.
+through August 7, 2026, during the challenge period. The Git history contains
+the source changes, published capacity and profiler plans, archived runtime
+treatment plans, experiment records, and evidence used by the release.
 
 The project is MIT licensed. BANKING77 is used under CC BY 4.0 and credited in
 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md). Model weights are downloaded
